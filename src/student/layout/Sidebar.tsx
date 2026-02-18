@@ -10,10 +10,9 @@ import {
 
 interface SidebarProps {
     collapsed: boolean;
-    setCollapsed: (collapsed: boolean) => void;
 }
 
-const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
+const Sidebar = ({ collapsed }: SidebarProps) => {
     const { logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();

@@ -8,7 +8,7 @@ const StudentLayout = () => {
 
     return (
         <div className="student-layout">
-            <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+            <Sidebar collapsed={collapsed} />
             <div className="main-content-wrapper">
                 <Topbar collapsed={collapsed} setCollapsed={setCollapsed} />
                 <main className="dashboard-scroll-area">
