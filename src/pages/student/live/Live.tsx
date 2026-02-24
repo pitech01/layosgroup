@@ -1,4 +1,4 @@
-import { Calendar, Clock, Video, ExternalLink, User } from 'lucide-react';
+import { Calendar, Clock, Video, User } from 'lucide-react';
 
 const UPCOMING_SESSIONS = [
     {
@@ -8,7 +8,7 @@ const UPCOMING_SESSIONS = [
         instructor: 'Sarah Wilson',
         date: 'Today',
         time: '15:00 - 16:30',
-        status: 'Uncoming',
+        status: 'Upcoming',
         meetLink: 'https://meet.google.com/abc-defg-hij'
     },
     {
@@ -44,51 +44,46 @@ const PAST_SESSIONS = [
 
 const Live = () => {
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-10">
-            {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-slate-900">Live Sessions</h1>
-                <p className="text-slate-500">Join upcoming classes or watch recorded sessions.</p>
+        <div className="animate-fade-in-up">
+            <div style={{ marginBottom: '2.5rem' }}>
+                <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.5rem', color: '#0f172a' }}>Live Sessions</h1>
+                <p style={{ color: '#64748b' }}>Join upcoming classes or watch recorded sessions.</p>
             </div>
 
             {/* Upcoming Sessions */}
-            <section>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                        Upcoming & Live
-                    </h2>
+            <section style={{ marginBottom: '3rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                    <span style={{ width: '10px', height: '10px', background: '#ef4444', borderRadius: '50%', boxShadow: '0 0 0 4px rgba(239, 68, 68, 0.2)' }}></span>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Upcoming & Live</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
                     {UPCOMING_SESSIONS.map((session) => (
-                        <div key={session.id} className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 relative overflow-hidden group hover:shadow-md transition-shadow">
-                            <div className="absolute top-0 right-0 p-4 opacity-50 group-hover:opacity-100 transition-opacity">
-                                <Video size={100} className="text-slate-50/50 transform rotate-12 -mr-8 -mt-8 pointer-events-none text-slate-100" />
+                        <div key={session.id} className="section-card" style={{ position: 'relative', overflow: 'hidden' }}>
+                            <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, transform: 'rotate(15deg)' }}>
+                                <Video size={120} />
                             </div>
 
-                            <div className="relative z-10">
-                                <div className="flex justify-between items-start mb-4">
-                                    <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-100">
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                    <span style={{ padding: '0.25rem 0.75rem', background: '#eff6ff', color: '#3b82f6', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, border: '1px solid #dbeafe' }}>
                                         {session.courseName}
                                     </span>
                                     {session.date === 'Today' && (
-                                        <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-bold rounded animate-pulse">
-                                            LIVE SOON
-                                        </span>
+                                        <span className="live-badge">LIVE SOON</span>
                                     )}
                                 </div>
 
-                                <h3 className="text-xl font-bold text-slate-800 mb-2">{session.topic}</h3>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem', lineHeight: 1.4 }}>{session.topic}</h3>
 
-                                <div className="space-y-2 mb-6">
-                                    <div className="flex items-center text-sm text-slate-600">
-                                        <User size={16} className="mr-2 text-slate-400" />
-                                        {session.instructor}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem' }}>
+                                        <User size={16} />
+                                        <span>{session.instructor}</span>
                                     </div>
-                                    <div className="flex items-center text-sm text-slate-600">
-                                        <Calendar size={16} className="mr-2 text-slate-400" />
-                                        {session.date} &bull; {session.time}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem' }}>
+                                        <Calendar size={16} />
+                                        <span>{session.date} &bull; {session.time}</span>
                                     </div>
                                 </div>
 
@@ -96,9 +91,10 @@ const Live = () => {
                                     href={session.meetLink}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors gap-2"
+                                    className="join-btn"
+                                    style={{ display: 'block', textAlign: 'center', background: '#3b82f6', padding: '0.75rem' }}
                                 >
-                                    Join Live Class <ExternalLink size={16} />
+                                    Join Live Class
                                 </a>
                             </div>
                         </div>
@@ -108,25 +104,27 @@ const Live = () => {
 
             {/* Past Sessions */}
             <section>
-                <h2 className="text-lg font-bold text-slate-800 mb-4">Past Sessions</h2>
-                <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="divide-y divide-slate-100">
-                        {PAST_SESSIONS.map((session) => (
-                            <div key={session.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between hover:bg-slate-50 transition-colors gap-4">
-                                <div>
-                                    <h4 className="font-bold text-slate-800">{session.topic}</h4>
-                                    <p className="text-sm text-slate-500 mb-1">{session.courseName}</p>
-                                    <div className="flex items-center gap-3 text-xs text-slate-400">
-                                        <span className="flex items-center gap-1"><Calendar size={12} /> {session.date}</span>
-                                        <span className="flex items-center gap-1"><Clock size={12} /> {session.duration}</span>
-                                    </div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.5rem' }}>Past Sessions</h2>
+                <div className="section-card" style={{ padding: 0, overflow: 'hidden' }}>
+                    {PAST_SESSIONS.map((session, idx) => (
+                        <div key={session.id} style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: idx !== PAST_SESSIONS.length - 1 ? '1px solid #f1f5f9' : 'none', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div>
+                                <h4 style={{ fontSize: '1rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.25rem' }}>{session.topic}</h4>
+                                <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>{session.courseName}</p>
+                                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', color: '#94a3b8' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                        <Calendar size={14} /> {session.date}
+                                    </span>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                        <Clock size={14} /> {session.duration}
+                                    </span>
                                 </div>
-                                <button className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-white hover:text-blue-600 hover:border-blue-200 transition-colors">
-                                    Watch Recording
-                                </button>
                             </div>
-                        ))}
-                    </div>
+                            <button className="btn-cta-white" style={{ border: '1px solid #e2e8f0', fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
+                                Watch Recording
+                            </button>
+                        </div>
+                    ))}
                 </div>
             </section>
         </div>

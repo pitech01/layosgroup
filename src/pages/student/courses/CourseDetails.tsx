@@ -37,88 +37,90 @@ const CourseDetails = () => {
     const course = MOCK_COURSE_DETAILS;
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
-            <Link to="/student/courses" className="inline-flex items-center text-sm text-slate-500 hover:text-slate-800 mb-6 transition-colors">
-                <ChevronLeft size={16} className="mr-1" /> Back to Courses
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+            <Link to="/student/courses" style={{ display: 'inline-flex', alignItems: 'center', color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem', textDecoration: 'none' }}>
+                <ChevronLeft size={16} style={{ marginRight: '0.25rem' }} /> Back to Courses
             </Link>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2.5rem' }}>
                 {/* Main Content - Course Info & Curriculum */}
-                <div className="lg:col-span-2 space-y-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-slate-900 mb-2">{course.title}</h1>
-                        <p className="text-slate-500 mb-4">Instructor: {course.instructor}</p>
-                        <p className="text-slate-600 leading-relaxed">{course.description}</p>
+                <div>
+                    <div style={{ marginBottom: '2.5rem' }}>
+                        <h1 style={{ fontSize: '2rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>{course.title}</h1>
+                        <p style={{ color: '#64748b', marginBottom: '1rem', fontSize: '1rem' }}>Instructor: <span style={{ color: '#0f172a', fontWeight: 600 }}>{course.instructor}</span></p>
+                        <p style={{ color: '#475569', lineHeight: 1.6 }}>{course.description}</p>
                     </div>
 
                     {/* Progress */}
-                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="font-semibold text-blue-900">Your Progress</span>
-                            <span className="text-blue-700 font-bold">{course.progress}%</span>
+                    <div style={{ background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '12px', padding: '1.25rem', marginBottom: '2.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                            <span style={{ fontWeight: 600, color: '#1e40af' }}>Your Progress</span>
+                            <span style={{ fontWeight: 700, color: '#1d4ed8' }}>{course.progress}%</span>
                         </div>
-                        <div className="w-full bg-blue-200 rounded-full h-2.5">
-                            <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${course.progress}%` }}></div>
+                        <div style={{ width: '100%', background: '#bfdbfe', height: '8px', borderRadius: '4px' }}>
+                            <div style={{ width: `${course.progress}%`, background: '#2563eb', height: '100%', borderRadius: '4px', transition: 'width 0.5s ease' }}></div>
                         </div>
                     </div>
 
                     {/* Modules Accordion */}
-                    <div className="space-y-4">
-                        <h2 className="text-xl font-bold text-slate-800">Course Curriculum</h2>
-                        {course.modules.map((module) => (
-                            <div key={module.id} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                                <div className="bg-slate-50 px-5 py-4 border-b border-slate-100 font-medium text-slate-800 flex justify-between items-center">
-                                    <span>{module.title}</span>
-                                    <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">{module.lessons.length} Lessons</span>
-                                </div>
-                                <div className="divide-y divide-slate-100">
-                                    {module.lessons.map((lesson) => (
-                                        <Link
-                                            key={lesson.id}
-                                            to={`/student/lesson/${lesson.id}`}
-                                            className="px-5 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors group"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                {lesson.isCompleted ? (
-                                                    <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
-                                                ) : (
-                                                    <PlayCircle size={20} className="text-slate-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
-                                                )}
-                                                <div>
-                                                    <p className={`text-sm font-medium ${lesson.isCompleted ? 'text-slate-500 line-through' : 'text-slate-700 group-hover:text-blue-700'}`}>
+                    <div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.25rem' }}>Course Curriculum</h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {course.modules.map((module) => (
+                                <div key={module.id} className="section-card" style={{ padding: 0, overflow: 'hidden' }}>
+                                    <div style={{ background: '#f8fafc', padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ fontWeight: 600, color: '#334155' }}>{module.title}</span>
+                                        <span style={{ fontSize: '0.75rem', background: 'white', padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #e2e8f0', color: '#64748b' }}>{module.lessons.length} Lessons</span>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        {module.lessons.map((lesson, idx) => (
+                                            <Link
+                                                key={lesson.id}
+                                                to={`/student/lesson/${lesson.id}`}
+                                                style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', borderBottom: idx !== module.lessons.length - 1 ? '1px solid #f1f5f9' : 'none', transition: 'background-color 0.2s', backgroundColor: 'white' }}
+                                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    {lesson.isCompleted ? (
+                                                        <CheckCircle size={20} color="#22c55e" />
+                                                    ) : (
+                                                        <PlayCircle size={20} color="#94a3b8" />
+                                                    )}
+                                                    <span style={{ fontSize: '0.9rem', color: lesson.isCompleted ? '#94a3b8' : '#334155', textDecoration: lesson.isCompleted ? 'line-through' : 'none', fontWeight: 500 }}>
                                                         {lesson.title}
-                                                    </p>
+                                                    </span>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-center text-xs text-slate-400">
-                                                <Clock size={14} className="mr-1" />
-                                                {lesson.duration}
-                                            </div>
-                                        </Link>
-                                    ))}
+                                                <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                    <Clock size={14} />
+                                                    {lesson.duration}
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </div>
 
                 {/* Sidebar - Resources & Actions */}
-                <div className="space-y-6">
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 sticky top-24">
-                        <h3 className="font-bold text-slate-800 mb-4">Course Resources</h3>
-                        <div className="space-y-3">
+                <div>
+                    <div className="section-card" style={{ position: 'sticky', top: '100px' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.25rem' }}>Course Resources</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             {course.resources.map((resource) => (
                                 <a
                                     key={resource.id}
                                     href="#"
-                                    className="flex items-center p-3 rounded-lg border border-slate-100 hover:border-blue-100 hover:bg-blue-50 transition-all group"
+                                    style={{ display: 'flex', alignItems: 'center', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', textDecoration: 'none', transition: 'all 0.2s', backgroundColor: 'white' }}
                                 >
-                                    <FileText size={20} className="text-slate-400 group-hover:text-blue-500 mr-3" />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-slate-700 truncate">{resource.title}</p>
-                                        <p className="text-xs text-slate-400">{resource.size}</p>
+                                    <FileText size={20} style={{ color: '#94a3b8', marginRight: '0.75rem' }} />
+                                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                                        <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 500, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{resource.title}</p>
+                                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>{resource.size}</p>
                                     </div>
-                                    <Download size={16} className="text-slate-300 group-hover:text-blue-500" />
+                                    <Download size={16} style={{ color: '#cbd5e1' }} />
                                 </a>
                             ))}
                         </div>

@@ -106,7 +106,7 @@ export default function StudentLogin() {
 
 
                     <div className="login-register-prompt delay-400">
-                        Don't have an account? <a href="#" className="login-register-link">Register</a>
+                        Don't have an account? <Link to="/register" className="login-register-link">Register</Link>
                     </div>
 
                     <div style={{ marginTop: '1.5rem', textAlign: 'center' }} className="delay-500">

@@ -15,75 +15,81 @@ const Account = () => {
     };
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold text-slate-900 mb-6">Account Settings</h1>
+        <div className="animate-fade-in-up account-container">
+            <h1 className="dashboard-header-title">Account Settings</h1>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="flex border-b border-slate-100">
+            <div className="section-card" style={{ padding: 0, overflow: 'hidden' }}>
+                <div className="account-tabs-header">
                     <button
                         onClick={() => setActiveTab('profile')}
-                        className={`flex-1 py-4 text-sm font-medium transition-colors border-b-2 ${activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+                        className={`account-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
                     >
-                        Profile Information
+                        <User size={18} />
+                        Profile
                     </button>
                     <button
                         onClick={() => setActiveTab('security')}
-                        className={`flex-1 py-4 text-sm font-medium transition-colors border-b-2 ${activeTab === 'security' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+                        className={`account-tab-btn ${activeTab === 'security' ? 'active' : ''}`}
                     >
-                        Security & Password
+                        <Shield size={18} />
+                        Security
                     </button>
                 </div>
 
-                <div className="p-8">
+                <div className="account-content-area">
                     {activeTab === 'profile' && (
-                        <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-300">
-                            {/* Profile Picture */}
-                            <div className="flex items-center gap-6">
-                                <div className="relative">
-                                    <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center text-3xl font-bold text-slate-400 border-4 border-white shadow-md">
+                        <div className="animate-fade-in-up">
+                            {/* Profile Picture Section */}
+                            <div className="profile-picture-section">
+                                <div className="avatar-wrapper">
+                                    <div className="avatar-circle">
                                         AS
                                     </div>
-                                    <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-sm">
-                                        <Camera size={16} />
+                                    <button className="avatar-upload-btn" title="Change Avatar">
+                                        <Camera size={18} />
                                     </button>
                                 </div>
-                                <div>
-                                    <h3 className="font-bold text-slate-800 text-lg">Anna Student</h3>
-                                    <p className="text-slate-500 text-sm mb-2">Student ID: #883920</p>
-                                    <button className="text-sm text-blue-600 font-medium hover:underline">Change Profile Photo</button>
+                                <div className="profile-identity">
+                                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem 0' }}>Anna Student</h3>
+                                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                        <span style={{ fontSize: '0.85rem', color: '#64748b', background: '#f1f5f9', padding: '0.4rem 0.75rem', borderRadius: '8px', fontWeight: 600 }}>ID: #883920</span>
+                                        <span style={{ fontSize: '0.85rem', color: '#10b981', background: '#ecfdf5', padding: '0.4rem 0.75rem', borderRadius: '8px', fontWeight: 600 }}>Active Student</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Form */}
-                            <form className="space-y-5 max-w-lg">
-                                <div className="grid grid-cols-2 gap-5">
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
-                                        <div className="relative">
-                                            <User size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                                            <input type="text" defaultValue="Anna" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all" />
+                            {/* Profile Form */}
+                            <form className="animate-fade-in-up">
+                                <div className="responsive-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                    <div className="input-group-modern">
+                                        <label className="input-label-modern">First Name</label>
+                                        <div className="input-with-icon">
+                                            <User size={18} className="input-icon" />
+                                            <input type="text" className="custom-input-modern" defaultValue="Anna" />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
-                                        <div className="relative">
-                                            <User size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                                            <input type="text" defaultValue="Student" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all" />
+                                    <div className="input-group-modern">
+                                        <label className="input-label-modern">Last Name</label>
+                                        <div className="input-with-icon">
+                                            <User size={18} className="input-icon" />
+                                            <input type="text" className="custom-input-modern" defaultValue="Student" />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-                                    <div className="relative">
-                                        <Mail size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                                        <input type="email" defaultValue="anna@student.com" readOnly className="w-full pl-10 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-500 cursor-not-allowed" />
+                                <div className="input-group-modern" style={{ marginBottom: '1.5rem' }}>
+                                    <label className="input-label-modern">Email Address</label>
+                                    <div className="input-with-icon">
+                                        <Mail size={18} className="input-icon" />
+                                        <input type="email" className="custom-input-modern readonly" defaultValue="anna@student.com" readOnly />
                                     </div>
-                                    <p className="text-xs text-slate-400 mt-1">Contact support to change email</p>
+                                    <small style={{ color: '#94a3b8', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem' }}>
+                                        <Lock size={12} /> Email is managed by administrator
+                                    </small>
                                 </div>
 
-                                <div className="pt-4">
-                                    <button type="button" className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-colors shadow-sm">
+                                <div className="form-actions-bar">
+                                    <button type="button" className="btn-save-settings">
                                         Save Changes
                                     </button>
                                 </div>
@@ -92,57 +98,65 @@ const Account = () => {
                     )}
 
                     {activeTab === 'security' && (
-                        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                            <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 flex gap-3">
-                                <Shield className="text-yellow-600 flex-shrink-0" size={24} />
+                        <div className="animate-fade-in-up">
+                            <div className="security-alert-box">
+                                <div className="alert-icon-wrapper">
+                                    <Shield size={28} />
+                                </div>
                                 <div>
-                                    <h4 className="font-bold text-yellow-800 text-sm">Security Status</h4>
-                                    <p className="text-sm text-yellow-700 mt-1">Your account is secured. Last login was detected from Windows PC on Feb 14, 2024.</p>
+                                    <h4 className="alert-title">Account Security: Optimal</h4>
+                                    <p className="alert-desc">Your account is well protected. Last security activity was a login from Lagos, NG on Linux Chrome.</p>
                                 </div>
                             </div>
 
-                            <form className="space-y-5 max-w-lg">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Current Password</label>
-                                    <div className="relative">
-                                        <Lock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                                        <input type="password" placeholder="••••••••" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all" />
+                            <form>
+                                <div className="input-group-modern" style={{ marginBottom: '2rem' }}>
+                                    <label className="input-label-modern">Current Password</label>
+                                    <div className="input-with-icon">
+                                        <Lock size={18} className="input-icon" />
+                                        <input type="password" placeholder="••••••••" className="custom-input-modern" />
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-5">
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">New Password</label>
-                                        <div className="relative">
-                                            <Lock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                                            <input type="password" placeholder="New password" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all" />
+                                <div className="responsive-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                                    <div className="input-group-modern">
+                                        <label className="input-label-modern">New Password</label>
+                                        <div className="input-with-icon">
+                                            <Lock size={18} className="input-icon" />
+                                            <input type="password" placeholder="Enter new password" className="custom-input-modern" />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
-                                        <div className="relative">
-                                            <Lock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                                            <input type="password" placeholder="Confirm password" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all" />
+                                    <div className="input-group-modern">
+                                        <label className="input-label-modern">Confirm Password</label>
+                                        <div className="input-with-icon">
+                                            <Lock size={18} className="input-icon" />
+                                            <input type="password" placeholder="Repeat new password" className="custom-input-modern" />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="pt-4 border-b border-slate-100 pb-8 mb-4">
-                                    <button type="button" className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-colors shadow-sm">
+                                <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '2.5rem', marginBottom: '2.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button type="button" className="btn-save-settings" style={{ background: '#3b82f6' }}>
                                         Update Password
                                     </button>
                                 </div>
 
-                                <div className="pt-2">
-                                    <h4 className="font-bold text-slate-800 mb-2">Session Management</h4>
-                                    <button
-                                        type="button"
-                                        onClick={handleLogout}
-                                        className="flex items-center gap-2 text-red-600 font-medium hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors -ml-4"
-                                    >
-                                        <LogOut size={18} />
-                                        Log Out of All Devices
-                                    </button>
+                                <div className="session-management">
+                                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginBottom: '1.25rem' }}>Active Sessions</h4>
+                                    <div className="session-card-modern">
+                                        <div className="session-info">
+                                            <h5>Windows PC • Lagos, Nigeria</h5>
+                                            <p>This Device • Active Now</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleLogout}
+                                            className="btn-outline-danger"
+                                        >
+                                            <LogOut size={16} />
+                                            Sign Out All
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
