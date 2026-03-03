@@ -2,11 +2,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import {
     LayoutDashboard,
-    Library,
     Users,
-    Video,
+    BookOpen,
+    GraduationCap,
     LogOut,
-    MessageCircle
+    Settings
 } from 'lucide-react';
 
 interface InstructorSidebarProps {
@@ -32,11 +32,10 @@ const InstructorSidebar = ({ collapsed }: InstructorSidebarProps) => {
 
     const navItems = [
         { path: '/instructor-dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/instructor/courses', label: 'My Courses', icon: Library },
-        { path: '/instructor/students', label: 'Students', icon: Users },
-        { path: '/instructor/channels', label: 'Messages', icon: MessageCircle },
-        // { path: '/instructor/revenue', label: 'Revenue', icon: BadgeDollarSign },
-        { path: '/instructor/live', label: 'Live Classes', icon: Video },
+        { path: '/instructor/cohorts', label: 'Cohort', icon: Users },
+        { path: '/instructor/course-library', label: 'Course', icon: BookOpen },
+        { path: '/instructor/students', label: 'Student', icon: GraduationCap },
+        { path: '/instructor/settings', label: 'Setting', icon: Settings },
     ];
 
     return (

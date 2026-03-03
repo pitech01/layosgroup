@@ -3,52 +3,66 @@ import {
     BookOpen,
     CheckCircle2,
     ChevronDown,
-    MoreVertical,
     Users,
     Trash2,
     Edit2,
     Eye,
     Video,
-    Globe
+    Globe,
+    Clock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function MyCourses() {
     const stats = [
-        { label: 'Active Courses', count: 4, trend: '+1', isUp: true, color: '#10b981', icon: CheckCircle2 },
-        { label: 'In-Active Courses', count: 2, trend: '0', isUp: true, color: '#64748b', icon: BookOpen },
+        { label: 'Total Managed Cohorts', count: 7, trend: '+1', isUp: true, color: '#1a4d3e', icon: CheckCircle2 },
+        { label: 'Active & Upcoming', count: 6, trend: '0', isUp: true, color: '#64748b', icon: BookOpen },
     ];
 
-    const courses = [
+    const cohorts = [
         {
             id: 1,
+            batch_code: 'WL-JAN-2026',
             title: 'Work-Life Balance: Achieve',
             category: 'Productivity',
-            price: '$200.00',
             students: 124,
             status: 'Active',
             delivery_type: 'recorded',
+            timeline: 'Jan 15 - Mar 20',
             image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=100&h=100'
         },
         {
             id: 2,
+            batch_code: 'REACT-ARCH-04',
             title: 'Advanced React Architecture',
             category: 'Development',
-            price: '$150.00',
             students: 856,
             status: 'Active',
             delivery_type: 'hybrid',
+            timeline: 'Feb 01 - May 15',
             image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=100&h=100'
         },
         {
             id: 3,
+            batch_code: 'UI-FE-PRIN',
             title: 'UI Design Principles',
             category: 'Design',
-            price: '$99.00',
             students: 450,
-            status: 'In-Active',
+            status: 'Upcoming',
             delivery_type: 'live',
+            timeline: 'Apr 10 - Jun 30',
             image: 'https://images.unsplash.com/photo-1541462608141-ad4d14b43c4a?auto=format&fit=crop&q=80&w=100&h=100'
+        },
+        {
+            id: 4,
+            batch_code: 'DS-2025-Q4',
+            title: 'Data Science Bootcamp',
+            category: 'Analytics',
+            students: 210,
+            status: 'Completed',
+            delivery_type: 'recorded',
+            timeline: 'Oct 01 - Dec 15, 2025',
+            image: 'https://images.unsplash.com/photo-1551288049-bbbda536339a?auto=format&fit=crop&q=80&w=100&h=100'
         }
     ];
 
@@ -59,112 +73,95 @@ export default function MyCourses() {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 2.5rem;
+                    margin-bottom: 3.5rem;
                 }
 
                 .courses-header h2 {
-                    font-size: 1.5rem;
-                    font-weight: 700;
-                    color: #1e293b;
+                    font-size: 1.75rem;
+                    font-weight: 950;
+                    color: #0f172a;
                     margin: 0;
+                    letter-spacing: -0.02em;
                 }
 
                 .courses-stats-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                    gap: 1.5rem;
-                    margin-bottom: 2.5rem;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 2rem;
+                    margin-bottom: 3.5rem;
                 }
 
-                .stat-card-clean {
+                .stat-card-premium {
                     background: white;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 16px;
-                    padding: 1.5rem;
+                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border-radius: 24px;
+                    padding: 2rem;
                     display: flex;
                     align-items: center;
-                    gap: 1.25rem;
+                    gap: 1.5rem;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
                 }
 
                 .filter-section {
                     display: flex;
-                    gap: 1rem;
-                    margin-bottom: 2rem;
+                    gap: 1.5rem;
+                    margin-bottom: 2.5rem;
                     flex-wrap: wrap;
                 }
 
                 .search-pill-container {
                     position: relative;
                     flex: 2;
-                    min-width: 300px;
-                }
-
-                /* Standardized input/select base */
-                .control-base-standard {
-                    height: 48px;
-                    border: 1.5px solid #e2e8f0;
-                    border-radius: 12px;
-                    background: white;
-                    color: #1e293b;
-                    font-size: 0.9375rem;
-                    font-weight: 500;
-                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                    display: flex;
-                    align-items: center;
-                    width: 100%;
-                    padding: 0 1.25rem;
+                    min-width: 350px;
                 }
 
                 .search-pill-input {
-                    composes: control-base-standard; /* Conceptually, applying same properties */
-                    height: 48px;
-                    border: 1.5px solid #e2e8f0;
-                    border-radius: 12px;
+                    height: 56px;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 18px;
                     background: white;
                     color: #1e293b;
-                    font-size: 0.9375rem;
-                    font-weight: 500;
-                    padding: 0 1.25rem;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    padding: 0 1.5rem;
                     width: 100%;
                     outline: none;
-                    transition: all 0.2s ease;
+                    transition: all 0.3s ease;
                 }
 
                 .search-pill-input:focus {
-                    border-color: #020617;
-                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.1);
+                    border-color: #10b981;
+                    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.05);
                 }
 
-                .filter-pill {
-                    height: 48px;
-                    border: 1.5px solid #e2e8f0;
-                    border-radius: 12px;
+                .filter-pill-premium {
+                    height: 56px;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 18px;
                     background: white;
                     color: #475569;
-                    font-size: 0.9375rem;
-                    font-weight: 500;
-                    padding: 0 1.25rem;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    padding: 0 1.5rem;
                     display: flex;
                     align-items: center;
-                    gap: 0.75rem;
+                    gap: 1rem;
                     cursor: pointer;
-                    transition: all 0.2s ease;
-                    min-width: 180px;
-                    flex: 1;
-                    justify-content: space-between;
+                    transition: all 0.2s;
+                    min-width: 200px;
                 }
 
-                .filter-pill:hover {
-                    border-color: #cbd5e1;
-                    background-color: #f8fafc;
+                .filter-pill-premium:hover {
+                    border-color: #1a4d3e30;
+                    background: #f8fafc;
                 }
 
-                .course-table-card {
+                .course-table-card-premium {
                     background: white;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 16px;
+                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border-radius: 32px;
                     overflow: hidden;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
                 }
 
                 .course-table {
@@ -174,17 +171,18 @@ export default function MyCourses() {
 
                 .course-table th {
                     text-align: left;
-                    padding: 1rem 1.5rem;
+                    padding: 1.5rem 2rem;
                     background: #f8fafc;
                     color: #64748b;
-                    font-size: 0.8rem;
-                    font-weight: 600;
+                    font-size: 0.85rem;
+                    font-weight: 800;
                     text-transform: uppercase;
+                    letter-spacing: 0.05em;
                     border-bottom: 1px solid #f1f5f9;
                 }
 
                 .course-table td {
-                    padding: 1.25rem 1.5rem;
+                    padding: 1.75rem 2rem;
                     border-bottom: 1px solid #f8fafc;
                     vertical-align: middle;
                 }
@@ -192,78 +190,90 @@ export default function MyCourses() {
                 .course-identity {
                     display: flex;
                     align-items: center;
-                    gap: 1rem;
+                    gap: 1.25rem;
                 }
 
-                .thumb-rounded {
+                .thumb-rounded-premium {
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 16px;
+                    object-fit: cover;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+                }
+
+                .status-pill-premium {
+                    padding: 0.5rem 1rem;
+                    border-radius: 12px;
+                    font-size: 0.75rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+
+                .status-pill-premium.active { background: #f0fdf4; color: #16a34a; }
+                .status-pill-premium.upcoming { background: #eff6ff; color: #2563eb; }
+                .status-pill-premium.completed { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+                .action-btn-circle {
                     width: 44px;
                     height: 44px;
-                    border-radius: 10px;
-                    object-fit: cover;
-                }
-
-                .course-name-text {
-                    font-weight: 600;
-                    color: #1e293b;
-                    font-size: 0.925rem;
-                }
-
-                .status-pill {
-                    padding: 0.35rem 0.75rem;
-                    border-radius: 9999px;
-                    font-size: 0.75rem;
-                    font-weight: 700;
-                }
-
-                .status-pill.active { background: #f0fdf4; color: #16a34a; }
-                .status-pill.in-active { background: #f1f5f9; color: #64748b; }
-
-                .action-icon-btn {
-                    background: none;
-                    border: none;
-                    color: #94a3b8;
+                    border-radius: 14px;
+                    background: #f8fafc;
+                    border: 1.5px solid #f1f5f9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #64748b;
                     cursor: pointer;
-                    padding: 0.4rem;
-                    border-radius: 6px;
                     transition: all 0.2s;
                 }
 
-                .action-icon-btn:hover {
-                    background: #f1f5f9;
-                    color: #1e293b;
+                .action-btn-circle:hover {
+                    background: #1a4d3e;
+                    color: white;
+                    border-color: #1a4d3e;
+                    transform: translateY(-2px);
                 }
-
-                @media (max-width: 768px) {
-                    .courses-header {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 1rem;
-                    }
-                    .btn-standard { width: 100%; justify-content: center; }
+                
+                .btn-standard {
+                    height: 52px;
+                    padding: 0 2rem;
+                    border-radius: 16px;
+                    font-size: 0.95rem;
+                    font-weight: 800;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    cursor: pointer;
+                    border: none;
+                    color: white;
+                    text-decoration: none;
                 }
             `}</style>
 
             <div className="courses-header">
                 <div>
-                    <h2>Course Management</h2>
-                    <p style={{ color: '#64748b', margin: '0.25rem 0 0 0' }}>Create, edit, and track the performance of your curriculum.</p>
+                    <h2>Cohort Inventory</h2>
+                    <p style={{ color: '#64748b', margin: '0.4rem 0 0 0', fontWeight: 600 }}>Manage, track, and optimize your global batch deployments.</p>
                 </div>
                 <Link
                     to="/instructor/courses/create"
                     className="btn-standard"
-                    style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', background: '#020617' }}
+                    style={{ background: '#1a4d3e', boxShadow: '0 10px 15px -3px rgba(26, 77, 62, 0.2)' }}
                 >
-                    <Plus size={18} /> Create Course
+                    <Plus size={20} /> Create New Batch
                 </Link>
             </div>
 
             <div className="courses-stats-grid">
                 {stats.map((stat, i) => (
-                    <div key={i} className="stat-card-clean">
+                    <div key={i} className="stat-card-premium">
                         <div style={{
-                            width: '48px',
-                            height: '48px',
-                            borderRadius: '12px',
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '18px',
                             background: `${stat.color}10`,
                             color: stat.color,
                             display: 'flex',
@@ -271,11 +281,11 @@ export default function MyCourses() {
                             justifyContent: 'center',
                             flexShrink: 0
                         }}>
-                            <stat.icon size={24} />
+                            <stat.icon size={32} />
                         </div>
                         <div>
-                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>{stat.label}</p>
-                            <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#1e293b' }}>{stat.count}</h3>
+                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</p>
+                            <h3 style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: 950, color: '#0f172a' }}>{stat.count}</h3>
                         </div>
                     </div>
                 ))}
@@ -283,70 +293,72 @@ export default function MyCourses() {
 
             <div className="filter-section">
                 <div className="search-pill-container">
-                    <input type="text" placeholder="Search by course title or ID..." className="search-pill-input" />
+                    <input type="text" placeholder="Search batches, codes, or intellectual blueprints..." className="search-pill-input" />
                 </div>
-                <div className="filter-pill">
-                    <span>Select Category</span>
-                    <ChevronDown size={16} style={{ color: '#94a3b8' }} />
+                <div className="filter-pill-premium">
+                    <span>Category</span>
+                    <ChevronDown size={18} />
                 </div>
-                <div className="filter-pill">
-                    <span>All Status</span>
-                    <ChevronDown size={16} style={{ color: '#94a3b8' }} />
+                <div className="filter-pill-premium">
+                    <span>Status</span>
+                    <ChevronDown size={18} />
                 </div>
             </div>
 
-            <div className="course-table-card">
+            <div className="course-table-card-premium">
                 <div style={{ overflowX: 'auto' }}>
                     <table className="course-table">
                         <thead>
                             <tr>
-                                <th>Course Title</th>
-                                <th>Category</th>
-                                <th>Price</th>
-                                <th>Students</th>
+                                <th>Batch / Blueprint</th>
+                                <th>Operational Data</th>
+                                <th>Capacity</th>
                                 <th>Status</th>
                                 <th style={{ textAlign: 'right' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {courses.map(course => (
-                                <tr key={course.id}>
+                            {cohorts.map(cohort => (
+                                <tr key={cohort.id}>
                                     <td>
                                         <div className="course-identity">
-                                            <img src={course.image} className="thumb-rounded" alt="" />
+                                            <img src={cohort.image} className="thumb-rounded-premium" alt="" />
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                <span className="course-name-text">{course.title}</span>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    {course.delivery_type === 'recorded' && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.65rem', color: '#020617', background: 'rgba(2, 6, 23, 0.08)', padding: '2px 8px', borderRadius: '4px', fontWeight: 800 }}><Video size={10} /> Self-Paced</div>}
-                                                    {course.delivery_type === 'hybrid' && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.65rem', color: '#b45309', background: '#fff7ed', padding: '2px 8px', borderRadius: '4px', fontWeight: 800 }}><Globe size={10} /> Hybrid</div>}
-                                                    {course.delivery_type === 'live' && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.65rem', color: '#b91c1c', background: '#fef2f2', padding: '2px 8px', borderRadius: '4px', fontWeight: 800 }}><Users size={10} /> Live</div>}
-                                                </div>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', letterSpacing: '0.05em' }}>{cohort.batch_code}</span>
+                                                <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '1rem' }}>{cohort.title}</span>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span style={{ color: '#64748b', fontWeight: 500 }}>{course.category}</span>
-                                    </td>
-                                    <td>
-                                        <span style={{ fontWeight: 700, color: '#1e293b' }}>{course.price}</span>
-                                    </td>
-                                    <td>
-                                        <div className="flex items-center gap-2" style={{ color: '#64748b' }}>
-                                            <Users size={14} />
-                                            <span style={{ fontWeight: 500 }}>{course.students}</span>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 600, color: '#475569' }}>
+                                                <Clock size={14} /> {cohort.timeline}
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {cohort.delivery_type === 'recorded' && <div style={{ fontSize: '0.7rem', color: '#1a4d3e', fontWeight: 800, textTransform: 'uppercase' }}><Video size={12} /> On-Demand</div>}
+                                                {cohort.delivery_type === 'hybrid' && <div style={{ fontSize: '0.7rem', color: '#b45309', fontWeight: 800, textTransform: 'uppercase' }}><Globe size={12} /> Hybrid</div>}
+                                                {cohort.delivery_type === 'live' && <div style={{ fontSize: '0.7rem', color: '#b91c1c', fontWeight: 800, textTransform: 'uppercase' }}><Users size={12} /> Synchronous</div>}
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span className={`status-pill ${course.status.toLowerCase()}`}>
-                                            {course.status}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{ width: '100px', height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+                                                <div style={{ width: `${Math.min(100, (cohort.students / 1000) * 100)}%`, height: '100%', background: '#1a4d3e' }}></div>
+                                            </div>
+                                            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>{cohort.students}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span className={`status-pill-premium ${cohort.status.toLowerCase()}`}>
+                                            {cohort.status}
                                         </span>
                                     </td>
                                     <td style={{ textAlign: 'right' }}>
-                                        <div className="flex justify-end gap-1">
-                                            <Link to={`/instructor/courses/${course.id}`} className="action-icon-btn" title="Manage"><Eye size={18} /></Link>
-                                            <button className="action-icon-btn" title="Edit"><Edit2 size={18} /></button>
-                                            <button className="action-icon-btn" title="Delete" style={{ color: '#ef4444' }}><Trash2 size={18} /></button>
-                                            <button className="action-icon-btn"><MoreVertical size={18} /></button>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                                            <Link to={`/instructor/cohort/${cohort.batch_code}`} className="action-btn-circle" title="Manage Batch"><Eye size={20} /></Link>
+                                            <Link to={`/instructor/curriculum/${cohort.id}`} className="action-btn-circle" title="Edit Blueprint"><Edit2 size={20} /></Link>
+                                            <button className="action-btn-circle" style={{ color: '#ef4444' }} title="Terminate Batch"><Trash2 size={20} /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -355,6 +367,6 @@ export default function MyCourses() {
                     </table>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

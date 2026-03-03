@@ -49,7 +49,7 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon }: TopbarProp
                 icon: <Video size={20} strokeWidth={2.5} />
             };
         }
-        if (path.includes('account')) {
+        if (path.includes('account') || path.includes('settings')) {
             return {
                 title: 'Account Settings',
                 subtitle: 'Manage your profile and security',

@@ -73,7 +73,7 @@ const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
                     </div>
 
                     <button
-                        onClick={() => { setIsOpen(false); navigate(role === 'instructor' ? '/instructor/account' : '/student/account'); }}
+                        onClick={() => { setIsOpen(false); navigate(role === 'instructor' ? '/instructor/settings' : '/student/account'); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: 'none', border: 'none', borderRadius: '10px', color: '#475569', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}
                         onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
                         onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -92,6 +92,7 @@ const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
                     </button>
 
                     <button
+                        onClick={() => { setIsOpen(false); navigate(role === 'instructor' ? '/instructor/settings' : '/student/account'); }}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: 'none', border: 'none', borderRadius: '10px', color: '#475569', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}
                         onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
                         onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}

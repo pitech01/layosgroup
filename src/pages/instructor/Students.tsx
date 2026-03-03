@@ -256,10 +256,10 @@ export default function Students() {
 
             <div className="users-card">
                 <div className="users-header">
-                    <h2>All users (31)</h2>
+                    <h2>Student (31)</h2>
                     <div className="header-actions">
                         <button className="btn-export">Export</button>
-                        <button className="btn-add-user">Add new user <Plus size={18} /></button>
+                        <button className="btn-add-user">Add new student <Plus size={18} /></button>
                         <div className="filter-pill">All users <ChevronDown size={16} /></div>
                         <div className="filter-pill">Desc <ChevronDown size={16} /></div>
                         <div className="search-pill-icon"><Search size={18} /></div>

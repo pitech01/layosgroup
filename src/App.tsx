@@ -15,13 +15,15 @@ import Live from './pages/student/live/Live';
 import Account from './pages/student/account/Account';
 import StudentLayout from './pages/student/layout/StudentLayout';
 import InstructorLayout from './components/layouts/InstructorLayout';
-import MyCourses from './pages/instructor/MyCourses';
 import CreateCourse from './pages/instructor/CreateCourse';
+import MyCohorts from './pages/instructor/CohortsPage';
+import CreateCohort from './pages/instructor/CreateCohort';
+import CourseLibrary from './pages/instructor/CourseLibrary';
+import CohortDetails from './pages/instructor/CohortDetails';
 import Students from './pages/instructor/Students';
 import Revenue from './pages/instructor/Revenue';
 import LiveClass from './pages/instructor/LiveClass';
 import CreateLiveSession from './pages/instructor/CreateLiveSession';
-import InstructorCourseDetails from './pages/instructor/CourseDetails';
 import NotFound from './pages/NotFound';
 import AdminLayout from './components/layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -29,6 +31,7 @@ import Preloader from './components/Preloader';
 import CurriculumBuilder from './pages/instructor/CurriculumBuilder';
 import InstructorChannelsPage from './pages/instructor/InstructorChannelsPage';
 import InstructorChannelPage from './pages/instructor/InstructorChannelPage';
+import InstructorSettings from './pages/instructor/Settings';
 import StudentChannelsPage from './pages/student/StudentChannelsPage';
 import StudentChannelPage from './pages/student/StudentChannelPage';
 import { useState, useEffect } from 'react';
@@ -79,16 +82,24 @@ function App() {
             <Route element={<ProtectedRoute allowedRoles={['instructor']} />}>
               <Route element={<InstructorLayout />}>
                 <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
-                <Route path="/instructor/courses" element={<MyCourses />} />
-                <Route path="/instructor/courses/create" element={<CreateCourse />} />
+                <Route path="/instructor/cohorts" element={<MyCohorts />} />
+                <Route path="/instructor/cohorts/create" element={<CreateCohort />} />
+                <Route path="/instructor/cohorts/:id" element={<CohortDetails />} />
+                <Route path="/instructor/cohorts/:id/attach-course" element={<CreateCourse />} />
+                <Route path="/instructor/cohorts/:id/curriculum" element={<CurriculumBuilder />} />
+                <Route path="/instructor/course-library" element={<CourseLibrary />} />
+                <Route path="/instructor/course-library/create" element={<CreateCourse />} />
+
+                {/* Legacy Redirection Support */}
+                <Route path="/instructor/courses" element={<Navigate to="/instructor/cohorts" replace />} />
+
                 <Route path="/instructor/students" element={<Students />} />
                 <Route path="/instructor/revenue" element={<Revenue />} />
                 <Route path="/instructor/live" element={<LiveClass />} />
                 <Route path="/instructor/live/create" element={<CreateLiveSession />} />
-                <Route path="/instructor/courses/:id/curriculum" element={<CurriculumBuilder />} />
-                <Route path="/instructor/courses/:id" element={<InstructorCourseDetails />} />
                 <Route path="/instructor/channels" element={<InstructorChannelsPage />} />
                 <Route path="/instructor/courses/:courseId/channel" element={<InstructorChannelPage />} />
+                <Route path="/instructor/settings" element={<InstructorSettings />} />
               </Route>
             </Route>
 

@@ -73,14 +73,14 @@ export default function StudentRegister() {
                                     Everything you need for project management with intense support. No matter your background or experience, this course is designed for you.
                                 </p>
 
-                                <div className="responsive-two-col" style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: '4rem', alignItems: 'center' }}>
+                                <div className="responsive-two-col" style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: '2rem', alignItems: 'center' }}>
                                     {[
-                                        { title: 'Project Management', icon: '📋', color: '#eff6ff' },
-                                        { title: 'Intense Support', icon: '🤝', color: '#f0fdf4' },
-                                        { title: 'MS Project Mastery', icon: '💻', color: '#fff7ed' },
-                                        { title: 'Career Guidance', icon: '🎓', color: '#faf5ff' },
-                                        { title: 'Job Placement', icon: '💼', color: '#fdf2f2' },
-                                        { title: 'Certification', icon: '🏆', color: '#f0f9ff' }
+                                        { title: 'Primavera P6 (Hands-On)', icon: '📊', color: '#eff6ff' },
+                                        { title: 'Microsoft Project (MSP)', icon: '💻', color: '#f0fdf4' },
+                                        { title: 'Smartsheet', icon: '📋', color: '#fff7ed' },
+                                        { title: 'Resource Planning & Cost Loading', icon: '📉', color: '#faf5ff' },
+                                        { title: 'Earned Value Management (SPI/CPI)', icon: '📈', color: '#fdf2f2' },
+                                        { title: 'Schedule Analysis & Reporting', icon: '📄', color: '#f0f9ff' }
                                     ].map((item, i) => (
                                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', background: item.color, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.03)', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                                             <span style={{ fontSize: '1.75rem' }}>{item.icon}</span>
