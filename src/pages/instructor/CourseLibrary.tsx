@@ -1,47 +1,74 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Plus,
     Layers,
     Search,
     Filter,
-    Copy,
-    Calendar,
-    Award
+    Edit2,
+    Trash2,
+    Loader2,
+    AlertCircle,
+    Video,
+    Users,
+    FileText,
+    HelpCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 export default function CourseLibrary() {
+    const { user } = useAuth();
     const [searchQuery, setSearchQuery] = useState('');
+    const [courses, setCourses] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const templates = [
-        {
-            id: 'TPL-1',
-            title: "Executive Brand Systems",
-            category: "Design Strategy",
-            level: "Intermediate",
-            modulesCount: 8,
-            createdDate: "Oct 12, 2025",
-            description: "High-level brand logic and visual system architecture."
-        },
-        {
-            id: 'TPL-2',
-            title: "Digital Market Psychology",
-            category: "Marketing",
-            level: "Advanced",
-            modulesCount: 12,
-            createdDate: "Nov 05, 2025",
-            description: "Deep-dive into consumer behavioral funnels and high-conversion logic."
-        },
-        {
-            id: 'TPL-3',
-            title: "React Architecture Patterns",
-            category: "Development",
-            level: "Expert",
-            modulesCount: 15,
-            createdDate: "Jan 20, 2026",
-            description: "Scalable frontend architectures for enterprise-grade applications."
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    const fetchCourses = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/courses`);
+            const data = await response.json();
+            if (response.ok) {
+                // Filter by instructor
+                const filtered = data.filter((c: any) => c.instructor_id === user?.id);
+                setCourses(filtered);
+            } else {
+                throw new Error(data.message || 'Failed to retrieve course list.');
+            }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
+
+    useEffect(() => {
+        fetchCourses();
+    }, [user?.id]);
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm('Are you sure you want to permanently delete this course? This action cannot be undone.')) {
+            try {
+                const response = await fetch(`${API_URL}/courses/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    setCourses(courses.filter(c => c.id !== id));
+                } else {
+                    alert('Action failed. The course might be in use and cannot be removed.');
+                }
+            } catch (err) {
+                alert('Connection error. Please check your network.');
+            }
+        }
+    };
+
+    const filteredCourses = courses.filter(c =>
+        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.category?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className="course-library-container">
@@ -191,7 +218,7 @@ export default function CourseLibrary() {
                 }
 
                 .action-fab-library {
-                    width: 44px;
+                    padding: 0 1rem;
                     height: 44px;
                     background: #f8fafc;
                     border: 1.5px solid #f1f5f9;
@@ -205,6 +232,30 @@ export default function CourseLibrary() {
                 }
 
                 .action-fab-library:hover {
+                    background: #1a4d3e;
+                    color: white;
+                    border-color: #1a4d3e;
+                }
+
+                .action-fab-library.delete-btn {
+                    color: #ef4444; 
+                    background: #fff1f2;
+                    border-color: #fee2e2;
+                }
+
+                .action-fab-library.delete-btn:hover {
+                    background: #ef4444;
+                    color: white;
+                    border-color: #ef4444;
+                }
+
+                .action-fab-library.edit-btn {
+                    color: #1a4d3e;
+                    background: #f0fdf4;
+                    border-color: #dcfce7;
+                }
+
+                .action-fab-library.edit-btn:hover {
                     background: #1a4d3e;
                     color: white;
                     border-color: #1a4d3e;
@@ -235,8 +286,8 @@ export default function CourseLibrary() {
 
             <div className="library-header-premium">
                 <div>
-                    <h1>Course</h1>
-                    <p>Manage and reuse your course templates.</p>
+                    <h1>Course Library</h1>
+                    <p>Manage and organize your learning materials and curriculums.</p>
                 </div>
                 <Link to="/instructor/course-library/create" className="btn-create-master" style={{ textDecoration: 'none' }}>
                     <Plus size={20} /> Create New Course
@@ -262,34 +313,82 @@ export default function CourseLibrary() {
                 </div>
             </div>
 
-            <div className="template-grid">
-                {templates.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase())).map(template => (
-                    <div key={template.id} className="template-card-premium shadow-premium">
-                        <div className="category-badge-library">{template.category}</div>
-                        <h3 className="template-title-premium">{template.title}</h3>
-                        <p className="template-description-premium">{template.description}</p>
+            {loading ? (
+                <div style={{ padding: '5rem', textAlign: 'center' }}>
+                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#64748b' }}>Opening Course Catalog...</p>
+                </div>
+            ) : error ? (
+                <div style={{ padding: '3rem', background: '#fff1f2', borderRadius: '24px', border: '1.5px solid #ffe4e6', textAlign: 'center' }}>
+                    <AlertCircle size={40} color="#e11d48" style={{ margin: '0 auto 1rem' }} />
+                    <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 900 }}>Database Connection Failed</h3>
+                    <p style={{ color: '#64748b', fontWeight: 600, margin: '8px 0 2rem' }}>{error}</p>
+                    <button onClick={fetchCourses} className="btn-primary-forest" style={{ margin: '0 auto' }}>Try Connecting Again</button>
+                </div>
+            ) : (
+                <div className="template-grid">
+                    {filteredCourses.length > 0 ? filteredCourses.map(course => (
+                        <div key={course.id} className="template-card-premium shadow-premium">
 
-                        <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem' }}>
-                            <div className="meta-item-library">
-                                <Layers size={16} /> {template.modulesCount} Modules
+                            <h3 className="template-title-premium">{course.title}</h3>
+                            <div style={{ marginBottom: '1.25rem' }}>
+                                <span style={{
+                                    fontSize: '0.65rem',
+                                    fontWeight: 900,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em',
+                                    padding: '4px 10px',
+                                    borderRadius: '8px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    background: course.category === 'live' ? '#fee2e2' :
+                                        course.category === 'material' ? '#ecfdf5' :
+                                            course.category === 'quiz' ? '#fff7ed' : '#eff6ff',
+                                    color: course.category === 'live' ? '#b91c1c' :
+                                        course.category === 'material' ? '#065f46' :
+                                            course.category === 'quiz' ? '#9a3412' : '#1d4ed8'
+                                }}>
+                                    {course.category === 'live' ? <Users size={12} /> :
+                                        course.category === 'material' ? <FileText size={12} /> :
+                                            course.category === 'quiz' ? <HelpCircle size={12} /> : <Video size={12} />}
+                                    {course.category || 'Video Course'}
+                                </span>
                             </div>
-                            <div className="meta-item-library">
-                                <Award size={16} /> {template.level}
+                            <p className="template-description-premium">{course.description}</p>
+
+                            <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem' }}>
+                                <div className="meta-item-library">
+                                    <Layers size={16} /> {course.modules?.length || 0} Modules
+                                </div>
+                            </div>
+
+                            <div className="template-meta-strip">
+
+                                <div style={{ display: 'flex', gap: '0.75rem', width: '100%', justifyContent: 'flex-end' }}>
+                                    <Link to={`/instructor/courses/${course.id}/edit`} className="action-fab-library edit-btn shadow-sm" title="Edit Course" style={{ textDecoration: 'none', flex: 1, gap: '8px', minWidth: '100px' }}>
+                                        <Edit2 size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Edit Course</span>
+                                    </Link>
+                                    <button
+                                        className="action-fab-library delete-btn shadow-sm"
+                                        style={{ flex: 1, gap: '8px', minWidth: '100px' }}
+                                        title="Delete Course"
+                                        onClick={() => handleDelete(course.id)}
+                                    >
+                                        <Trash2 size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Remove</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
-                        <div className="template-meta-strip">
-                            <div className="meta-item-library">
-                                <Calendar size={14} /> Registered: {template.createdDate}
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                <button className="action-fab-library" title="Clone Template"><Copy size={18} /></button>
-                                <button className="action-fab-library" title="Edit Master"><Plus size={18} /></button>
-                            </div>
+                    )) : (
+                        <div style={{ gridColumn: '1 / -1', padding: '5rem', background: '#f8fafc', borderRadius: '32px', textAlign: 'center', border: '2px dashed #e2e8f0' }}>
+                            <Layers size={48} color="#cbd5e1" style={{ margin: '0 auto 1.5rem' }} />
+                            <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 900 }}>No Courses Found</h3>
+                            <p style={{ color: '#64748b', fontWeight: 600, marginTop: '8px' }}>Your course library is currently empty. Create your first course syllabus to get started.</p>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-    ChevronRight,
     ChevronLeft,
     Video,
     FileText,
@@ -15,7 +14,8 @@ import {
     Layout,
     Activity,
     PlusCircle,
-    Check
+    Check,
+    ChevronDown
 } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 
@@ -64,7 +64,7 @@ export default function CurriculumBuilder() {
     const [modules, setModules] = useState<Module[]>([]);
     const [courseInfo] = useState({ title: 'Executive Brand Systems', status: 'draft' });
     const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
-    const [deliveryMode, setDeliveryMode] = useState('Blueprint Mapping');
+    const [deliveryMode, setDeliveryMode] = useState('Course Planning');
 
     // UI state for Modals
     const [activeModal, setActiveModal] = useState<{
@@ -90,7 +90,7 @@ export default function CurriculumBuilder() {
         loadCurriculum: () => {
             const saved = localStorage.getItem(`course_${courseId}_curriculum`);
             return saved ? JSON.parse(saved) : [
-                { id: 'm1', title: 'Phase 1: Foundation Strategy', order_position: 1, isOpen: true, sessions: [] }
+                { id: 'm1', title: 'Module 1: Getting Started', order_position: 1, isOpen: true, sessions: [] }
             ];
         }
     };
@@ -104,18 +104,18 @@ export default function CurriculumBuilder() {
             api.saveCurriculum(modules);
             const allSessions = modules.flatMap(m => m.sessions);
             const types = new Set(allSessions.map(s => s.type));
-            if (types.has('live') && types.has('video')) setDeliveryMode('Hybrid Logic');
-            else if (types.has('live')) setDeliveryMode('Live Interactive');
-            else if (types.has('video')) setDeliveryMode('Asynchronous Core');
-            else if (allSessions.length > 0) setDeliveryMode('Knowledge Hub');
-            else setDeliveryMode('Framework Drafting');
+            if (types.has('live') && types.has('video')) setDeliveryMode('Hybrid Delivery');
+            else if (types.has('live')) setDeliveryMode('Live Sessions');
+            else if (types.has('video')) setDeliveryMode('Self-paced');
+            else if (allSessions.length > 0) setDeliveryMode('Resources Only');
+            else setDeliveryMode('Drafting');
         }
     }, [modules]);
 
     const handleAddModule = () => {
         setModules([...modules, {
             id: `mod_${Date.now()}`,
-            title: 'New Strategic Module',
+            title: 'New Course Module',
             order_position: modules.length + 1,
             isOpen: true,
             sessions: []
@@ -127,7 +127,7 @@ export default function CurriculumBuilder() {
     };
 
     const handleDeleteModule = (modId: string) => {
-        if (window.confirm('WARNING: Deleting this module will remove all associated session nodes. Proceed?')) {
+        if (window.confirm('Are you sure you want to delete this module? All lessons within it will be removed.')) {
             setModules(modules.filter(m => m.id !== modId));
         }
     };
@@ -160,7 +160,7 @@ export default function CurriculumBuilder() {
                     const newSession: Session = {
                         id: `sess_${Date.now()}`,
                         module_id: moduleId,
-                        title: sessionData.title || 'Untitled Node',
+                        title: sessionData.title || 'Untitled Lesson',
                         description: sessionData.description || '',
                         type: type!,
                         order_position: m.sessions.length + 1,
@@ -272,20 +272,20 @@ export default function CurriculumBuilder() {
                             </span>
                         </div>
                         <div className={`save-status ${saveStatus}`}>
-                            {saveStatus === 'saving' ? <><Clock size={14} /> Syncing Blueprint...</> : <><Check size={14} /> Blueprint Secured</>}
+                            {saveStatus === 'saving' ? <><Clock size={14} /> Saving Curriculum...</> : <><Check size={14} /> Curriculum Saved</>}
                         </div>
                     </div>
                 </div>
                 <div className="header-actions">
                     <button className="btn-outline-premium"><Eye size={20} /> Preview</button>
-                    <button className="btn-primary-forest">Commit Changes</button>
+                    <button className="btn-primary-forest">Publish Changes</button>
                 </div>
             </header>
 
             <main className="curriculum-canvas">
                 <div className="canvas-header">
-                    <h2>Intellectual Architecture</h2>
-                    <p>Map out the transformative journey of your cohort. Define modules and deploy strategic session nodes to the master blueprint.</p>
+                    <h2>Course Curriculum</h2>
+                    <p>Map out the learning journey for your students. Organize content into modules and lessons to create a structured educational experience.</p>
                 </div>
 
                 <div className="modules-list">
@@ -299,14 +299,14 @@ export default function CurriculumBuilder() {
                                         value={mod.title}
                                         onChange={(e) => handleEditModuleTitle(mod.id, e.target.value)}
                                         onClick={(e) => e.stopPropagation()}
-                                        placeholder="Module Phase Title..."
+                                        placeholder="Module Title..."
                                     />
-                                    <span className="module-meta">{mod.sessions.length} Session Nodes Deployed</span>
+                                    <span className="module-meta">{mod.sessions.length} Lessons Added</span>
                                 </div>
                                 <div className="module-controls" onClick={(e) => e.stopPropagation()}>
                                     <button onClick={() => handleDeleteModule(mod.id)} className="ctrl-btn delete"><Trash2 size={20} /></button>
                                     <div style={{ transform: mod.isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s', color: '#64748b' }}>
-                                        <ChevronDownComponent size={24} />
+                                        <ChevronDown size={24} />
                                     </div>
                                 </div>
                             </div>
@@ -315,7 +315,7 @@ export default function CurriculumBuilder() {
                                 <div className="module-body">
                                     <div className="sessions-container">
                                         {mod.sessions.length === 0 && (
-                                            <div className="empty-placeholder">No strategic nodes deployed to this phase.</div>
+                                            <div className="empty-placeholder">No lessons added to this module yet.</div>
                                         )}
                                         {mod.sessions.map((sess) => (
                                             <div key={sess.id} className="session-item">
@@ -328,7 +328,7 @@ export default function CurriculumBuilder() {
                                                     </div>
                                                     <div className="session-text">
                                                         <h4>{sess.title}</h4>
-                                                        <p>{sess.type} • {sess.is_locked ? 'Prerequisite Required' : 'Open Access Point'}</p>
+                                                        <p>{sess.type} • {sess.is_locked ? 'Prerequisite Required' : 'Public Access'}</p>
                                                     </div>
                                                 </div>
                                                 <div className="module-controls">
@@ -338,9 +338,24 @@ export default function CurriculumBuilder() {
                                             </div>
                                         ))}
                                     </div>
-                                    <button onClick={() => handleOpenAddSession(mod.id)} className="add-session-trigger">
+                                    <button onClick={() => handleOpenAddSession(mod.id)} style={{
+                                        width: '100%',
+                                        padding: '1.5rem',
+                                        background: '#f8fafc',
+                                        border: '2px dashed #e2e8f0',
+                                        borderRadius: '20px',
+                                        color: '#1a4d3e',
+                                        fontWeight: 800,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '12px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        marginTop: '1.5rem'
+                                    }} onMouseOver={e => e.currentTarget.style.background = '#f0fdf4'} onMouseOut={e => e.currentTarget.style.background = '#f8fafc'}>
                                         <PlusCircle size={22} />
-                                        <span>Deploy New Session Node</span>
+                                        <span>Add New Lesson</span>
                                     </button>
                                 </div>
                             )}
@@ -349,7 +364,7 @@ export default function CurriculumBuilder() {
 
                     <button className="add-module-master" onClick={handleAddModule}>
                         <Layout size={32} />
-                        Architect New Phase Module
+                        Add New Module
                     </button>
                 </div>
             </main>
@@ -359,28 +374,28 @@ export default function CurriculumBuilder() {
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
                         {!activeModal.type ? (
                             <div className="session-selector">
-                                <h3>Select Node Type</h3>
-                                <p>Which logical payload should this session deliver to the cohort?</p>
+                                <h3>Select Lesson Type</h3>
+                                <p>Choose the type of content you want to add to this module.</p>
                                 <div className="selector-grid">
                                     <div className="select-opt video" onClick={() => setActiveModal({ ...activeModal, type: 'video' })}>
                                         <div className="opt-icon"><Video size={40} /></div>
-                                        <h4>Masterclass Core</h4>
-                                        <p>High-fidelity recorded sessions for asynchronous mastery.</p>
+                                        <h4>Video Lesson</h4>
+                                        <p>Recordings or uploaded videos for students to watch at their own pace.</p>
                                     </div>
                                     <div className="select-opt live" onClick={() => setActiveModal({ ...activeModal, type: 'live' })}>
                                         <div className="opt-icon"><Activity size={40} /></div>
-                                        <h4>Live Intervention</h4>
-                                        <p>Real-time synchronous sessions for deep engagement.</p>
+                                        <h4>Live Session</h4>
+                                        <p>Schedule a real-time meeting or stream for direct engagement.</p>
                                     </div>
                                     <div className="select-opt docs" onClick={() => setActiveModal({ ...activeModal, type: 'docs' })}>
                                         <div className="opt-icon"><FileText size={40} /></div>
-                                        <h4>Strategic Asset</h4>
-                                        <p>PDFs, Doc Blueprints, and toolkits for student success.</p>
+                                        <h4>Course Material</h4>
+                                        <p>PDFs, documents, and resources for students to download.</p>
                                     </div>
                                     <div className="select-opt assessment" onClick={() => setActiveModal({ ...activeModal, type: 'assessment' })}>
                                         <div className="opt-icon"><HelpCircle size={40} /></div>
-                                        <h4>Logic Validation</h4>
-                                        <p>Knowledge assessments and scoring for certification.</p>
+                                        <h4>Assessment</h4>
+                                        <p>Create quizzes and tests to evaluate student understanding.</p>
                                     </div>
                                 </div>
                                 <button className="modal-close" onClick={() => setActiveModal({ ...activeModal, isOpen: false })}><X size={32} /></button>
@@ -400,9 +415,7 @@ export default function CurriculumBuilder() {
     );
 }
 
-function ChevronDownComponent({ size }: { size: number }) {
-    return <ChevronRight size={size} />;
-}
+
 
 function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionType, initialData: Session | null, onCancel: () => void, onSave: (data: Partial<Session>) => void }) {
     const [formData, setFormData] = useState<Partial<Session>>(initialData || {
@@ -456,42 +469,42 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                     {type === 'assessment' && <HelpCircle size={36} />}
                 </div>
                 <div>
-                    <h2>{initialData ? 'Update Strategic Node' : `Deploy New ${type} Node`}</h2>
-                    <p>Configure the parameters for this logical curriculum unit.</p>
+                    <h2>{initialData ? 'Update Lesson' : `Add New ${type === 'docs' ? 'Resource' : type}`}</h2>
+                    <p>Configure the details for this curriculum unit.</p>
                 </div>
             </header>
 
             <div className="form-body">
                 <div className="form-group">
-                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px', display: 'block' }}>Node Title</label>
-                    <input className="form-input-premium" value={formData.title} onChange={e => handleFieldChange('title', e.target.value)} placeholder="e.g. Fundamental Strategic Logic" />
+                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '12px', display: 'block' }}>Lesson Title</label>
+                    <input className="form-input-premium" value={formData.title} onChange={e => handleFieldChange('title', e.target.value)} placeholder="e.g. Introduction to Course" />
                 </div>
 
                 <div className="form-group">
-                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px', display: 'block' }}>Operational Description</label>
-                    <textarea className="form-textarea-premium" value={formData.description} onChange={e => handleFieldChange('description', e.target.value)} placeholder="Define the learning objectives of this node..." />
+                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '12px', display: 'block' }}>Description</label>
+                    <textarea className="form-textarea-premium" value={formData.description} onChange={e => handleFieldChange('description', e.target.value)} placeholder="Describe what students will learn in this session..." />
                 </div>
 
                 {type === 'video' && (
                     <div className="upload-box">
                         <UploadCloud size={56} color="#1a4d3e" />
-                        <h4>Drop Master Video Asset</h4>
-                        <p>MP4, MOV 4K or linked protected sources.</p>
+                        <h4>Upload Video Lesson</h4>
+                        <p>MP4, MOV or link to external video sources.</p>
                     </div>
                 )}
 
                 {type === 'live' && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                         <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#475569', marginBottom: '8px', display: 'block' }}>Platform Backbone</label>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#475569', marginBottom: '8px', display: 'block' }}>Live Platform</label>
                             <select className="form-input-premium">
-                                <option>Internal Stream Hub</option>
-                                <option>Zoom Enterprise</option>
-                                <option>Google Executive</option>
+                                <option>Internal Stream</option>
+                                <option>Zoom</option>
+                                <option>Google Meet</option>
                             </select>
                         </div>
                         <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#475569', marginBottom: '8px', display: 'block' }}>Access Point Link</label>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#475569', marginBottom: '8px', display: 'block' }}>Meeting Link</label>
                             <input className="form-input-premium" placeholder="https://..." />
                         </div>
                     </div>
@@ -500,17 +513,17 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                 {type === 'assessment' && (
                     <div className="questions-builder">
                         <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '24px', border: '2px solid #e2e8f0' }}>
-                            <label style={{ fontWeight: 900, color: '#0f172a' }}>Certification Threshold: {assessmentFields.pass_mark}%</label>
+                            <label style={{ fontWeight: 900, color: '#0f172a' }}>Passing Grade: {assessmentFields.pass_mark}%</label>
                             <input type="range" min="0" max="100" step="5" value={assessmentFields.pass_mark} onChange={e => setAssessmentFields({ ...assessmentFields, pass_mark: parseInt(e.target.value) })} style={{ width: '100%', marginTop: '1rem', accentColor: '#1a4d3e' }} />
                         </div>
 
                         {assessmentFields.questions.map((q, idx) => (
                             <div key={q.id} className="q-card">
                                 <div className="q-header">
-                                    <span>Inference Node Q{idx + 1}</span>
+                                    <span>Question {idx + 1}</span>
                                     <button onClick={() => setAssessmentFields({ ...assessmentFields, questions: assessmentFields.questions.filter(x => x.id !== q.id) })} className="del-btn"><Trash2 size={16} /></button>
                                 </div>
-                                <input className="form-input-premium" style={{ marginBottom: '1.5rem' }} value={q.text} onChange={e => updateQuestion(q.id, { text: e.target.value })} placeholder="Formulate the inquisitive logic..." />
+                                <input className="form-input-premium" style={{ marginBottom: '1.5rem' }} value={q.text} onChange={e => updateQuestion(q.id, { text: e.target.value })} placeholder="Enter your question here..." />
                                 <div className="options-grid">
                                     {q.options.map((opt, oIdx) => (
                                         <div key={oIdx} className={`opt-row ${q.correctIndex === oIdx ? 'correct' : ''}`}>
@@ -519,33 +532,33 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                                                 const newOpts = [...q.options];
                                                 newOpts[oIdx] = e.target.value;
                                                 updateQuestion(q.id, { options: newOpts });
-                                            }} placeholder="Inference..." />
+                                            }} placeholder={`Option ${oIdx + 1}`} />
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         ))}
-                        <button className="add-q-btn" onClick={addQuestion}><PlusCircle size={20} /> Add Inference Node</button>
+                        <button className="add-q-btn" onClick={addQuestion}><PlusCircle size={20} /> Add Question</button>
                     </div>
                 )}
 
                 <div style={{ display: 'flex', gap: '3rem', paddingTop: '3rem', borderTop: '2.5px solid #f1f5f9' }}>
                     <div style={{ flex: 1 }}>
                         <label style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>Preview Access</label>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '6px' }}>Allow non-purchased access to this node.</p>
+                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '6px' }}>Allow students to view this lesson before enrolling.</p>
                         <input type="checkbox" checked={formData.preview_enabled} onChange={e => handleFieldChange('preview_enabled', e.target.checked)} style={{ marginTop: '12px', width: '24px', height: '24px', accentColor: '#1a4d3e' }} />
                     </div>
                     <div style={{ flex: 1 }}>
-                        <label style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>Prerequisite Lock</label>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '6px' }}>Lock node behind previous sessions.</p>
+                        <label style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>Lock Lesson</label>
+                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '6px' }}>Require completion of previous lessons.</p>
                         <input type="checkbox" checked={formData.is_locked} onChange={e => handleFieldChange('is_locked', e.target.checked)} style={{ marginTop: '12px', width: '24px', height: '24px', accentColor: '#1a4d3e' }} />
                     </div>
                 </div>
             </div>
 
             <footer style={{ marginTop: '5rem', display: 'flex', justifyContent: 'flex-end', gap: '2rem', background: 'white', padding: '2.5rem 0', borderTop: '2px solid #f1f5f9', position: 'sticky', bottom: 0 }}>
-                <button onClick={onCancel} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontWeight: 900, cursor: 'pointer', fontSize: '1.1rem' }}>Abort Node Deployment</button>
-                <button className="deploy-btn-forest" onClick={handleSubmit}>Deploy To Blueprint</button>
+                <button onClick={onCancel} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontWeight: 900, cursor: 'pointer', fontSize: '1.1rem' }}>Cancel</button>
+                <button className="deploy-btn-forest" onClick={handleSubmit}>Save to Module</button>
             </footer>
         </div>
     );

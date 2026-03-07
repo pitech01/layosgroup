@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 
 import { useAuth } from '../../context/AuthContext';
+import { AlertCircle, X } from 'lucide-react';
 // Import images
 import loginHero from '../../assets/login-hero.jpeg';
 
@@ -12,13 +13,43 @@ export default function StudentLogin() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        login('student');
-        navigate('/student-dashboard');
+        setLoading(true);
+        setError(null);
+
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ email, password, role: 'student' })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Login failed. Please verify your credentials.');
+            }
+
+            // Successful login
+            login(data.user, data.token);
+            navigate('/student/dashboard');
+        } catch (err: any) {
+            console.error('Student Login Error:', err);
+            setError(err.message || 'A network error occurred. Please check your connection.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -38,6 +69,32 @@ export default function StudentLogin() {
                         <h1>Welcome Back</h1>
                         <p>Enter your email and password to continue.</p>
                     </div>
+
+                    {error && (
+                        <div className="animate-slide-in" style={{
+                            padding: '1rem 1.25rem',
+                            background: '#fff1f2',
+                            border: '1px solid #ffe4e6',
+                            color: '#e11d48',
+                            borderRadius: '16px',
+                            marginBottom: '1.5rem',
+                            fontSize: '0.95rem',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
+                        }}>
+                            <AlertCircle size={20} strokeWidth={2.5} />
+                            <span style={{ flex: 1 }}>{error}</span>
+                            <button
+                                onClick={() => setError(null)}
+                                style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px' }}
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    )}
 
                     <form onSubmit={handleLogin} className="delay-300">
                         <div className="login-form-group">
@@ -98,9 +155,21 @@ export default function StudentLogin() {
                             <Link to="/forgot-password" title="Forgot password" className="forgot-password-link">Forgot password</Link>
                         </div>
 
-                        <button type="submit" className="login-btn-primary">
-                            Sign In
+                        <button type="submit" className="login-btn-primary" disabled={loading}>
+                            {loading ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                                    <div style={{ width: '20px', height: '20px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                                    <span>Authenticating...</span>
+                                </div>
+                            ) : (
+                                'Sign In'
+                            )}
                         </button>
+                        <style>{`
+                            @keyframes spin {
+                                to { transform: rotate(360deg); }
+                            }
+                        `}</style>
                     </form>
 
 

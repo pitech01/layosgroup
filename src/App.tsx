@@ -16,25 +16,30 @@ import Account from './pages/student/account/Account';
 import StudentLayout from './pages/student/layout/StudentLayout';
 import InstructorLayout from './components/layouts/InstructorLayout';
 import CreateCourse from './pages/instructor/CreateCourse';
+import EditCourse from './pages/instructor/EditCourse';
 import MyCohorts from './pages/instructor/CohortsPage';
 import CreateCohort from './pages/instructor/CreateCohort';
+import EditCohort from './pages/instructor/EditCohort';
 import CourseLibrary from './pages/instructor/CourseLibrary';
 import CohortDetails from './pages/instructor/CohortDetails';
 import Students from './pages/instructor/Students';
+import AddStudent from './pages/instructor/AddStudent';
+import StudentDetails from './pages/instructor/StudentDetails';
 import Revenue from './pages/instructor/Revenue';
+import PaymentVerification from './pages/instructor/PaymentVerification';
 import LiveClass from './pages/instructor/LiveClass';
 import CreateLiveSession from './pages/instructor/CreateLiveSession';
 import NotFound from './pages/NotFound';
 import AdminLayout from './components/layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Preloader from './components/Preloader';
-import CurriculumBuilder from './pages/instructor/CurriculumBuilder';
 import InstructorChannelsPage from './pages/instructor/InstructorChannelsPage';
 import InstructorChannelPage from './pages/instructor/InstructorChannelPage';
 import InstructorSettings from './pages/instructor/Settings';
 import StudentChannelsPage from './pages/student/StudentChannelsPage';
 import StudentChannelPage from './pages/student/StudentChannelPage';
 import { useState, useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -50,6 +55,7 @@ function App() {
   return (
     <>
       {loading && <Preloader />}
+      <Toaster position="top-right" />
       <BrowserRouter>
         <AuthProvider>
           <Routes>
@@ -69,7 +75,7 @@ function App() {
                 <Route path="/student/dashboard" element={<StudentDashboard />} />
                 <Route path="/student/courses" element={<Courses />} />
                 <Route path="/student/courses/:courseId" element={<CourseDetails />} />
-                <Route path="/student/lesson/:lessonId" element={<LessonView />} />
+                <Route path="/student/courses/:courseId/lesson/:lessonId" element={<LessonView />} />
                 <Route path="/student/live" element={<Live />} />
                 <Route path="/student/account" element={<Account />} />
                 <Route path="/student/channels" element={<StudentChannelsPage />} />
@@ -85,8 +91,9 @@ function App() {
                 <Route path="/instructor/cohorts" element={<MyCohorts />} />
                 <Route path="/instructor/cohorts/create" element={<CreateCohort />} />
                 <Route path="/instructor/cohorts/:id" element={<CohortDetails />} />
+                <Route path="/instructor/cohorts/:id/edit" element={<EditCohort />} />
                 <Route path="/instructor/cohorts/:id/attach-course" element={<CreateCourse />} />
-                <Route path="/instructor/cohorts/:id/curriculum" element={<CurriculumBuilder />} />
+                <Route path="/instructor/courses/:id/edit" element={<EditCourse />} />
                 <Route path="/instructor/course-library" element={<CourseLibrary />} />
                 <Route path="/instructor/course-library/create" element={<CreateCourse />} />
 
@@ -94,7 +101,10 @@ function App() {
                 <Route path="/instructor/courses" element={<Navigate to="/instructor/cohorts" replace />} />
 
                 <Route path="/instructor/students" element={<Students />} />
+                <Route path="/instructor/students/add" element={<AddStudent />} />
+                <Route path="/instructor/students/:id" element={<StudentDetails />} />
                 <Route path="/instructor/revenue" element={<Revenue />} />
+                <Route path="/instructor/payments" element={<PaymentVerification />} />
                 <Route path="/instructor/live" element={<LiveClass />} />
                 <Route path="/instructor/live/create" element={<CreateLiveSession />} />
                 <Route path="/instructor/channels" element={<InstructorChannelsPage />} />

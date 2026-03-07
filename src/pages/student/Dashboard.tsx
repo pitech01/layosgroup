@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
     Play,
@@ -7,34 +8,96 @@ import {
     ArrowRight,
     Star,
     Video,
-    ChevronRight
+    ChevronRight,
+    Loader2,
+    Maximize2,
+    X,
+    FileVideo
 } from 'lucide-react';
-
-const stats = [
-    { label: 'Enrolled Courses', value: '3', icon: <BookOpen size={20} />, color: '#3b82f6' },
-    { label: 'Live Classes Today', value: '2', icon: <Video size={20} />, color: '#8b5cf6' },
-    { label: 'Completed', value: '1', icon: <CheckCircle2 size={20} />, color: '#10b981' },
-    { label: 'Certificates', value: '1', icon: <Star size={20} />, color: '#f59e0b' },
-];
-
-const courseProgress = [
-    { id: 1, title: 'UI/UX Design for Beginner', lessons: '30', progress: 78, icon: '🎨' },
-    { id: 2, title: 'Front End developer for beginner', lessons: '30', progress: 78, icon: '💻' },
-    { id: 3, title: 'Usability testing for beginner', lessons: '28', progress: 22, icon: '🧪' },
-];
-
-const upcomingLive = [
-    { id: 1, course: 'Advanced React Patterns', instructor: 'Sarah Jenkins', time: '10:00 AM', date: 'Today' },
-    { id: 2, course: 'Node.js Backend Architecture', instructor: 'Mike Chen', time: '02:00 PM', date: 'Tomorrow' },
-];
-
-const notifications = [
-    { id: 1, text: 'Live class starting in 30 minutes', time: '2 mins ago' },
-    { id: 2, text: 'New lesson uploaded in React Course', time: '1 hour ago' },
-    { id: 3, text: 'Your assignment has been graded', time: '5 hours ago' },
-];
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 export default function StudentDashboard() {
+    const { user } = useAuth();
+    const [enrollments, setEnrollments] = useState<any[]>([]);
+    const [liveSessions, setLiveSessions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+                const token = localStorage.getItem('token');
+
+                // Fetch enrollments
+                const enrollmentsRes = await fetch(`${API_URL}/my-enrollments`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (enrollmentsRes.ok) {
+                    const data = await enrollmentsRes.json();
+                    if (data.cohorts) {
+                        setEnrollments(data.cohorts);
+                    }
+                }
+
+                // Fetch live sessions
+                const sessionsRes = await fetch(`${API_URL}/student/live-sessions`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (sessionsRes.ok) {
+                    const data = await sessionsRes.json();
+                    setLiveSessions(data);
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                toast.error('Failed to load dashboard data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    const nameParts = user?.name ? user.name.split(' ') : [''];
+    const firstName = nameParts[0] || 'Student';
+
+    const getCourseIcon = (title: string) => {
+        const t = title.toLowerCase();
+        if (t.includes('design') || t.includes('ui/ux')) return '🎨';
+        if (t.includes('frontend') || t.includes('developer') || t.includes('code')) return '💻';
+        if (t.includes('test') || t.includes('qa')) return '🧪';
+        if (t.includes('data')) return '📊';
+        return '📚';
+    };
+
+    const getSessionStatus = (session: any) => {
+        const now = new Date();
+        const start = new Date(`${session.scheduled_date}T${session.start_time}`);
+        const end = new Date(`${session.scheduled_date}T${session.end_time}`);
+
+        if (now >= start && now <= end) return 'live';
+        if (now < start) return 'upcoming';
+        return 'ended';
+    };
+
+    const stats = [
+        { label: 'Enrolled Courses', value: enrollments.length.toString(), icon: <BookOpen size={20} />, color: '#3b82f6' },
+        { label: 'Live Classes Today', value: liveSessions.filter(s => new Date(s.scheduled_date).toDateString() === new Date().toDateString()).length.toString(), icon: <Video size={20} />, color: '#8b5cf6' },
+        { label: 'Completed', value: enrollments.filter(e => e.pivot?.progress === 100).length.toString(), icon: <CheckCircle2 size={20} />, color: '#10b981' },
+        { label: 'Certificates', value: '0', icon: <Star size={20} />, color: '#f59e0b' },
+    ];
+
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                <Loader2 size={40} className="animate-spin text-blue-500" />
+            </div>
+        );
+    }
+
     return (
         <div className="animate-fade-in-up">
             <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '2rem', color: '#0f172a' }}>Dashboard</h1>
@@ -42,23 +105,23 @@ export default function StudentDashboard() {
             {/* Welcome Card */}
             <div className="welcome-card-dark">
                 <div className="welcome-content-left">
-                    <h2>Welcome back, Anna 👋</h2>
+                    <h2>Welcome back, {firstName} 👋</h2>
                     <p style={{ lineHeight: '1.6' }}>Your progress this week is awesome!<br />Keep it up and reach your learning goals faster than ever.</p>
-                    <button className="btn-cta-white">
+                    <Link to="/student/courses" className="btn-cta-white" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
                         <span>Continue Learning</span>
                         <ArrowRight size={18} />
-                    </button>
+                    </Link>
                 </div>
 
                 <div className="welcome-course-previews">
-                    {courseProgress.slice(0, 2).map(course => (
-                        <div key={course.id} className="mini-course-card">
-                            <div className="mini-icon-box" style={{ fontSize: '1.25rem' }}>{course.icon}</div>
-                            <h5 style={{ fontWeight: 600 }}>{course.title}</h5>
+                    {enrollments.slice(0, 2).map((cohort: any) => (
+                        <div key={cohort.id} className="mini-course-card">
+                            <div className="mini-icon-box" style={{ fontSize: '1.25rem' }}>{getCourseIcon(cohort.course?.title || 'Course')}</div>
+                            <h5 style={{ fontWeight: 600 }}>{cohort.course?.title || cohort.name}</h5>
                             <div className="mini-progress-bar">
-                                <div className="mini-progress-fill" style={{ width: `${course.progress}%` }}></div>
+                                <div className="mini-progress-fill" style={{ width: `${cohort.pivot?.progress || 0}%` }}></div>
                             </div>
-                            <div className="mini-lessons-count">{course.lessons} lessons</div>
+                            <div className="mini-lessons-count">{cohort.course?.modules?.flatMap((m: any) => m.lessons)?.length || 0} lessons</div>
                         </div>
                     ))}
                 </div>
@@ -92,16 +155,16 @@ export default function StudentDashboard() {
                         </div>
 
                         <div className="progress-list">
-                            {courseProgress.map(course => (
-                                <div key={course.id} className="progress-item-modern">
-                                    <div className="course-icon-round" style={{ fontSize: '1.25rem' }}>{course.icon}</div>
+                            {enrollments.map((cohort: any) => (
+                                <div key={cohort.id} className="progress-item-modern">
+                                    <div className="course-icon-round" style={{ fontSize: '1.25rem' }}>{getCourseIcon(cohort.course?.title || 'Course')}</div>
                                     <div className="course-info-modern">
-                                        <h6>{course.title}</h6>
+                                        <h6>{cohort.course?.title || cohort.name}</h6>
                                         <div className="course-progress-bar-wrapper">
                                             <div className="modern-progress-bg">
-                                                <div className="modern-progress-fill" style={{ width: `${course.progress}%` }}></div>
+                                                <div className="modern-progress-fill" style={{ width: `${cohort.pivot?.progress || 0}%` }}></div>
                                             </div>
-                                            <span className="progress-percentage">{course.progress}%</span>
+                                            <span className="progress-percentage">{cohort.pivot?.progress || 0}%</span>
                                         </div>
                                     </div>
                                     <div style={{ color: '#94a3b8' }}>
@@ -111,34 +174,12 @@ export default function StudentDashboard() {
                                     </div>
                                 </div>
                             ))}
+                            {enrollments.length === 0 && (
+                                <p style={{ fontSize: '0.875rem', color: '#94a3b8', textAlign: 'center', padding: '2rem 0' }}>You are not enrolled in any courses yet.</p>
+                            )}
                         </div>
                     </div>
 
-                    <div className="section-card" style={{ backgroundColor: '#fff7f2', border: '1px solid #ffe4d3' }}>
-                        <div className="section-title-modern">
-                            <span>Learning Activity</span>
-                            <select style={{ background: 'transparent', border: 'none', fontSize: '0.85rem', fontWeight: 600, color: '#fb923c', outline: 'none' }}>
-                                <option>Monthly</option>
-                                <option>Weekly</option>
-                            </select>
-                        </div>
-                        <div className="activity-chart-placeholder">
-                            <div className="chart-bar" style={{ height: '40%' }}></div>
-                            <div className="chart-bar" style={{ height: '60%' }}></div>
-                            <div className="chart-bar" style={{ height: '80%' }}></div>
-                            <div className="chart-bar" style={{ height: '50%' }}></div>
-                            <div className="chart-bar" style={{ height: '30%' }}></div>
-                            <div className="chart-bar" style={{ height: '70%' }}></div>
-                            <div className="chart-bar" style={{ height: '90%' }}></div>
-                            <div className="chart-bar" style={{ height: '45%' }}></div>
-                            <div className="chart-bar" style={{ height: '55%' }}></div>
-                            <div className="chart-bar" style={{ height: '75%' }}></div>
-                            <div className="chart-bar" style={{ height: '85%' }}></div>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', color: '#94a3b8', fontSize: '0.75rem' }}>
-                            <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Right Column: Live Classes & Notifications */}
@@ -147,50 +188,112 @@ export default function StudentDashboard() {
                         <div className="section-title-modern">
                             <span>Upcoming Live Classes</span>
                         </div>
-                        {upcomingLive.length > 0 ? upcomingLive.map(session => (
-                            <div key={session.id} style={{ marginBottom: '1.25rem', padding: '1rem', borderRadius: '16px', border: '1px solid #f1f5f9', background: '#f8fafc' }}>
-                                <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <Clock size={14} />
-                                    {session.date}, {session.time}
+                        {liveSessions.length > 0 ? liveSessions.slice(0, 3).map((session: any) => {
+                            const sessionDate = new Date(session.scheduled_date);
+                            const isToday = sessionDate.toDateString() === new Date().toDateString();
+                            const isTomorrow = new Date(new Date().setDate(new Date().getDate() + 1)).toDateString() === sessionDate.toDateString();
+                            const dateLabel = isToday ? 'Today' : isTomorrow ? 'Tomorrow' : sessionDate.toLocaleDateString();
+                            const status = getSessionStatus(session);
+
+                            return (
+                                <div key={session.id} style={{ marginBottom: '1.25rem', padding: '1rem', borderRadius: '16px', border: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Clock size={14} />
+                                        {dateLabel}, {session.start_time.substring(0, 5)} - {session.end_time.substring(0, 5)}
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <h6 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.25rem', color: '#0f172a' }}>{session.title}</h6>
+                                        {status === 'live' && (
+                                            <span style={{ background: '#ef4444', color: 'white', padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 800, animation: 'pulse 1s infinite' }}>LIVE</span>
+                                        )}
+                                        {status === 'ended' && (
+                                            <span style={{ background: '#f1f5f9', color: '#64748b', padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 800 }}>ENDED</span>
+                                        )}
+                                    </div>
+                                    <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '1rem' }}>{session.course?.title}</p>
+
+                                    {status === 'ended' ? (
+                                        <button
+                                            onClick={() => session.recording_link && setPreviewUrl(session.recording_link)}
+                                            disabled={!session.recording_link}
+                                            style={{
+                                                width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '0.625rem', fontSize: '0.85rem',
+                                                background: session.recording_link ? '#3b82f6' : '#e2e8f0',
+                                                color: session.recording_link ? 'white' : '#94a3b8',
+                                                border: 'none', borderRadius: '8px', fontWeight: 600,
+                                                cursor: session.recording_link ? 'pointer' : 'not-allowed'
+                                            }}
+                                        >
+                                            {session.recording_link ? <><FileVideo size={16} /> Watch Recording</> : 'Recording Pending'}
+                                        </button>
+                                    ) : (
+                                        <a
+                                            href={session.meeting_link}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            style={{
+                                                width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '0.625rem', fontSize: '0.85rem',
+                                                background: status === 'live' ? '#ef4444' : '#3b82f6',
+                                                color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 600
+                                            }}
+                                        >
+                                            {status === 'live' ? 'Join Live Now' : 'Join Link'}
+                                        </a>
+                                    )}
                                 </div>
-                                <h6 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.25rem', color: '#0f172a' }}>{session.course}</h6>
-                                <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '1rem' }}>By {session.instructor}</p>
-                                <a
-                                    href="https://meet.google.com/"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="join-btn"
-                                    style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '0.625rem', fontSize: '0.85rem' }}
-                                >
-                                    Join Live Session
-                                </a>
-                            </div>
-                        )) : (
-                            <p style={{ fontSize: '0.875rem', color: '#94a3b8', textAlign: 'center', padding: '2rem 0' }}>No upcoming live sessions. Explore courses.</p>
+                            );
+                        }) : (
+                            <p style={{ fontSize: '0.875rem', color: '#94a3b8', textAlign: 'center', padding: '2rem 0' }}>No upcoming live sessions.</p>
                         )}
                     </div>
 
-                    <div className="section-card">
-                        <div className="section-title-modern">
-                            <span>Notifications</span>
-                        </div>
-                        <div className="notification-list">
-                            {notifications.map(notif => (
-                                <div key={notif.id} className="notification-item">
-                                    <div className="notif-dot-marker"></div>
-                                    <div className="notif-text">
-                                        <p style={{ color: '#0f172a', fontWeight: 500 }}>{notif.text}</p>
-                                        <div className="notif-time">{notif.time}</div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <Link to="#" style={{ display: 'block', textAlign: 'center', fontSize: '0.85rem', color: '#3b82f6', fontWeight: 600, marginTop: '1rem' }}>
-                            View Full Inbox
-                        </Link>
-                    </div>
                 </div>
             </div>
+
+            {/* Video Preview Modal */}
+            {previewUrl && (
+                <div
+                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '2rem' }}
+                    onClick={() => setPreviewUrl(null)}
+                >
+                    <style>{`
+                        @keyframes modalPopDash {
+                            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+                            to { transform: scale(1) translateY(0); opacity: 1; }
+                        }
+                    `}</style>
+                    <div
+                        style={{ background: 'white', width: '100%', maxWidth: '900px', borderRadius: '32px', overflow: 'hidden', boxShadow: '0 40px 100px -20px rgba(0,0,0,0.5)', animation: 'modalPopDash 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                        onClick={(e: any) => e.stopPropagation()}
+                    >
+                        <div style={{ padding: '1.5rem 2rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Maximize2 size={18} /> Recording Preview
+                            </h3>
+                            <button
+                                onClick={() => setPreviewUrl(null)}
+                                style={{ width: '40px', height: '40px', borderRadius: '12px', border: 'none', background: '#f1f5f9', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+                                onMouseEnter={(e: any) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = 'white'; e.currentTarget.style.transform = 'rotate(90deg)'; }}
+                                onMouseLeave={(e: any) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; e.currentTarget.style.transform = 'none'; }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div style={{ width: '100%', background: '#000', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <video
+                                src={previewUrl}
+                                controls
+                                autoPlay
+                                style={{ width: '100%', height: '100%' }}
+                                controlsList="nodownload"
+                                onContextMenu={(e: any) => e.preventDefault()}
+                            >
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

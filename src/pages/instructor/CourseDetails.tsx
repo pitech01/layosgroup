@@ -306,21 +306,21 @@ export default function CohortDetails() {
                             <span style={{ fontSize: '0.9rem', color: '#1a4d3e', fontWeight: 900, background: '#f0fdf4', padding: '4px 12px', borderRadius: '8px' }}>{cohort.code}</span>
                             <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Operational Cycle: {cohort.launchDate} — {cohort.endDate}</span>
                         </div>
-                        <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em' }}>Strategic Cohort Console</h1>
-                        <p style={{ margin: 0, color: '#64748b', fontSize: '1.15rem', fontWeight: 600 }}>Deploying across {assignedCourses.length} Assigned Course Blueprints</p>
+                        <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em' }}>Cohort Management</h1>
+                        <p style={{ margin: 0, color: '#64748b', fontSize: '1.15rem', fontWeight: 600 }}>Managing {assignedCourses.length} Assigned Courses</p>
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button className="action-pill"><Settings size={18} /> Batch Settings</button>
+                        <button className="action-pill"><Settings size={18} /> Cohort Settings</button>
                         <button className="btn-primary-forest" onClick={handleAddCourse}><Plus size={20} /> Assign New Course</button>
                     </div>
                 </div>
             </div>
 
             <div className="management-tabs-premium">
-                <div className={`tab-premium ${activeTab === 'roadmap' ? 'active' : ''}`} onClick={() => setActiveTab('roadmap')}><Layers size={18} /> Curriculum Roadmap</div>
-                <div className={`tab-premium ${activeTab === 'students' ? 'active' : ''}`} onClick={() => setActiveTab('students')}><Users size={18} /> Cohort Directory</div>
-                <div className={`tab-premium ${activeTab === 'performance' ? 'active' : ''}`} onClick={() => setActiveTab('performance')}><TrendingUp size={18} /> Performance Analytics</div>
+                <div className={`tab-premium ${activeTab === 'roadmap' ? 'active' : ''}`} onClick={() => setActiveTab('roadmap')}><Layers size={18} /> Course Curriculum</div>
+                <div className={`tab-premium ${activeTab === 'students' ? 'active' : ''}`} onClick={() => setActiveTab('students')}><Users size={18} /> Enrollment List</div>
+                <div className={`tab-premium ${activeTab === 'performance' ? 'active' : ''}`} onClick={() => setActiveTab('performance')}><TrendingUp size={18} /> Performance Metrics</div>
             </div>
 
             {activeTab === 'roadmap' && (
@@ -335,8 +335,8 @@ export default function CohortDetails() {
                             />
                         </div>
                         <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button className="action-pill"><Calendar size={18} /> Launch Timeline</button>
-                            <button className="action-pill"><Activity size={18} /> Drip Logic</button>
+                            <button className="action-pill"><Calendar size={18} /> Schedule</button>
+                            <button className="action-pill"><Activity size={18} /> Drip Content</button>
                         </div>
                     </div>
 
@@ -367,8 +367,8 @@ export default function CohortDetails() {
                                 <div className="blueprint-content">
                                     {course.modules.length === 0 && (
                                         <div style={{ padding: '3rem', textAlign: 'center', border: '2px dashed #f1f5f9', borderRadius: '24px', margin: '1.5rem 0' }}>
-                                            <p style={{ color: '#94a3b8', fontWeight: 600 }}>No curriculum structure defined for this blueprint yet.</p>
-                                            <Link to={`/instructor/curriculum/${course.id}`} className="btn-primary-forest" style={{ display: 'inline-flex', marginTop: '1rem' }}>Initiate Builder</Link>
+                                            <p style={{ color: '#94a3b8', fontWeight: 600 }}>No curriculum structure defined for this course yet.</p>
+                                            <Link to={`/instructor/curriculum/${course.id}`} className="btn-primary-forest" style={{ display: 'inline-flex', marginTop: '1rem' }}>Open Curriculum Builder</Link>
                                         </div>
                                     )}
                                     {course.modules.map(mod => (
@@ -403,14 +403,14 @@ export default function CohortDetails() {
                                                     </div>
                                                 ))}
                                                 <div style={{ padding: '1rem 2rem', background: '#fcfdfe', display: 'flex', gap: '1rem' }}>
-                                                    <button style={{ border: 'none', background: 'transparent', color: '#1a4d3e', fontWeight: 900, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Session Component</button>
+                                                    <button style={{ border: 'none', background: 'transparent', color: '#1a4d3e', fontWeight: 900, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Lesson</button>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
                                     <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center' }}>
                                         <Link to={`/instructor/curriculum/${course.id}`} className="action-pill" style={{ borderStyle: 'dashed', background: 'transparent', padding: '1rem 3rem' }}>
-                                            <Edit3 size={18} /> Expand Strategic Blueprint
+                                            <Edit3 size={18} /> Edit Course Curriculum
                                         </Link>
                                     </div>
                                 </div>

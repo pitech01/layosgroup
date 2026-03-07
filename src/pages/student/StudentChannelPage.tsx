@@ -1,37 +1,104 @@
-import { Link } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { ChevronLeft, Loader2 } from 'lucide-react';
 import ChannelHeader from '../../components/channel/ChannelHeader';
 import ChannelFeed from '../../components/channel/ChannelFeed';
+import ChatInput from '../../components/channel/ChatInput';
 import type { Message } from '../../components/channel/MessageCard';
-
-const MOCK_MESSAGES: Message[] = [
-    {
-        id: '1',
-        senderName: 'Sarah Wilson',
-        senderRole: 'instructor',
-        type: 'announcement',
-        content: 'Welcome to the Course Channel! Here I will share all important updates and assignments.',
-        createdAt: 'Feb 15, 2024',
-        attachmentUrl: '#'
-    },
-    {
-        id: '4',
-        senderName: 'Sarah Wilson',
-        senderRole: 'instructor',
-        type: 'assignment',
-        content: 'Please submit your React Portfolio project by next Monday. Ensure you have at least 3 pages implemented.',
-        dueDate: 'Feb 26, 2024',
-        createdAt: 'Feb 20, 2024',
-        attachmentUrl: '#'
-    }
-];
+import { toast } from 'react-hot-toast';
 
 const StudentChannelPage = () => {
-    // In a real app, you would fetch course title by ID
-    const courseTitle = "Advanced React Development";
+    const { courseId } = useParams<{ courseId: string }>();
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [courseTitle, setCourseTitle] = useState("Course Channel");
+    const [loading, setLoading] = useState(true);
+    const [isSending, setIsSending] = useState(false);
+    const feedEndRef = useRef<HTMLDivElement>(null);
+
+    const fetchMessages = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+            const response = await fetch(`${API_URL}/courses/${courseId}/channels`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setCourseTitle(data.courseTitle);
+                setMessages(data.messages);
+            } else {
+                toast.error('Failed to access channel');
+            }
+        } catch (error) {
+            console.error("Failed to fetch messages", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (courseId) {
+            fetchMessages();
+        }
+    }, [courseId]);
+
+    useEffect(() => {
+        feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    const handleSendMessage = async (content: string, attachment?: File) => {
+        setIsSending(true);
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+            let requestBody: any;
+            let headers: any = { 'Authorization': `Bearer ${token}` };
+
+            if (attachment) {
+                const formData = new FormData();
+                formData.append('content', content);
+                formData.append('type', 'message');
+                formData.append('attachment', attachment);
+                requestBody = formData;
+            } else {
+                headers['Content-Type'] = 'application/json';
+                requestBody = JSON.stringify({
+                    content,
+                    type: 'message'
+                });
+            }
+
+            const response = await fetch(`${API_URL}/courses/${courseId}/channels`, {
+                method: 'POST',
+                headers,
+                body: requestBody
+            });
+
+            if (response.ok) {
+                const newMessage = await response.json();
+                setMessages(prev => [...prev, newMessage]);
+            } else {
+                toast.error('Failed to send message.');
+            }
+        } catch (error) {
+            toast.error('Error sending message.');
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                <Loader2 size={40} className="animate-spin text-blue-500" />
+            </div>
+        );
+    }
 
     return (
-        <div className="animate-fade-in-up">
+        <div className="animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 150px)', overflow: 'hidden' }}>
             <Link to="/student/channels" style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -40,17 +107,28 @@ const StudentChannelPage = () => {
                 textDecoration: 'none',
                 fontSize: '0.9rem',
                 fontWeight: 600,
-                marginBottom: '1.5rem'
+                marginBottom: '1.5rem',
+                flex: 'none'
             }}>
                 <ChevronLeft size={16} />
                 Back to Channels
             </Link>
 
-            <ChannelHeader
-                courseTitle={courseTitle}
-            />
+            <div style={{ padding: '0 10px', flex: 'none' }}>
+                <ChannelHeader
+                    courseTitle={courseTitle}
+                    showPostButton={false}
+                />
+            </div>
 
-            <ChannelFeed messages={MOCK_MESSAGES} userRole="student" />
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 1.5rem', display: 'flex', flexDirection: 'column' }}>
+                <ChannelFeed messages={messages} userRole="student" />
+                <div ref={feedEndRef} />
+            </div>
+
+            <div style={{ flex: 'none' }}>
+                <ChatInput onSendMessage={handleSendMessage} isSending={isSending} placeholder="Message channel" />
+            </div>
         </div>
     );
 };

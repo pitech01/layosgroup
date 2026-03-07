@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
     Plus,
     Users,
@@ -5,24 +6,56 @@ import {
     Clock,
     ArrowUpRight,
     ArrowDownRight,
-    MoreHorizontal
+    Loader2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function InstructorDashboard() {
-    const quickStats = [
-        { label: 'Shells Deployed', value: '6', trend: '+2', isUp: true, icon: BookOpen, color: '#1a4d3e' },
-        { label: 'Total Capacity', value: '2,500', trend: '+12.5%', isUp: true, icon: Users, color: '#1a4d3e' },
-    ];
+    const [stats, setStats] = useState<any>(null);
+    const [activities, setActivities] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const activities = [
-        { id: 1, user: 'Alex Johnson', action: 'enrolled in', target: 'Full-Stack Jan 2026', time: '2 mins ago', type: 'enroll' },
-        { id: 2, user: 'Maria Garcia', action: 'completed assessment in', target: 'UI/UX March Batch', time: '15 mins ago', type: 'complete' },
-        { id: 3, user: 'David Smith', action: 'posted in cohort Q&A', target: 'Backend Pro', time: '1 hour ago', type: 'comment' },
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const response = await fetch(`${API_URL}/instructor/dashboard-stats`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    setStats(data.stats);
+                    setActivities(data.recent_activities);
+                }
+            } catch (err) {
+                console.error("Fetch Dashboard Stats Error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDashboardData();
+    }, []);
+
+    if (loading) {
+        return (
+            <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+                <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
+                <p style={{ fontWeight: 800, color: '#64748b' }}>Loading Dashboard Analytics...</p>
+            </div>
+        );
+    }
+
+    const quickStats = [
+        { label: 'Active Cohorts', value: stats?.active_cohorts || '0', trend: 'Live', isUp: true, icon: BookOpen, color: '#1a4d3e' },
+        { label: 'Students Enrolled', value: stats?.total_students?.toLocaleString() || '0', trend: 'Total', isUp: true, icon: Users, color: '#1a4d3e' },
     ];
 
     return (
-        <div className="instructor-dashboard">
+        <div className="instructor-dashboard animate-fade-in-up">
             <style>{`
                 .section-header {
                     display: flex;
@@ -129,8 +162,8 @@ export default function InstructorDashboard() {
 
             <div className="section-header">
                 <div>
-                    <h2>Dashboard</h2>
-                    <p style={{ color: '#64748b', margin: '0.4rem 0 0 0', fontWeight: 600, fontSize: '1rem' }}>Overview of your performance and active cohorts.</p>
+                    <h2>Instructor Dashboard</h2>
+                    <p style={{ color: '#64748b', margin: '0.4rem 0 0 0', fontWeight: 600, fontSize: '1rem' }}>Monitor course performance, student progress, and active cohorts.</p>
                 </div>
                 <Link
                     to="/instructor/cohorts/create"
@@ -181,41 +214,53 @@ export default function InstructorDashboard() {
             <div className="dashboard-content-grid">
                 <div className="glass-panel-premium">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900 }}>Cohort Engagement</h3>
-                        <button style={{ background: 'transparent', border: 'none', color: '#1a4d3e', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer' }}>View Live Stream</button>
+                        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900 }}>Recent Student Activity</h3>
+                        <Link to="/instructor/students" style={{ background: 'transparent', border: 'none', color: '#1a4d3e', fontWeight: 800, fontSize: '0.95rem', cursor: 'pointer', textDecoration: 'none' }}>View All Activity</Link>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        {activities.map(activity => (
-                            <div key={activity.id} className="activity-item">
-                                <div className="user-avatar-mini">{activity.user.charAt(0)}</div>
+                        {activities.length > 0 ? activities.map((activity, idx) => (
+                            <div key={idx} className="activity-item">
+                                <div className="user-avatar-mini">{activity.user_name.charAt(0)}</div>
                                 <div style={{ flex: 1 }}>
                                     <p style={{ margin: 0, fontSize: '1rem', color: '#1e293b', fontWeight: 500 }}>
-                                        <span style={{ fontWeight: 800, color: '#0f172a' }}>{activity.user}</span> {activity.action} <span style={{ fontWeight: 800, color: '#1a4d3e' }}>{activity.target}</span>
+                                        <span style={{ fontWeight: 800, color: '#0f172a' }}>{activity.user_name}</span> enrolled in <span style={{ fontWeight: 800, color: '#1a4d3e' }}>{activity.cohort_name}</span>
                                     </p>
                                     <span style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontWeight: 600 }}>
-                                        <Clock size={14} /> {activity.time}
+                                        <Clock size={14} /> {new Date(activity.time).toLocaleDateString()}
                                     </span>
                                 </div>
-                                <button style={{ background: 'transparent', border: 'none', color: '#cbd5e1', cursor: 'pointer', padding: '8px' }}>
-                                    <MoreHorizontal size={20} />
-                                </button>
+                                <div style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '10px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 900,
+                                    background: activity.payment_status === 'full' ? '#f0fdf4' : '#fff7ed',
+                                    color: activity.payment_status === 'full' ? '#166534' : '#9a3412',
+                                    textTransform: 'uppercase'
+                                }}>
+                                    {activity.payment_status}
+                                </div>
                             </div>
-                        ))}
+                        )) : (
+                            <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', fontWeight: 600 }}>
+                                No recent activity found.
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className="glass-panel-premium">
-                    <h3 style={{ margin: '0 0 2rem 0', fontSize: '1.25rem', fontWeight: 900 }}>Network Performance</h3>
+                    <h3 style={{ margin: '0 0 2rem 0', fontSize: '1.25rem', fontWeight: 900 }}>Learning Outcomes</h3>
                     <div style={{ padding: '1rem 0', textAlign: 'center' }}>
                         <div style={{ width: '160px', height: '160px', borderRadius: '50%', border: '12px solid #f8fafc', borderTopColor: '#1a4d3e', margin: '0 auto 2.5rem auto', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', boxShadow: '0 0 20px rgba(26, 77, 62, 0.05)' }}>
-                            <span style={{ fontSize: '2rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>85%</span>
-                            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase' }}>Batch Cap</span>
+                            <span style={{ fontSize: '2rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>{stats?.completion_rate || 0}%</span>
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase' }}>Completion</span>
                         </div>
                         <p style={{ fontSize: '1rem', color: '#64748b', lineHeight: 1.6, fontWeight: 600 }}>
-                            Cohort retention is <span style={{ color: '#16a34a', fontWeight: 800 }}>+12%</span> against last quarter.
+                            Track the overall progress of all students across your active cohorts.
                         </p>
                         <button className="btn-standard" style={{ width: '100%', marginTop: '2.5rem', background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#1e293b', fontWeight: 900 }}>
-                            Full Analytics Suite
+                            View Performance Reports
                         </button>
                     </div>
                 </div>

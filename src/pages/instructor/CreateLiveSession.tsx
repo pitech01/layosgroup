@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Plus,
@@ -8,35 +8,54 @@ import {
     Link as LinkIcon,
     ArrowLeft,
     MonitorIcon,
-    CalendarDays
+    CalendarDays,
+    FileVideo
 } from 'lucide-react';
 
 interface Course {
-    id: string;
+    id: number;
     title: string;
-    status: string;
 }
-
-const MOCK_COURSES: Course[] = [
-    { id: 'c1', title: 'Professional React Development', status: 'ongoing' },
-    { id: 'c2', title: 'Fullstack Web Mastery', status: 'ongoing' },
-    { id: 'c3', title: 'UI/UX Design Masterclass', status: 'ongoing' },
-    { id: 'c4', title: 'Backend Engineering', status: 'ongoing' },
-    { id: 'c5', title: 'Legacy jQuery Course', status: 'completed' },
-];
 
 export default function CreateLiveSession() {
     const navigate = useNavigate();
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [loadingCourses, setLoadingCourses] = useState(true);
     const [formData, setFormData] = useState({
         title: '',
         courseId: '',
         date: '',
         startTime: '',
         endTime: '',
-        meetingLink: ''
+        meetingLink: '',
     });
+    const [recordingFile, setRecordingFile] = useState<File | null>(null);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const response = await fetch(`${API_URL}/courses`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    setCourses(data);
+                }
+            } catch (err) {
+                console.error("Fetch Courses Error:", err);
+            } finally {
+                setLoadingCourses(false);
+            }
+        };
+        fetchCourses();
+    }, [API_URL]);
 
     const validateForm = () => {
         const errors: Record<string, string> = {};
@@ -68,16 +87,44 @@ export default function CreateLiveSession() {
         return Object.keys(errors).length === 0;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (validateForm()) {
             setIsSubmitting(true);
 
-            // Simulate API call
-            setTimeout(() => {
+            try {
+                const submitData = new FormData();
+                submitData.append('title', formData.title);
+                submitData.append('course_id', formData.courseId);
+                submitData.append('scheduled_date', formData.date);
+                submitData.append('start_time', formData.startTime);
+                submitData.append('end_time', formData.endTime);
+                submitData.append('meeting_link', formData.meetingLink);
+                if (recordingFile) {
+                    submitData.append('recording_file', recordingFile);
+                }
+
+                const response = await fetch(`${API_URL}/live-sessions`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: submitData
+                });
+
+                if (response.ok) {
+                    navigate('/instructor/live', { state: { success: true } });
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.message || 'Failed to create live session');
+                }
+            } catch (err) {
+                console.error("Create Live Session Error:", err);
+                alert('An error occurred. Please try again.');
+            } finally {
                 setIsSubmitting(false);
-                navigate('/instructor/live', { state: { success: true } });
-            }, 1000);
+            }
         }
     };
 
@@ -240,9 +287,10 @@ export default function CreateLiveSession() {
                             className={`form-input-modern ${formErrors.courseId ? 'error' : ''}`}
                             value={formData.courseId}
                             onChange={e => setFormData({ ...formData, courseId: e.target.value })}
+                            disabled={loadingCourses}
                         >
-                            <option value="">Select an ongoing course</option>
-                            {MOCK_COURSES.filter(c => c.status === 'ongoing').map(c => (
+                            <option value="">{loadingCourses ? 'Loading courses...' : 'Select a course'}</option>
+                            {courses.map(c => (
                                 <option key={c.id} value={c.id}>{c.title}</option>
                             ))}
                         </select>
@@ -304,6 +352,20 @@ export default function CreateLiveSession() {
                         />
                         {formErrors.meetingLink && <p className="error-text"><AlertCircle size={14} /> {formErrors.meetingLink}</p>}
                         <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>This link will be visible to students when the session is live.</p>
+                    </div>
+
+                    <div className="form-group-modern">
+                        <label className="form-label-modern">
+                            <FileVideo size={16} /> Pre-recorded Session (Optional)
+                        </label>
+                        <input
+                            type="file"
+                            accept="video/*"
+                            className="form-input-modern"
+                            onChange={e => setRecordingFile(e.target.files?.[0] || null)}
+                            style={{ padding: '0.6rem' }}
+                        />
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Upload a video file for students to watch later.</p>
                     </div>
 
                     <button type="submit" className="btn-submit-live" disabled={isSubmitting}>

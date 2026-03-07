@@ -1,21 +1,58 @@
+import { useState, useEffect } from 'react';
 import ChannelCard from '../../components/channel/ChannelCard';
-
-const MOCK_STUDENT_CHANNELS = [
-    {
-        id: 1,
-        title: 'Advanced React Development',
-        instructor: 'Sarah Wilson',
-        lastActivity: '2 hours ago'
-    },
-    {
-        id: 2,
-        title: 'UI/UX Design Masterclass',
-        instructor: 'Michael Chen',
-        lastActivity: 'Yesterday'
-    }
-];
+import { Loader2 } from 'lucide-react';
 
 const StudentChannelsPage = () => {
+    const [channels, setChannels] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchChannels = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+                const response = await fetch(`${API_URL}/my-enrollments`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const cohorts = data.cohorts || [];
+
+                    const coursesMap = new Map();
+                    cohorts.forEach((cohort: any) => {
+                        if (cohort.course) {
+                            if (!coursesMap.has(cohort.course.id)) {
+                                coursesMap.set(cohort.course.id, {
+                                    id: cohort.course.id,
+                                    title: cohort.course.title,
+                                    instructor: cohort.course.instructor?.name || 'Instructor',
+                                    lastActivity: 'Active'
+                                });
+                            }
+                        }
+                    });
+
+                    setChannels(Array.from(coursesMap.values()));
+                }
+            } catch (error) {
+                console.error("Failed to fetch channels", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchChannels();
+    }, []);
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                <Loader2 size={40} className="animate-spin text-blue-500" />
+            </div>
+        );
+    }
+
     return (
         <div className="animate-fade-in-up">
             <div style={{ marginBottom: '2.5rem' }}>
@@ -23,9 +60,9 @@ const StudentChannelsPage = () => {
                 <p style={{ color: '#64748b' }}>Stay connected with your instructors and classmates.</p>
             </div>
 
-            {MOCK_STUDENT_CHANNELS.length > 0 ? (
+            {channels.length > 0 ? (
                 <div className="channel-grid">
-                    {MOCK_STUDENT_CHANNELS.map((channel) => (
+                    {channels.map((channel) => (
                         <ChannelCard
                             key={channel.id}
                             courseId={channel.id}

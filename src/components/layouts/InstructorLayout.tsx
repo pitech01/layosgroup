@@ -42,13 +42,18 @@ const InstructorLayout = () => {
                     position: relative;
                 }
 
-                .instructor-sidebar {
+                 .instructor-sidebar {
                     background: var(--inst-sidebar-bg) !important;
                     border-right: 1px solid var(--inst-border) !important;
                     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02) !important;
                     z-index: 1001;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
                     flex-shrink: 0;
+                    height: 100vh !important;
+                    position: sticky !important;
+                    top: 0 !important;
+                    overflow-y: auto !important;
+                    scrollbar-width: thin;
                 }
 
                 .instructor-nav-item {

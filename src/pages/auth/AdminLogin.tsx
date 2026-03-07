@@ -8,10 +8,39 @@ export default function AdminLogin() {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        login('admin');
-        navigate('/admin-dashboard');
+        setLoading(true);
+        setError(null);
+
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ email, password, role: 'admin' })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Access Denied: Administrative credentials invalid.');
+            }
+
+            login(data.user, data.token);
+            navigate('/admin-dashboard');
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -21,6 +50,11 @@ export default function AdminLogin() {
                 <p className="text-center text-gray-400 mb-4">System Administration</p>
 
                 <form onSubmit={handleLogin}>
+                    {error && (
+                        <div style={{ color: '#ef4444', fontSize: '0.8rem', marginBottom: '1rem', background: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' }}>
+                            {error}
+                        </div>
+                    )}
                     <div>
                         <label className="block mb-2">Email</label>
                         <input
@@ -43,8 +77,8 @@ export default function AdminLogin() {
                         />
                     </div>
 
-                    <button type="submit" className="w-full mt-4" style={{ width: '100%', background: '#ef4444' }}>
-                        Login as Admin
+                    <button type="submit" className="w-full mt-4" style={{ width: '100%', background: '#ef4444' }} disabled={loading}>
+                        {loading ? 'Authenticating...' : 'Login as Admin'}
                     </button>
                 </form>
 

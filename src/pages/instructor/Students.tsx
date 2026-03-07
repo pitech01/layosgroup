@@ -1,65 +1,68 @@
 import {
     Search,
     Plus,
-    ChevronDown,
     ExternalLink,
-    CheckCircle,
-    Mail
+    Loader2,
+    AlertCircle,
+    Trash2
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Students() {
-    const users = [
-        {
-            id: 96,
-            name: 'Demo User',
-            email: 'amentotech021@gmail.com',
-            phone: '123654789',
-            created: 'February 16, 2026',
-            role: 'Tutor',
-            isVerified: true,
-            avatar: 'linear-gradient(135deg, #10b981, #bbf7d0)'
-        },
-        {
-            id: 95,
-            name: 'Test User',
-            email: 'devin@teamento.com',
-            phone: '',
-            created: 'February 16, 2026',
-            role: 'Student',
-            isVerified: false,
-            avatar: 'linear-gradient(135deg, #10b981, #bbf7d0)'
-        },
-        {
-            id: 94,
-            name: 'Test User',
-            email: 'test@example.com',
-            phone: '',
-            created: 'February 16, 2026',
-            role: 'Student',
-            isVerified: true,
-            avatar: 'linear-gradient(135deg, #10b981, #bbf7d0)'
-        },
-        {
-            id: 91,
-            name: 'Test Test',
-            email: 'amentotech037@gmail.com',
-            phone: '',
-            created: 'November 27, 2024',
-            role: 'Tutor',
-            isVerified: true,
-            avatar: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)'
-        },
-        {
-            id: 90,
-            name: 'John Doe',
-            email: 'amentotech012@gmail.com',
-            phone: '',
-            created: 'November 27, 2024',
-            role: 'Student',
-            isVerified: false,
-            avatar: 'linear-gradient(135deg, #10b981, #bbf7d0)'
+    const navigate = useNavigate();
+    const [users, setUsers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    const fetchStudents = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/students`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setUsers(data);
+            } else {
+                throw new Error(data.message || 'Failed to sync with central student records.');
+            }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
+
+    useEffect(() => {
+        fetchStudents();
+    }, []);
+
+    const handleDeleteStudent = async (id: number) => {
+        if (!window.confirm('Are you sure you want to purge this student record? This action will remove all academic history for this user.')) return;
+
+        try {
+            const response = await fetch(`${API_URL}/students/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (response.ok) {
+                setUsers(users.filter(u => u.id !== id));
+            } else {
+                alert('Conflict detected during purging. Please retry.');
+            }
+        } catch (err) {
+            alert('Signal lost. Check your network connectivity.');
+        }
+    };
 
     return (
         <div className="all-users-container">
@@ -178,6 +181,12 @@ export default function Students() {
                     display: flex;
                     align-items: center;
                     gap: 0.75rem;
+                    cursor: pointer;
+                    transition: opacity 0.2s;
+                }
+
+                .name-cell:hover {
+                    opacity: 0.7;
                 }
 
                 .avatar-circle {
@@ -252,73 +261,154 @@ export default function Students() {
                 .verification-icon {
                     color: #475569;
                 }
+
+                /* Modal Styles */
+                .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(15, 23, 42, 0.6);
+                    backdrop-filter: blur(4px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                }
+
+                .modal-content {
+                    background: white;
+                    width: 100%;
+                    max-width: 450px;
+                    border-radius: 20px;
+                    padding: 2rem;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                    position: relative;
+                }
+
+                .form-group {
+                    margin-bottom: 1.25rem;
+                }
+
+                .form-group label {
+                    display: block;
+                    font-weight: 600;
+                    color: #1e293b;
+                    margin-bottom: 0.5rem;
+                    font-size: 0.9rem;
+                }
+
+                .form-input {
+                    width: 100%;
+                    padding: 0.75rem 1rem;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    font-family: inherit;
+                    font-size: 0.95rem;
+                    color: #1e293b;
+                }
+
+                .form-input:focus {
+                    outline: none;
+                    border-color: #020617;
+                }
             `}</style>
 
             <div className="users-card">
                 <div className="users-header">
-                    <h2>Student (31)</h2>
+                    <h2>Students ({users.length})</h2>
                     <div className="header-actions">
-                        <button className="btn-export">Export</button>
-                        <button className="btn-add-user">Add new student <Plus size={18} /></button>
-                        <div className="filter-pill">All users <ChevronDown size={16} /></div>
-                        <div className="filter-pill">Desc <ChevronDown size={16} /></div>
+                        <button className="btn-export">Export List</button>
+                        <button className="btn-add-user" onClick={() => navigate('/instructor/students/add')}>Register New Student <Plus size={18} /></button>
                         <div className="search-pill-icon"><Search size={18} /></div>
                     </div>
                 </div>
 
-                <div style={{ overflowX: 'auto' }}>
-                    <table className="users-table">
-                        <thead>
-                            <tr>
-                                <th style={{ width: '40px' }}>#</th>
-                                <th>Name</th>
-                                <th>Email/Phone</th>
-                                <th>Created date</th>
-                                <th style={{ textAlign: 'center' }}>Email Verification</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map((user) => (
-                                <tr key={user.id}>
-                                    <td className="user-id">{user.id}</td>
-                                    <td>
-                                        <div className="name-cell">
-                                            <div className="avatar-circle" style={{ background: user.avatar }} />
-                                            <span className="user-name">
-                                                {user.name} <ExternalLink size={14} style={{ color: '#94a3b8' }} />
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="email-cell">
-                                            <span className="email-text">{user.email}</span>
-                                            {user.phone && <span className="phone-text">{user.phone}</span>}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span className="date-text">{user.created}</span>
-                                    </td>
-                                    <td style={{ textAlign: 'center' }}>
-                                        <div className={`verification-badge ${user.isVerified ? 'verified' : 'non-verified'}`}>
-                                            {user.isVerified ? (
-                                                <>
-                                                    <CheckCircle size={16} className="verification-icon" />
-                                                    VERIFIED
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Mail size={16} className="verification-icon" />
-                                                    NON VERIFIED
-                                                </>
-                                            )}
-                                        </div>
-                                    </td>
+                {loading ? (
+                    <div style={{ padding: '5rem', textAlign: 'center' }}>
+                        <Loader2 className="animate-spin" size={48} color="#020617" style={{ margin: '0 auto' }} />
+                        <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#64748b' }}>Fetching student list...</p>
+                    </div>
+                ) : error ? (
+                    <div style={{ padding: '3rem', background: '#fff1f2', borderRadius: '24px', border: '1.5px solid #ffe4e6', textAlign: 'center', marginBottom: '3rem' }}>
+                        <AlertCircle size={40} color="#e11d48" style={{ margin: '0 auto 1rem' }} />
+                        <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 900 }}>Connection Failed</h3>
+                        <p style={{ color: '#64748b', fontWeight: 600, margin: '8px 0 2rem' }}>{error}</p>
+                        <button onClick={fetchStudents} className="btn-export" style={{ margin: '0 auto' }}>Try Reconnecting</button>
+                    </div>
+                ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table className="users-table">
+                            <thead>
+                                <tr>
+                                    <th style={{ width: '40px' }}>ID</th>
+                                    <th>Student Name</th>
+                                    <th>Email & Contact</th>
+                                    <th>Enrollment Date</th>
+                                    <th>Active Cohorts</th>
+                                    <th style={{ textAlign: 'right' }}>Management</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {users.length > 0 ? users.map((user) => (
+                                    <tr key={user.id}>
+                                        <td className="user-id">{user.id}</td>
+                                        <td>
+                                            <div className="name-cell" onClick={() => navigate(`/instructor/students/${user.id}`)}>
+                                                <div className="avatar-circle" style={{ background: user.avatar || 'linear-gradient(135deg, #3b82f6, #93c5fd)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '0.8rem' }}>
+                                                    {user.name.charAt(0)}
+                                                </div>
+                                                <span className="user-name">
+                                                    {user.name} <ExternalLink size={14} style={{ color: '#94a3b8' }} />
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="email-cell">
+                                                <span className="email-text">{user.email}</span>
+                                                {user.phone && <span className="phone-text">{user.phone}</span>}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className="date-text">{new Date(user.created_at).toLocaleDateString()}</span>
+                                        </td>
+                                        <td>
+                                            {user.cohorts?.length > 0 ? (
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                    {user.cohorts.map((c: any) => (
+                                                        <span key={c.id} style={{ fontSize: '0.7rem', fontWeight: 800, background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', color: '#1e293b' }}>{c.name || c.id}</span>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8' }}>No active cohorts</span>
+                                            )}
+                                        </td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                                <button
+                                                    onClick={() => handleDeleteStudent(user.id)}
+                                                    style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}
+                                                    title="Delete Student"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan={6} style={{ textAlign: 'center', padding: '5rem', color: '#64748b', fontWeight: 800 }}>
+                                            No students found.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
+
         </div>
     );
 }

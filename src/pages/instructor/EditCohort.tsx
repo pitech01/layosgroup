@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
     Shield,
     DollarSign,
@@ -11,10 +11,12 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-export default function CreateCohort() {
+export default function EditCohort() {
+    const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [updating, setUpdating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -25,32 +27,66 @@ export default function CreateCohort() {
         deliveryMode: 'recorded',
         seatLimit: 100,
         pricing: '',
-        paymentModel: 'full', // 'full' or 'split-50'
+        paymentModel: 'full',
         paymentLink: '',
         visibility: 'public'
     });
 
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    useEffect(() => {
+        const fetchCohort = async () => {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_URL}/cohorts/${id}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    setFormData({
+                        name: data.name || '',
+                        startDate: data.start_date || '',
+                        endDate: data.end_date || '',
+                        enrollmentDeadline: data.enrollment_deadline || '',
+                        timezone: data.timezone || 'UTC+1 (WAT)',
+                        deliveryMode: data.delivery_mode || 'recorded',
+                        seatLimit: data.seat_limit || 100,
+                        pricing: data.pricing || '',
+                        paymentModel: data.payment_model || 'full',
+                        paymentLink: data.payment_link || '',
+                        visibility: data.visibility || 'public'
+                    });
+                } else {
+                    throw new Error(data.message || 'Failed to fetch cohort data.');
+                }
+            } catch (err: any) {
+                console.error("Fetch Cohort Error:", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCohort();
+    }, [id, API_URL]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        setUpdating(true);
         setError(null);
-
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-
-        // Generate a clean ID for the cohort
-        const cohortId = `CH-${formData.name.substring(0, 3).toUpperCase()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
 
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch(`${API_URL}/cohorts`, {
-                method: 'POST',
+            const response = await fetch(`${API_URL}/cohorts/${id}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    id: cohortId,
                     name: formData.name,
                     start_date: formData.startDate,
                     end_date: formData.endDate,
@@ -69,18 +105,27 @@ export default function CreateCohort() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to create cohort.');
+                throw new Error(data.message || 'Failed to update cohort.');
             }
 
-            console.log("Cohort Created:", data);
-            navigate(`/instructor/cohorts/${data.id}`);
+            console.log("Cohort Updated:", data);
+            navigate(`/instructor/cohorts/${id}`);
         } catch (err: any) {
-            console.error('Cohort Creation Error:', err);
+            console.error('Cohort Update Error:', err);
             setError(err.message || 'A network error occurred.');
         } finally {
-            setLoading(false);
+            setUpdating(false);
         }
     };
+
+    if (loading) {
+        return (
+            <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+                <Loader2 className="animate-spin" size={48} color="#1a4d3e" />
+                <p style={{ fontWeight: 800, color: '#64748b', fontSize: '1.1rem' }}>Loading Cohort Settings...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="create-cohort-container animate-fade-in">
@@ -222,13 +267,13 @@ export default function CreateCohort() {
                 }
             `}</style>
 
-            <Link to="/instructor/cohorts" className="breadcrumb-back">
-                <ArrowLeft size={18} /> Back to Cohorts
+            <Link to={`/instructor/cohorts/${id}`} className="breadcrumb-back">
+                <ArrowLeft size={18} /> Back to Cohort Details
             </Link>
 
             <div className="form-header-premium">
-                <h1>Create New Cohort</h1>
-                <p>Set up a new cohort session for your students to join.</p>
+                <h1>Cohort Settings</h1>
+                <p>Update configuration and pricing for {formData.name}</p>
             </div>
 
             {error && (
@@ -271,7 +316,7 @@ export default function CreateCohort() {
                         placeholder="e.g. Masterclass Batch Jan 2026"
                         required
                         value={formData.name}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
                 </div>
 
@@ -283,7 +328,7 @@ export default function CreateCohort() {
                             className="input-premium"
                             required
                             value={formData.startDate}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, startDate: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                         />
                     </div>
                     <div className="input-group-premium">
@@ -293,7 +338,7 @@ export default function CreateCohort() {
                             className="input-premium"
                             required
                             value={formData.endDate}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, endDate: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                         />
                     </div>
                 </div>
@@ -305,7 +350,7 @@ export default function CreateCohort() {
                         className="input-premium"
                         required
                         value={formData.enrollmentDeadline}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, enrollmentDeadline: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, enrollmentDeadline: e.target.value })}
                     />
                 </div>
 
@@ -324,7 +369,7 @@ export default function CreateCohort() {
                             placeholder="e.g. 500.00"
                             required
                             value={formData.pricing}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, pricing: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, pricing: e.target.value })}
                         />
                     </div>
                     <div className="input-group-premium">
@@ -332,10 +377,10 @@ export default function CreateCohort() {
                         <select
                             className="input-premium select-premium"
                             value={formData.paymentModel}
-                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, paymentModel: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, paymentModel: e.target.value })}
                         >
-                            <option value="full">Full Upfront Access</option>
-                            <option value="split-50">50/50 Installment Plan (Locked after Half-way)</option>
+                            <option value="full">Full Upfront</option>
+                            <option value="split-50">50/50 Installment</option>
                         </select>
                     </div>
                 </div>
@@ -347,19 +392,19 @@ export default function CreateCohort() {
                         className="input-premium"
                         placeholder="https://..."
                         value={formData.paymentLink}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, paymentLink: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, paymentLink: e.target.value })}
                     />
                 </div>
 
-                <button type="submit" className="submit-btn-premium" disabled={loading}>
-                    {loading ? (
+                <button type="submit" className="submit-btn-premium" disabled={updating}>
+                    {updating ? (
                         <>
                             <Loader2 className="animate-spin" size={20} />
-                            Creating Cohort...
+                            Saving Settings...
                         </>
                     ) : (
                         <>
-                            Create Cohort <ChevronRight size={20} />
+                            Save Cohort Settings <ChevronRight size={20} />
                         </>
                     )}
                 </button>
@@ -367,4 +412,3 @@ export default function CreateCohort() {
         </div>
     );
 }
-

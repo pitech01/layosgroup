@@ -6,7 +6,11 @@ import {
     BookOpen,
     GraduationCap,
     LogOut,
-    Settings
+    Settings,
+    DollarSign,
+    CircleCheck,
+    Video,
+    MessageCircle
 } from 'lucide-react';
 
 interface InstructorSidebarProps {
@@ -35,11 +39,15 @@ const InstructorSidebar = ({ collapsed }: InstructorSidebarProps) => {
         { path: '/instructor/cohorts', label: 'Cohort', icon: Users },
         { path: '/instructor/course-library', label: 'Course', icon: BookOpen },
         { path: '/instructor/students', label: 'Student', icon: GraduationCap },
+        { path: '/instructor/revenue', label: 'Revenue', icon: DollarSign },
+        { path: '/instructor/payments', label: 'Payments', icon: CircleCheck },
+        { path: '/instructor/live', label: 'Live Classes', icon: Video },
+        { path: '/instructor/channels', label: 'Channels', icon: MessageCircle },
         { path: '/instructor/settings', label: 'Setting', icon: Settings },
     ];
 
     return (
-        <aside className={`sidebar-modern instructor-sidebar ${collapsed ? 'collapsed' : ''}`}>
+        <aside className={`sidebar-modern instructor-sidebar ${collapsed ? 'collapsed' : ''}`} style={{ overflowY: 'auto' }}>
             <div className="sidebar-header">
                 <img
                     src="/logo.png"

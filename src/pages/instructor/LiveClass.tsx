@@ -8,53 +8,62 @@ import {
     Play,
     AlertCircle,
     Inbox,
-    CheckCircle2
+    CheckCircle2,
+    X,
+    Save,
+    FileVideo
 } from 'lucide-react';
 
 interface LiveSession {
-    id: string;
+    id: number;
     title: string;
-    courseId: string;
-    courseTitle: string;
-    scheduledDate: string; // ISO date
-    startTime: string; // HH:mm
-    endTime: string; // HH:mm
-    meetingLink: string;
-    status: "upcoming" | "live" | "ended";
+    course_id: number;
+    course: {
+        title: string;
+    };
+    scheduled_date: string;
+    start_time: string;
+    end_time: string;
+    meeting_link: string;
+    recording_link?: string;
 }
-
-const INITIAL_SESSIONS: LiveSession[] = [
-    {
-        id: '1',
-        title: 'Advanced React Hooks Workshop',
-        courseId: 'c1',
-        courseTitle: 'Professional React Development',
-        scheduledDate: '2026-02-24T14:30:00Z',
-        startTime: '14:30',
-        endTime: '15:30',
-        meetingLink: 'https://meet.google.com/abc-defg-hij',
-        status: 'upcoming'
-    },
-    {
-        id: '2',
-        title: 'Project Setup & Architecture',
-        courseId: 'c2',
-        courseTitle: 'Fullstack Web Mastery',
-        scheduledDate: '2026-02-24T12:00:00Z',
-        startTime: '12:00',
-        endTime: '13:30',
-        meetingLink: 'https://meet.google.com/xyz-pqrs-tuv',
-        status: 'live'
-    }
-];
 
 export default function LiveClass() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [sessions] = useState<LiveSession[]>(INITIAL_SESSIONS);
+    const [sessions, setSessions] = useState<LiveSession[]>([]);
+    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<"all" | "upcoming" | "live" | "ended">("all");
     const [currentTime, setCurrentTime] = useState(new Date());
     const [showSuccessToast, setShowSuccessToast] = useState(false);
+    const [recordingModal, setRecordingModal] = useState<{ show: boolean, sessionId: number | null }>({ show: false, sessionId: null });
+    const [recordingFile, setRecordingFile] = useState<File | null>(null);
+    const [savingRecording, setSavingRecording] = useState(false);
+
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    const fetchSessions = async () => {
+        try {
+            const response = await fetch(`${API_URL}/live-sessions`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setSessions(data);
+            }
+        } catch (err) {
+            console.error("Fetch Sessions Error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSessions();
+    }, [API_URL]);
 
     // Show success toast if redirected from creation page
     useEffect(() => {
@@ -77,9 +86,20 @@ export default function LiveClass() {
         return () => clearInterval(timer);
     }, []);
 
-    const filteredSessions = sessions.filter(session => {
+    const getSessionStatus = (session: LiveSession) => {
+        const now = new Date();
+        const start = new Date(`${session.scheduled_date}T${session.start_time}`);
+        const end = new Date(`${session.scheduled_date}T${session.end_time}`);
+
+        if (now >= start && now <= end) return 'live';
+        if (now < start) return 'upcoming';
+        return 'ended';
+    };
+
+    const filteredSessions = sessions.filter((session: LiveSession) => {
+        const status = getSessionStatus(session);
         if (filter === "all") return true;
-        return session.status === filter;
+        return status === filter;
     });
 
     const getStatusStyles = (status: string) => {
@@ -98,6 +118,44 @@ export default function LiveClass() {
     const handleGoLive = (link: string) => {
         if (link) {
             window.open(link, '_blank');
+        }
+    };
+
+    const handleOpenRecordingModal = (session: LiveSession) => {
+        setRecordingModal({
+            show: true,
+            sessionId: session.id,
+        });
+        setRecordingFile(null);
+    };
+
+    const handleSaveRecording = async () => {
+        if (!recordingModal.sessionId || !recordingFile) return;
+        setSavingRecording(true);
+        try {
+            const submitData = new FormData();
+            submitData.append('recording_file', recordingFile);
+            submitData.append('_method', 'PUT'); // For Laravel to handle files with PUT
+
+            const response = await fetch(`${API_URL}/live-sessions/${recordingModal.sessionId}`, {
+                method: 'POST', // Use POST with _method override
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: submitData
+            });
+
+            if (response.ok) {
+                await fetchSessions();
+                setRecordingModal({ show: false, sessionId: null });
+                setRecordingFile(null);
+                // Show success toast manually
+            }
+        } catch (err) {
+            console.error("Save Recording Error:", err);
+        } finally {
+            setSavingRecording(false);
         }
     };
 
@@ -245,6 +303,36 @@ export default function LiveClass() {
                     align-items: center;
                 }
 
+                .modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(15, 23, 42, 0.4);
+                    backdrop-filter: blur(8px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 2000;
+                    animation: fadeIn 0.3s ease;
+                }
+
+                .recording-modal {
+                    background: white;
+                    width: 100%;
+                    max-width: 450px;
+                    border-radius: 20px;
+                    padding: 2rem;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                }
+
+                .modal-title {
+                    font-size: 1.25rem;
+                    font-weight: 800;
+                    margin-bottom: 1.5rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
                 @media (max-width: 640px) {
                     .sessions-grid {
                         grid-template-columns: 1fr;
@@ -283,16 +371,19 @@ export default function LiveClass() {
                 ))}
             </div>
 
-            {filteredSessions.length > 0 ? (
+            {loading ? (
+                <div style={{ padding: '8rem 2rem', textAlign: 'center' }}>Loading sessions...</div>
+            ) : filteredSessions.length > 0 ? (
                 <div className="sessions-grid">
                     {filteredSessions.map(session => {
-                        const style = getStatusStyles(session.status);
-                        const hasLink = !!session.meetingLink;
+                        const status = getSessionStatus(session);
+                        const style = getStatusStyles(status);
+                        const hasLink = !!session.meeting_link;
 
-                        const scheduledTime = new Date(session.scheduledDate);
-                        const isTimeToGoLive = currentTime >= scheduledTime;
-                        const isUpcoming = session.status === 'upcoming';
-                        const isEnded = session.status === 'ended';
+                        const scheduledStartTime = new Date(`${session.scheduled_date}T${session.start_time}`);
+                        const isTimeToGoLive = currentTime >= scheduledStartTime;
+                        const isUpcoming = status === 'upcoming';
+                        const isEnded = status === 'ended';
 
                         return (
                             <div key={session.id} className="live-session-card">
@@ -304,17 +395,17 @@ export default function LiveClass() {
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                                     <Video size={16} />
-                                    <span>{session.courseTitle}</span>
+                                    <span>{session.course?.title}</span>
                                 </div>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                                     <Calendar size={16} />
-                                    <span>{new Date(session.scheduledDate).toLocaleDateString()}</span>
+                                    <span>{new Date(session.scheduled_date).toLocaleDateString()}</span>
                                 </div>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                                     <Clock size={16} />
-                                    <span>{session.startTime} - {session.endTime}</span>
+                                    <span>{session.start_time.substring(0, 5)} - {session.end_time.substring(0, 5)}</span>
                                 </div>
 
                                 <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
@@ -325,14 +416,23 @@ export default function LiveClass() {
                                     )}
 
                                     {isEnded ? (
-                                        <button className="btn-go-live" disabled>Session Ended</button>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                            <button className="btn-go-live" disabled style={{ background: '#f8fafc', color: '#94a3b8' }}>Session Ended</button>
+                                            <button
+                                                className="btn-standard"
+                                                style={{ width: '100%', justifyContent: 'center', background: session.recording_link ? '#020617' : '#3b82f6' }}
+                                                onClick={() => handleOpenRecordingModal(session)}
+                                            >
+                                                {session.recording_link ? 'Update Recording Link' : 'Add Recording Link'}
+                                            </button>
+                                        </div>
                                     ) : (
                                         <button
                                             className="btn-go-live"
                                             disabled={!hasLink || (isUpcoming && !isTimeToGoLive)}
-                                            onClick={() => handleGoLive(session.meetingLink)}
+                                            onClick={() => handleGoLive(session.meeting_link)}
                                         >
-                                            {isUpcoming && !isTimeToGoLive ? `Starts at ${session.startTime}` : <><Play size={18} fill="currentColor" /> Go Live</>}
+                                            {isUpcoming && !isTimeToGoLive ? `Starts at ${session.start_time.substring(0, 5)}` : <><Play size={18} fill="currentColor" /> Go Live</>}
                                         </button>
                                     )}
                                 </div>
@@ -357,6 +457,45 @@ export default function LiveClass() {
                 <div className="success-toast">
                     <CheckCircle2 size={20} />
                     <span>Live session created successfully</span>
+                </div>
+            )}
+
+            {recordingModal.show && (
+                <div className="modal-overlay">
+                    <div className="recording-modal">
+                        <div className="modal-title">
+                            Add Session Recording
+                            <button
+                                onClick={() => setRecordingModal({ ...recordingModal, show: false })}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                            Upload the video file for this session. Recommended formats: MP4, WebM.
+                        </p>
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                                <FileVideo size={16} /> Choose Video File
+                            </label>
+                            <input
+                                type="file"
+                                accept="video/*"
+                                onChange={(e) => setRecordingFile(e.target.files?.[0] || null)}
+                                style={{ width: '100%', marginBottom: 0, padding: '0.6rem' }}
+                                className="custom-input-modern"
+                            />
+                        </div>
+                        <button
+                            className="btn-standard"
+                            style={{ width: '100%', justifyContent: 'center' }}
+                            onClick={handleSaveRecording}
+                            disabled={savingRecording}
+                        >
+                            {savingRecording ? 'Saving...' : <><Save size={18} /> Save Recording</>}
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

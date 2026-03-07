@@ -7,67 +7,100 @@ import {
     Trash2,
     Edit2,
     Eye,
-    Video,
-    Globe,
-    Clock
+    Clock,
+    Loader2,
+    Search,
+    Settings
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+interface Cohort {
+    id: string | number;
+    name: string;
+    start_date: string;
+    delivery_mode: string;
+    pricing: string | number;
+    payment_model: string;
+    course?: {
+        id: string;
+        title: string;
+    };
+    students: Array<{ id: string | number; name: string }>;
+}
+
 export default function MyCourses() {
+    const [cohortsList, setCohortsList] = useState<Cohort[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    const fetchCohorts = async () => {
+        try {
+            const response = await fetch(`${API_URL}/cohorts`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setCohortsList(data);
+            }
+        } catch (err) {
+            console.error("Fetch Cohorts Error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCohorts();
+    }, []);
+
+    const handleDeleteCohort = async (id: string | number) => {
+        if (window.confirm('Are you sure you want to delete this cohort? All student progress data for this group will be lost.')) {
+            try {
+                const response = await fetch(`${API_URL}/cohorts/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (response.ok) {
+                    setCohortsList(cohortsList.filter(c => c.id !== id));
+                } else {
+                    alert('Failed to delete cohort.');
+                }
+            } catch (err) {
+                console.error("Delete Cohort Error:", err);
+                alert('An error occurred.');
+            }
+        }
+    };
+
+    const filteredCohorts = cohortsList.filter(c =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.id.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     const stats = [
-        { label: 'Total Managed Cohorts', count: 7, trend: '+1', isUp: true, color: '#1a4d3e', icon: CheckCircle2 },
-        { label: 'Active & Upcoming', count: 6, trend: '0', isUp: true, color: '#64748b', icon: BookOpen },
+        { label: 'Total Managed Cohorts', count: cohortsList.length, trend: 'Managed', color: '#1a4d3e', icon: CheckCircle2 },
+        { label: 'Active Students', count: cohortsList.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Enrolled', color: '#64748b', icon: Users },
     ];
 
-    const cohorts = [
-        {
-            id: 1,
-            batch_code: 'WL-JAN-2026',
-            title: 'Work-Life Balance: Achieve',
-            category: 'Productivity',
-            students: 124,
-            status: 'Active',
-            delivery_type: 'recorded',
-            timeline: 'Jan 15 - Mar 20',
-            image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=100&h=100'
-        },
-        {
-            id: 2,
-            batch_code: 'REACT-ARCH-04',
-            title: 'Advanced React Architecture',
-            category: 'Development',
-            students: 856,
-            status: 'Active',
-            delivery_type: 'hybrid',
-            timeline: 'Feb 01 - May 15',
-            image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=100&h=100'
-        },
-        {
-            id: 3,
-            batch_code: 'UI-FE-PRIN',
-            title: 'UI Design Principles',
-            category: 'Design',
-            students: 450,
-            status: 'Upcoming',
-            delivery_type: 'live',
-            timeline: 'Apr 10 - Jun 30',
-            image: 'https://images.unsplash.com/photo-1541462608141-ad4d14b43c4a?auto=format&fit=crop&q=80&w=100&h=100'
-        },
-        {
-            id: 4,
-            batch_code: 'DS-2025-Q4',
-            title: 'Data Science Bootcamp',
-            category: 'Analytics',
-            students: 210,
-            status: 'Completed',
-            delivery_type: 'recorded',
-            timeline: 'Oct 01 - Dec 15, 2025',
-            image: 'https://images.unsplash.com/photo-1551288049-bbbda536339a?auto=format&fit=crop&q=80&w=100&h=100'
-        }
-    ];
+    if (loading) {
+        return (
+            <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+                <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
+                <p style={{ fontWeight: 800, color: '#64748b' }}>Accessing Instructor Records...</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="instructor-courses-page">
+        <div className="instructor-courses-page animate-fade-in-up">
             <style>{`
                 .courses-header {
                     display: flex;
@@ -123,15 +156,15 @@ export default function MyCourses() {
                     color: #1e293b;
                     font-size: 1rem;
                     font-weight: 600;
-                    padding: 0 1.5rem;
+                    padding: 0 1.5rem 0 3.5rem;
                     width: 100%;
                     outline: none;
                     transition: all 0.3s ease;
                 }
 
                 .search-pill-input:focus {
-                    border-color: #10b981;
-                    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.05);
+                    border-color: #1a4d3e;
+                    box-shadow: 0 0 0 5px rgba(26, 77, 62, 0.05);
                 }
 
                 .filter-pill-premium {
@@ -149,11 +182,6 @@ export default function MyCourses() {
                     cursor: pointer;
                     transition: all 0.2s;
                     min-width: 200px;
-                }
-
-                .filter-pill-premium:hover {
-                    border-color: #1a4d3e30;
-                    background: #f8fafc;
                 }
 
                 .course-table-card-premium {
@@ -198,7 +226,12 @@ export default function MyCourses() {
                     height: 56px;
                     border-radius: 16px;
                     object-fit: cover;
-                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+                    background: #f1f5f9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #1a4d3e;
+                    font-weight: 950;
                 }
 
                 .status-pill-premium {
@@ -234,6 +267,36 @@ export default function MyCourses() {
                     border-color: #1a4d3e;
                     transform: translateY(-2px);
                 }
+
+                .action-btn-circle.view-btn {
+                    color: #1a4d3e;
+                    background: #f0fdf4;
+                    border-color: #dcfce7;
+                }
+                .action-btn-circle.view-btn:hover {
+                    background: #1a4d3e;
+                    color: white;
+                }
+
+                .action-btn-circle.edit-btn {
+                    color: #0f172a;
+                    background: #f1f5f9;
+                    border-color: #e2e8f0;
+                }
+                .action-btn-circle.edit-btn:hover {
+                    background: #0f172a;
+                    color: white;
+                }
+
+                .action-btn-circle.delete-btn {
+                    color: #ef4444;
+                    background: #fef2f2;
+                    border-color: #fee2e2;
+                }
+                .action-btn-circle.delete-btn:hover {
+                    background: #ef4444;
+                    color: white;
+                }
                 
                 .btn-standard {
                     height: 52px;
@@ -255,20 +318,20 @@ export default function MyCourses() {
 
             <div className="courses-header">
                 <div>
-                    <h2>Cohort Inventory</h2>
-                    <p style={{ color: '#64748b', margin: '0.4rem 0 0 0', fontWeight: 600 }}>Manage, track, and optimize your global batch deployments.</p>
+                    <h2>Cohort Dashboard</h2>
+                    <p style={{ color: '#64748b', margin: '0.4rem 0 0 0', fontWeight: 600 }}>Manage, track, and optimize your student cohorts and active sessions.</p>
                 </div>
                 <Link
-                    to="/instructor/courses/create"
+                    to="/instructor/cohorts/create"
                     className="btn-standard"
                     style={{ background: '#1a4d3e', boxShadow: '0 10px 15px -3px rgba(26, 77, 62, 0.2)' }}
                 >
-                    <Plus size={20} /> Create New Batch
+                    <Plus size={20} /> Create New Cohort
                 </Link>
             </div>
 
             <div className="courses-stats-grid">
-                {stats.map((stat, i) => (
+                {stats.map((stat: any, i: number) => (
                     <div key={i} className="stat-card-premium">
                         <div style={{
                             width: '64px',
@@ -293,7 +356,14 @@ export default function MyCourses() {
 
             <div className="filter-section">
                 <div className="search-pill-container">
-                    <input type="text" placeholder="Search batches, codes, or intellectual blueprints..." className="search-pill-input" />
+                    <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <input
+                        type="text"
+                        placeholder="Search cohorts or course titles..."
+                        className="search-pill-input"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                 </div>
                 <div className="filter-pill-premium">
                     <span>Category</span>
@@ -310,61 +380,80 @@ export default function MyCourses() {
                     <table className="course-table">
                         <thead>
                             <tr>
-                                <th>Batch / Blueprint</th>
-                                <th>Operational Data</th>
-                                <th>Capacity</th>
-                                <th>Status</th>
+                                <th>Cohort / Course</th>
+                                <th>Schedule</th>
+                                <th>Enrollment</th>
+                                <th>Pricing</th>
                                 <th style={{ textAlign: 'right' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {cohorts.map(cohort => (
+                            {filteredCohorts.map(cohort => (
                                 <tr key={cohort.id}>
                                     <td>
                                         <div className="course-identity">
-                                            <img src={cohort.image} className="thumb-rounded-premium" alt="" />
+                                            <div className="thumb-rounded-premium">
+                                                {cohort.name.charAt(0)}
+                                            </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', letterSpacing: '0.05em' }}>{cohort.batch_code}</span>
-                                                <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '1rem' }}>{cohort.title}</span>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', letterSpacing: '0.05em' }}>{cohort.id}</span>
+                                                <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '1rem' }}>{cohort.name}</span>
+                                                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>{cohort.course?.title || 'No Course Linked'}</span>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 600, color: '#475569' }}>
-                                                <Clock size={14} /> {cohort.timeline}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 700, color: '#475569' }}>
+                                                <Clock size={14} /> {new Date(cohort.start_date).toLocaleDateString()}
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                {cohort.delivery_type === 'recorded' && <div style={{ fontSize: '0.7rem', color: '#1a4d3e', fontWeight: 800, textTransform: 'uppercase' }}><Video size={12} /> On-Demand</div>}
-                                                {cohort.delivery_type === 'hybrid' && <div style={{ fontSize: '0.7rem', color: '#b45309', fontWeight: 800, textTransform: 'uppercase' }}><Globe size={12} /> Hybrid</div>}
-                                                {cohort.delivery_type === 'live' && <div style={{ fontSize: '0.7rem', color: '#b91c1c', fontWeight: 800, textTransform: 'uppercase' }}><Users size={12} /> Synchronous</div>}
-                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Delivery: {cohort.delivery_mode}</div>
                                         </div>
                                     </td>
                                     <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{ width: '100px', height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                                                <div style={{ width: `${Math.min(100, (cohort.students / 1000) * 100)}%`, height: '100%', background: '#1a4d3e' }}></div>
-                                            </div>
-                                            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>{cohort.students}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Users size={18} color="#94a3b8" />
+                                            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>{cohort.students?.length || 0}</span>
                                         </div>
                                     </td>
                                     <td>
-                                        <span className={`status-pill-premium ${cohort.status.toLowerCase()}`}>
-                                            {cohort.status}
-                                        </span>
+                                        <div style={{ fontWeight: 900, color: '#0f172a' }}>${cohort.pricing}</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700 }}>{cohort.payment_model}</div>
                                     </td>
                                     <td style={{ textAlign: 'right' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                                            <Link to={`/instructor/cohort/${cohort.batch_code}`} className="action-btn-circle" title="Manage Batch"><Eye size={20} /></Link>
-                                            <Link to={`/instructor/curriculum/${cohort.id}`} className="action-btn-circle" title="Edit Blueprint"><Edit2 size={20} /></Link>
-                                            <button className="action-btn-circle" style={{ color: '#ef4444' }} title="Terminate Batch"><Trash2 size={20} /></button>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+                                            <Link to={`/instructor/cohort/${cohort.id}`} className="action-btn-circle view-btn shadow-sm" title="View Roster" style={{ width: 'auto', padding: '0 1rem', gap: '8px' }}>
+                                                <Eye size={18} /> <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>Roster</span>
+                                            </Link>
+                                            {cohort.course ? (
+                                                <Link to={`/instructor/courses/${cohort.course.id}/edit`} className="action-btn-circle edit-btn shadow-sm" title="Edit Curriculum" style={{ width: 'auto', padding: '0 1rem', gap: '8px' }}>
+                                                    <Edit2 size={18} /> <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>Edit Course</span>
+                                                </Link>
+                                            ) : (
+                                                <Link to={`/instructor/cohorts/${cohort.id}/edit`} className="action-btn-circle edit-btn shadow-sm" title="Edit Cohort" style={{ width: 'auto', padding: '0 1rem', gap: '8px' }}>
+                                                    <Settings size={18} /> <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>Settings</span>
+                                                </Link>
+                                            )}
+                                            <button
+                                                className="action-btn-circle delete-btn shadow-sm"
+                                                title="Delete Cohort"
+                                                onClick={() => handleDeleteCohort(cohort.id)}
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                    {filteredCohorts.length === 0 && (
+                        <div style={{ padding: '5rem', textAlign: 'center' }}>
+                            <BookOpen size={48} color="#e2e8f0" style={{ marginBottom: '1.5rem' }} />
+                            <h3 style={{ color: '#0f172a', fontWeight: 900 }}>No cohorts found</h3>
+                            <p style={{ color: '#64748b', fontWeight: 600 }}>Try adjusting your search or create a new cohort.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div >

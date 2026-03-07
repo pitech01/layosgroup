@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import {
-    ChevronRight,
     ChevronLeft,
     Save,
     Plus,
@@ -10,16 +11,19 @@ import {
     Layout,
     Edit2,
     ChevronDown,
+    ChevronRight,
     HelpCircle,
     Trash2,
     GripVertical,
     CheckCircle2,
     Clock,
-    Globe,
     Eye,
     UploadCloud,
     BookOpen,
-    Lock
+    Lock,
+    AlertCircle,
+    X,
+    Loader2
 } from 'lucide-react';
 
 interface Lesson {
@@ -39,6 +43,17 @@ interface Lesson {
     liveLink?: string;
     fileName?: string;
     fileUrl?: string;
+    fileToUpload?: File;
+    videoToUpload?: File;
+    quizData?: {
+        pass_mark: number;
+        questions: Array<{
+            id: string;
+            question: string;
+            options: string[];
+            correct_answer: number;
+        }>;
+    };
 }
 
 interface Module {
@@ -49,7 +64,25 @@ interface Module {
 }
 
 export default function CreateCourse() {
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const { id: cohortIdFromUrl } = useParams();
     const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [cohorts, setCohorts] = useState<Array<{ id: string, name: string, delivery_mode?: string }>>([]);
+    const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
+    const [confirmed, setConfirmed] = useState(false);
+    const [loadingText, setLoadingText] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
+
+    const [courseData, setCourseData] = useState({
+        title: '',
+        description: '',
+        category: 'video',
+        thumbnail: null as string | null
+    });
+
     const [modules, setModules] = useState<Module[]>([
         {
             id: 'm1',
@@ -61,12 +94,212 @@ export default function CreateCourse() {
         }
     ]);
 
-    // Category Management
-    const [categories] = useState(['Design & Creative', 'Software Engineering', 'Business & Finance', 'Health & Wellness', 'Marketing']);
+    const validateStep = (currentStep: number) => {
+        if (currentStep === 1) {
+            if (!courseData.title.trim()) return "Course title is required.";
+            if (!courseData.description.trim()) return "Course description is required.";
+            if (!courseData.thumbnail) return "Course thumbnail is required.";
+        } else if (currentStep === 2) {
+            if (!selectedCohortId) return "Please select a target cohort for this course.";
+        } else if (currentStep === 3) {
+            if (modules.length === 0) return "At least one module is required.";
+            for (const mod of modules) {
+                if (!mod.title.trim()) return "All modules must have a title.";
+                if (mod.lessons.length === 0) return `Module "${mod.title}" must have at least one lesson.`;
+                for (const lesson of mod.lessons) {
+                    if (!lesson.title.trim()) return `Lesson in module "${mod.title}" must have a title.`;
+                    if (lesson.type === 'video' && !lesson.videoUrl && !lesson.fileToUpload) return `Video lesson "${lesson.title}" needs a video file.`;
+                    if (lesson.type === 'material' && !lesson.fileUrl && !lesson.fileToUpload) return `Material lesson "${lesson.title}" needs a document file.`;
+                    if (lesson.type === 'live' && (!lesson.liveDate || !lesson.liveTime || !lesson.liveLink)) return `Live class "${lesson.title}" needs complete date, time and link.`;
+                }
+            }
+        } else if (currentStep === 4) {
+            if (!confirmed) return "You must confirm compliance before finalizing.";
+        }
+        return null;
+    };
+
+    useEffect(() => {
+        const fetchCohorts = async () => {
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+            try {
+                const response = await fetch(`${API_URL}/cohorts`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setCohorts(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch cohorts:", err);
+            }
+        };
+        fetchCohorts();
+
+        if (cohortIdFromUrl) {
+            setSelectedCohortId(cohortIdFromUrl);
+        }
+    }, [cohortIdFromUrl]);
+
+    const handleSaveCourse = async () => {
+        setLoading(true);
+        setError(null);
+        setLoadingText('Initiating launch...');
+
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+        const token = localStorage.getItem('token');
+
+        try {
+            // Process pending file uploads first
+            const updatedModules = [...modules];
+            for (let i = 0; i < updatedModules.length; i++) {
+                const mod = updatedModules[i];
+                for (let j = 0; j < mod.lessons.length; j++) {
+                    const l = mod.lessons[j];
+                    if (l.fileToUpload || l.videoToUpload) {
+                        const file = l.fileToUpload || l.videoToUpload;
+                        if (!file) continue;
+
+                        setLoadingText(`Uploading: ${file.name}...`);
+                        setUploadingVideos((prev: any) => ({ ...prev, [l.id]: true }));
+                        setUploadProgress((prev: any) => ({ ...prev, [l.id]: 0 }));
+
+                        const formData = new FormData();
+                        formData.append('video', file);
+
+                        try {
+                            const url = await new Promise((resolve, reject) => {
+                                const xhr = new XMLHttpRequest();
+                                xhr.open('POST', `${API_URL}/upload-video`, true);
+                                xhr.setRequestHeader('Accept', 'application/json');
+                                if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+                                xhr.upload.onprogress = (event) => {
+                                    if (event.lengthComputable) {
+                                        const percentComplete = Math.round((event.loaded / event.total) * 100);
+                                        setUploadProgress((prev: any) => ({ ...prev, [l.id]: percentComplete }));
+                                        setLoadingText(`Uploading: ${file.name} (${percentComplete}%)`);
+                                    }
+                                };
+
+                                xhr.onload = () => {
+                                    if (xhr.status >= 200 && xhr.status < 300) {
+                                        try {
+                                            const data = JSON.parse(xhr.responseText);
+                                            if (data.success && data.video_url) resolve(data.video_url);
+                                            else reject(data.message || 'Failed to upload');
+                                        } catch { reject('Error parsing response.'); }
+                                    } else { reject('Error uploading file. Status: ' + xhr.status); }
+                                };
+
+                                xhr.onerror = () => reject('Network error during upload.');
+                                xhr.send(formData);
+                            });
+
+                            if (l.type === 'video' || l.videoToUpload) {
+                                l.videoUrl = url as string;
+                            } else {
+                                l.fileUrl = url as string;
+                                l.fileName = file.name;
+                            }
+                            delete l.fileToUpload;
+                            delete l.videoToUpload;
+                            setUploadingVideos((prev: any) => ({ ...prev, [l.id]: false }));
+                        } catch (err) {
+                            setUploadingVideos((prev: any) => ({ ...prev, [l.id]: false }));
+                            throw new Error(typeof err === 'string' ? err : 'Upload failed');
+                        }
+                    }
+                }
+            }
+            setModules(updatedModules);
+            setLoadingText('Saving course blueprint...');
+
+            const payload = {
+                title: courseData.title,
+                description: courseData.description,
+                category: courseData.category,
+                thumbnail: courseData.thumbnail,
+                instructor_id: user?.id,
+                modules: updatedModules.map((m: Module) => ({
+                    title: m.title,
+                    lessons: m.lessons.map((l: Lesson) => ({
+                        title: l.title,
+                        type: l.type,
+                        description: l.description,
+                        is_locked: l.isLocked,
+                        is_preview: l.isPreview,
+                        video_url: l.videoUrl,
+                        video_source: l.videoSource,
+                        live_date: l.liveDate,
+                        live_time: l.liveTime,
+                        live_platform: l.livePlatform,
+                        live_link: l.liveLink,
+                        file_url: l.fileUrl,
+                        file_name: l.fileName,
+                        quiz_data: l.quizData
+                    }))
+                }))
+            };
+
+            const response = await fetch(`${API_URL}/courses`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to save course.');
+            }
+
+            // If a cohort was selected, link it
+            if (selectedCohortId) {
+                await fetch(`${API_URL}/cohorts/${selectedCohortId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify({ course_id: data.id })
+                });
+            }
+
+            setLoadingText('Curriculum successfully deployed!');
+            setShowSuccess(true);
+
+            // Wait for 3 seconds to show success before navigating
+            setTimeout(() => {
+                navigate('/instructor/courses');
+            }, 3000);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'An error occurred while saving.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+
+
 
     // Editing State
     const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
     const [viewingLesson, setViewingLesson] = useState<Lesson | null>(null);
+
+    // Video Upload State
+    const [uploadingVideos, setUploadingVideos] = useState<{ [lessonId: string]: boolean }>({});
+    const [uploadProgress, setUploadProgress] = useState<{ [lessonId: string]: number }>({});
+    const [previewAsset, setPreviewAsset] = useState<{ url: string; type: 'image' | 'pdf' } | null>(null);
+    const [designingQuiz, setDesigningQuiz] = useState<{ moduleId: string; lessonId: string } | null>(null);
+
+    const handleFileUpload = (moduleId: string, lessonId: string, file: File) => {
+        updateLesson(moduleId, lessonId, { fileToUpload: file, videoUrl: undefined, fileUrl: undefined });
+    };
 
 
     // Helpers
@@ -81,7 +314,7 @@ export default function CreateCourse() {
     };
 
     const addLesson = (moduleId: string, type: Lesson['type']) => {
-        setModules(modules.map(mod => {
+        setModules(modules.map((mod: Module) => {
             if (mod.id === moduleId) {
                 return {
                     ...mod,
@@ -99,22 +332,22 @@ export default function CreateCourse() {
     };
 
     const toggleModule = (id: string) => {
-        setModules(modules.map(m => m.id === id ? { ...m, isOpen: !m.isOpen } : m));
+        setModules(modules.map((m: Module) => m.id === id ? { ...m, isOpen: !m.isOpen } : m));
     };
 
     const removeModule = (id: string) => {
         if (window.confirm('Are you sure you want to remove this module and all its contents?')) {
-            setModules(modules.filter(m => m.id !== id));
+            setModules(modules.filter((m: Module) => m.id !== id));
         }
     };
 
     const updateModuleTitle = (id: string, title: string) => {
-        setModules(modules.map(m => m.id === id ? { ...m, title } : m));
+        setModules(modules.map((m: Module) => m.id === id ? { ...m, title } : m));
     };
 
     const removeLesson = (moduleId: string, lessonId: string) => {
-        if (window.confirm('Delete this session?')) {
-            setModules(modules.map(mod => {
+        if (window.confirm('Delete this lesson?')) {
+            setModules(modules.map((mod: Module) => {
                 if (mod.id === moduleId) {
                     return { ...mod, lessons: mod.lessons.filter(l => l.id !== lessonId) };
                 }
@@ -124,7 +357,7 @@ export default function CreateCourse() {
     };
 
     const updateLesson = (moduleId: string, lessonId: string, updates: Partial<Lesson>) => {
-        setModules(modules.map(mod => {
+        setModules(modules.map((mod: Module) => {
             if (mod.id === moduleId) {
                 return {
                     ...mod,
@@ -394,6 +627,47 @@ export default function CreateCourse() {
                     gap: 1.5rem;
                     margin-top: 1.5rem;
                 }
+
+                @keyframes slideUp {
+                    from { transform: translateY(30px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+
+                .animate-slide-up {
+                    animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+                }
+
+                @keyframes shimmer {
+                    0% { background-position: -200% 0; }
+                    100% { background-position: 200% 0; }
+                }
+
+                .shimmer-progress {
+                    background: linear-gradient(90deg, #1a4d3e 25%, #2d7a63 50%, #1a4d3e 75%);
+                    background-size: 200% 100%;
+                    animation: shimmer 2.5s infinite linear;
+                }
+
+                @keyframes float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                }
+
+                .animate-float {
+                    animation: float 4s ease-in-out infinite;
+                }
+
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #e2e8f0;
+                    border-radius: 10px;
+                }
+
                 .mode-card {
                     padding: 2.5rem;
                     border-radius: 28px;
@@ -422,11 +696,42 @@ export default function CreateCourse() {
                 }
                 
                 .hover-danger:hover { background: #fef2f2 !important; color: #ef4444 !important; }
+                
+                .thumbnail-container:hover .thumbnail-overlay { opacity: 1 !important; }
+                .preview-btn:hover {
+                    background: #1a4d3e !important;
+                    color: white !important;
+                    border-color: #1a4d3e !important;
+                    transform: scale(1.1);
+                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                }
+
+                .modal-overlay {
+                    animation: fadeIn 0.3s ease-out forwards;
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+
+                @keyframes scaleUp {
+                    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
+                }
+
+                .animate-scale-up {
+                    animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+
+                .animate-fade-in {
+                    animation: fadeIn 0.5s ease-out forwards;
+                }
             `}</style>
 
             {/* Step Wizard Header */}
             <div className="step-indicator-bar">
-                {['Academic Identity', 'Operational Deployment', 'Payload Builder', 'Review & Seal'].map((label, i) => (
+                {['Course Details', 'Target Cohort', 'Curriculum Builder', 'Review & Publish'].map((label, i) => (
                     <div key={i} className={`step-item ${step === i + 1 ? 'active' : step > i + 1 ? 'completed' : ''}`}>
                         <div className="step-circle">
                             {step > i + 1 ? <CheckCircle2 size={24} /> : i + 1}
@@ -436,63 +741,143 @@ export default function CreateCourse() {
                 ))}
             </div>
 
-            {/* Step 1: Academic Identity (formerly Step 2 content) */}
+            {error && (
+                <div className="animate-slide-in" style={{
+                    maxWidth: '1240px',
+                    margin: '-3rem auto 3rem auto',
+                    padding: '1rem 1.25rem',
+                    background: '#fff1f2',
+                    border: '1px solid #ffe4e6',
+                    color: '#e11d48',
+                    borderRadius: '16px',
+                    fontSize: '0.95rem',
+                    fontWeight: 500,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
+                }}>
+                    <AlertCircle size={20} strokeWidth={2.5} />
+                    <span style={{ flex: 1 }}>{error}</span>
+                    <button
+                        onClick={() => setError(null)}
+                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px' }}
+                    >
+                        <X size={16} />
+                    </button>
+                </div>
+            )}
+
+            {/* Step 1: Course Details */}
             {step === 1 && (
                 <div className="form-section-card animate-fade-in-up">
                     <h3 className="section-title">
                         <Layout size={32} color="#020617" style={{ background: 'rgba(2, 6, 23, 0.08)', padding: '8px', borderRadius: '14px' }} />
-                        Course Foundations & Identity
+                        General Course Information
                     </h3>
 
                     <div className="responsive-two-col" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)', gap: '4.5rem' }}>
                         <div style={{ display: 'grid', gap: '3rem' }}>
                             <div style={{ display: 'grid', gap: '2rem' }}>
                                 <div>
-                                    <label className="input-label">Project Title <span style={{ color: '#ef4444' }}>*</span></label>
-                                    <input type="text" className="custom-input" placeholder="Give your course a high-impact name..." />
+                                    <label className="input-label">Course Title <span style={{ color: '#ef4444' }}>*</span></label>
+                                    <input
+                                        type="text"
+                                        className="custom-input"
+                                        placeholder="Enter the title of your course..."
+                                        value={courseData.title}
+                                        onChange={(e) => setCourseData({ ...courseData, title: e.target.value })}
+                                    />
                                 </div>
                                 <div>
                                     <label className="input-label">Core Description</label>
-                                    <textarea className="custom-input" rows={6} placeholder="Summarize the learning transformation students will experience..." style={{ resize: 'none' }} />
+                                    <textarea
+                                        className="custom-input"
+                                        rows={6}
+                                        placeholder="Summarize the learning transformation students will experience..."
+                                        style={{ resize: 'none' }}
+                                        value={courseData.description}
+                                        onChange={(e) => setCourseData({ ...courseData, description: e.target.value })}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="input-label">Primary Content Type</label>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                                        {[
+                                            { id: 'video', label: 'Video Lessons', icon: Video, color: '#1d4ed8' },
+                                            { id: 'live', label: 'Live Sessions', icon: Users, color: '#b91c1c' },
+                                            { id: 'material', label: 'Document Hub', icon: FileText, color: '#065f46' },
+                                            { id: 'quiz', label: 'Assessments', icon: HelpCircle, color: '#9a3412' }
+                                        ].map((cat) => (
+                                            <div
+                                                key={cat.id}
+                                                onClick={() => setCourseData({ ...courseData, category: cat.id })}
+                                                style={{
+                                                    padding: '1.25rem',
+                                                    borderRadius: '18px',
+                                                    border: courseData.category === cat.id ? `2px solid ${cat.color}` : '2px solid #f1f5f9',
+                                                    background: courseData.category === cat.id ? `${cat.color}05` : 'white',
+                                                    cursor: 'pointer',
+                                                    textAlign: 'center',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                <cat.icon size={24} color={courseData.category === cat.id ? cat.color : '#94a3b8'} style={{ marginBottom: '8px' }} />
+                                                <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 900, color: courseData.category === cat.id ? cat.color : '#64748b', textTransform: 'uppercase' }}>{cat.label}</p>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="responsive-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                                <div>
-                                    <label className="input-label">Market Category</label>
-                                    <select className="custom-input">
-                                        {categories.map((cat, idx) => (
-                                            <option key={idx} value={cat}>{cat}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="input-label">Target Level</label>
-                                    <select className="custom-input">
-                                        <option>Foundational / Beginner</option>
-                                        <option>Professional / Intermediate</option>
-                                        <option>Advanced / Expert</option>
-                                    </select>
-                                </div>
-                            </div>
+
+
+
                         </div>
 
                         <div className="blueprint-meta-sidebar" style={{ background: '#f8fafc', padding: '3rem', borderRadius: '24px', border: '1.5px solid #f1f5f9' }}>
                             <div style={{ display: 'grid', gap: '2rem' }}>
-                                <div style={{ textAlign: 'center', padding: '2.5rem', border: '2.5px dashed #cbd5e1', borderRadius: '24px', background: 'white' }}>
-                                    <UploadCloud size={32} color="#94a3b8" />
-                                    <p style={{ margin: '1rem 0 0 0', fontWeight: 800, color: '#64748b', fontSize: '0.85rem' }}>DRAG COVER COVER ART</p>
+                                <div
+                                    className="thumbnail-container"
+                                    style={{ textAlign: 'center', padding: '2.5rem', border: '2.5px dashed #cbd5e1', borderRadius: '24px', background: 'white', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
+                                    onClick={() => document.getElementById('thumbnail-upload')?.click()}
+                                >
+                                    {courseData.thumbnail ? (
+                                        <div style={{ position: 'absolute', inset: 0 }}>
+                                            <img
+                                                src={courseData.thumbnail}
+                                                alt="Thumbnail preview"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none' }}
+                                                onContextMenu={(e: any) => e.preventDefault()}
+                                            />
+                                            <div className="thumbnail-overlay" style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', pointerEvents: 'auto' }}>
+                                                <p style={{ color: 'white', fontWeight: 'bold', margin: 0 }}>Change Image</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <UploadCloud size={32} color="#94a3b8" />
+                                            <p style={{ margin: '1rem 0 0 0', fontWeight: 800, color: '#64748b', fontSize: '0.85rem' }}>UPLOAD COURSE THUMBNAIL</p>
+                                        </>
+                                    )}
+                                    <input
+                                        type="file"
+                                        id="thumbnail-upload"
+                                        accept="image/*"
+                                        style={{ display: 'none' }}
+                                        onChange={(e) => {
+                                            if (e.target.files && e.target.files[0]) {
+                                                const reader = new FileReader();
+                                                reader.onload = (event) => {
+                                                    setCourseData({ ...courseData, thumbnail: event.target?.result as string });
+                                                };
+                                                reader.readAsDataURL(e.target.files[0]);
+                                            }
+                                        }}
+                                    />
                                 </div>
-                                <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                    <div>
-                                        <label className="input-label"><Globe size={18} /> Language</label>
-                                        <select className="custom-input"><option>English</option></select>
-                                    </div>
-                                    <div>
-                                        <label className="input-label"><Clock size={18} /> Est. Duration</label>
-                                        <input type="text" className="custom-input" placeholder="e.g. 10 hours" />
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -504,40 +889,54 @@ export default function CreateCourse() {
                 <div className="form-section-card animate-fade-in-up">
                     <h3 className="section-title">
                         <Users size={32} color="#1a4d3e" style={{ background: '#f0fdf4', padding: '8px', borderRadius: '14px' }} />
-                        Deployment Target
+                        Target Cohort Assignment
                     </h3>
 
-                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>Select the operational shell to host this academic payload.</p>
+                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>Select the cohort you want to assign this course curriculum to.</p>
 
                     <div style={{ display: 'grid', gap: '1.25rem' }}>
-                        {[
-                            { name: 'Jan 2026 Batch', code: 'WL-JAN-2026', type: 'Professional Shell' },
-                            { name: 'Q1 Alumni Track', code: 'WL-ALUM-Q1', type: 'Legacy Shell' },
-                            { name: 'Global Direct', code: 'WL-DIR-GLO', type: 'Self-Paced Shell' }
-                        ].map((cohort) => (
-                            <div
-                                key={cohort.code}
-                                style={{
-                                    padding: '2rem',
-                                    border: '2px solid #f1f5f9',
-                                    borderRadius: '24px',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s'
-                                }}
-                                className="hover-premium"
-                            >
-                                <div>
-                                    <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900 }}>{cohort.name}</h4>
-                                    <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 800 }}>CODE: {cohort.code} • {cohort.type}</span>
+                        {cohorts.length > 0 ? (
+                            cohorts.map((cohort) => (
+                                <div
+                                    key={cohort.id}
+                                    style={{
+                                        padding: '2rem',
+                                        border: selectedCohortId === cohort.id ? '2.5px solid #1a4d3e' : '2px solid #f1f5f9',
+                                        background: selectedCohortId === cohort.id ? '#f0fdf4' : 'white',
+                                        borderRadius: '24px',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        boxShadow: selectedCohortId === cohort.id ? '0 10px 20px -5px rgba(26, 77, 62, 0.1)' : 'none'
+                                    }}
+                                    onClick={() => setSelectedCohortId(selectedCohortId === cohort.id ? null : cohort.id)}
+                                    className="hover-premium"
+                                >
+                                    <div>
+                                        <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900 }}>{cohort.name}</h4>
+                                        <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 800 }}>ID: {cohort.id} • {cohort.delivery_mode}</span>
+                                    </div>
+                                    <button
+                                        className="btn-standard"
+                                        style={{
+                                            background: selectedCohortId === cohort.id ? '#1a4d3e' : '#f8fafc',
+                                            border: '1.5px solid #e2e8f0',
+                                            color: selectedCohortId === cohort.id ? 'white' : '#1a4d3e',
+                                            fontWeight: 800
+                                        }}
+                                    >
+                                        {selectedCohortId === cohort.id ? 'Selected' : 'Select Target'}
+                                    </button>
                                 </div>
-                                <button className="btn-standard" style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#1a4d3e', fontWeight: 800 }}>
-                                    Select Target
-                                </button>
+                            ))
+                        ) : (
+                            <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '24px', border: '1.5px dashed #cbd5e1' }}>
+                                <p style={{ color: '#64748b', fontWeight: 700 }}>No cohorts found. You can continue without deploying.</p>
+                                <Link to="/instructor/cohorts/create" style={{ color: '#1a4d3e', fontWeight: 800, textDecoration: 'none', fontSize: '0.9rem' }}>+ Create New Cohort</Link>
                             </div>
-                        ))}
+                        )}
                     </div>
 
                     <div style={{ marginTop: '3rem', padding: '2rem', background: '#f8fafc', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
@@ -555,9 +954,9 @@ export default function CreateCourse() {
                             <div>
                                 <h3 className="section-title" style={{ marginBottom: '0.5rem' }}>
                                     <BookOpen size={32} color="#020617" style={{ background: 'rgba(2, 6, 23, 0.08)', padding: '8px', borderRadius: '14px' }} />
-                                    Curriculum Architecture
+                                    Course Curriculum
                                 </h3>
-                                <p style={{ color: '#64748b', margin: 0, fontSize: '1rem', fontWeight: 600 }}>Design the learning path for your students' growth.</p>
+                                <p style={{ color: '#64748b', margin: 0, fontSize: '1rem', fontWeight: 600 }}>Design the learning path with modules and lessons.</p>
                             </div>
                             <button onClick={addModule} className="btn-standard" style={{ background: '#020617', padding: '0 2rem', boxShadow: '0 10px 15px -3px rgba(2, 6, 23, 0.2)' }}>
                                 <Plus size={20} /> New Module
@@ -565,7 +964,7 @@ export default function CreateCourse() {
                         </div>
 
                         <div className="curriculum-container">
-                            {modules.map((mod, modIdx) => (
+                            {modules.map((mod: any, modIdx: number) => (
                                 <div key={mod.id} className="curriculum-module">
                                     <div className="module-header" onClick={() => toggleModule(mod.id)}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flex: 1 }}>
@@ -607,7 +1006,7 @@ export default function CreateCourse() {
                                     </div>
                                     {mod.isOpen && (
                                         <div className="module-content" style={{ paddingBottom: '1.5rem' }}>
-                                            {mod.lessons.map((lesson) => (
+                                            {mod.lessons.map((lesson: Lesson) => (
                                                 <div key={lesson.id} style={{ marginBottom: '0.25rem' }}>
                                                     <div className="lesson-card">
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
@@ -631,10 +1030,10 @@ export default function CreateCourse() {
                                                                 <Edit2 size={16} />
                                                             </button>
                                                             <button
-                                                                className="btn-standard"
+                                                                className="btn-standard preview-btn"
                                                                 style={{ height: '40px', width: '40px', padding: 0, background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b' }}
                                                                 onClick={(e) => { e.stopPropagation(); setViewingLesson(lesson); }}
-                                                                title="Preview"
+                                                                title="Preview Lesson"
                                                             >
                                                                 <Eye size={16} />
                                                             </button>
@@ -663,50 +1062,94 @@ export default function CreateCourse() {
                                                                     />
                                                                 </div>
 
+
+                                                                <div>
+                                                                    <label className="input-label">Session Description</label>
+                                                                    <textarea
+                                                                        className="custom-input"
+                                                                        style={{ minHeight: '120px', resize: 'vertical', paddingTop: '1rem' }}
+                                                                        value={lesson.description || ''}
+                                                                        onChange={(e) => updateLesson(mod.id, lesson.id, { description: e.target.value })}
+                                                                        placeholder="Provide a detailed overview of what students will learn in this session..."
+                                                                    />
+                                                                </div>
+
                                                                 {lesson.type === 'video' && (
                                                                     <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                                                        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
-                                                                            <div>
-                                                                                <label className="input-label">Video Hosting</label>
-                                                                                <select
-                                                                                    className="custom-input"
-                                                                                    value={lesson.videoSource || 'upload'}
-                                                                                    onChange={(e) => updateLesson(mod.id, lesson.id, { videoSource: e.target.value as any })}
-                                                                                >
-                                                                                    <option value="upload">LayosCloud Direct Upload</option>
-                                                                                    <option value="youtube">YouTube Embed</option>
-                                                                                    <option value="vimeo">Vimeo Embed</option>
-                                                                                </select>
-                                                                            </div>
-                                                                            <div>
-                                                                                <label className="input-label">Video Run Time</label>
-                                                                                <input
-                                                                                    type="text"
-                                                                                    className="custom-input"
-                                                                                    value={lesson.duration || ''}
-                                                                                    onChange={(e) => updateLesson(mod.id, lesson.id, { duration: e.target.value })}
-                                                                                    placeholder="e.g. 12:45"
-                                                                                />
-                                                                            </div>
+                                                                        <div
+                                                                            style={{ padding: '3rem', border: '2.5px dashed #cbd5e1', borderRadius: '20px', textAlign: 'center', background: 'white', cursor: uploadingVideos[lesson.id] ? 'not-allowed' : 'pointer', position: 'relative' }}
+                                                                            onClick={() => {
+                                                                                if (!uploadingVideos[lesson.id] && !lesson.videoUrl) {
+                                                                                    document.getElementById(`video-upload-${lesson.id}`)?.click();
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            {uploadingVideos[lesson.id] ? (
+                                                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#f8fafc', marginBottom: '1rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+                                                                                        <UploadCloud size={32} color="#1a4d3e" />
+                                                                                    </div>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#1a4d3e' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
+                                                                                    <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
+                                                                                        <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: '#10b981', transition: 'width 0.3s ease' }}></div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : lesson.fileToUpload ? (
+                                                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#fffbeb', marginBottom: '1rem' }}>
+                                                                                        <Clock size={32} color="#f59e0b" />
+                                                                                    </div>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#f59e0b' }}>Pending Upload</h5>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', wordBreak: 'break-all', padding: '0 2rem' }}>{lesson.fileToUpload.name}</p>
+                                                                                    <button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            updateLesson(mod.id, lesson.id, { fileToUpload: undefined });
+                                                                                            const fileInput = document.getElementById(`video-upload-${lesson.id}`) as HTMLInputElement;
+                                                                                            if (fileInput) fileInput.value = '';
+                                                                                        }}
+                                                                                        style={{ marginTop: '15px', padding: '8px 16px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <Trash2 size={16} /> Remove Selection
+                                                                                    </button>
+                                                                                </div>
+                                                                            ) : lesson.videoUrl ? (
+                                                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#f0fdf4', marginBottom: '1rem' }}>
+                                                                                        <CheckCircle2 size={32} color="#10b981" />
+                                                                                    </div>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#10b981' }}>Video Uploaded Successfully</h5>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', wordBreak: 'break-all', padding: '0 2rem' }}>{lesson.videoUrl}</p>
+                                                                                    <button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            updateLesson(mod.id, lesson.id, { videoUrl: '' });
+                                                                                        }}
+                                                                                        style={{ marginTop: '15px', padding: '8px 16px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <Trash2 size={16} /> Delete Video
+                                                                                    </button>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <>
+                                                                                    <UploadCloud size={40} color="#020617" style={{ marginBottom: '1rem' }} />
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Upload Video File</h5>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Supports 4K/HD formats up to 2GB</p>
+                                                                                </>
+                                                                            )}
+                                                                            <input
+                                                                                type="file"
+                                                                                id={`video-upload-${lesson.id}`}
+                                                                                accept="video/mp4,video/quicktime,video/x-msvideo"
+                                                                                style={{ display: 'none' }}
+                                                                                onChange={(e) => {
+                                                                                    if (e.target.files && e.target.files[0]) {
+                                                                                        handleFileUpload(mod.id, lesson.id, e.target.files[0]);
+                                                                                    }
+                                                                                    e.target.value = ''; // Reset input to allow re-upload of same file if needed
+                                                                                }}
+                                                                            />
                                                                         </div>
-                                                                        {lesson.videoSource === 'upload' ? (
-                                                                            <div style={{ padding: '3rem', border: '2.5px dashed #cbd5e1', borderRadius: '20px', textAlign: 'center', background: 'white', cursor: 'pointer' }}>
-                                                                                <UploadCloud size={40} color="#020617" style={{ marginBottom: '1rem' }} />
-                                                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Upload Video File</h5>
-                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Supports 4K/HD formats up to 2GB</p>
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div>
-                                                                                <label className="input-label">{lesson.videoSource === 'youtube' ? 'YouTube' : 'Vimeo'} URL</label>
-                                                                                <input
-                                                                                    type="text"
-                                                                                    className="custom-input"
-                                                                                    value={lesson.videoUrl || ''}
-                                                                                    onChange={(e) => updateLesson(mod.id, lesson.id, { videoUrl: e.target.value })}
-                                                                                    placeholder="https://..."
-                                                                                />
-                                                                            </div>
-                                                                        )}
                                                                     </div>
                                                                 )}
 
@@ -754,22 +1197,188 @@ export default function CreateCourse() {
                                                                                 placeholder="https://zoom.us/j/..."
                                                                             />
                                                                         </div>
+
+                                                                        {/* Recording Section */}
+                                                                        <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1.5px dashed #e2e8f0' }}>
+                                                                            <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1a4d3e' }}>
+                                                                                <Video size={18} /> Recording Vault (Post-Session)
+                                                                            </label>
+
+                                                                            {uploadingVideos[lesson.id] ? (
+                                                                                <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '16px', border: '1.5px dashed #cbd5e1', textAlign: 'center' }}>
+                                                                                    <div style={{ width: '48px', height: '48px', background: '#f0fdf4', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+                                                                                        <Video size={24} color="#1a4d3e" />
+                                                                                    </div>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#1a4d3e' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
+                                                                                    <div style={{ width: '100%', maxWidth: '200px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden', margin: '10px auto' }}>
+                                                                                        <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: '#10b981', transition: 'width 0.3s ease' }}></div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : lesson.videoToUpload ? (
+                                                                                <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '16px', border: '1.5px dashed #1a4d3e', textAlign: 'center' }}>
+                                                                                    <div style={{ width: '48px', height: '48px', background: '#f0fdf4', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
+                                                                                        <Clock size={24} color="#1a4d3e" />
+                                                                                    </div>
+                                                                                    <h5 style={{ margin: '0 0 5px 0', fontWeight: 800 }}>Recording Staged</h5>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>{lesson.videoToUpload.name}</p>
+                                                                                    <button
+                                                                                        onClick={() => updateLesson(mod.id, lesson.id, { videoToUpload: undefined })}
+                                                                                        style={{ marginTop: '1rem', color: '#ef4444', background: 'none', border: 'none', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+                                                                                    >
+                                                                                        Remove Recording
+                                                                                    </button>
+                                                                                </div>
+                                                                            ) : lesson.videoUrl ? (
+                                                                                <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', background: 'black', aspectRatio: '16/9' }}>
+                                                                                    <video
+                                                                                        src={lesson.videoUrl}
+                                                                                        className="w-full h-full"
+                                                                                        controls
+                                                                                        controlsList="nodownload"
+                                                                                        onContextMenu={(e: any) => e.preventDefault()}
+                                                                                        style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
+                                                                                    />
+                                                                                    <button
+                                                                                        onClick={() => updateLesson(mod.id, lesson.id, { videoUrl: '' })}
+                                                                                        style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', zIndex: 10 }}
+                                                                                    >
+                                                                                        Delete Recording
+                                                                                    </button>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div
+                                                                                    onClick={() => document.getElementById(`recording-upload-${lesson.id}`)?.click()}
+                                                                                    style={{ padding: '2.5rem', background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '16px', textAlign: 'center', cursor: 'pointer' }}
+                                                                                >
+                                                                                    <Plus size={32} color="#64748b" style={{ marginBottom: '1rem' }} />
+                                                                                    <h5 style={{ margin: '0 0 5px 0', fontWeight: 800 }}>Upload Session Recording</h5>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>Drag and drop or click to browse (MP4, MKV)</p>
+                                                                                    <input
+                                                                                        type="file"
+                                                                                        id={`recording-upload-${lesson.id}`}
+                                                                                        style={{ display: 'none' }}
+                                                                                        accept="video/*"
+                                                                                        onChange={(e: any) => {
+                                                                                            if (e.target.files && e.target.files[0]) {
+                                                                                                updateLesson(mod.id, lesson.id, { videoToUpload: e.target.files[0] });
+                                                                                            }
+                                                                                            e.target.value = '';
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
                                                                 )}
 
                                                                 {lesson.type === 'material' && (
-                                                                    <div style={{ padding: '3rem', border: '2.5px dashed #cbd5e1', borderRadius: '20px', textAlign: 'center', background: 'white' }}>
-                                                                        <FileText size={40} color="#020617" style={{ marginBottom: '1rem' }} />
-                                                                        <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Deploy Document Resource</h5>
-                                                                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Upload PDFs, Slides, or Blueprint assets (Max 50MB)</p>
-                                                                        <input type="file" style={{ display: 'none' }} id={`file-upload-${lesson.id}`} />
-                                                                        <button
-                                                                            className="btn-standard"
-                                                                            style={{ marginTop: '1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#020617' }}
-                                                                            onClick={() => document.getElementById(`file-upload-${lesson.id}`)?.click()}
-                                                                        >
-                                                                            Browse Files
-                                                                        </button>
+                                                                    <div
+                                                                        style={{ padding: '3rem', border: '2.5px dashed #cbd5e1', borderRadius: '20px', textAlign: 'center', background: 'white', cursor: uploadingVideos[lesson.id] ? 'not-allowed' : 'pointer' }}
+                                                                        onClick={() => {
+                                                                            if (!uploadingVideos[lesson.id] && !lesson.fileUrl && !lesson.fileToUpload) {
+                                                                                document.getElementById(`file-upload-${lesson.id}`)?.click();
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        {uploadingVideos[lesson.id] ? (
+                                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+                                                                                <div style={{ padding: '12px', borderRadius: '50%', background: '#f8fafc', marginBottom: '1rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+                                                                                    <UploadCloud size={32} color="#1a4d3e" />
+                                                                                </div>
+                                                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#1a4d3e' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
+                                                                                <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
+                                                                                    <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: '#10b981', transition: 'width 0.3s ease' }}></div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : lesson.fileToUpload ? (
+                                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <div style={{ padding: '12px', borderRadius: '50%', background: '#fffbeb', marginBottom: '1rem', border: '1.5px dashed #f59e0b' }}>
+                                                                                    <Clock size={32} color="#f59e0b" />
+                                                                                </div>
+                                                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#f59e0b' }}>Pending Upload</h5>
+                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>{lesson.fileToUpload.name}</p>
+                                                                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                                                                                    <button
+                                                                                        onClick={(e: any) => {
+                                                                                            e.stopPropagation();
+                                                                                            if (lesson.fileToUpload) {
+                                                                                                const url = URL.createObjectURL(lesson.fileToUpload);
+                                                                                                const isPdf = lesson.fileToUpload.type === 'application/pdf' || lesson.fileToUpload.name.toLowerCase().endsWith('.pdf');
+                                                                                                setPreviewAsset({ url, type: isPdf ? 'pdf' : 'image' });
+                                                                                            }
+                                                                                        }}
+                                                                                        style={{ padding: '8px 16px', background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '8px', color: '#b45309', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <Eye size={16} /> Preview
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={(e: any) => {
+                                                                                            e.stopPropagation();
+                                                                                            updateLesson(mod.id, lesson.id, { fileToUpload: undefined });
+                                                                                            const fileInput = document.getElementById(`file-upload-${lesson.id}`) as HTMLInputElement;
+                                                                                            if (fileInput) fileInput.value = '';
+                                                                                        }}
+                                                                                        style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <X size={16} /> Remove
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : lesson.fileUrl ? (
+                                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <div style={{ padding: '12px', borderRadius: '50%', background: '#f0fdf4', marginBottom: '1rem' }}>
+                                                                                    <CheckCircle2 size={32} color="#10b981" />
+                                                                                </div>
+                                                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#10b981' }}>File Ready</h5>
+                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>{lesson.fileName || 'Resource Document'}</p>
+                                                                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                                                                                    <button
+                                                                                        onClick={(e: any) => {
+                                                                                            e.stopPropagation();
+                                                                                            const url = lesson.fileUrl || '';
+                                                                                            const isPdf = url.toLowerCase().endsWith('.pdf') || lesson.fileName?.toLowerCase().endsWith('.pdf');
+                                                                                            setPreviewAsset({ url, type: isPdf ? 'pdf' : 'image' });
+                                                                                        }}
+                                                                                        style={{ padding: '8px 16px', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '8px', color: '#1a4d3e', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <Eye size={16} /> Preview
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={(e: any) => {
+                                                                                            e.stopPropagation();
+                                                                                            updateLesson(mod.id, lesson.id, { fileUrl: '', fileName: '' });
+                                                                                        }}
+                                                                                        style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <Trash2 size={16} /> Delete
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <>
+                                                                                <FileText size={40} color="#020617" style={{ marginBottom: '1rem' }} />
+                                                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Deploy Document Resource</h5>
+                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Upload PDFs, Slides, or Blueprint assets (Max 50MB)</p>
+                                                                                <button
+                                                                                    className="btn-standard"
+                                                                                    style={{ marginTop: '1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#020617' }}
+                                                                                    onClick={() => document.getElementById(`file-upload-${lesson.id}`)?.click()}
+                                                                                >
+                                                                                    Browse Files
+                                                                                </button>
+                                                                            </>
+                                                                        )}
+                                                                        <input
+                                                                            type="file"
+                                                                            style={{ display: 'none' }}
+                                                                            id={`file-upload-${lesson.id}`}
+                                                                            onChange={(e: any) => {
+                                                                                if (e.target.files && e.target.files[0]) {
+                                                                                    handleFileUpload(mod.id, lesson.id, e.target.files[0]);
+                                                                                }
+                                                                                e.target.value = '';
+                                                                            }}
+                                                                        />
                                                                     </div>
                                                                 )}
 
@@ -783,24 +1392,31 @@ export default function CreateCourse() {
                                                                         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
                                                                             <div>
                                                                                 <label className="input-label">Pass Mark (%)</label>
-                                                                                <input type="number" className="custom-input" placeholder="80" defaultValue="80" />
+                                                                                <input
+                                                                                    type="number"
+                                                                                    className="custom-input"
+                                                                                    placeholder="80"
+                                                                                    value={lesson.quizData?.pass_mark || 80}
+                                                                                    onChange={(e) => updateLesson(mod.id, lesson.id, {
+                                                                                        quizData: {
+                                                                                            pass_mark: parseInt(e.target.value) || 80,
+                                                                                            questions: lesson.quizData?.questions || []
+                                                                                        }
+                                                                                    })}
+                                                                                />
                                                                             </div>
-                                                                            <button className="btn-standard" style={{ alignSelf: 'flex-end', background: '#020617' }}>Design Quiz Questions</button>
+                                                                            <button
+                                                                                className="btn-standard"
+                                                                                style={{ alignSelf: 'flex-end', background: '#020617' }}
+                                                                                onClick={() => setDesigningQuiz({ moduleId: mod.id, lessonId: lesson.id })}
+                                                                            >
+                                                                                Design Quiz Questions ({lesson.quizData?.questions?.length || 0})
+                                                                            </button>
                                                                         </div>
                                                                     </div>
                                                                 )}
 
-                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', borderTop: '1px solid #f1f5f9', paddingTop: '2rem' }}>
-                                                                    <div style={{ display: 'flex', gap: '1.5rem' }}>
-                                                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, color: '#64748b' }}>
-                                                                            <input type="checkbox" checked={lesson.isPreview} onChange={(e) => updateLesson(mod.id, lesson.id, { isPreview: e.target.checked })} style={{ accentColor: '#020617' }} />
-                                                                            Enable Preview
-                                                                        </label>
-                                                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, color: '#64748b' }}>
-                                                                            <input type="checkbox" checked={lesson.isLocked} onChange={(e) => updateLesson(mod.id, lesson.id, { isLocked: e.target.checked })} style={{ accentColor: '#020617' }} />
-                                                                            Prerequisite Lock
-                                                                        </label>
-                                                                    </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', borderTop: '1px solid #f1f5f9', paddingTop: '2rem' }}>
                                                                     <div style={{ display: 'flex', gap: '1rem' }}>
                                                                         <button onClick={() => setEditingLessonId(null)} className="btn-standard" style={{ background: '#1a4d3e' }}>Finish Setup</button>
                                                                     </div>
@@ -846,9 +1462,30 @@ export default function CreateCourse() {
                             <div style={{ display: 'grid', gap: '1.5rem' }}>
                                 <div>
                                     <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Operational Container</label>
-                                    <p style={{ margin: '8px 0 0 0', fontWeight: 900, fontSize: '1.25rem', color: '#0f172a' }}>Jan 2026 Batch</p>
-                                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Code: WL-JAN-2026</span>
+                                    <p style={{ margin: '8px 0 0 0', fontWeight: 900, fontSize: '1.25rem', color: '#0f172a' }}>
+                                        {selectedCohortId ? cohorts.find(c => c.id === selectedCohortId)?.name : 'Library Only (No Deployment)'}
+                                    </p>
+                                    {selectedCohortId && (
+                                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>ID: {selectedCohortId}</span>
+                                    )}
                                 </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Course Title</label>
+                                    <p style={{ margin: '8px 0 0 0', fontWeight: 800, fontSize: '1.25rem', color: '#0f172a' }}>{courseData.title || 'Untitled Course'}</p>
+                                </div>
+                                {courseData.thumbnail && (
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Card Preview</label>
+                                        <div style={{ marginTop: '1rem', width: '100%', height: '160px', borderRadius: '16px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                                            <img
+                                                src={courseData.thumbnail}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none' }}
+                                                alt="Card Preview"
+                                                onContextMenu={(e: any) => e.preventDefault()}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -870,7 +1507,12 @@ export default function CreateCourse() {
                                 </div>
                                 <div style={{ paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                                        <input type="checkbox" style={{ width: '24px', height: '24px', accentColor: '#1a4d3e' }} />
+                                        <input
+                                            type="checkbox"
+                                            style={{ width: '24px', height: '24px', accentColor: '#1a4d3e' }}
+                                            checked={confirmed}
+                                            onChange={(e) => setConfirmed(e.target.checked)}
+                                        />
                                         <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#475569' }}>
                                             I confirm this cohort session is compliant with global educational standards.
                                         </span>
@@ -886,24 +1528,44 @@ export default function CreateCourse() {
             <div className="sticky-actions-bar">
                 <button
                     onClick={() => setStep(Math.max(1, step - 1))}
-                    disabled={step === 1}
+                    disabled={step === 1 || loading}
                     className="btn-standard"
-                    style={{ background: 'transparent', border: '1.5px solid #e2e8f0', color: '#475569', opacity: step === 1 ? 0 : 1, pointerEvents: step === 1 ? 'none' : 'auto' }}
+                    style={{ background: 'transparent', border: '1.5px solid #e2e8f0', color: '#475569', opacity: step === 1 ? 0 : 1, pointerEvents: (step === 1 || loading) ? 'none' : 'auto' }}
                 >
                     <ChevronLeft size={20} /> Back
                 </button>
 
                 <div style={{ display: 'flex', gap: '1.25rem' }}>
-                    <button className="btn-standard" style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#64748b', fontWeight: 800, display: 'flex', gap: '8px' }}>
+                    <button
+                        className="btn-standard"
+                        style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#64748b', fontWeight: 800, display: 'flex', gap: '8px' }}
+                        disabled={loading}
+                        onClick={handleSaveCourse}
+                    >
                         <Save size={20} /> Save Progress
                     </button>
                     <button
-                        onClick={() => setStep(Math.min(4, step + 1))}
+                        onClick={() => {
+                            const errorMsg = validateStep(step);
+                            if (errorMsg) {
+                                setError(errorMsg);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                return;
+                            }
+                            setError(null);
+                            if (step === 4) {
+                                handleSaveCourse();
+                            } else {
+                                setStep(Math.min(4, step + 1));
+                            }
+                        }}
+                        disabled={loading}
                         className="btn-standard"
                         style={{ background: '#1a4d3e', padding: '0 3rem', height: '60px', borderRadius: '18px', fontWeight: 900, display: 'flex', gap: '12px', boxShadow: '0 10px 20px -5px rgba(26, 77, 62, 0.3)' }}
                     >
-                        {step === 4 ? 'Launch & Attach' : 'Proceed'}
-                        {step === 4 ? <Globe size={20} /> : <ChevronRight size={20} />}
+                        {loading ? 'Finalizing...' : (step === 4 ? 'Launch & Attach' : 'Proceed')}
+                        {loading ? <Loader2 size={20} className="animate-spin" /> : (step === 4 ? <CheckCircle2 size={20} /> : <ChevronRight size={20} />)}
+
                     </button>
                 </div>
             </div>
@@ -930,16 +1592,28 @@ export default function CreateCourse() {
                                     </div>
                                     <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem', color: '#0f172a' }}>{viewingLesson.title}</h3>
                                 </div>
-                                <button onClick={() => setViewingLesson(null)} style={{ background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', color: '#64748b' }}>
-                                    <Trash2 size={20} style={{ transform: 'rotate(45deg)' }} />
+                                <button onClick={() => setViewingLesson(null)} style={{ background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <X size={20} />
                                 </button>
                             </div>
                             <div style={{ padding: '4rem', textAlign: 'center' }}>
                                 {viewingLesson.type === 'video' && (
-                                    <div style={{ width: '100%', aspectRatio: '16/9', background: '#0f172a', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
-                                        <Video size={48} opacity={0.5} />
-                                        <p style={{ fontWeight: 800 }}>Video Stream Simulator</p>
-                                        <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{viewingLesson.videoSource === 'upload' ? 'LayosCloud Secure Feed' : viewingLesson.videoUrl}</span>
+                                    <div style={{ width: '100%', aspectRatio: '16/9', background: '#0f172a', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexDirection: 'column', overflow: 'hidden' }}>
+                                        {viewingLesson.videoUrl || viewingLesson.fileToUpload ? (
+                                            <video
+                                                src={viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : viewingLesson.videoUrl}
+                                                controls
+                                                style={{ width: '100%', height: '100%' }}
+                                                controlsList="nodownload"
+                                                onContextMenu={(e: any) => e.preventDefault()}
+                                            />
+                                        ) : (
+                                            <>
+                                                <Video size={48} opacity={0.5} style={{ marginBottom: '1.5rem' }} />
+                                                <p style={{ fontWeight: 800, margin: 0 }}>Video Stream Simulator</p>
+                                                <span style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '8px' }}>No video uploaded yet</span>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                                 {viewingLesson.type === 'live' && (
@@ -952,11 +1626,41 @@ export default function CreateCourse() {
                                     </div>
                                 )}
                                 {viewingLesson.type === 'material' && (
-                                    <div style={{ padding: '3rem', background: '#eff6ff', borderRadius: '24px', border: '1.5px solid #2563eb20', marginBottom: '2rem' }}>
-                                        <FileText size={48} color="#2563eb" style={{ marginBottom: '1.5rem' }} />
-                                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1.25rem', fontWeight: 900, color: '#2563eb' }}>Document Hub Unit</h4>
-                                        <p style={{ margin: 0, fontWeight: 700, color: '#64748b' }}>PDF/Slides Asset Ready</p>
-                                        <button className="btn-standard" style={{ background: '#2563eb', padding: '0 2.5rem', marginTop: '2rem' }}>Download Resource</button>
+                                    <div style={{ width: '100%', aspectRatio: '16/9', background: '#eff6ff', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexDirection: 'column', overflow: 'hidden', marginBottom: '2rem', position: 'relative' }}>
+                                        {viewingLesson.fileUrl || viewingLesson.fileToUpload ? (
+                                            <>
+                                                {(() => {
+                                                    const url = viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : viewingLesson.fileUrl;
+                                                    const fileName = viewingLesson.fileToUpload ? viewingLesson.fileToUpload.name : (typeof viewingLesson.fileUrl === 'string' ? viewingLesson.fileUrl.split('/').pop() : 'Resource Asset');
+
+                                                    if (fileName?.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                                                        return <img src={url} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onContextMenu={(e: any) => e.preventDefault()} />;
+                                                    }
+                                                    if (fileName?.match(/\.pdf$/i)) {
+                                                        return <iframe src={`${url}#toolbar=0`} style={{ width: '100%', height: '100%', border: 'none' }} />;
+                                                    }
+                                                    return (
+                                                        <div style={{ textAlign: 'center', padding: '2rem' }}>
+                                                            <FileText size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                                                            <p style={{ fontWeight: 800, margin: 0 }}>Document Unit Ready</p>
+                                                            <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{fileName}</span>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FileText size={48} opacity={0.5} style={{ marginBottom: '1.5rem' }} />
+                                                <h4 style={{ margin: '0 0 10px 0', fontSize: '1.25rem', fontWeight: 900, color: '#2563eb' }}>Document Hub Unit</h4>
+                                                <p style={{ margin: 0, fontWeight: 700, color: '#64748b' }}>PDF/Slides Asset Ready</p>
+                                            </>
+                                        )}
+                                        <button className="btn-standard" style={{ background: '#2563eb', padding: '0 2.5rem', marginTop: (viewingLesson.fileUrl || viewingLesson.fileToUpload) ? '1rem' : '2rem', position: 'absolute', bottom: '2rem' }} onClick={() => {
+                                            const url = viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : viewingLesson.fileUrl;
+                                            if (url) window.open(url, '_blank');
+                                        }}>
+                                            <Eye size={18} /> Preview Asset
+                                        </button>
                                     </div>
                                 )}
                                 {viewingLesson.type === 'quiz' && (
@@ -982,6 +1686,390 @@ export default function CreateCourse() {
                     </div>
                 )
             }
-        </div >
+
+            {/* Final Launch Progress Overlay */}
+            {loading && step === 4 && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        background: 'rgba(15, 23, 42, 0.4)',
+                        backdropFilter: 'blur(20px)',
+                        zIndex: 2000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '2rem'
+                    }}
+                >
+                    <div
+                        className="animate-slide-up"
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            width: '100%',
+                            maxWidth: '540px',
+                            padding: '3.5rem',
+                            borderRadius: '48px',
+                            textAlign: 'center',
+                            boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+                            border: '1px solid rgba(255, 255, 255, 0.5)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}
+                    >
+                        {/* Decorative background element */}
+                        <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '200px', height: '200px', background: 'rgba(26, 77, 62, 0.05)', borderRadius: '50%', filter: 'blur(40px)' }}></div>
+
+                        <div style={{ position: 'relative', zIndex: 1 }}>
+                            {showSuccess ? (
+                                <div className="animate-slide-up">
+                                    <div style={{ width: '100px', height: '100px', background: '#10b981', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto', boxShadow: '0 20px 40px -10px rgba(16, 185, 129, 0.4)' }}>
+                                        <CheckCircle2 size={44} color="white" />
+                                    </div>
+                                    <h2 style={{ fontSize: '2.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.75rem 0', letterSpacing: '-0.03em' }}>
+                                        Launch Complete
+                                    </h2>
+                                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>
+                                        Your academic curriculum is now live and operational.
+                                    </p>
+                                    <div style={{ background: '#f0fdf4', padding: '1.5rem', borderRadius: '24px', border: '1.5px solid #10b98120', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                                        <span style={{ fontWeight: 800, fontSize: '1rem', color: '#059669' }}>Redirecting to Course Management...</span>
+                                        <Loader2 size={20} className="animate-spin" color="#059669" />
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="animate-float" style={{ width: '100px', height: '100px', background: '#1a4d3e', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto', boxShadow: '0 20px 40px -10px rgba(26, 77, 62, 0.4)' }}>
+                                        <UploadCloud size={44} color="white" />
+                                    </div>
+
+                                    <h2 style={{ fontSize: '2.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.75rem 0', letterSpacing: '-0.03em' }}>
+                                        Launching Curriculum
+                                    </h2>
+                                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>
+                                        {loadingText || 'Architecting your academic environment...'}
+                                    </p>
+
+                                    {/* Main Progress Tube */}
+                                    <div style={{ background: '#f1f5f9', height: '16px', borderRadius: '20px', overflow: 'hidden', marginBottom: '1rem', border: '1px solid #f1f5f9' }}>
+                                        <div
+                                            className="shimmer-progress"
+                                            style={{
+                                                height: '100%',
+                                                width: `${Object.keys(uploadProgress).length > 0 ? (Math.round((Object.values(uploadProgress) as number[]).reduce((a: number, b: number) => a + b, 0) / Object.keys(uploadProgress).length)) : (loadingText.includes('blueprint') ? 95 : 5)}%`,
+                                                transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                borderRadius: '20px'
+                                            }}
+                                        ></div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3rem' }}>
+                                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>System Integrity Check</span>
+                                        {Math.round(Object.keys(uploadProgress).length > 0 ? ((Object.values(uploadProgress) as number[]).reduce((a: number, b: number) => a + b, 0) / Object.keys(uploadProgress).length) : (loadingText.includes('blueprint') ? 95 : 10))}%
+                                    </div>
+
+                                    {/* Active Uploads List */}
+                                    <div style={{ textAlign: 'left', maxHeight: '180px', overflowY: 'auto', paddingRight: '10px' }} className="custom-scrollbar">
+                                        {modules.flatMap(m => m.lessons).filter(l => uploadingVideos[l.id]).map(l => (
+                                            <div key={l.id} style={{ marginBottom: '1.25rem', background: '#f8fafc', padding: '1.25rem', borderRadius: '24px', border: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ width: '40px', height: '40px', background: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                                                    <Video size={18} color="#1a4d3e" />
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                                        <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#334155' }}>{l.title}</span>
+                                                        <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#1a4d3e' }}>{uploadProgress[l.id] || 0}%</span>
+                                                    </div>
+                                                    <div style={{ background: '#e2e8f0', height: '5px', borderRadius: '10px', overflow: 'hidden' }}>
+                                                        <div style={{ width: `${uploadProgress[l.id] || 0}%`, height: '100%', background: '#1a4d3e', transition: 'width 0.4s ease' }}></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {loadingText.includes('blueprint') && (
+                                            <div className="animate-pulse" style={{ background: '#f0fdf4', padding: '1.25rem', borderRadius: '24px', border: '1.5px solid #1a4d3e20', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ width: '40px', height: '40px', background: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <Save size={18} color="#1a4d3e" />
+                                                </div>
+                                                <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#1a4d3e' }}>Finalizing Course Blueprint...</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Asset Preview Modal */}
+            {previewAsset && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', background: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(8px)' }}>
+                    <div style={{ background: 'white', overflow: 'hidden', width: '100%', maxWidth: '1000px', maxHeight: '90vh', position: 'relative', borderRadius: '32px', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ padding: '1.5rem 2rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfe' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
+                                    {previewAsset.type === 'pdf' ? <FileText size={20} color="#1a4d3e" /> : <Eye size={20} color="#1a4d3e" />}
+                                </div>
+                                <h3 style={{ margin: 0, fontWeight: 900, color: '#0f172a' }}>Material Intelligence Preview</h3>
+                            </div>
+                            <button
+                                onClick={() => setPreviewAsset(null)}
+                                style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div style={{ flex: 1, padding: '2rem', background: '#f8fafc', overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            {previewAsset.type === 'pdf' ? (
+                                <iframe
+                                    src={`${previewAsset.url}#toolbar=0`}
+                                    style={{ width: '100%', height: '70vh', border: 'none', borderRadius: '16px', boxShadow: '0 20px 50px rgba(0,0,0,0.1)' }}
+                                    title="PDF Preview"
+                                />
+                            ) : (
+                                <img
+                                    src={previewAsset.url}
+                                    style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '20px', boxShadow: '0 30px 60px rgba(0,0,0,0.15)', userSelect: 'none' }}
+                                    alt="Asset Preview"
+                                    onContextMenu={(e: any) => e.preventDefault()}
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Quiz Design Modal */}
+            {designingQuiz && (() => {
+                const mod = modules.find(m => m.id === designingQuiz.moduleId);
+                const lesson = mod?.lessons.find(l => l.id === designingQuiz.lessonId);
+                const quizData = lesson?.quizData || { pass_mark: 80, questions: [] };
+
+                return (
+                    <div
+                        className="modal-overlay animate-fade-in"
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
+                    >
+                        <div
+                            className="animate-scale-up"
+                            style={{ background: 'white', width: '100%', maxWidth: '900px', borderRadius: '40px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
+                        >
+                            <div style={{ padding: '2.5rem 3rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                                <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+                                        <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#1a4d3e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                                            <HelpCircle size={18} />
+                                        </div>
+                                        <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem', color: '#0f172a' }}>Assessment Intelligence Designer</h3>
+                                    </div>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Crafting validation units for: <span style={{ color: '#1a4d3e' }}>{lesson?.title}</span></p>
+                                </div>
+                                <button
+                                    onClick={() => setDesigningQuiz(null)}
+                                    style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '3rem' }}>
+                                {quizData.questions.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '5rem 0' }}>
+                                        <div style={{ width: '80px', height: '80px', borderRadius: '30px', background: '#f8fafc', border: '2px dashed #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: '#94a3b8' }}>
+                                            <Plus size={32} />
+                                        </div>
+                                        <h4 style={{ fontWeight: 900, color: '#0f172a', marginBottom: '8px' }}>Empty Assessment Pipeline</h4>
+                                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2.5rem' }}>Start building your validation unit by adding the first question.</p>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'grid', gap: '2.5rem' }}>
+                                        {quizData.questions.map((q, qIdx) => (
+                                            <div key={q.id} style={{ background: '#f8fafc', borderRadius: '24px', padding: '2.5rem', border: '1.5px solid #f1f5f9', position: 'relative' }}>
+                                                <div style={{ position: 'absolute', top: '-15px', left: '2rem', background: '#1a4d3e', color: 'white', padding: '4px 16px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.05em' }}>
+                                                    QUESTION {qIdx + 1}
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const newQuestions = [...quizData.questions];
+                                                        newQuestions.splice(qIdx, 1);
+                                                        updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                            quizData: { ...quizData, questions: newQuestions }
+                                                        });
+                                                    }}
+                                                    style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: '#fff1f2', border: 'none', color: '#e11d48', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+
+                                                <div style={{ marginBottom: '2rem' }}>
+                                                    <label className="input-label">Question Text</label>
+                                                    <textarea
+                                                        className="custom-input"
+                                                        rows={2}
+                                                        value={q.question}
+                                                        onChange={(e) => {
+                                                            const newQuestions = [...quizData.questions];
+                                                            newQuestions[qIdx].question = e.target.value;
+                                                            updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                                quizData: { ...quizData, questions: newQuestions }
+                                                            });
+                                                        }}
+                                                        placeholder="e.g. What is the primary objective of this module?"
+                                                        style={{ resize: 'none' }}
+                                                    />
+                                                </div>
+
+                                                <div style={{ display: 'grid', gap: '1rem' }}>
+                                                    <label className="input-label">Options & Correct Answer</label>
+                                                    {q.options.map((opt, oIdx) => (
+                                                        <div key={oIdx} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                                            <div
+                                                                onClick={() => {
+                                                                    const newQuestions = [...quizData.questions];
+                                                                    newQuestions[qIdx].correct_answer = oIdx;
+                                                                    updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                                        quizData: { ...quizData, questions: newQuestions }
+                                                                    });
+                                                                }}
+                                                                style={{
+                                                                    width: '32px',
+                                                                    height: '32px',
+                                                                    borderRadius: '50%',
+                                                                    border: '2px solid',
+                                                                    borderColor: q.correct_answer === oIdx ? '#1a4d3e' : '#e2e8f0',
+                                                                    background: q.correct_answer === oIdx ? '#1a4d3e' : 'white',
+                                                                    cursor: 'pointer',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    transition: 'all 0.2s'
+                                                                }}
+                                                            >
+                                                                {q.correct_answer === oIdx && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white' }} />}
+                                                            </div>
+                                                            <input
+                                                                type="text"
+                                                                className="custom-input"
+                                                                style={{ flex: 1, padding: '0.75rem 1.25rem' }}
+                                                                value={opt}
+                                                                onChange={(e) => {
+                                                                    const newQuestions = [...quizData.questions];
+                                                                    newQuestions[qIdx].options[oIdx] = e.target.value;
+                                                                    updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                                        quizData: { ...quizData, questions: newQuestions }
+                                                                    });
+                                                                }}
+                                                                placeholder={`Option ${oIdx + 1}`}
+                                                            />
+                                                            {q.options.length > 2 && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const newQuestions = [...quizData.questions];
+                                                                        newQuestions[qIdx].options.splice(oIdx, 1);
+                                                                        if (newQuestions[qIdx].correct_answer >= newQuestions[qIdx].options.length) {
+                                                                            newQuestions[qIdx].correct_answer = 0;
+                                                                        }
+                                                                        updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                                            quizData: { ...quizData, questions: newQuestions }
+                                                                        });
+                                                                    }}
+                                                                    style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                    {q.options.length < 5 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                const newQuestions = [...quizData.questions];
+                                                                newQuestions[qIdx].options.push('');
+                                                                updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                                    quizData: { ...quizData, questions: newQuestions }
+                                                                });
+                                                            }}
+                                                            style={{
+                                                                background: 'none',
+                                                                border: '1.5px dashed #e2e8f0',
+                                                                padding: '0.75rem',
+                                                                borderRadius: '12px',
+                                                                color: '#64748b',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: 700,
+                                                                cursor: 'pointer',
+                                                                marginTop: '0.5rem',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                gap: '8px'
+                                                            }}
+                                                        >
+                                                            <Plus size={14} /> Add Option
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={() => {
+                                        updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                            quizData: {
+                                                ...quizData,
+                                                questions: [
+                                                    ...quizData.questions,
+                                                    {
+                                                        id: 'q' + Date.now(),
+                                                        question: '',
+                                                        options: ['', ''],
+                                                        correct_answer: 0
+                                                    }
+                                                ]
+                                            }
+                                        });
+                                    }}
+                                    className="btn-standard"
+                                    style={{
+                                        width: '100%',
+                                        marginTop: '2rem',
+                                        background: '#f8fafc',
+                                        border: '2px dashed #e2e8f0',
+                                        color: '#0f172a',
+                                        height: '64px',
+                                        fontWeight: 900,
+                                        gap: '12px'
+                                    }}
+                                >
+                                    <Plus size={20} /> Add New Question
+                                </button>
+                            </div>
+
+                            <div style={{ padding: '2rem 3rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem' }}>
+                                <button
+                                    onClick={() => setDesigningQuiz(null)}
+                                    className="btn-standard"
+                                    style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#64748b', padding: '0 2.5rem' }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => setDesigningQuiz(null)}
+                                    className="btn-standard"
+                                    style={{ background: '#1a4d3e', color: 'white', padding: '0 3rem' }}
+                                >
+                                    Finalize Assessment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
+        </div>
     );
 }

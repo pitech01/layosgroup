@@ -68,7 +68,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
                 >
                     <div className="nav-item-indicator" />
                     <BookOpen size={22} style={{ flexShrink: 0 }} />
-                    <span>My Courses</span>
+                    <span>Courses</span>
                 </Link>
 
                 <Link

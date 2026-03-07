@@ -1,28 +1,126 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     User,
     Mail,
     Lock,
     Shield,
     Camera,
-    LogOut
+    LogOut,
+    Loader2,
+    AlertCircle,
+    CheckCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Settings = () => {
-    const { logout } = useAuth();
+    const { user, logout, updateUserInfo } = useAuth();
     const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
     const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
-    const handleSave = () => {
+    const [formData, setFormData] = useState({
+        name: user?.name || '',
+        email: user?.email || '',
+        bio: user?.bio || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                name: user.name,
+                email: user.email,
+                bio: user.bio || ''
+            }));
+        }
+    }, [user]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        setError(null);
+    };
+
+    const handleSaveProfile = async () => {
         setIsSaving(true);
-        setTimeout(() => {
+        setError(null);
+        setSuccess(null);
+
+        try {
+            const response = await fetch(`${API_URL}/update-profile`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    bio: formData.bio
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setSuccess('Profile updated successfully.');
+                if (updateUserInfo) updateUserInfo(data.user);
+            } else {
+                throw new Error(data.message || 'Profile update failed.');
+            }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
             setIsSaving(false);
-            alert('Settings synchronized successfully.');
-        }, 1500);
+        }
+    };
+
+    const handleUpdatePassword = async () => {
+        if (formData.newPassword !== formData.confirmPassword) {
+            setError('Passwords do not match.');
+            return;
+        }
+
+        setIsSaving(true);
+        setError(null);
+        setSuccess(null);
+
+        try {
+            const response = await fetch(`${API_URL}/change-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    current_password: formData.currentPassword,
+                    new_password: formData.newPassword,
+                    new_password_confirmation: formData.confirmPassword
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setSuccess('Password updated successfully.');
+                setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+            } else {
+                throw new Error(data.message || 'Password update failed.');
+            }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleLogout = () => {
@@ -339,32 +437,40 @@ const Settings = () => {
                             <div className="profile-setup-grid">
                                 <div className="avatar-editor-col">
                                     <div className="instructor-avatar-large">
-                                        LD
-                                        <div className="avatar-update-badge" title="Upload New Identity Media">
+                                        {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'UI'}
+                                        <div className="avatar-update-badge" title="Upload Profile Picture">
                                             <Camera size={20} />
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
-                                        <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>Lead Instructor</h4>
-                                        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>ID: INS-2294-00</p>
+                                        <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>{user?.name}</h4>
+                                        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>ID: INS-{user?.id.toString().padStart(4, '0')}</p>
                                     </div>
                                 </div>
 
                                 <div className="settings-form-col">
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                        <div className="input-field-group">
-                                            <label>First Name</label>
-                                            <div className="premium-input-wrapper">
-                                                <User size={20} className="premium-input-icon" />
-                                                <input type="text" className="premium-text-input" defaultValue="Lead" />
-                                            </div>
+                                    {error && (
+                                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '1rem', borderRadius: '16px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                            <AlertCircle size={18} /> {error}
                                         </div>
-                                        <div className="input-field-group">
-                                            <label>Last Name</label>
-                                            <div className="premium-input-wrapper">
-                                                <User size={20} className="premium-input-icon" />
-                                                <input type="text" className="premium-text-input" defaultValue="Instructor" />
-                                            </div>
+                                    )}
+                                    {success && (
+                                        <div style={{ background: '#f0fdf4', border: '1px solid #dcfce7', padding: '1rem', borderRadius: '16px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                            <CheckCircle size={18} /> {success}
+                                        </div>
+                                    )}
+
+                                    <div className="input-field-group">
+                                        <label>Full Name</label>
+                                        <div className="premium-input-wrapper">
+                                            <User size={20} className="premium-input-icon" />
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                className="premium-text-input"
+                                                value={formData.name}
+                                                onChange={handleInputChange}
+                                            />
                                         </div>
                                     </div>
 
@@ -372,25 +478,35 @@ const Settings = () => {
                                         <label>Email Address</label>
                                         <div className="premium-input-wrapper">
                                             <Mail size={20} className="premium-input-icon" />
-                                            <input type="email" className="premium-text-input" defaultValue="instructor@layosgroup.com" />
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                className="premium-text-input"
+                                                value={formData.email}
+                                                onChange={handleInputChange}
+                                            />
                                         </div>
                                     </div>
 
                                     <div className="input-field-group">
                                         <label>Professional Biography</label>
                                         <textarea
+                                            name="bio"
                                             className="premium-textarea"
                                             placeholder="Outline your professional background and teaching philosophy..."
-                                            defaultValue="Expert in software engineering and system architecture."
+                                            value={formData.bio}
+                                            onChange={handleInputChange}
                                         ></textarea>
                                     </div>
 
                                     <div className="settings-action-row">
                                         <button
                                             className="btn-premium-save"
-                                            onClick={handleSave}
+                                            onClick={handleSaveProfile}
                                             disabled={isSaving}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                                         >
+                                            {isSaving ? <Loader2 className="animate-spin" size={18} /> : null}
                                             {isSaving ? 'Saving...' : 'Save Profile'}
                                         </button>
                                     </div>
@@ -406,17 +522,35 @@ const Settings = () => {
                                     <Shield size={24} />
                                 </div>
                                 <div>
-                                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#065f46' }}>Security Layer: Reinforced</h4>
-                                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#047857', fontWeight: 600 }}>Your command node is currently protected by high-level encryption protocols.</p>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#065f46' }}>Security Status: Secure</h4>
+                                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#047857', fontWeight: 600 }}>Your account is protected by industry-standard encryption.</p>
                                 </div>
                             </div>
 
                             <div className="settings-form-col" style={{ maxWidth: '600px' }}>
+                                {error && (
+                                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '1rem', borderRadius: '16px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                        <AlertCircle size={18} /> {error}
+                                    </div>
+                                )}
+                                {success && (
+                                    <div style={{ background: '#f0fdf4', border: '1px solid #dcfce7', padding: '1rem', borderRadius: '16px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                        <CheckCircle size={18} /> {success}
+                                    </div>
+                                )}
+
                                 <div className="input-field-group">
                                     <label>Current Password</label>
                                     <div className="premium-input-wrapper">
                                         <Lock size={20} className="premium-input-icon" />
-                                        <input type="password" password-reveal="true" className="premium-text-input" placeholder="••••••••••••" />
+                                        <input
+                                            type="password"
+                                            name="currentPassword"
+                                            className="premium-text-input"
+                                            placeholder="••••••••••••"
+                                            value={formData.currentPassword}
+                                            onChange={handleInputChange}
+                                        />
                                     </div>
                                 </div>
 
@@ -425,14 +559,28 @@ const Settings = () => {
                                         <label>New Password</label>
                                         <div className="premium-input-wrapper">
                                             <Lock size={20} className="premium-input-icon" />
-                                            <input type="password" className="premium-text-input" placeholder="Enter new key" />
+                                            <input
+                                                type="password"
+                                                name="newPassword"
+                                                className="premium-text-input"
+                                                placeholder="Enter new password"
+                                                value={formData.newPassword}
+                                                onChange={handleInputChange}
+                                            />
                                         </div>
                                     </div>
                                     <div className="input-field-group">
                                         <label>Confirm New Password</label>
                                         <div className="premium-input-wrapper">
                                             <Lock size={20} className="premium-input-icon" />
-                                            <input type="password" className="premium-text-input" placeholder="Confirm new key" />
+                                            <input
+                                                type="password"
+                                                name="confirmPassword"
+                                                className="premium-text-input"
+                                                placeholder="Confirm new password"
+                                                value={formData.confirmPassword}
+                                                onChange={handleInputChange}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -440,10 +588,11 @@ const Settings = () => {
                                 <div className="settings-action-row">
                                     <button
                                         className="btn-premium-save"
-                                        style={{ background: '#3b82f6', boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.2)' }}
-                                        onClick={handleSave}
+                                        style={{ background: '#3b82f6', boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.2)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                        onClick={handleUpdatePassword}
                                         disabled={isSaving}
                                     >
+                                        {isSaving ? <Loader2 className="animate-spin" size={18} /> : null}
                                         {isSaving ? 'Updating...' : 'Update Password'}
                                     </button>
                                 </div>
@@ -454,7 +603,7 @@ const Settings = () => {
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                                             <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#16a34a', boxShadow: '0 0 10px rgba(22, 163, 74, 0.5)' }}></div>
                                             <div>
-                                                <h5 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>Windows 11 Node • Lagos, NG</h5>
+                                                <h5 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>Windows 11 Device • Lagos, NG</h5>
                                                 <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Current Session • Active Now</p>
                                             </div>
                                         </div>

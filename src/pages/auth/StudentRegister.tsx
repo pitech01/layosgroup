@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { AlertCircle, X, Eye, EyeOff } from 'lucide-react';
 import loginHero from '../../assets/login-hero.jpeg';
 
 export default function StudentRegister() {
@@ -19,8 +20,14 @@ export default function StudentRegister() {
         gender: '',
         levelOfEducation: '',
         receiveOn: '',
+        password: '',
+        confirmPassword: '',
         agreedToTerms: false
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -34,12 +41,43 @@ export default function StudentRegister() {
         }
     };
 
-    const handleRegister = (e: React.FormEvent) => {
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here we would typically call an API to register the user
-        // For now, we'll just log them in as a student
-        login('student');
-        navigate('/student/dashboard');
+        setLoading(true);
+        setError(null);
+
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+        try {
+            const response = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...formData,
+                    name: `${formData.firstName} ${formData.lastName}`, // Combine for backend User model
+                    password_confirmation: formData.confirmPassword,
+                    role: 'student'
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Registration failed. Please try again.');
+            }
+
+            // Successful registration
+            login(data.user, data.token);
+            navigate('/student/dashboard');
+        } catch (err: any) {
+            console.error('Registration Error:', err);
+            setError(err.message || 'A network error occurred. Please check your connection.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const nextStep = () => {
@@ -122,6 +160,32 @@ export default function StudentRegister() {
                                 <h2 style={{ fontSize: '1.875rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>Student Information</h2>
                                 <p style={{ color: '#64748b' }}>Please fill in the details below to complete your registration.</p>
                             </div>
+
+                            {error && (
+                                <div className="animate-slide-in" style={{
+                                    padding: '1rem 1.25rem',
+                                    background: '#fff1f2',
+                                    border: '1px solid #ffe4e6',
+                                    color: '#e11d48',
+                                    borderRadius: '16px',
+                                    marginBottom: '1.5rem',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 500,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
+                                }}>
+                                    <AlertCircle size={20} strokeWidth={2.5} />
+                                    <span style={{ flex: 1 }}>{error}</span>
+                                    <button
+                                        onClick={() => setError(null)}
+                                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px' }}
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                            )}
 
                             <form onSubmit={handleRegister}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -326,9 +390,94 @@ export default function StudentRegister() {
                                     </label>
                                 </div>
 
-                                <button type="submit" className="login-btn-primary" style={{ marginTop: '1.5rem' }}>
-                                    Register or be Renewed
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
+                                    <div className="login-form-group">
+                                        <label className="login-label">Password *</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                name="password"
+                                                className="login-input"
+                                                placeholder="Create password"
+                                                style={{ paddingRight: '2.5rem' }}
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                style={{
+                                                    position: 'absolute',
+                                                    right: '0.75rem',
+                                                    top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    color: '#94a3b8',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    padding: '4px',
+                                                    zIndex: 10
+                                                }}
+                                            >
+                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="login-form-group">
+                                        <label className="login-label">Confirm Password *</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <input
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                name="confirmPassword"
+                                                className="login-input"
+                                                placeholder="Repeat password"
+                                                style={{ paddingRight: '2.5rem' }}
+                                                value={formData.confirmPassword}
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                style={{
+                                                    position: 'absolute',
+                                                    right: '0.75rem',
+                                                    top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    color: '#94a3b8',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    padding: '4px',
+                                                    zIndex: 10
+                                                }}
+                                            >
+                                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" className="login-btn-primary" style={{ marginTop: '1.5rem' }} disabled={loading}>
+                                    {loading ? (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                                            <div style={{ width: '20px', height: '20px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                                            <span>Processing...</span>
+                                        </div>
+                                    ) : (
+                                        'Register or be Renewed'
+                                    )}
                                 </button>
+                                <style>{`
+                                    @keyframes spin {
+                                        to { transform: rotate(360deg); }
+                                    }
+                                `}</style>
                             </form>
                         </div>
                     )}

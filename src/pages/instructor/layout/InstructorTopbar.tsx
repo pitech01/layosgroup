@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bell, Menu, ChevronDown, Clock } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface InstructorTopbarProps {
     collapsed: boolean;
@@ -7,14 +9,20 @@ interface InstructorTopbarProps {
 }
 
 const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) => {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+
     const notificationRef = useRef<HTMLDivElement>(null);
     const bellBtnRef = useRef<HTMLButtonElement>(null);
+    const profileBtnRef = useRef<HTMLDivElement>(null);
+    const profileMenuRef = useRef<HTMLDivElement>(null);
 
-    // Mock user data
-    const userName = "Instructor Hub";
-    const userRole = "Senior Instructor";
-    const userInitial = "I";
+    // Dynamic user data
+    const userName = user?.name || "Instructor Hub";
+    const userRole = user?.role === 'instructor' ? "Lead Instructor" : "Administrator";
+    const userInitial = user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : "I";
 
     // Mock notifications
     const notifications = [
@@ -34,6 +42,15 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                 !bellBtnRef.current.contains(event.target as Node)
             ) {
                 setShowNotifications(false);
+            }
+
+            if (
+                profileMenuRef.current &&
+                !profileMenuRef.current.contains(event.target as Node) &&
+                profileBtnRef.current &&
+                !profileBtnRef.current.contains(event.target as Node)
+            ) {
+                setShowProfileMenu(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -89,15 +106,78 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                     )}
                 </div>
 
-                <div className="user-pill instructor-profile-pill">
-                    <div className="user-avatar-small" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
-                        {userInitial}
+                <div style={{ position: 'relative' }}>
+                    <div
+                        className="user-pill instructor-profile-pill"
+                        onClick={() => setShowProfileMenu(!showProfileMenu)}
+                        ref={profileBtnRef}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        <div className="user-avatar-small" style={{ background: '#1a4d3e' }}>
+                            {userInitial}
+                        </div>
+                        <div className="user-info-text">
+                            <span className="user-name">{userName}</span>
+                            <span className="user-role">{userRole}</span>
+                        </div>
+                        <ChevronDown size={14} color="#94a3b8" style={{ transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
                     </div>
-                    <div className="user-info-text">
-                        <span className="user-name">{userName}</span>
-                        <span className="user-role">{userRole}</span>
-                    </div>
-                    <ChevronDown size={14} color="#94a3b8" />
+
+                    {showProfileMenu && (
+                        <div className="profile-dropdown shadow-premium" ref={profileMenuRef} style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 12px)',
+                            right: 0,
+                            width: '200px',
+                            background: 'white',
+                            borderRadius: '16px',
+                            padding: '0.75rem',
+                            border: '1.5px solid #f1f5f9',
+                            zIndex: 1000
+                        }}>
+                            <div
+                                onClick={() => { navigate('/instructor/settings'); setShowProfileMenu(false); }}
+                                style={{
+                                    padding: '0.75rem 1rem',
+                                    borderRadius: '10px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    color: '#475569',
+                                    fontWeight: 700,
+                                    fontSize: '0.9rem',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+                                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1a4d3e' }}></span>
+                                My Profile
+                            </div>
+                            <div style={{ height: '1px', background: '#f1f5f9', margin: '0.5rem 0' }}></div>
+                            <div
+                                onClick={() => logout()}
+                                style={{
+                                    padding: '0.75rem 1rem',
+                                    borderRadius: '10px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    color: '#ef4444',
+                                    fontWeight: 700,
+                                    fontSize: '0.9rem',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.background = '#fef2f2'}
+                                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }}></span>
+                                Sign Out
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </header>
