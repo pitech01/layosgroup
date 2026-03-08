@@ -85,6 +85,21 @@ export default function Students() {
                     justify-content: space-between;
                     align-items: center;
                     margin-bottom: 2rem;
+                    gap: 1.5rem;
+                }
+
+                @media (max-width: 640px) {
+                    .users-header {
+                        flex-direction: column;
+                        align-items: stretch;
+                        text-align: center;
+                    }
+                    .header-actions {
+                        flex-direction: column;
+                    }
+                    .btn-add-user {
+                        justify-content: center;
+                    }
                 }
 
                 .users-header h2 {
@@ -227,6 +242,49 @@ export default function Students() {
                     font-weight: 500;
                 }
 
+                @media (max-width: 768px) {
+                    .users-card {
+                        padding: 1rem;
+                    }
+                    .users-table thead {
+                        display: none;
+                    }
+                    .users-table, .users-table tbody, .users-table tr, .users-table td {
+                        display: block;
+                        width: 100%;
+                    }
+                    .users-table tr {
+                        background: white;
+                        border: 1px solid #f1f5f9;
+                        border-radius: 12px;
+                        margin-bottom: 1rem;
+                        padding: 1rem;
+                    }
+                    .users-table td {
+                        border: none;
+                        padding: 0.5rem 0;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    .users-table td::before {
+                        content: attr(data-label);
+                        font-weight: 700;
+                        color: #64748b;
+                        font-size: 0.8rem;
+                        text-transform: uppercase;
+                    }
+                    .users-table td:last-child {
+                        border-top: 1px solid #f8fafc;
+                        margin-top: 0.5rem;
+                        padding-top: 1rem;
+                    }
+                    .name-cell {
+                        width: 100%;
+                        justify-content: flex-end;
+                    }
+                }
+
 
                 .verification-badge {
                     display: inline-flex;
@@ -353,8 +411,8 @@ export default function Students() {
                             <tbody>
                                 {users.length > 0 ? users.map((user) => (
                                     <tr key={user.id}>
-                                        <td className="user-id">{user.id}</td>
-                                        <td>
+                                        <td className="user-id" data-label="ID">{user.id}</td>
+                                        <td data-label="Student Name">
                                             <div className="name-cell" onClick={() => navigate(`/instructor/students/${user.id}`)}>
                                                 <div className="avatar-circle" style={{ background: user.avatar || 'linear-gradient(135deg, #3b82f6, #93c5fd)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '0.8rem' }}>
                                                     {user.name.charAt(0)}
@@ -364,18 +422,18 @@ export default function Students() {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Email & Contact">
                                             <div className="email-cell">
-                                                <span className="email-text">{user.email}</span>
-                                                {user.phone && <span className="phone-text">{user.phone}</span>}
+                                                <span className="email-text" style={{ textAlign: 'right' }}>{user.email}</span>
+                                                {user.phone && <span className="phone-text" style={{ textAlign: 'right' }}>{user.phone}</span>}
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Enrollment Date">
                                             <span className="date-text">{new Date(user.created_at).toLocaleDateString()}</span>
                                         </td>
-                                        <td>
+                                        <td data-label="Active Cohorts">
                                             {user.cohorts?.length > 0 ? (
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'flex-end' }}>
                                                     {user.cohorts.map((c: any) => (
                                                         <span key={c.id} style={{ fontSize: '0.7rem', fontWeight: 800, background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', color: '#1e293b' }}>{c.name || c.id}</span>
                                                     ))}
@@ -384,7 +442,7 @@ export default function Students() {
                                                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8' }}>No active cohorts</span>
                                             )}
                                         </td>
-                                        <td style={{ textAlign: 'right' }}>
+                                        <td data-label="Management">
                                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                                                 <button
                                                     onClick={() => handleDeleteStudent(user.id)}

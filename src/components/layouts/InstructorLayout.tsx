@@ -167,6 +167,35 @@ const InstructorLayout = () => {
                     .instructor-top-nav .user-info-text {
                         display: none;
                     }
+                    
+                    .instructor-content-area {
+                        padding: 1rem !important;
+                    }
+
+                    .instructor-sidebar {
+                        width: 100% !important;
+                        left: -100% !important;
+                    }
+                    
+                    .mobile-open .instructor-sidebar {
+                        left: 0 !important;
+                        width: 85% !important; /* Don't cover fully to show overlay hint */
+                        max-width: 300px;
+                    }
+                }
+
+                /* Ensure long names or titles wrap or truncate properly */
+                .top-nav-page-title {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 150px;
+                }
+
+                @media (min-width: 641px) and (max-width: 1024px) {
+                    .top-nav-page-title {
+                        max-width: 300px;
+                    }
                 }
             `}</style>
 
@@ -177,7 +206,8 @@ const InstructorLayout = () => {
             <div className="instructor-content-wrapper">
                 <Topbar
                     role="instructor"
-                    collapsed={collapsed}
+                    className="instructor-top-nav"
+                    collapsed={window.innerWidth <= 1024 ? !mobileOpen : collapsed}
                     onToggle={() => {
                         if (window.innerWidth <= 1024) {
                             setMobileOpen(!mobileOpen);

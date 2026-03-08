@@ -10,9 +10,10 @@ interface TopbarProps {
     title?: string;
     subtitle?: string;
     icon?: React.ReactNode;
+    className?: string;
 }
 
-const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon }: TopbarProps) => {
+const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }: TopbarProps) => {
     const location = useLocation();
 
     // Derive title from route if not provided
@@ -67,7 +68,7 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon }: TopbarProp
     const context = getPageContext();
 
     return (
-        <header className="top-nav-bar">
+        <header className={`top-nav-bar ${className || ''}`}>
             <TopbarLeft
                 collapsed={collapsed}
                 onToggle={onToggle}

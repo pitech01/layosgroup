@@ -4,7 +4,6 @@ import {
     ArrowUpRight,
     ArrowDownRight,
     DollarSign,
-    Calendar,
     Search,
     Loader2
 } from 'lucide-react';
@@ -52,7 +51,6 @@ export default function Revenue() {
 
     const revenueStats = [
         { label: 'Total Revenue', value: stats?.total_revenue || '$0.00', trend: '+15.4%', isUp: true, icon: DollarSign, color: '#10b981' },
-        { label: 'This Month', value: stats?.this_month || '$0.00', trend: '+5.2%', isUp: true, icon: Calendar, color: '#3b82f6' },
         { label: 'Avg. per Cohort', value: stats?.avg_per_course || '$0.00', trend: '-1.2%', isUp: false, icon: TrendingUp, color: '#8b5cf6' },
     ];
 
@@ -78,9 +76,23 @@ export default function Revenue() {
                     margin: 0;
                 }
 
+                @media (max-width: 640px) {
+                    .rev-header {
+                        flex-direction: column;
+                        align-items: stretch;
+                        text-align: center;
+                    }
+                    .rev-header h2 { font-size: 1.25rem; }
+                    .rev-header p { font-size: 0.85rem; }
+                    .btn-export-rev { width: 100%; margin-top: 1rem; }
+                    .rev-stats-grid { grid-template-columns: 1fr; }
+                    .filter-bar-rev { flex-direction: column; gap: 1rem; align-items: stretch; }
+                    .filter-bar-rev input { width: 100% !important; }
+                }
+
                 .rev-stats-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
                     gap: 1.5rem;
                     margin-bottom: 2.5rem;
                 }
@@ -109,6 +121,15 @@ export default function Revenue() {
                     padding: 1.75rem;
                     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
                 }
+
+                @media (max-width: 768px) {
+                    .glass-panel-rev { padding: 1.25rem; }
+                    .rev-table thead { display: none; }
+                    .rev-table, .rev-table tbody, .rev-table tr, .rev-table td { display: block; width: 100%; }
+                    .rev-table tr { margin-bottom: 1rem; border: 1px solid #f1f5f9; border-radius: 12px; padding: 1rem; }
+                    .rev-table td { display: flex; justify-content: space-between; padding: 0.5rem 0; border: none !important; }
+                    .rev-table td::before { content: attr(data-label); font-weight: 700; color: #64748b; font-size: 0.75rem; text-transform: uppercase; }
+                }
                 
                 .btn-standard {
                     height: 52px;
@@ -133,7 +154,7 @@ export default function Revenue() {
                     <h2>Revenue Overview</h2>
                     <p style={{ color: '#64748b', marginTop: '0.25rem' }}>Track your earnings and student enrollment fees.</p>
                 </div>
-                <button className="btn-standard" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#020617' }}>
+                <button className="btn-standard btn-export-rev" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#020617' }}>
                     <Download size={18} /> Export Earnings
                 </button>
             </div>
@@ -190,7 +211,7 @@ export default function Revenue() {
                 </div>
 
                 <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table className="rev-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ textAlign: 'left', borderBottom: '1px solid #f1f5f9' }}>
                                 <th style={{ padding: '1.25rem 1rem', color: '#64748b', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>Course / Cohort</th>
@@ -203,11 +224,11 @@ export default function Revenue() {
                         <tbody>
                             {filteredTransactions.map((t, idx) => (
                                 <tr key={idx} style={{ borderBottom: '1px solid #f8fafc' }}>
-                                    <td style={{ padding: '1.5rem 1rem', fontWeight: 700, fontSize: '0.95rem', color: '#1e293b' }}>{t.course}</td>
-                                    <td style={{ padding: '1.5rem 1rem', fontWeight: 900, fontSize: '0.95rem', color: '#1a4d3e' }}>{t.amount}</td>
-                                    <td style={{ padding: '1.5rem 1rem', fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>{new Date(t.date).toLocaleDateString()}</td>
-                                    <td style={{ padding: '1.5rem 1rem', fontSize: '0.9rem', color: '#1e293b', fontWeight: 700 }}>{t.student}</td>
-                                    <td style={{ padding: '1.5rem 1rem' }}>
+                                    <td data-label="Cohort" style={{ padding: '1.5rem 1rem', fontWeight: 700, fontSize: '0.95rem', color: '#1e293b' }}>{t.course}</td>
+                                    <td data-label="Amount" style={{ padding: '1.5rem 1rem', fontWeight: 900, fontSize: '0.95rem', color: '#1a4d3e' }}>{t.amount}</td>
+                                    <td data-label="Date" style={{ padding: '1.5rem 1rem', fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>{new Date(t.date).toLocaleDateString()}</td>
+                                    <td data-label="Student" style={{ padding: '1.5rem 1rem', fontSize: '0.9rem', color: '#1e293b', fontWeight: 700 }}>{t.student}</td>
+                                    <td data-label="Status" style={{ padding: '1.5rem 1rem' }}>
                                         <span className={`badge-status status-${t.status.toLowerCase()}`}>
                                             {t.status}
                                         </span>

@@ -112,6 +112,15 @@ export default function PaymentVerification() {
                     color: #0f172a;
                     margin: 0;
                 }
+                @media (max-width: 640px) {
+                    .pv-header {
+                        flex-direction: column;
+                        align-items: stretch;
+                        text-align: center;
+                    }
+                    .pv-header h2 { font-size: 1.4rem; }
+                    .search-container { max-width: 100%; }
+                }
                 .glass-panel-pv {
                     background: rgba(255, 255, 255, 0.7);
                     backdrop-filter: blur(10px);
@@ -119,6 +128,32 @@ export default function PaymentVerification() {
                     border-radius: 20px;
                     padding: 1.5rem;
                     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+                }
+                @media (max-width: 768px) {
+                    .glass-panel-pv { padding: 1rem; }
+                    .pv-table thead { display: none; }
+                    .pv-table, .pv-table tbody, .pv-table tr, .pv-table td { display: block; width: 100%; }
+                    .pv-row { 
+                        margin-bottom: 1rem; 
+                        border: 1px solid #f1f5f9 !important;
+                        padding: 1rem;
+                    }
+                    .pv-row td { 
+                        display: flex; 
+                        justify-content: space-between; 
+                        align-items: center;
+                        padding: 0.6rem 0 !important;
+                        border: none !important;
+                    }
+                    .pv-row td::before {
+                        content: attr(data-label);
+                        font-weight: 700;
+                        color: #64748b;
+                        font-size: 0.75rem;
+                        text-transform: uppercase;
+                    }
+                    .student-info { justify-content: flex-end; width: 100%; }
+                    .action-btns { justify-content: flex-end; width: 100%; }
                 }
                 .search-container {
                     margin-bottom: 1.5rem;
@@ -274,6 +309,12 @@ export default function PaymentVerification() {
                     display: flex;
                     flex-direction: column;
                 }
+                @media (max-width: 640px) {
+                    .preview-modal-overlay { padding: 1rem; }
+                    .preview-content-card { border-radius: 16px; }
+                    .preview-header { padding: 1rem; }
+                    .preview-header h3 { font-size: 1rem; }
+                }
                 .preview-header {
                     padding: 1.25rem 1.5rem;
                     border-bottom: 1px solid #f1f5f9;
@@ -391,30 +432,30 @@ export default function PaymentVerification() {
                         <tbody>
                             {filteredList.map((p) => (
                                 <tr key={`${p.user_id}-${p.cohort_id}`} className="pv-row">
-                                    <td>
+                                    <td data-label="Student">
                                         <div className="student-info">
                                             <div className="student-avatar">
                                                 <User size={20} />
                                             </div>
-                                            <div>
+                                            <div style={{ textAlign: 'right' }}>
                                                 <div style={{ fontWeight: 700, color: '#1e293b' }}>{p.student_name}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{p.student_email}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <td data-label="Cohort">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
                                             <BookOpen size={14} color="#64748b" />
-                                            <span style={{ fontWeight: 600, color: '#334155' }}>{p.cohort_name}</span>
+                                            <span style={{ fontWeight: 600, color: '#334155', textAlign: 'right' }}>{p.cohort_name}</span>
                                         </div>
                                     </td>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 800, color: '#0f172a' }}>
+                                    <td data-label="Amount">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 800, color: '#0f172a', justifyContent: 'flex-end' }}>
                                             <DollarSign size={14} />
                                             <span>{p.pricing.toLocaleString()}</span>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Proof">
                                         {p.receipt_path ? (
                                             <button
                                                 onClick={() => {
@@ -424,20 +465,18 @@ export default function PaymentVerification() {
                                                 className="receipt-preview-link"
                                                 style={{ cursor: 'pointer', border: 'none' }}
                                             >
-                                                Preview Receipt <Maximize2 size={12} />
+                                                Preview <Maximize2 size={12} />
                                             </button>
                                         ) : (
                                             <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>No receipt</span>
                                         )}
                                     </td>
-                                    <td>
-                                        <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>
+                                    <td data-label="Submitted">
+                                        <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500, textAlign: 'right' }}>
                                             {new Date(p.updated_at).toLocaleDateString()}
-                                            <br />
-                                            {new Date(p.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Actions">
                                         <div className="action-btns">
                                             <button
                                                 className="btn-icon btn-approve"

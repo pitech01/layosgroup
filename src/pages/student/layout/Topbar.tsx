@@ -109,7 +109,6 @@ const Topbar = ({ collapsed, onToggle }: TopbarProps) => {
                         </div>
                         <div className="user-info-text">
                             <span className="user-name">Anna Student</span>
-                            <span className="user-role">Premium Plan</span>
                         </div>
                         <ChevronDown size={14} className="dropdown-arrow" />
                     </div>

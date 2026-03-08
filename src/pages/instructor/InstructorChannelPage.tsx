@@ -121,8 +121,32 @@ const InstructorChannelPage = () => {
     }
 
     return (
-        <div className="animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 150px)', overflow: 'hidden' }}>
-            <Link to="/instructor/channels" style={{
+        <div className="animate-fade-in-up instructor-channel-container">
+            <style>{`
+                .instructor-channel-container {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(100vh - 150px);
+                    overflow: hidden;
+                }
+
+                @media (max-width: 768px) {
+                    .instructor-channel-container {
+                        height: calc(100dvh - 120px);
+                    }
+                    .channel-breadcrumb {
+                        margin-bottom: 1rem !important;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .instructor-channel-container {
+                        padding: 0;
+                    }
+                }
+            `}</style>
+
+            <Link to="/instructor/channels" className="channel-breadcrumb" style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',

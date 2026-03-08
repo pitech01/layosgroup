@@ -1,13 +1,28 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from '../../../components/layout/Topbar';
 
 const StudentLayout = () => {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const location = useLocation();
+    // Start collapsed on mobile by default
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth <= 1024);
+
+    // Close mobile sidebar on route change
+    useEffect(() => {
+        if (window.innerWidth <= 1024) {
+            setSidebarCollapsed(true);
+        }
+    }, [location]);
 
     return (
-        <div className="student-layout">
+        <div className={`student-layout ${!sidebarCollapsed ? 'sidebar-open' : ''}`}>
+            {/* Mobile Overlay */}
+            <div
+                className="sidebar-mobile-overlay"
+                onClick={() => setSidebarCollapsed(true)}
+            />
+
             <Sidebar collapsed={sidebarCollapsed} />
 
             <div className="main-content-wrapper">

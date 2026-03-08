@@ -54,7 +54,28 @@ const InstructorChannelsPage = () => {
 
     return (
         <div className="animate-fade-in-up">
-            <div style={{ marginBottom: '2.5rem' }}>
+            <style>{`
+                .channel-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                    gap: 1.5rem;
+                }
+
+                @media (max-width: 640px) {
+                    .channel-grid {
+                        grid-template-columns: 1fr;
+                        gap: 1rem;
+                    }
+                    .channels-header-section {
+                        text-align: center;
+                    }
+                    .channels-header-section h1 {
+                        font-size: 1.5rem !important;
+                    }
+                }
+            `}</style>
+
+            <div className="channels-header-section" style={{ marginBottom: '2.5rem' }}>
                 <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>Course Channels</h1>
                 <p style={{ color: '#64748b' }}>Manage communication for your active courses.</p>
             </div>

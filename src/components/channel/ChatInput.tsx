@@ -100,7 +100,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
     };
 
     return (
-        <form onSubmit={handleSubmit} style={{
+        <form onSubmit={handleSubmit} className="chat-input-form" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
@@ -111,8 +111,32 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
             bottom: 0,
             zIndex: 10
         }}>
+            <style>{`
+                @media (max-width: 640px) {
+                    .chat-input-form {
+                        padding: 0.5rem 0.75rem !important;
+                        gap: 0.4rem !important;
+                    }
+                    .ci-btn-icon {
+                        padding: 0.4rem !important;
+                    }
+                    .ci-btn-icon svg {
+                        width: 18px !important;
+                        height: 18px !important;
+                    }
+                    .ci-input-main {
+                        padding: 0.6rem 0.85rem !important;
+                        font-size: 0.85rem !important;
+                    }
+                    .audio-status-box {
+                        padding: 0.5rem 0.75rem !important;
+                        font-size: 0.85rem !important;
+                    }
+                }
+            `}</style>
             <button
                 type="button"
+                className="ci-btn-icon"
                 style={{
                     background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', borderRadius: '50%'
                 }}
@@ -130,13 +154,13 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
             </button>
             <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
                 {isRecording ? (
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#fee2e2', borderRadius: '24px', color: '#ef4444' }}>
+                    <div className="audio-status-box" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#fee2e2', borderRadius: '24px', color: '#ef4444' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444', animation: 'pulse 1s infinite' }} />
-                            <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>Recording... {formatTime(recordingTime)}</span>
+                            <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>Rec... {formatTime(recordingTime)}</span>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button type="button" onClick={cancelRecording} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}>
+                            <button type="button" onClick={cancelRecording} className="ci-btn-icon" style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}>
                                 <Trash2 size={18} />
                             </button>
                             <button type="button" onClick={stopRecording} style={{ background: '#ef4444', border: 'none', color: 'white', cursor: 'pointer', padding: '0.25rem 0.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 700 }}>
@@ -145,18 +169,19 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                         </div>
                     </div>
                 ) : file && file.type.startsWith('audio') ? (
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f0fdf4', borderRadius: '24px', color: '#16a34a' }}>
-                        <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>🎤 Voice note attached ({file.size < 1024 * 1024 ? Math.round(file.size / 1024) + ' KB' : (file.size / (1024 * 1024)).toFixed(1) + ' MB'})</span>
-                        <button type="button" onClick={() => setFile(null)} style={{ background: 'transparent', border: 'none', color: '#16a34a', cursor: 'pointer', padding: '0.25rem' }}>
+                    <div className="audio-status-box" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f0fdf4', borderRadius: '24px', color: '#16a34a' }}>
+                        <span style={{ fontWeight: 600, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🎤 Voice note</span>
+                        <button type="button" onClick={() => setFile(null)} className="ci-btn-icon" style={{ background: 'transparent', border: 'none', color: '#16a34a', cursor: 'pointer', padding: '0.25rem' }}>
                             <Trash2 size={18} />
                         </button>
                     </div>
                 ) : (
                     <input
                         type="text"
-                        placeholder={file ? `Attached: ${file.name} - Add a message...` : placeholder}
+                        placeholder={file ? `Attached: ${file.name.substring(0, 10)}...` : placeholder}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
+                        className="ci-input-main"
                         style={{
                             width: '100%',
                             padding: '0.75rem 1rem',
@@ -176,6 +201,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                     type="button"
                     onClick={startRecording}
                     disabled={isSending}
+                    className="ci-btn-icon"
                     style={{
                         background: 'transparent',
                         color: '#64748b',
@@ -197,6 +223,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
             <button
                 type="submit"
                 disabled={(!message.trim() && !file) || isSending || isRecording}
+                className="ci-btn-icon"
                 style={{
                     background: 'transparent',
                     color: (!message.trim() && !file) || isSending || isRecording ? '#cbd5e1' : '#3b82f6',

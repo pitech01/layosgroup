@@ -426,12 +426,54 @@ export default function EditCourse() {
                     padding-bottom: 8rem;
                 }
 
+                @media (max-width: 768px) {
+                    .create-course-system {
+                        padding-bottom: 4rem;
+                    }
+                }
+                
+                .responsive-two-col {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+                    gap: 4.5rem;
+                }
+                
+                @media (max-width: 1024px) {
+                    .responsive-two-col {
+                        grid-template-columns: 1fr;
+                        gap: 2rem;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .responsive-two-col {
+                        gap: 1.5rem;
+                    }
+                }
+
                 .step-indicator-bar {
                     display: flex;
                     justify-content: space-between;
                     margin-bottom: 5rem;
                     position: relative;
                     padding: 0 1rem;
+                }
+
+                @media (max-width: 768px) {
+                    .step-indicator-bar {
+                        margin-bottom: 3rem;
+                        gap: 0.5rem;
+                    }
+                }
+
+                @media (max-width: 640px) {
+                    .step-indicator-bar {
+                        overflow-x: auto;
+                        padding-bottom: 1rem;
+                        justify-content: flex-start;
+                        scrollbar-width: none;
+                    }
+                    .step-indicator-bar::-webkit-scrollbar { display: none; }
                 }
 
                 .step-indicator-bar::before {
@@ -471,6 +513,15 @@ export default function EditCourse() {
                     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
                 }
 
+                @media (max-width: 768px) {
+                    .step-circle {
+                        width: 42px;
+                        height: 42px;
+                        border-radius: 12px;
+                        font-size: 0.85rem;
+                    }
+                }
+
                 .step-item.active .step-circle {
                     border-color: #1a4d3e;
                     background: linear-gradient(135deg, #1a4d3e, #0f172a);
@@ -492,6 +543,20 @@ export default function EditCourse() {
                     text-transform: uppercase;
                     letter-spacing: 0.1em;
                     transition: all 0.3s;
+                    text-align: center;
+                }
+
+                @media (max-width: 768px) {
+                    .step-label {
+                        font-size: 0.65rem;
+                        letter-spacing: 0.05em;
+                    }
+                }
+                
+                @media (max-width: 640px) {
+                    .step-item {
+                        min-width: 100px;
+                    }
                 }
 
                 .step-item.active .step-label { 
@@ -505,6 +570,13 @@ export default function EditCourse() {
                     border-radius: 32px;
                     padding: 4rem;
                     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.03), 0 15px 20px -5px rgba(0,0,0,0.02);
+                }
+
+                @media (max-width: 768px) {
+                    .form-section-card {
+                        padding: 2rem 1.5rem;
+                        border-radius: 24px;
+                    }
                 }
 
                 .section-title {
@@ -569,6 +641,13 @@ export default function EditCourse() {
                     transition: background 0.2s;
                 }
 
+                @media (max-width: 768px) {
+                    .module-header {
+                        padding: 1.25rem 1.5rem;
+                        gap: 1rem;
+                    }
+                }
+
                 .module-header:hover { background: #f1f5f9; }
 
                 .lesson-card {
@@ -581,9 +660,26 @@ export default function EditCourse() {
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
 
+                @media (max-width: 768px) {
+                    .lesson-card {
+                        padding: 1.25rem 1.5rem;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 1.25rem;
+                    }
+                    .lesson-card > div:last-child {
+                        width: 100%;
+                        justify-content: flex-end;
+                    }
+                }
+
                 .lesson-card:hover {
                     background: #fcfdfe;
                     transform: translateX(6px);
+                }
+
+                @media (max-width: 768px) {
+                    .lesson-card:hover { transform: none; }
                 }
 
                 .lesson-type-badge {
@@ -610,6 +706,20 @@ export default function EditCourse() {
                     display: flex;
                     gap: 1.5rem;
                     justify-content: center;
+                    flex-wrap: wrap;
+                }
+
+                @media (max-width: 768px) {
+                    .add-lesson-bar {
+                        padding: 1.5rem;
+                        gap: 0.75rem;
+                    }
+                    .type-btn {
+                        padding: 0.6rem 1rem;
+                        font-size: 0.75rem;
+                        flex: 1 1 40%;
+                        justify-content: center;
+                    }
                 }
 
                 .type-btn {
@@ -641,17 +751,127 @@ export default function EditCourse() {
                     bottom: 2.5rem;
                     left: 50%;
                     transform: translateX(-50%);
-                    width: min(800px, 92%);
-                    background: rgba(255, 255, 255, 0.9);
+                    width: min(1000px, 92%);
+                    background: rgba(255, 255, 255, 0.8);
                     backdrop-filter: blur(20px) saturate(180%);
-                    padding: 1rem 2rem;
-                    border-radius: 24px;
-                    border: 1px solid rgba(226, 232, 240, 0.8);
-                    display: grid;
-                    grid-template-columns: 120px 1fr 120px;
+                    padding: 1.25rem 3rem;
+                    border-radius: 30px;
+                    border: 1px solid rgba(255, 255, 255, 0.4);
+                    display: flex;
+                    justify-content: space-between;
                     align-items: center;
-                    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+                    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
                     z-index: 100;
+                }
+
+                @media (max-width: 768px) {
+                    .sticky-actions-bar {
+                        bottom: 1rem;
+                        padding: 1rem 1.5rem;
+                        border-radius: 20px;
+                        width: 95%;
+                    }
+                    .btn-standard {
+                        padding: 0 1.25rem;
+                        font-size: 0.85rem;
+                        height: 46px;
+                    }
+                }
+                
+                @media (max-width: 480px) {
+                    .btn-save-progress span {
+                        display: inline !important;
+                        font-size: 0.75rem;
+                    }
+                    .btn-save-progress {
+                        padding: 0 0.75rem !important;
+                        height: 44px !important;
+                        border-radius: 12px !important;
+                        min-width: unset !important;
+                        width: auto !important;
+                    }
+                    .btn-next-step {
+                        padding: 0 1rem !important;
+                        height: 44px !important;
+                        gap: 6px !important;
+                        font-size: 0.8rem !important;
+                        min-width: 110px !important;
+                        border-radius: 12px !important;
+                    }
+                    .sticky-actions-bar {
+                        padding: 1rem !important;
+                        gap: 1rem !important;
+                        justify-content: center !important;
+                        position: fixed !important;
+                        bottom: 1.5rem !important;
+                        width: calc(100% - 2rem) !important;
+                        left: 1rem !important;
+                        transform: none !important;
+                    }
+                    .back-btn-container {
+                        position: static !important;
+                    }
+                    .sticky-actions-bar > div:nth-child(2) {
+                        flex: 1;
+                        justify-content: center !important;
+                        gap: 0.75rem !important;
+                    }
+                    .hide-mobile {
+                        display: none !important;
+                    }
+                    .btn-save-progress span {
+                        display: inline;
+                        font-size: 0.8rem;
+                    }
+                    .btn-save-progress {
+                        padding: 0 1rem !important;
+                        gap: 0.5rem !important;
+                    }
+                    .btn-next-step {
+                        padding: 0 1.25rem !important;
+                        flex: 1;
+                        max-width: 180px;
+                        font-size: 0.85rem !important;
+                    }
+                    .btn-next-step span {
+                        font-size: 0.85rem;
+                    }
+                }
+
+                .hide-mobile {
+                    display: inline;
+                }
+
+                .btn-save-progress {
+                    background: white !important;
+                    border: 1.5px solid #e2e8f0 !important;
+                    color: #64748b !important;
+                    font-weight: 800 !important;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .btn-next-step {
+                    background: #1a4d3e !important;
+                    color: white !important;
+                    padding: 0 3rem;
+                    height: 60px;
+                    border-radius: 18px;
+                    font-weight: 900;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    box-shadow: 0 10px 20px -5px rgba(26, 77, 62, 0.3);
+                }
+
+                @media (max-width: 768px) {
+                    .btn-next-step {
+                        padding: 0 2rem;
+                        height: 52px;
+                        border-radius: 14px;
+                        gap: 10px;
+                    }
                 }
 
                 .btn-standard {
@@ -767,7 +987,7 @@ export default function EditCourse() {
                         Update Course Foundations
                     </h3>
 
-                    <div className="responsive-two-col" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)', gap: '4.5rem' }}>
+                    <div className="responsive-two-col">
                         <div style={{ display: 'grid', gap: '3rem' }}>
                             <div style={{ display: 'grid', gap: '2rem' }}>
                                 <div>
@@ -1375,7 +1595,14 @@ export default function EditCourse() {
                                                                         <h5 style={{ margin: 0, fontWeight: 800 }}>Assessment Logic Configuration</h5>
                                                                     </div>
                                                                     <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#64748b' }}>Configure passing thresholds and deployment rules for this validation unit.</p>
-                                                                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
+                                                                    <div className="assessment-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
+                                                                        <style>{`
+                                                                            @media (max-width: 640px) {
+                                                                                .assessment-grid {
+                                                                                    grid-template-columns: 1fr !important;
+                                                                                }
+                                                                            }
+                                                                        `}</style>
                                                                         <div>
                                                                             <label className="input-label">Pass Mark (%)</label>
                                                                             <input
@@ -1439,7 +1666,15 @@ export default function EditCourse() {
                         <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600 }}>Verify your academic blueprint before finalizing the deployment.</p>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+                    <div className="review-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+                        <style>{`
+                            @media (max-width: 1024px) {
+                                .review-grid {
+                                    grid-template-columns: 1fr !important;
+                                    gap: 1.5rem !important;
+                                }
+                            }
+                        `}</style>
                         <div style={{ background: '#f8fafc', padding: '3rem', borderRadius: '32px', border: '1.5px solid #f1f5f9' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
                                 <Users size={24} color="#1a4d3e" />
@@ -1454,7 +1689,14 @@ export default function EditCourse() {
                             </div>
                         </div>
 
-                        <div style={{ background: 'white', padding: '3rem', border: '1.5px solid #f1f5f9', borderRadius: '32px' }}>
+                        <div className="blueprint-card" style={{ background: 'white', padding: '3rem', border: '1.5px solid #f1f5f9', borderRadius: '32px' }}>
+                            <style>{`
+                                @media (max-width: 768px) {
+                                    .blueprint-card {
+                                        padding: 1.5rem !important;
+                                    }
+                                }
+                            `}</style>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
                                 <BookOpen size={24} color="#1a4d3e" />
                                 <h4 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900 }}>Intellectual Blueprint</h4>
@@ -1492,25 +1734,24 @@ export default function EditCourse() {
 
             {/* Bottom Sticky Action Bar */}
             <div className="sticky-actions-bar">
-                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <div className="back-btn-container" style={{ display: 'flex', justifyContent: 'flex-start' }}>
                     <button
                         onClick={() => setStep(Math.max(1, step - 1))}
                         disabled={step === 1}
                         className="btn-standard"
                         style={{ background: 'transparent', border: '1.5px solid #e2e8f0', color: '#475569', opacity: step === 1 ? 0 : 1, pointerEvents: step === 1 ? 'none' : 'auto', padding: '0 1.25rem' }}
                     >
-                        <ChevronLeft size={18} /> Back
+                        <ChevronLeft size={18} /> <span className="hide-mobile">Back</span>
                     </button>
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                     <button
-                        className="btn-standard"
+                        className="btn-standard btn-save-progress"
                         onClick={() => handleUpdateCourse(true)}
                         disabled={loading}
-                        style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#64748b', fontWeight: 800, padding: '0 1.5rem' }}
                     >
-                        <Save size={18} /> Save Progress
+                        <Save size={18} /> <span>Save Progress</span>
                     </button>
                     <button
                         onClick={() => {
@@ -1528,10 +1769,9 @@ export default function EditCourse() {
                             }
                         }}
                         disabled={loading}
-                        className="btn-standard"
-                        style={{ background: '#1a4d3e', padding: '0 2.5rem', fontWeight: 900, boxShadow: '0 10px 20px -5px rgba(26, 77, 62, 0.2)' }}
+                        className="btn-standard btn-next-step"
                     >
-                        {step === 4 ? 'Update Blueprint' : 'Proceed'}
+                        <span>{step === 4 ? 'Update Blueprint' : 'Proceed'}</span>
                         {step === 4 ? <CheckCircle2 size={18} /> : <ChevronRight size={18} />}
                     </button>
                 </div>
@@ -1751,10 +1991,40 @@ export default function EditCourse() {
                         style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
                     >
                         <div
-                            className="animate-scale-up"
-                            style={{ background: 'white', width: '100%', maxWidth: '900px', borderRadius: '40px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
+                            className="quiz-modal animate-scale-up"
+                            style={{ background: 'white', width: '100%', maxWidth: '900px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
                         >
-                            <div style={{ padding: '2.5rem 3rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                            <style>{`
+                                @media (max-width: 640px) {
+                                    .quiz-modal {
+                                        border-radius: 24px !important;
+                                    }
+                                    .quiz-header {
+                                        padding: 1.5rem !important;
+                                    }
+                                    .quiz-body {
+                                        padding: 1.5rem !important;
+                                    }
+                                    .question-card {
+                                        padding: 1.5rem !important;
+                                    }
+                                }
+                                @media (min-width: 641px) {
+                                    .quiz-modal {
+                                        border-radius: 40px !important;
+                                    }
+                                    .quiz-header {
+                                        padding: 2.5rem 3rem !important;
+                                    }
+                                    .quiz-body {
+                                        padding: 3rem !important;
+                                    }
+                                    .question-card {
+                                        padding: 2.5rem !important;
+                                    }
+                                }
+                            `}</style>
+                            <div className="quiz-header" style={{ borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
                                         <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#1a4d3e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
@@ -1772,7 +2042,7 @@ export default function EditCourse() {
                                 </button>
                             </div>
 
-                            <div style={{ flex: 1, overflowY: 'auto', padding: '3rem' }}>
+                            <div className="quiz-body" style={{ flex: 1, overflowY: 'auto' }}>
                                 {quizData.questions.length === 0 ? (
                                     <div style={{ textAlign: 'center', padding: '5rem 0' }}>
                                         <div style={{ width: '80px', height: '80px', borderRadius: '30px', background: '#f8fafc', border: '2px dashed #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: '#94a3b8' }}>
@@ -1784,7 +2054,7 @@ export default function EditCourse() {
                                 ) : (
                                     <div style={{ display: 'grid', gap: '2.5rem' }}>
                                         {quizData.questions.map((q, qIdx) => (
-                                            <div key={q.id} style={{ background: '#f8fafc', borderRadius: '24px', padding: '2.5rem', border: '1.5px solid #f1f5f9', position: 'relative' }}>
+                                            <div key={q.id} className="question-card" style={{ background: '#f8fafc', borderRadius: '24px', border: '1.5px solid #f1f5f9', position: 'relative' }}>
                                                 <div style={{ position: 'absolute', top: '-15px', left: '2rem', background: '#1a4d3e', color: 'white', padding: '4px 16px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.05em' }}>
                                                     QUESTION {qIdx + 1}
                                                 </div>

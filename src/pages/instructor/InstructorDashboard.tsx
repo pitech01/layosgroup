@@ -62,6 +62,7 @@ export default function InstructorDashboard() {
                     justify-content: space-between;
                     align-items: center;
                     margin-bottom: 3rem;
+                    gap: 1.5rem;
                 }
                 
                 .section-header h2 {
@@ -74,9 +75,34 @@ export default function InstructorDashboard() {
 
                 .stats-grid-dashboard {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                    gap: 2rem;
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    gap: 1.5rem;
                     margin-bottom: 3.5rem;
+                }
+
+                @media (max-width: 640px) {
+                    .section-header {
+                        flex-direction: column;
+                        align-items: stretch;
+                        text-align: center;
+                    }
+                    
+                    .section-header h2 {
+                        font-size: 1.5rem;
+                    }
+
+                    .stats-grid-dashboard {
+                        grid-template-columns: 1fr;
+                        gap: 1rem;
+                    }
+                    
+                    .stat-card-premium {
+                        padding: 1.5rem !important;
+                    }
+                    
+                    .glass-panel-premium {
+                        padding: 1.5rem !important;
+                    }
                 }
 
                 .stat-card-premium {
@@ -109,11 +135,27 @@ export default function InstructorDashboard() {
                 .activity-item {
                     display: flex;
                     align-items: center;
-                    gap: 1.25rem;
-                    padding: 1.25rem;
+                    gap: 1rem;
+                    padding: 1rem;
                     border-radius: 16px;
                     transition: all 0.2s;
                     border: 1px solid transparent;
+                }
+
+                @media (max-width: 480px) {
+                    .activity-item {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 0.75rem;
+                        background: #f8fafc;
+                        border-color: #f1f5f9;
+                        margin-bottom: 0.5rem;
+                    }
+                    
+                    .user-avatar-mini {
+                        width: 40px !important;
+                        height: 40px !important;
+                    }
                 }
 
                 .activity-item:hover {
@@ -132,6 +174,7 @@ export default function InstructorDashboard() {
                     font-weight: 800;
                     color: #1a4d3e;
                     font-size: 1.1rem;
+                    flex-shrink: 0;
                 }
                 
                 .glass-panel-premium {
@@ -160,17 +203,30 @@ export default function InstructorDashboard() {
                 }
             `}</style>
 
-            <div className="section-header">
+            <div className="section-header inst-dash-header">
+                <style>{`
+                    @media (max-width: 640px) {
+                        .inst-dash-header {
+                            flex-direction: column;
+                            align-items: flex-start !important;
+                            text-align: left !important;
+                            gap: 1.5rem;
+                        }
+                        .create-cohort-btn {
+                            width: 100% !important;
+                        }
+                    }
+                `}</style>
                 <div>
                     <h2>Instructor Dashboard</h2>
                     <p style={{ color: '#64748b', margin: '0.4rem 0 0 0', fontWeight: 600, fontSize: '1rem' }}>Monitor course performance, student progress, and active cohorts.</p>
                 </div>
                 <Link
                     to="/instructor/cohorts/create"
-                    className="btn-standard"
+                    className="btn-standard create-cohort-btn"
                     style={{ background: '#1a4d3e', boxShadow: '0 10px 15px -3px rgba(26, 77, 62, 0.2)' }}
                 >
-                    <Plus size={20} /> Create New Cohort
+                    <Plus size={20} /> <span>Create New Cohort</span>
                 </Link>
             </div>
 

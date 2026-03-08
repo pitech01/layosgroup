@@ -201,10 +201,38 @@ const Settings = () => {
                     gap: 4rem;
                 }
 
-                @media (max-width: 768px) {
+                @media (max-width: 900px) {
                     .profile-setup-grid {
                         flex-direction: column;
-                        gap: 2rem;
+                        align-items: center;
+                        gap: 3rem;
+                    }
+                    .settings-content-body {
+                        padding: 1.5rem;
+                    }
+                    .settings-header h1 {
+                        font-size: 1.75rem;
+                    }
+                }
+
+                @media (max-width: 640px) {
+                    .settings-tabs-nav {
+                        padding: 1rem;
+                    }
+                    .settings-tab-btn {
+                        padding: 0.6rem 1rem;
+                        font-size: 0.85rem;
+                        flex: 1;
+                        justify-content: center;
+                    }
+                    .settings-action-row {
+                        flex-direction: column;
+                        align-items: stretch;
+                        margin-top: 2rem;
+                    }
+                    .btn-premium-save {
+                        width: 100%;
+                        justify-content: center;
                     }
                 }
 
@@ -408,6 +436,32 @@ const Settings = () => {
                     background: #fef2f2;
                     border-color: #fecaca;
                 }
+
+                @media (max-width: 640px) {
+                    .security-status-box {
+                        flex-direction: column;
+                        text-align: center;
+                        gap: 1rem;
+                        padding: 1.25rem;
+                    }
+                    .password-grid-premium {
+                        grid-template-columns: 1fr !important;
+                        gap: 1rem !important;
+                    }
+                    .session-card-premium {
+                        flex-direction: column;
+                        gap: 1.5rem;
+                        text-align: center;
+                        padding: 1.5rem;
+                    }
+                    .session-card-premium div {
+                        flex-direction: column;
+                    }
+                    .btn-outline-danger-premium {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
             `}</style>
 
             <header className="settings-header">
@@ -554,7 +608,7 @@ const Settings = () => {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '2.5rem' }}>
+                                <div className="password-grid-premium" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '2.5rem' }}>
                                     <div className="input-field-group">
                                         <label>New Password</label>
                                         <div className="premium-input-wrapper">
@@ -563,21 +617,21 @@ const Settings = () => {
                                                 type="password"
                                                 name="newPassword"
                                                 className="premium-text-input"
-                                                placeholder="Enter new password"
+                                                placeholder="Enter"
                                                 value={formData.newPassword}
                                                 onChange={handleInputChange}
                                             />
                                         </div>
                                     </div>
                                     <div className="input-field-group">
-                                        <label>Confirm New Password</label>
+                                        <label>Confirm Password</label>
                                         <div className="premium-input-wrapper">
                                             <Lock size={20} className="premium-input-icon" />
                                             <input
                                                 type="password"
                                                 name="confirmPassword"
                                                 className="premium-text-input"
-                                                placeholder="Confirm new password"
+                                                placeholder="Confirm"
                                                 value={formData.confirmPassword}
                                                 onChange={handleInputChange}
                                             />

@@ -107,14 +107,14 @@ const Courses = () => {
         return (
             <div className="animate-fade-in-up">
                 <style>{`
-                    .cohort-selection-grid {
+                    .cohort-selection-grid, .course-grid {
                         display: grid;
-                        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
                         gap: 2rem;
                         margin-top: 2rem;
                     }
 
-                    .cohort-select-card {
+                    .cohort-select-card, .course-card {
                         background: white;
                         border: 1.5px solid #f1f5f9;
                         border-radius: 24px;
@@ -124,9 +124,16 @@ const Courses = () => {
                         display: flex;
                         flex-direction: column;
                         gap: 1.5rem;
+                        height: 100%;
                     }
 
-                    .cohort-select-card:hover {
+                    .course-card {
+                        padding: 0;
+                        overflow: hidden;
+                        border-radius: 28px;
+                    }
+
+                    .cohort-select-card:hover, .course-card:hover {
                         transform: translateY(-8px);
                         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
                         border-color: #1a4d3e40;
@@ -180,22 +187,253 @@ const Courses = () => {
                         color: #64748b;
                     }
 
-                    .tab-btn:not(.active):hover {
-                        background: #e2e8f0;
+                    .back-btn-modern {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        background: none;
+                        border: none;
+                        color: #64748b;
+                        font-weight: 700;
+                        cursor: pointer;
+                        margin-bottom: 2rem;
+                        padding: 0;
+                        transition: all 0.2s;
+                    }
+
+                    .back-btn-modern:hover {
+                        color: #1a4d3e;
+                    }
+
+                    .selected-cohort-header {
+                        margin-bottom: 3.5rem;
+                    }
+
+                    .selected-cohort-meta {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        color: #1a4d3e;
+                        margin-bottom: 0.75rem;
+                    }
+
+                    .cohort-id-badge {
+                        font-size: 0.9rem;
+                        font-weight: 900;
+                        text-transform: uppercase;
+                        letter-spacing: 0.1em;
+                        background: #f0fdf4;
+                        padding: 4px 12px;
+                        border-radius: 8px;
+                    }
+
+                    .selected-cohort-title {
+                        font-size: 2.25rem;
+                        font-weight: 950;
                         color: #0f172a;
+                        letter-spacing: -0.04em;
+                        margin: 0;
+                    }
+
+                    .course-progress-labels {
+                        display: flex; 
+                        justify-content: space-between; 
+                        font-size: 0.85rem; 
+                        color: #64748b; 
+                        margin-bottom: 0.75rem;
+                        font-weight: 700;
+                    }
+
+                    .course-progress-track {
+                        width: 100%; 
+                        background: #f1f5f9; 
+                        height: 8px; 
+                        border-radius: 4px;
+                        overflow: hidden;
+                    }
+
+                    .course-progress-bar {
+                        background: #1a4d3e; 
+                        height: 100%; 
+                        border-radius: 4px; 
+                        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+
+                    .course-access-link {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: #0f172a;
+                        color: white;
+                        text-decoration: none;
+                        padding: 1rem;
+                        border-radius: 16px;
+                        font-weight: 800;
+                        font-size: 0.95rem;
+                        gap: 8px;
+                        transition: all 0.2s;
+                        margin-top: auto;
+                    }
+
+                    .course-access-link:hover {
+                        background: #1a4d3e;
+                        transform: translateY(-2px);
+                    }
+
+                    .payment-activation-panel {
+                        background: white;
+                        border: 1.5px solid #f1f5f9;
+                        border-radius: 32px;
+                        padding: 5rem 3rem;
+                        text-align: center;
+                    }
+
+                    .enrollment-title {
+                        font-size: 2.5rem;
+                        font-weight: 950;
+                        color: #0f172a;
+                        margin-bottom: 1rem;
+                        letter-spacing: -0.04em;
+                    }
+
+                    .enrollment-desc {
+                        color: #64748b;
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        max-width: 600px;
+                        margin: 0 auto 3rem auto;
+                        line-height: 1.6;
+                    }
+
+                    .empty-state-container {
+                        grid-column: 1/-1; 
+                        text-align: center; 
+                        padding: 5rem 2rem; 
+                        background: #f8fafc; 
+                        border-radius: 32px; 
+                        border: 2px dashed #e2e8f0;
+                        transition: all 0.3s ease;
+                    }
+
+                    .browse-cohorts-btn {
+                        margin-top: 2rem; 
+                        height: 52px; 
+                        padding: 0 2.5rem; 
+                        background: #1a4d3e; 
+                        color: white; 
+                        border: none; 
+                        border-radius: 14px; 
+                        font-weight: 900; 
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        font-size: 0.95rem;
+                        box-shadow: 0 4px 12px rgba(26, 77, 62, 0.15);
+                    }
+
+                    .browse-cohorts-btn:hover {
+                        background: #153c31;
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 15px rgba(26, 77, 62, 0.2);
+                    }
+
+                    .payment-action-btn {
+                        height: 64px;
+                        padding: 0 3rem;
+                        background: #1a4d3e;
+                        color: white;
+                        border: none;
+                        border-radius: 20px;
+                        font-size: 1.1rem;
+                        font-weight: 950;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        cursor: pointer;
+                        box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                        transition: all 0.2s;
+                    }
+
+                    @media (max-width: 1024px) {
+                        .cohort-selection-grid, .course-grid {
+                            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                            gap: 1.5rem;
+                        }
+                    }
+
+                    @media (max-width: 768px) {
+                        .section-header-courses {
+                            flex-direction: column;
+                            align-items: flex-start !important;
+                            gap: 1.5rem;
+                        }
+                        .section-header-courses h1 {
+                            font-size: 1.75rem !important;
+                        }
+                        .section-header-courses p {
+                            font-size: 0.95rem !important;
+                        }
+                        .cohort-selection-grid, .course-grid {
+                            grid-template-columns: 1fr;
+                        }
+                        .cohort-select-card {
+                            padding: 1.5rem;
+                        }
+                        .payment-activation-panel {
+                            padding: 3rem 1.5rem;
+                        }
+                        .enrollment-title {
+                            font-size: 1.75rem;
+                        }
+                        .enrollment-desc {
+                            font-size: 1rem;
+                            margin-bottom: 2rem;
+                        }
+                        .payment-action-btn {
+                            width: 100%;
+                            justify-content: center;
+                            padding: 0 1.5rem;
+                            font-size: 1rem;
+                            height: 56px;
+                        }
+                        .selected-cohort-header {
+                            margin-bottom: 2rem;
+                        }
+                        .selected-cohort-title {
+                            font-size: 1.75rem;
+                        }
+                        .empty-state-container {
+                            padding: 3rem 1.5rem;
+                        }
+                        .browse-cohorts-btn {
+                            width: 100%;
+                            height: 48px;
+                            padding: 0 1.5rem;
+                            font-size: 0.9rem;
+                        }
+                    }
+
+                    @media (max-width: 480px) {
+                        .tab-btn {
+                            padding: 0.6rem 1rem;
+                            font-size: 0.8rem;
+                        }
+                        .tabs-container {
+                            width: 100%;
+                            overflow-x: auto;
+                        }
                     }
                 `}</style>
 
-                <div className="section-header-compact" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
+                <div className="section-header-compact section-header-courses" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em' }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', margin: 0 }}>
                             {activeTab === 'enrolled' ? 'My Curriculum' : 'Discovery Hub'}
                         </h1>
-                        <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem' }}>
+                        <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem', margin: '0.5rem 0 0 0' }}>
                             {activeTab === 'enrolled' ? 'Select a cohort to access your active courses.' : 'Explore and join new available programs.'}
                         </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.75rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '18px', border: '1.5px solid #f1f5f9' }}>
+                    <div className="tabs-container" style={{ display: 'flex', gap: '0.75rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '18px', border: '1.5px solid #f1f5f9', flexShrink: 0 }}>
                         <button
                             className={`tab-btn ${activeTab === 'enrolled' ? 'active' : ''}`}
                             onClick={() => setActiveTab('enrolled')}
@@ -250,7 +488,7 @@ const Courses = () => {
                             </div>
                         ))
                     ) : (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', background: '#f8fafc', borderRadius: '32px', border: '2px dashed #e2e8f0' }}>
+                        <div className="empty-state-container">
                             <div style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
                                 <Layers size={48} style={{ opacity: 0.5 }} />
                             </div>
@@ -263,7 +501,7 @@ const Courses = () => {
                             {activeTab === 'enrolled' && (
                                 <button
                                     onClick={() => setActiveTab('available')}
-                                    style={{ marginTop: '2rem', height: '48px', padding: '0 2rem', background: '#1a4d3e', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 900, cursor: 'pointer' }}
+                                    className="browse-cohorts-btn"
                                 >
                                     Browse Available Cohorts
                                 </button>
@@ -279,58 +517,33 @@ const Courses = () => {
         <div className="animate-fade-in-up">
             <button
                 onClick={() => setSelectedCohort(null)}
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    background: 'none',
-                    border: 'none',
-                    color: '#64748b',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    marginBottom: '2rem',
-                    padding: '0'
-                }}
+                className="back-btn-modern"
             >
                 <ArrowLeft size={18} /> Back to Cohorts
             </button>
 
-            <div style={{ marginBottom: '3rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#1a4d3e', marginBottom: '0.5rem' }}>
+            <div className="selected-cohort-header">
+                <div className="selected-cohort-meta">
                     <Layers size={20} strokeWidth={2.5} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{selectedCohort.id}</span>
+                    <span className="cohort-id-badge">{selectedCohort.id}</span>
                 </div>
-                <h1 style={{ fontSize: '2.25rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em' }}>{selectedCohort.name}</h1>
+                <h1 className="selected-cohort-title">{selectedCohort.name}</h1>
             </div>
 
             {selectedCohort.paymentStatus === 'unpaid' ? (
-                <div style={{ background: 'white', border: '1.5px solid #f1f5f9', borderRadius: '32px', padding: '5rem 3rem', textAlign: 'center' }}>
+                <div className="payment-activation-panel">
                     <div style={{ width: '80px', height: '80px', background: '#f0fdf4', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto' }}>
                         <Layers size={40} color="#1a4d3e" />
                     </div>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', marginBottom: '1rem', letterSpacing: '-0.04em' }}>Activate Your Enrollment</h2>
-                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, maxWidth: '600px', margin: '0 auto 3rem auto', lineHeight: 1.6 }}>
+                    <h2 className="enrollment-title">Activate Your Enrollment</h2>
+                    <p className="enrollment-desc">
                         To access the modules in the <strong>{selectedCohort.name}</strong> cohort, please complete your {selectedCohort.paymentModel === 'split-50' ? 'initial deposit' : 'enrollment payment'}.
                     </p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
                         <button
                             onClick={() => window.open(selectedCohort.paymentLink, '_blank')}
-                            style={{
-                                height: '64px',
-                                padding: '0 3rem',
-                                background: '#1a4d3e',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '20px',
-                                fontSize: '1.1rem',
-                                fontWeight: 950,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                cursor: 'pointer',
-                                boxShadow: '0 10px 15px -3px rgba(26, 77, 62, 0.2)'
-                            }}
+                            className="payment-action-btn"
                         >
                             {selectedCohort.paymentModel === 'split-50' ? 'Pay 50% Deposit' : 'Pay Full Enrollment'} ({selectedCohort.paymentModel === 'split-50' ? `$${parseFloat(selectedCohort.price.replace('$', '').replace(',', '')) / 2}` : selectedCohort.price}) <ChevronRight size={20} />
                         </button>
@@ -363,11 +576,13 @@ const Courses = () => {
                                             cursor: 'pointer',
                                             fontWeight: 700,
                                             color: selectedFile ? '#1a4d3e' : '#64748b',
-                                            transition: 'all 0.2s'
+                                            transition: 'all 0.2s',
+                                            width: '100%',
+                                            boxSizing: 'border-box'
                                         }}
                                     >
                                         {selectedFile ? <FileText size={18} /> : <Upload size={18} />}
-                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '300px' }}>
+                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>
                                             {selectedFile ? selectedFile.name : 'Choose Receipt File'}
                                         </span>
                                     </label>
@@ -450,12 +665,12 @@ const Courses = () => {
                     </div>
                 </div>
             ) : selectedCohort.paymentStatus === 'pending_verification' ? (
-                <div style={{ background: 'white', border: '1.5px solid #f1f5f9', borderRadius: '32px', padding: '5rem 3rem', textAlign: 'center' }}>
+                <div className="payment-activation-panel">
                     <div style={{ width: '80px', height: '80px', background: '#fff7ed', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto' }}>
                         <Clock size={40} color="#9a3412" />
                     </div>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', marginBottom: '1rem', letterSpacing: '-0.04em' }}>Verification in Progress</h2>
-                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, maxWidth: '600px', margin: '0 auto 2rem auto', lineHeight: 1.6 }}>
+                    <h2 className="enrollment-title">Verification in Progress</h2>
+                    <p className="enrollment-desc">
                         Thank you for submitting your proof of payment for <strong>{selectedCohort.name}</strong>. An instructor is currently reviewing your receipt.
                     </p>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.75rem 1.5rem', background: '#fff7ed', color: '#9a3412', borderRadius: '12px', fontWeight: 800, fontSize: '0.9rem' }}>
@@ -477,12 +692,7 @@ const Courses = () => {
                                 />
                                 <div className="course-overlay shadow-sm" style={{
                                     background: course.progress === 100 ? '#f0fdf4' : '#eff6ff',
-                                    color: course.progress === 100 ? '#166534' : '#1e40af',
-                                    fontWeight: 800,
-                                    fontSize: '0.75rem',
-                                    padding: '6px 14px',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.05em'
+                                    color: course.progress === 100 ? '#166534' : '#1e40af'
                                 }}>
                                     {course.progress === 100 ? 'Completed' : course.progress > 0 ? 'In Progress' : 'Ready to Start'}
                                 </div>
@@ -493,31 +703,24 @@ const Courses = () => {
                                 <h3 className="course-title">{course.title}</h3>
 
                                 <div style={{ marginBottom: '1.5rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                                    <div className="course-progress-labels">
                                         <span>{course.progress}% Complete</span>
                                         <span>{course.completedLessons}/{course.totalLessons} Lessons</span>
                                     </div>
-                                    <div style={{ width: '100%', background: '#f1f5f9', height: '6px', borderRadius: '3px' }}>
+                                    <div className="course-progress-track">
                                         <div
-                                            style={{ width: `${course.progress}%`, background: '#1a4d3e', height: '100%', borderRadius: '3px', transition: 'width 0.5s ease' }}
+                                            className="course-progress-bar"
+                                            style={{ width: `${course.progress}%` }}
                                         ></div>
                                     </div>
                                 </div>
 
                                 <Link
                                     to={`/student/courses/${course.id}?cohortId=${selectedCohort.id}`}
-                                    className="instructor-link-modern"
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        background: '#0f172a',
-                                        color: 'white',
-                                        marginTop: 'auto'
-                                    }}
+                                    className="course-access-link"
                                 >
                                     {course.progress > 0 ? 'Continue Learning' : 'Start Course'}
-                                    <ChevronRight size={16} style={{ marginLeft: '0.5rem' }} />
+                                    <ChevronRight size={16} />
                                 </Link>
                             </div>
                         </div>

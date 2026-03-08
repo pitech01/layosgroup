@@ -14,27 +14,23 @@ const TopbarLeft = ({ collapsed, onToggle, title, subtitle, icon }: TopbarLeftPr
             <button
                 className={`sidebar-toggle-btn ${!collapsed ? 'is-active' : ''}`}
                 onClick={onToggle}
-                style={{
-                    background: '#f8fafc',
-                    width: '38px',
-                    height: '38px'
-                }}
+                aria-label="Toggle Sidebar"
             >
                 {collapsed ? <Menu size={20} /> : <X size={20} />}
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="top-nav-context-wrapper">
                 {icon && (
                     <div className="top-nav-context-icon">
                         {icon}
                     </div>
                 )}
                 <div className="top-nav-title-container">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="top-nav-title-row">
                         <h1 className="top-nav-page-title">
                             {title}
                         </h1>
-                        <button className="icon-action-btn" style={{ width: '38px', height: '38px' }}>
+                        <button className="top-nav-search-trigger" aria-label="Quick Search">
                             <Search size={18} strokeWidth={2.5} />
                         </button>
                     </div>

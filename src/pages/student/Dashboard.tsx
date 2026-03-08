@@ -144,6 +144,56 @@ export default function StudentDashboard() {
 
             {/* Main Grid Content */}
             <div className="dashboard-grid-layout">
+                <style>{`
+                    @media (max-width: 1024px) {
+                        .welcome-card-dark {
+                            flex-direction: column;
+                            align-items: flex-start;
+                            padding: 2rem;
+                            gap: 2.5rem;
+                            margin-bottom: 2rem;
+                        }
+                        .welcome-course-previews {
+                            width: 100%;
+                            flex-direction: row;
+                            overflow-x: auto;
+                            padding-bottom: 0.5rem;
+                            gap: 1.25rem;
+                            scrollbar-width: none;
+                        }
+                        .welcome-course-previews::-webkit-scrollbar { display: none; }
+                        .mini-course-card {
+                            min-width: 200px;
+                            flex-shrink: 0;
+                        }
+                        .dashboard-grid-layout {
+                            grid-template-columns: 1fr;
+                            gap: 1.5rem;
+                        }
+                    }
+
+                    @media (max-width: 640px) {
+                        .welcome-card-dark h2 {
+                            font-size: 1.5rem;
+                        }
+                        .welcome-card-dark p {
+                            font-size: 0.9rem;
+                        }
+                        .section-card {
+                            padding: 1.25rem !important;
+                        }
+                        .progress-item-modern {
+                            gap: 1rem;
+                        }
+                        .course-icon-round {
+                            width: 40px;
+                            height: 40px;
+                        }
+                        .course-info-modern h6 {
+                            font-size: 0.9rem;
+                        }
+                    }
+                `}</style>
                 {/* Left Column: Progress & Activity */}
                 <div className="dashboard-left-col">
                     <div className="section-card">

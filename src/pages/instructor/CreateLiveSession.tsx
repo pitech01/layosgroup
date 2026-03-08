@@ -139,6 +139,13 @@ export default function CreateLiveSession() {
                     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
                 }
 
+                @media (max-width: 768px) {
+                    .create-live-card {
+                        padding: 1.5rem;
+                        border-radius: 20px;
+                    }
+                }
+
                 .form-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
@@ -261,6 +268,17 @@ export default function CreateLiveSession() {
                     <h1 className="dashboard-header-title" style={{ margin: 0, fontSize: '1.75rem' }}>Schedule Live Session</h1>
                     <p style={{ color: '#64748b', marginTop: '0.25rem' }}>Create a new interactive session for your students.</p>
                 </div>
+
+                <style>{`
+                    @media (max-width: 640px) {
+                        .dashboard-header-title {
+                            font-size: 1.25rem !important;
+                        }
+                        .dashboard-header-title + p {
+                            font-size: 0.85rem !important;
+                        }
+                    }
+                `}</style>
             </div>
 
             <div className="create-live-card">

@@ -377,12 +377,89 @@ export default function CreateCourse() {
                     padding-bottom: 8rem;
                 }
 
+                @media (max-width: 768px) {
+                    .create-course-system {
+                        padding-bottom: 4rem;
+                    }
+                }
+                
+                .responsive-two-col {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+                    gap: 4.5rem;
+                }
+                
+                @media (max-width: 1024px) {
+                    .responsive-two-col {
+                        grid-template-columns: 1fr;
+                        gap: 2rem;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .responsive-two-col {
+                        gap: 1.5rem;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .create-course-system {
+                        padding-bottom: 4rem;
+                    }
+                }
+                
+                .responsive-two-col {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+                    gap: 4.5rem;
+                }
+                
+                @media (max-width: 1024px) {
+                    .responsive-two-col {
+                        grid-template-columns: 1fr;
+                        gap: 2rem;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .responsive-two-col {
+                        gap: 1.5rem;
+                    }
+                }
+
                 .step-indicator-bar {
                     display: flex;
                     justify-content: space-between;
                     margin-bottom: 5rem;
                     position: relative;
                     padding: 0 1rem;
+                    gap: 1rem;
+                }
+
+                @media (max-width: 768px) {
+                    .step-indicator-bar {
+                        margin-bottom: 3rem;
+                    }
+                    .step-indicator-bar::before {
+                        top: 20px !important;
+                    }
+                }
+
+                @media (max-width: 640px) {
+                    .step-indicator-bar {
+                        gap: 0.5rem;
+                        overflow-x: auto;
+                        padding-bottom: 1rem;
+                        justify-content: flex-start;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                    .step-indicator-bar::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .step-item {
+                        min-width: 100px;
+                        flex: none !important;
+                    }
                 }
 
                 .step-indicator-bar::before {
@@ -422,6 +499,14 @@ export default function CreateCourse() {
                     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
                 }
 
+                @media (max-width: 768px) {
+                    .step-circle {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 12px;
+                    }
+                }
+
                 .step-item.active .step-circle {
                     border-color: #1a4d3e;
                     background: linear-gradient(135deg, #1a4d3e, #0f172a);
@@ -443,6 +528,14 @@ export default function CreateCourse() {
                     text-transform: uppercase;
                     letter-spacing: 0.1em;
                     transition: all 0.3s;
+                    text-align: center;
+                }
+
+                @media (max-width: 768px) {
+                    .step-label {
+                        font-size: 0.65rem;
+                        letter-spacing: 0.05em;
+                    }
                 }
 
                 .step-item.active .step-label { 
@@ -456,6 +549,13 @@ export default function CreateCourse() {
                     border-radius: 32px;
                     padding: 4rem;
                     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.03), 0 15px 20px -5px rgba(0,0,0,0.02);
+                }
+
+                @media (max-width: 768px) {
+                    .form-section-card {
+                        padding: 2rem 1.5rem;
+                        border-radius: 24px;
+                    }
                 }
 
                 .section-title {
@@ -520,6 +620,13 @@ export default function CreateCourse() {
                     transition: background 0.2s;
                 }
 
+                @media (max-width: 768px) {
+                    .module-header {
+                        padding: 1.25rem 1.5rem;
+                        gap: 1rem;
+                    }
+                }
+
                 .module-header:hover { background: #f1f5f9; }
 
                 .lesson-card {
@@ -532,9 +639,28 @@ export default function CreateCourse() {
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
 
+                @media (max-width: 768px) {
+                    .lesson-card {
+                        padding: 1.25rem 1.5rem;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 1.25rem;
+                    }
+                    .lesson-card > div:last-child {
+                        width: 100%;
+                        justify-content: flex-end;
+                    }
+                }
+
                 .lesson-card:hover {
                     background: #fcfdfe;
                     transform: translateX(6px);
+                }
+                
+                @media (max-width: 768px) {
+                    .lesson-card:hover {
+                        transform: none;
+                    }
                 }
 
                 .lesson-type-badge {
@@ -561,6 +687,20 @@ export default function CreateCourse() {
                     display: flex;
                     gap: 1.5rem;
                     justify-content: center;
+                    flex-wrap: wrap;
+                }
+
+                @media (max-width: 768px) {
+                    .add-lesson-bar {
+                        padding: 1.5rem;
+                        gap: 0.75rem;
+                    }
+                    .type-btn {
+                        padding: 0.6rem 1rem;
+                        font-size: 0.75rem;
+                        flex: 1 1 40%;
+                        justify-content: center;
+                    }
                 }
 
                 .type-btn {
@@ -603,6 +743,99 @@ export default function CreateCourse() {
                     align-items: center;
                     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
                     z-index: 100;
+                }
+
+                @media (max-width: 768px) {
+                    .sticky-actions-bar {
+                        bottom: 1rem;
+                        padding: 1rem 1.5rem;
+                        border-radius: 20px;
+                        width: 95%;
+                    }
+                    .btn-standard {
+                        padding: 0 1.25rem;
+                        font-size: 0.85rem;
+                        height: 46px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .btn-save-progress span {
+                        display: inline !important;
+                        font-size: 0.75rem;
+                    }
+                    .btn-save-progress {
+                        padding: 0 0.75rem !important;
+                        height: 44px !important;
+                        border-radius: 12px !important;
+                        min-width: unset !important;
+                        width: auto !important;
+                    }
+                    .btn-next-step {
+                        padding: 0 1rem !important;
+                        height: 44px !important;
+                        gap: 6px !important;
+                        font-size: 0.8rem !important;
+                        min-width: 110px !important;
+                        border-radius: 12px !important;
+                    }
+                    .sticky-actions-bar {
+                        padding: 0.75rem 1rem !important;
+                        gap: 0.4rem !important;
+                        justify-content: center !important;
+                        position: fixed !important;
+                    }
+                    .btn-back-nav {
+                        position: absolute !important;
+                        left: 1rem !important;
+                        width: 44px !important;
+                        padding: 0 !important;
+                        justify-content: center !important;
+                    }
+                    .sticky-actions-bar div {
+                        gap: 0.4rem !important;
+                        width: 100% !important;
+                        justify-content: center !important;
+                    }
+                    .hide-mobile {
+                        display: none !important;
+                    }
+                }
+
+                .hide-mobile {
+                    display: inline;
+                }
+
+                .btn-save-progress {
+                    background: white !important;
+                    border: 1.5px solid #e2e8f0 !important;
+                    color: #64748b !important;
+                    font-weight: 800 !important;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .btn-next-step {
+                    background: #1a4d3e !important;
+                    color: white !important;
+                    padding: 0 3rem;
+                    height: 60px;
+                    border-radius: 18px;
+                    font-weight: 900;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    box-shadow: 0 10px 20px -5px rgba(26, 77, 62, 0.3);
+                }
+
+                @media (max-width: 768px) {
+                    .btn-next-step {
+                        padding: 0 2rem;
+                        height: 52px;
+                        border-radius: 14px;
+                        gap: 10px;
+                    }
                 }
 
                 .btn-standard {
@@ -776,7 +1009,7 @@ export default function CreateCourse() {
                         General Course Information
                     </h3>
 
-                    <div className="responsive-two-col" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)', gap: '4.5rem' }}>
+                    <div className="responsive-two-col">
                         <div style={{ display: 'grid', gap: '3rem' }}>
                             <div style={{ display: 'grid', gap: '2rem' }}>
                                 <div>
@@ -837,6 +1070,13 @@ export default function CreateCourse() {
                         </div>
 
                         <div className="blueprint-meta-sidebar" style={{ background: '#f8fafc', padding: '3rem', borderRadius: '24px', border: '1.5px solid #f1f5f9' }}>
+                            <style>{`
+                                @media (max-width: 768px) {
+                                    .blueprint-meta-sidebar {
+                                        padding: 1.5rem !important;
+                                    }
+                                }
+                            `}</style>
                             <div style={{ display: 'grid', gap: '2rem' }}>
                                 <div
                                     className="thumbnail-container"
@@ -909,10 +1149,10 @@ export default function CreateCourse() {
                                         alignItems: 'center',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
-                                        boxShadow: selectedCohortId === cohort.id ? '0 10px 20px -5px rgba(26, 77, 62, 0.1)' : 'none'
+                                        boxShadow: selectedCohortId === cohort.id ? '0 10px 20px -5px rgba(26, 77, 62, 0.1)' : 'none',
                                     }}
                                     onClick={() => setSelectedCohortId(selectedCohortId === cohort.id ? null : cohort.id)}
-                                    className="hover-premium"
+                                    className="cohort-selection-card hover-premium"
                                 >
                                     <div>
                                         <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900 }}>{cohort.name}</h4>
@@ -958,7 +1198,7 @@ export default function CreateCourse() {
                                 </h3>
                                 <p style={{ color: '#64748b', margin: 0, fontSize: '1rem', fontWeight: 600 }}>Design the learning path with modules and lessons.</p>
                             </div>
-                            <button onClick={addModule} className="btn-standard" style={{ background: '#020617', padding: '0 2rem', boxShadow: '0 10px 15px -3px rgba(2, 6, 23, 0.2)' }}>
+                            <button onClick={addModule} className="btn-standard" style={{ background: '#020617', padding: '0 2rem', boxShadow: '0 10px 15px -3px rgba(2, 6, 23, 0.2)', width: window.innerWidth <= 640 ? '100%' : 'auto', marginTop: window.innerWidth <= 640 ? '1rem' : '0' }}>
                                 <Plus size={20} /> New Module
                             </button>
                         </div>
@@ -1389,7 +1629,14 @@ export default function CreateCourse() {
                                                                             <h5 style={{ margin: 0, fontWeight: 800 }}>Assessment Logic Configuration</h5>
                                                                         </div>
                                                                         <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#64748b' }}>Configure passing thresholds and deployment rules for this validation unit.</p>
-                                                                        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
+                                                                        <div className="assessment-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
+                                                                            <style>{`
+                                                                            @media (max-width: 640px) {
+                                                                                .assessment-grid {
+                                                                                    grid-template-columns: 1fr !important;
+                                                                                }
+                                                                            }
+                                                                        `}</style>
                                                                             <div>
                                                                                 <label className="input-label">Pass Mark (%)</label>
                                                                                 <input
@@ -1453,7 +1700,15 @@ export default function CreateCourse() {
                         <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600 }}>Verify your academic blueprint before finalizing the deployment.</p>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+                    <div className="review-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+                        <style>{`
+                            @media (max-width: 1024px) {
+                                .review-grid {
+                                    grid-template-columns: 1fr !important;
+                                    gap: 1.5rem !important;
+                                }
+                            }
+                        `}</style>
                         <div style={{ background: '#f8fafc', padding: '3rem', borderRadius: '32px', border: '1.5px solid #f1f5f9' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
                                 <Users size={24} color="#1a4d3e" />
@@ -1489,7 +1744,14 @@ export default function CreateCourse() {
                             </div>
                         </div>
 
-                        <div style={{ background: 'white', padding: '3rem', border: '1.5px solid #f1f5f9', borderRadius: '32px' }}>
+                        <div className="blueprint-card" style={{ background: 'white', padding: '3rem', border: '1.5px solid #f1f5f9', borderRadius: '32px' }}>
+                            <style>{`
+                                @media (max-width: 768px) {
+                                    .blueprint-card {
+                                        padding: 1.5rem !important;
+                                    }
+                                }
+                            `}</style>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
                                 <BookOpen size={24} color="#1a4d3e" />
                                 <h4 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900 }}>Intellectual Blueprint</h4>
@@ -1529,20 +1791,19 @@ export default function CreateCourse() {
                 <button
                     onClick={() => setStep(Math.max(1, step - 1))}
                     disabled={step === 1 || loading}
-                    className="btn-standard"
+                    className="btn-standard btn-back-nav"
                     style={{ background: 'transparent', border: '1.5px solid #e2e8f0', color: '#475569', opacity: step === 1 ? 0 : 1, pointerEvents: (step === 1 || loading) ? 'none' : 'auto' }}
                 >
-                    <ChevronLeft size={20} /> Back
+                    <ChevronLeft size={20} /> <span className="hide-mobile">Back</span>
                 </button>
 
                 <div style={{ display: 'flex', gap: '1.25rem' }}>
                     <button
-                        className="btn-standard"
-                        style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#64748b', fontWeight: 800, display: 'flex', gap: '8px' }}
+                        className="btn-standard btn-save-progress"
                         disabled={loading}
                         onClick={handleSaveCourse}
                     >
-                        <Save size={20} /> Save Progress
+                        <Save size={20} /> <span>Save Progress</span>
                     </button>
                     <button
                         onClick={() => {
@@ -1560,12 +1821,10 @@ export default function CreateCourse() {
                             }
                         }}
                         disabled={loading}
-                        className="btn-standard"
-                        style={{ background: '#1a4d3e', padding: '0 3rem', height: '60px', borderRadius: '18px', fontWeight: 900, display: 'flex', gap: '12px', boxShadow: '0 10px 20px -5px rgba(26, 77, 62, 0.3)' }}
+                        className="btn-standard btn-next-step"
                     >
-                        {loading ? 'Finalizing...' : (step === 4 ? 'Launch & Attach' : 'Proceed')}
+                        <span>{loading ? 'Finalizing...' : (step === 4 ? 'Launch & Attach' : 'Proceed')}</span>
                         {loading ? <Loader2 size={20} className="animate-spin" /> : (step === 4 ? <CheckCircle2 size={20} /> : <ChevronRight size={20} />)}
-
                     </button>
                 </div>
             </div>
@@ -1854,10 +2113,46 @@ export default function CreateCourse() {
                         style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
                     >
                         <div
-                            className="animate-scale-up"
-                            style={{ background: 'white', width: '100%', maxWidth: '900px', borderRadius: '40px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
+                            className="quiz-modal animate-scale-up"
+                            style={{ background: 'white', width: '100%', maxWidth: '900px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
                         >
-                            <div style={{ padding: '2.5rem 3rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                            <style>{`
+                                @media (max-width: 640px) {
+                                    .quiz-modal {
+                                        border-radius: 24px !important;
+                                    }
+                                    .quiz-header {
+                                        padding: 1.5rem !important;
+                                    }
+                                    .quiz-body {
+                                        padding: 1.5rem !important;
+                                    }
+                                    .question-card {
+                                        padding: 1.5rem !important;
+                                    }
+                                    .cohort-selection-card {
+                                        flex-direction: column !important;
+                                        gap: 1.5rem !important;
+                                        align-items: flex-start !important;
+                                        padding: 1.5rem !important;
+                                    }
+                                }
+                                @media (min-width: 641px) {
+                                    .quiz-modal {
+                                        border-radius: 40px !important;
+                                    }
+                                    .quiz-header {
+                                        padding: 2.5rem 3rem !important;
+                                    }
+                                    .quiz-body {
+                                        padding: 3rem !important;
+                                    }
+                                    .question-card {
+                                        padding: 2.5rem !important;
+                                    }
+                                }
+                            `}</style>
+                            <div className="quiz-header" style={{ borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
                                         <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#1a4d3e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
@@ -1875,7 +2170,7 @@ export default function CreateCourse() {
                                 </button>
                             </div>
 
-                            <div style={{ flex: 1, overflowY: 'auto', padding: '3rem' }}>
+                            <div className="quiz-body" style={{ flex: 1, overflowY: 'auto' }}>
                                 {quizData.questions.length === 0 ? (
                                     <div style={{ textAlign: 'center', padding: '5rem 0' }}>
                                         <div style={{ width: '80px', height: '80px', borderRadius: '30px', background: '#f8fafc', border: '2px dashed #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: '#94a3b8' }}>
@@ -1887,7 +2182,7 @@ export default function CreateCourse() {
                                 ) : (
                                     <div style={{ display: 'grid', gap: '2.5rem' }}>
                                         {quizData.questions.map((q, qIdx) => (
-                                            <div key={q.id} style={{ background: '#f8fafc', borderRadius: '24px', padding: '2.5rem', border: '1.5px solid #f1f5f9', position: 'relative' }}>
+                                            <div key={q.id} className="question-card" style={{ background: '#f8fafc', borderRadius: '24px', border: '1.5px solid #f1f5f9', position: 'relative' }}>
                                                 <div style={{ position: 'absolute', top: '-15px', left: '2rem', background: '#1a4d3e', color: 'white', padding: '4px 16px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.05em' }}>
                                                     QUESTION {qIdx + 1}
                                                 </div>

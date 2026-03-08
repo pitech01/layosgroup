@@ -78,6 +78,16 @@ export default function CourseLibrary() {
                     justify-content: space-between;
                     align-items: flex-end;
                     margin-bottom: 3.5rem;
+                    gap: 1.5rem;
+                }
+
+                @media (max-width: 768px) {
+                    .library-header-premium {
+                        flex-direction: column;
+                        align-items: stretch;
+                        text-align: center;
+                        margin-bottom: 2.5rem;
+                    }
                 }
 
                 .library-header-premium h1 {
@@ -86,6 +96,12 @@ export default function CourseLibrary() {
                     color: #0f172a;
                     letter-spacing: -0.04em;
                     margin: 0;
+                }
+
+                @media (max-width: 640px) {
+                    .library-header-premium h1 {
+                        font-size: 2rem;
+                    }
                 }
 
                 .library-header-premium p {
@@ -99,6 +115,13 @@ export default function CourseLibrary() {
                     display: flex;
                     gap: 1.5rem;
                     margin-bottom: 2.5rem;
+                }
+
+                @media (max-width: 1024px) {
+                    .search-filter-belt {
+                        flex-direction: column;
+                        gap: 1rem;
+                    }
                 }
 
                 .search-pill-premium {
@@ -124,6 +147,20 @@ export default function CourseLibrary() {
                     color: #0f172a;
                 }
 
+                .filter-group {
+                    display: flex;
+                    gap: 1rem;
+                }
+
+                @media (max-width: 640px) {
+                    .filter-group {
+                        flex-direction: column;
+                    }
+                    .filter-pill-premium {
+                        width: 100% !important;
+                    }
+                }
+
                 .filter-pill-premium {
                     width: 180px;
                     height: 56px;
@@ -138,14 +175,24 @@ export default function CourseLibrary() {
                     color: #475569;
                     cursor: pointer;
                     transition: all 0.2s;
+                    flex-shrink: 0;
                 }
 
                 .filter-pill-premium:hover { border-color: #1a4d3e30; color: #1a4d3e; }
 
                 .template-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+                    grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
                     gap: 2rem;
+                }
+
+                @media (max-width: 640px) {
+                    .template-grid {
+                        gap: 1.25rem;
+                    }
+                    .template-card-premium {
+                        padding: 1.5rem !important;
+                    }
                 }
 
                 .template-card-premium {
@@ -272,15 +319,38 @@ export default function CourseLibrary() {
                     font-size: 1rem;
                     display: flex;
                     align-items: center;
+                    justify-content: center;
                     gap: 12px;
                     cursor: pointer;
                     box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
                     transition: all 0.3s;
                 }
 
+                @media (max-width: 640px) {
+                    .btn-create-master {
+                        height: 52px;
+                        border-radius: 14px;
+                        font-size: 0.9rem;
+                    }
+                }
+
                 .btn-create-master:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.25);
+                }
+
+                @media (max-width: 480px) {
+                    .template-meta-strip {
+                        flex-direction: column;
+                        gap: 1rem;
+                    }
+                    .template-meta-strip div {
+                        flex-direction: column;
+                        width: 100%;
+                    }
+                    .action-fab-library {
+                        width: 100%;
+                    }
                 }
             `}</style>
 
@@ -298,18 +368,20 @@ export default function CourseLibrary() {
                 <div className="search-pill-premium shadow-premium">
                     <Search size={22} color="#94a3b8" />
                     <input
-                        placeholder="Search courses by title, level, or category..."
+                        placeholder="Search courses..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="filter-pill-premium shadow-premium">
-                    <span>Level</span>
-                    <Filter size={18} />
-                </div>
-                <div className="filter-pill-premium shadow-premium">
-                    <span>Category</span>
-                    <Filter size={18} />
+                <div className="filter-group">
+                    <div className="filter-pill-premium shadow-premium">
+                        <span>Level</span>
+                        <Filter size={18} />
+                    </div>
+                    <div className="filter-pill-premium shadow-premium">
+                        <span>Category</span>
+                        <Filter size={18} />
+                    </div>
                 </div>
             </div>
 

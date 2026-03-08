@@ -178,6 +178,12 @@ export default function LiveClass() {
                     padding: 0.4rem;
                     border-radius: 14px;
                     width: fit-content;
+                    max-width: 100%;
+                    overflow-x: auto;
+                    scrollbar-width: none;
+                }
+                .filter-tabs::-webkit-scrollbar {
+                    display: none;
                 }
 
                 .filter-btn {
@@ -336,10 +342,36 @@ export default function LiveClass() {
                 @media (max-width: 640px) {
                     .sessions-grid {
                         grid-template-columns: 1fr;
+                        gap: 1rem;
                     }
                     .live-header-section {
                         flex-direction: column;
-                        align-items: flex-start;
+                        align-items: stretch;
+                        text-align: center;
+                        margin-bottom: 2rem;
+                    }
+                    .live-header-section div {
+                        margin-bottom: 1rem;
+                    }
+                    .live-header-section button {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                    .filter-tabs {
+                        width: 100%;
+                        justify-content: flex-start;
+                        margin-bottom: 1.5rem !important;
+                    }
+                    .live-session-card {
+                        padding: 1.25rem;
+                    }
+                    .recording-modal {
+                        padding: 1.5rem;
+                        margin: 1rem;
+                        border-radius: 16px;
+                    }
+                    .empty-state-container {
+                        padding: 4rem 1.5rem;
                     }
                 }
             `}</style>

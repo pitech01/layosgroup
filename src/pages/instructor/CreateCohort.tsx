@@ -88,7 +88,13 @@ export default function CreateCohort() {
                 .create-cohort-container {
                     max-width: 800px;
                     margin: 0 auto;
-                    padding: 2rem 0;
+                    padding: 2rem 1.5rem;
+                }
+
+                @media (max-width: 768px) {
+                    .create-cohort-container {
+                        padding: 1.5rem 1rem;
+                    }
                 }
 
                 .breadcrumb-back {
@@ -117,11 +123,13 @@ export default function CreateCohort() {
                     margin: 0 0 0.5rem 0;
                 }
 
-                .form-header-premium p {
-                    color: #64748b;
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                    margin: 0;
+                @media (max-width: 768px) {
+                    .form-header-premium h1 {
+                        font-size: 1.75rem;
+                    }
+                    .form-header-premium p {
+                        font-size: 0.95rem;
+                    }
                 }
 
                 .cohort-form-card {
@@ -130,6 +138,13 @@ export default function CreateCohort() {
                     border-radius: 32px;
                     padding: 3rem;
                     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
+                }
+
+                @media (max-width: 768px) {
+                    .cohort-form-card {
+                        padding: 1.5rem;
+                        border-radius: 24px;
+                    }
                 }
 
                 .input-group-premium {
@@ -171,6 +186,13 @@ export default function CreateCohort() {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     gap: 1.5rem;
+                }
+
+                @media (max-width: 640px) {
+                    .form-grid-2 {
+                        grid-template-columns: 1fr;
+                        gap: 1rem;
+                    }
                 }
 
                 .select-premium {
