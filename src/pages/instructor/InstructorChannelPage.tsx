@@ -96,11 +96,12 @@ const InstructorChannelPage = () => {
         }
     };
 
-    const handleCreatePost = (newPost: Partial<Message>) => {
+    const handleCreatePost = (newPost: Partial<Message> & { attachment?: File }) => {
         postToChannel({
             content: newPost.content,
             type: newPost.type,
-            dueDate: newPost.dueDate
+            dueDate: newPost.dueDate,
+            attachment: newPost.attachment
         });
     };
 

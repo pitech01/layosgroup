@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
     Shield,
-    DollarSign,
     ChevronRight,
     ArrowLeft,
     AlertCircle,
@@ -24,11 +23,6 @@ export default function EditCohort() {
         endDate: '',
         enrollmentDeadline: '',
         timezone: 'UTC+1 (WAT)',
-        deliveryMode: 'recorded',
-        seatLimit: 100,
-        pricing: '',
-        paymentModel: 'full',
-        paymentLink: '',
         visibility: 'public'
     });
 
@@ -52,11 +46,6 @@ export default function EditCohort() {
                         endDate: data.end_date || '',
                         enrollmentDeadline: data.enrollment_deadline || '',
                         timezone: data.timezone || 'UTC+1 (WAT)',
-                        deliveryMode: data.delivery_mode || 'recorded',
-                        seatLimit: data.seat_limit || 100,
-                        pricing: data.pricing || '',
-                        paymentModel: data.payment_model || 'full',
-                        paymentLink: data.payment_link || '',
                         visibility: data.visibility || 'public'
                     });
                 } else {
@@ -92,11 +81,6 @@ export default function EditCohort() {
                     end_date: formData.endDate,
                     enrollment_deadline: formData.enrollmentDeadline,
                     timezone: formData.timezone,
-                    delivery_mode: formData.deliveryMode,
-                    seat_limit: formData.seatLimit,
-                    pricing: formData.pricing,
-                    payment_model: formData.paymentModel,
-                    payment_link: formData.paymentLink,
                     visibility: formData.visibility,
                     instructor_id: user?.id
                 })
@@ -122,7 +106,7 @@ export default function EditCohort() {
         return (
             <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
                 <Loader2 className="animate-spin" size={48} color="#1a4d3e" />
-                <p style={{ fontWeight: 800, color: '#64748b', fontSize: '1.1rem' }}>Loading Cohort Settings...</p>
+                <p style={{ fontWeight: 800, color: '#64748b', fontSize: '1.1rem' }}>Loading Settings...</p>
             </div>
         );
     }
@@ -134,12 +118,6 @@ export default function EditCohort() {
                     max-width: 800px;
                     margin: 0 auto;
                     padding: 2rem 1.5rem;
-                }
-
-                @media (max-width: 768px) {
-                    .create-cohort-container {
-                        padding: 1.5rem 1rem;
-                    }
                 }
 
                 .breadcrumb-back {
@@ -168,28 +146,12 @@ export default function EditCohort() {
                     margin: 0 0 0.5rem 0;
                 }
 
-                @media (max-width: 768px) {
-                    .form-header-premium h1 {
-                        font-size: 1.75rem;
-                    }
-                    .form-header-premium p {
-                        font-size: 0.95rem;
-                    }
-                }
-
                 .cohort-form-card {
                     background: white;
                     border: 1.5px solid #f1f5f9;
                     border-radius: 32px;
                     padding: 3rem;
                     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
-                }
-
-                @media (max-width: 768px) {
-                    .cohort-form-card {
-                        padding: 1.5rem;
-                        border-radius: 24px;
-                    }
                 }
 
                 .input-group-premium {
@@ -231,21 +193,6 @@ export default function EditCohort() {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     gap: 1.5rem;
-                }
-
-                @media (max-width: 640px) {
-                    .form-grid-2 {
-                        grid-template-columns: 1fr;
-                        gap: 1rem;
-                    }
-                }
-
-                .select-premium {
-                    appearance: none;
-                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-                    background-repeat: no-repeat;
-                    background-position: right 1.25rem center;
-                    background-size: 1.25rem;
                 }
 
                 .submit-btn-premium {
@@ -293,9 +240,11 @@ export default function EditCohort() {
                 <ArrowLeft size={18} /> Back to Cohort Details
             </Link>
 
-            <div className="form-header-premium">
+            <div className="form-header-premium" style={{ marginBottom: '2.5rem' }}>
                 <h1>Cohort Settings</h1>
-                <p>Update configuration and pricing for {formData.name}</p>
+                <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem' }}>
+                    Adjust configuration for <strong>{formData.name}</strong>
+                </p>
             </div>
 
             {error && (
@@ -327,15 +276,14 @@ export default function EditCohort() {
             <form className="cohort-form-card shadow-premium" onSubmit={handleSubmit}>
                 <div className="section-tile">
                     <Shield size={20} color="#1a4d3e" />
-                    <span>Cohort Identity</span>
+                    <span>Cohort Configuration</span>
                 </div>
 
                 <div className="input-group-premium">
-                    <label>Cohort Name</label>
+                    <label>Title</label>
                     <input
                         type="text"
                         className="input-premium"
-                        placeholder="e.g. Masterclass Batch Jan 2026"
                         required
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -366,7 +314,7 @@ export default function EditCohort() {
                 </div>
 
                 <div className="input-group-premium">
-                    <label>Enrollment Deadline</label>
+                    <label>Registration Deadline</label>
                     <input
                         type="date"
                         className="input-premium"
@@ -377,56 +325,16 @@ export default function EditCohort() {
                 </div>
 
 
-                <div className="section-tile">
-                    <DollarSign size={20} color="#1a4d3e" />
-                    <span>Pricing & Payments</span>
-                </div>
-
-                <div className="form-grid-2">
-                    <div className="input-group-premium">
-                        <label>Course Price (USD)</label>
-                        <input
-                            type="text"
-                            className="input-premium"
-                            placeholder="e.g. 500.00"
-                            required
-                            value={formData.pricing}
-                            onChange={(e) => setFormData({ ...formData, pricing: e.target.value })}
-                        />
-                    </div>
-                    <div className="input-group-premium">
-                        <label>Payment Model</label>
-                        <select
-                            className="input-premium select-premium"
-                            value={formData.paymentModel}
-                            onChange={(e) => setFormData({ ...formData, paymentModel: e.target.value })}
-                        >
-                            <option value="full">Full Upfront</option>
-                            <option value="split-50">50/50 Installment</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="input-group-premium">
-                    <label>External Payment Link (Stripe, Paystack, etc.)</label>
-                    <input
-                        type="url"
-                        className="input-premium"
-                        placeholder="https://..."
-                        value={formData.paymentLink}
-                        onChange={(e) => setFormData({ ...formData, paymentLink: e.target.value })}
-                    />
-                </div>
 
                 <button type="submit" className="submit-btn-premium" disabled={updating}>
                     {updating ? (
                         <>
                             <Loader2 className="animate-spin" size={20} />
-                            Saving Settings...
+                            Updating...
                         </>
                     ) : (
                         <>
-                            Save Cohort Settings <ChevronRight size={20} />
+                            Save Changes <ChevronRight size={20} />
                         </>
                     )}
                 </button>

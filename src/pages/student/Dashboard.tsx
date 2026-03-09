@@ -26,14 +26,20 @@ export default function StudentDashboard() {
 
     useEffect(() => {
         const fetchDashboardData = async () => {
-            try {
-                const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-                const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+            const token = localStorage.getItem('token');
 
-                // Fetch enrollments
-                const enrollmentsRes = await fetch(`${API_URL}/my-enrollments`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+            try {
+                // Fetch concurrently for better performance
+                const [enrollmentsRes, sessionsRes] = await Promise.all([
+                    fetch(`${API_URL}/my-enrollments`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch(`${API_URL}/student/live-sessions`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
                 if (enrollmentsRes.ok) {
                     const data = await enrollmentsRes.json();
                     if (data.cohorts) {
@@ -41,10 +47,6 @@ export default function StudentDashboard() {
                     }
                 }
 
-                // Fetch live sessions
-                const sessionsRes = await fetch(`${API_URL}/student/live-sessions`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
                 if (sessionsRes.ok) {
                     const data = await sessionsRes.json();
                     setLiveSessions(data);

@@ -359,12 +359,12 @@ export default function CreateLiveSession() {
 
                     <div className="form-group-modern">
                         <label className="form-label-modern">
-                            <LinkIcon size={16} /> Meeting Link (Zoom, Meet, etc.)
+                            <LinkIcon size={16} /> Meeting Link (Microsoft Teams)
                         </label>
                         <input
                             type="text"
                             className={`form-input-modern ${formErrors.meetingLink ? 'error' : ''}`}
-                            placeholder="https://zoom.us/j/..."
+                            placeholder="https://teams.microsoft.com/l/meetup-join/..."
                             value={formData.meetingLink}
                             onChange={e => setFormData({ ...formData, meetingLink: e.target.value })}
                         />

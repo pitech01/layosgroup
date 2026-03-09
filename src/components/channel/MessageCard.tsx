@@ -1,4 +1,4 @@
-import { Calendar, Download, FileAudio, FileText } from 'lucide-react';
+import { Calendar, Download, FileAudio } from 'lucide-react';
 
 export interface Message {
     id: string;
@@ -48,13 +48,13 @@ const MessageCard = ({ message }: MessageCardProps) => {
             <div className="message-content">
                 <p style={{ margin: 0 }}>{message.content}</p>
 
-                {message.attachmentUrl && message.type === 'message' && (
+                {message.attachmentUrl && (message.type === 'message' || message.type === 'announcement') && (
                     <div style={{ marginTop: '0.75rem' }}>
-                        {/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(message.attachmentUrl) ? (
+                        {/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(message.attachmentUrl.split('?')[0]) ? (
                             <div style={{ maxWidth: '300px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', marginTop: '0.5rem' }}>
                                 <img src={message.attachmentUrl} alt="Attachment" style={{ width: '100%', display: 'block' }} loading="lazy" />
                             </div>
-                        ) : /\.(mp3|wav|ogg|webm|m4a)(\?.*)?$/i.test(message.attachmentUrl) ? (
+                        ) : /\.(mp3|wav|ogg|webm|m4a)(\?.*)?$/i.test(message.attachmentUrl.split('?')[0]) ? (
                             <div style={{ marginTop: '0.5rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '32px', display: 'inline-flex', alignItems: 'center', gap: '10px', border: '1px solid #e2e8f0' }}>
                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
                                     <FileAudio size={20} />
@@ -63,7 +63,7 @@ const MessageCard = ({ message }: MessageCardProps) => {
                             </div>
                         ) : (
                             <a href={message.attachmentUrl} target="_blank" rel="noreferrer" className="attachment-link" style={{ display: 'inline-flex', marginTop: '0.5rem' }}>
-                                <FileText size={14} /> Attached File
+                                <Download size={14} /> Download Attachment
                             </a>
                         )}
                     </div>
@@ -89,13 +89,7 @@ const MessageCard = ({ message }: MessageCardProps) => {
                     </div>
                 )}
 
-                {message.type === 'announcement' && message.attachmentUrl && (
-                    <div style={{ marginTop: '1rem' }}>
-                        <a href={message.attachmentUrl} target="_blank" rel="noreferrer" className="attachment-link" style={{ background: '#e0f2fe' }}>
-                            <Download size={14} /> Download Announcement Attachment
-                        </a>
-                    </div>
-                )}
+
             </div>
         </div>
     );

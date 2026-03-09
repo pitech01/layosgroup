@@ -3,8 +3,6 @@ import {
     UserPlus,
     ArrowLeft,
     Mail,
-    Phone,
-    BookOpen,
     Layers,
     ShieldCheck,
     CheckCircle,
@@ -21,10 +19,8 @@ export default function AddStudent() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        phone: '',
-        cohortId: cohortIdFromUrl || '',
-        courseId: '', // Ideally fetched based on cohort
-        role: 'Student',
+        password: '',
+        cohorts: cohortIdFromUrl ? [cohortIdFromUrl] : [] as string[],
         sendWelcomeEmail: true
     });
 
@@ -57,22 +53,13 @@ export default function AddStudent() {
         fetchCohorts();
     }, []);
 
-    useEffect(() => {
-        if (cohortIdFromUrl && cohorts.length > 0) {
-            const selectedCohort = cohorts.find(c => c.id === cohortIdFromUrl);
-            if (selectedCohort) {
-                setFormData(prev => ({ ...prev, courseId: selectedCohort.course?.title || '' }));
-            }
-        }
-    }, [cohortIdFromUrl, cohorts]);
-
-    const handleCohortChange = (id: string) => {
-        const selectedCohort = cohorts.find(c => c.id === id);
-        setFormData(prev => ({
-            ...prev,
-            cohortId: id,
-            courseId: selectedCohort?.course?.title || ''
-        }));
+    const toggleCohort = (id: string) => {
+        setFormData(prev => {
+            const selected = prev.cohorts.includes(id)
+                ? prev.cohorts.filter(c => c !== id)
+                : [...prev.cohorts, id];
+            return { ...prev, cohorts: selected };
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -91,9 +78,8 @@ export default function AddStudent() {
                 body: JSON.stringify({
                     name: formData.name,
                     email: formData.email,
-                    phone: formData.phone,
-                    cohort_id: formData.cohortId || null,
-                    password: 'password123' // Default student password
+                    cohorts: formData.cohorts,
+                    password: formData.password || undefined // Use default if empty
                 })
             });
 
@@ -121,7 +107,7 @@ export default function AddStudent() {
                         <CheckCircle size={50} />
                     </div>
                     <h2 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', margin: '0 0 1rem 0' }}>Student Enrolled</h2>
-                    <p style={{ color: '#64748b', fontSize: '1.2rem', fontWeight: 600 }}>The registration process is complete. Assigning student to the cohort session...</p>
+                    <p style={{ color: '#64748b', fontSize: '1.2rem', fontWeight: 600 }}>The registration process is complete. Assigning student to the selected cohorts...</p>
                 </div>
             </div>
         );
@@ -183,7 +169,7 @@ export default function AddStudent() {
                 .section-title h2 {
                     margin: 0;
                     font-size: 1.5rem;
-                    fontWeight: 950;
+                    font-weight: 950;
                     color: #0f172a;
                 }
 
@@ -243,16 +229,55 @@ export default function AddStudent() {
                     box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
                 }
 
-                .premium-select {
-                    width: 100%;
-                    padding: 0.85rem 1.25rem 0.85rem 3rem;
+                .cohort-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 0.75rem;
+                }
+
+                .cohort-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 1rem;
                     background: #fcfdfe;
                     border: 1.5px solid #f1f5f9;
                     border-radius: 16px;
-                    font-family: inherit;
-                    font-size: 0.95rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .cohort-item:hover {
+                    border-color: #1a4d3e;
+                    background: #f8fafc;
+                }
+
+                .cohort-item.selected {
+                    background: #f0fdf4;
+                    border-color: #1a4d3e;
+                }
+
+                .cohort-checkbox {
+                    width: 20px;
+                    height: 20px;
+                    accent-color: #1a4d3e;
+                }
+
+                .cohort-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .cohort-name {
+                    font-weight: 850;
+                    color: #0f172a;
+                    font-size: 0.9rem;
+                }
+
+                .cohort-course {
+                    font-size: 0.75rem;
+                    color: #64748b;
                     font-weight: 600;
-                    appearance: none;
                 }
 
                 .sidebar-info {
@@ -377,15 +402,15 @@ export default function AddStudent() {
                             </div>
 
                             <div className="form-group">
-                                <label>Phone Number</label>
+                                <label>Password (Optional)</label>
                                 <div className="input-wrapper">
-                                    <Phone className="input-icon" size={18} />
+                                    <ShieldCheck className="input-icon" size={18} />
                                     <input
-                                        type="tel"
+                                        type="password"
                                         className="premium-input"
-                                        placeholder="+1 (555) 000-0000"
-                                        value={formData.phone}
-                                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                        placeholder="Auto-generated if empty"
+                                        value={formData.password}
+                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
                                     />
                                 </div>
                             </div>
@@ -393,41 +418,32 @@ export default function AddStudent() {
 
                         <div className="section-title" style={{ marginTop: '1rem' }}>
                             <div className="icon-box"><Layers size={22} /></div>
-                            <h2>Enrollment Details</h2>
+                            <h2>Assign Cohorts</h2>
                         </div>
 
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label>Enroll in Cohort</label>
-                                <div className="input-wrapper">
-                                    <Layers className="input-icon" size={18} />
-                                    <select
-                                        className="premium-select"
-                                        value={formData.cohortId}
-                                        onChange={e => handleCohortChange(e.target.value)}
-                                        required
+                        <div className="cohort-grid" style={{ marginBottom: '2rem' }}>
+                            {cohorts.length > 0 ? (
+                                cohorts.map(c => (
+                                    <div
+                                        key={c.id}
+                                        className={`cohort-item ${formData.cohorts.includes(c.id) ? 'selected' : ''}`}
+                                        onClick={() => toggleCohort(c.id)}
                                     >
-                                        <option value="">Select Cohort</option>
-                                        {cohorts.map(c => (
-                                            <option key={c.id} value={c.id}>{c.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label>Course Assigned</label>
-                                <div className="input-wrapper">
-                                    <BookOpen className="input-icon" size={18} />
-                                    <input
-                                        type="text"
-                                        className="premium-input"
-                                        style={{ background: '#f8fafc', color: '#64748b' }}
-                                        value={formData.courseId || 'Auto-assigned'}
-                                        disabled
-                                    />
-                                </div>
-                            </div>
+                                        <input
+                                            type="checkbox"
+                                            className="cohort-checkbox"
+                                            checked={formData.cohorts.includes(c.id)}
+                                            onChange={() => { }} // Handled by div onClick
+                                        />
+                                        <div className="cohort-info">
+                                            <span className="cohort-name">{c.name}</span>
+                                            <span className="cohort-course">{c.course?.title || 'No Course Attached'}</span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>No cohorts available.</p>
+                            )}
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', padding: '1.25rem', borderRadius: '18px', marginBottom: '2.5rem' }}>
@@ -444,7 +460,7 @@ export default function AddStudent() {
                         </div>
 
                         <button type="submit" className="btn-submit" disabled={isSubmitting}>
-                            {isSubmitting ? 'Enrolling Student...' : 'Enroll Student'}
+                            {isSubmitting ? 'Adding Student...' : 'Create Student Profile'}
                         </button>
                     </form>
                 </div>

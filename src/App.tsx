@@ -3,7 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import StudentLogin from './pages/auth/StudentLogin';
 import InstructorLogin from './pages/auth/InstructorLogin';
 // import AdminLogin from './pages/auth/AdminLogin';
-import StudentRegister from './pages/auth/StudentRegister';
+// import StudentRegister from './pages/auth/StudentRegister';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import StudentDashboard from './pages/student/Dashboard';
 import InstructorDashboard from './pages/instructor/InstructorDashboard';
@@ -25,10 +25,13 @@ import CohortDetails from './pages/instructor/CohortDetails';
 import Students from './pages/instructor/Students';
 import AddStudent from './pages/instructor/AddStudent';
 import StudentDetails from './pages/instructor/StudentDetails';
-import Revenue from './pages/instructor/Revenue';
-import PaymentVerification from './pages/instructor/PaymentVerification';
 import LiveClass from './pages/instructor/LiveClass';
 import CreateLiveSession from './pages/instructor/CreateLiveSession';
+import InstructorAssignments from './pages/instructor/assignments/Assignments';
+import CreateAssignment from './pages/instructor/assignments/CreateAssignment';
+import AssignmentSubmissions from './pages/instructor/assignments/AssignmentSubmissions';
+import StudentAssignments from './pages/student/assignments/Assignments';
+import SubmitAssignment from './pages/student/assignments/SubmitAssignment';
 import NotFound from './pages/NotFound';
 import AdminLayout from './components/layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -61,7 +64,7 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<StudentLogin />} />
-            <Route path="/register" element={<StudentRegister />} />
+            {/* <Route path="/register" element={<StudentRegister />} /> */}
             <Route path="/instructor-login" element={<InstructorLogin />} />
             {/* <Route path="/admin-login" element={<AdminLogin />} /> */}
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -80,6 +83,8 @@ function App() {
                 <Route path="/student/account" element={<Account />} />
                 <Route path="/student/channels" element={<StudentChannelsPage />} />
                 <Route path="/student/courses/:courseId/channel" element={<StudentChannelPage />} />
+                <Route path="/student/assignments" element={<StudentAssignments />} />
+                <Route path="/student/assignments/:id/submit" element={<SubmitAssignment />} />
                 {/* Redirect legacy dashboard route if needed, or just keep /student/dashboard as main */}
                 <Route path="/student-dashboard" element={<Navigate to="/student/dashboard" replace />} />
               </Route>
@@ -103,8 +108,9 @@ function App() {
                 <Route path="/instructor/students" element={<Students />} />
                 <Route path="/instructor/students/add" element={<AddStudent />} />
                 <Route path="/instructor/students/:id" element={<StudentDetails />} />
-                <Route path="/instructor/revenue" element={<Revenue />} />
-                <Route path="/instructor/payments" element={<PaymentVerification />} />
+                <Route path="/instructor/assignments" element={<InstructorAssignments />} />
+                <Route path="/instructor/assignments/create" element={<CreateAssignment />} />
+                <Route path="/instructor/assignments/:id/submissions" element={<AssignmentSubmissions />} />
                 <Route path="/instructor/live" element={<LiveClass />} />
                 <Route path="/instructor/live/create" element={<CreateLiveSession />} />
                 <Route path="/instructor/channels" element={<InstructorChannelsPage />} />

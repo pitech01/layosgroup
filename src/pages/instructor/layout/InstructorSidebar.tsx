@@ -7,10 +7,9 @@ import {
     GraduationCap,
     LogOut,
     Settings,
-    DollarSign,
-    CircleCheck,
     Video,
-    MessageCircle
+    MessageCircle,
+    ClipboardList
 } from 'lucide-react';
 
 interface InstructorSidebarProps {
@@ -36,14 +35,13 @@ const InstructorSidebar = ({ collapsed }: InstructorSidebarProps) => {
 
     const navItems = [
         { path: '/instructor-dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/instructor/cohorts', label: 'Cohort', icon: Users },
-        { path: '/instructor/course-library', label: 'Course', icon: BookOpen },
-        { path: '/instructor/students', label: 'Student', icon: GraduationCap },
-        { path: '/instructor/revenue', label: 'Revenue', icon: DollarSign },
-        { path: '/instructor/payments', label: 'Payments', icon: CircleCheck },
+        { path: '/instructor/cohorts', label: 'Cohorts', icon: Users },
+        { path: '/instructor/course-library', label: 'Courses', icon: BookOpen },
+        { path: '/instructor/students', label: 'Students', icon: GraduationCap },
+        { path: '/instructor/assignments', label: 'Assignments', icon: ClipboardList },
         { path: '/instructor/live', label: 'Live Classes', icon: Video },
         { path: '/instructor/channels', label: 'Channels', icon: MessageCircle },
-        { path: '/instructor/settings', label: 'Setting', icon: Settings },
+        { path: '/instructor/settings', label: 'Settings', icon: Settings },
     ];
 
     return (

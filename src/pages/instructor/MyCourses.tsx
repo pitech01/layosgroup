@@ -1,16 +1,12 @@
 import {
     Plus,
-    BookOpen,
     CheckCircle2,
-    ChevronDown,
     Users,
     Trash2,
-    Edit2,
     Eye,
     Clock,
     Loader2,
-    Search,
-    Settings
+    Search
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -19,9 +15,6 @@ interface Cohort {
     id: string | number;
     name: string;
     start_date: string;
-    delivery_mode: string;
-    pricing: string | number;
-    payment_model: string;
     course?: {
         id: string;
         title: string;
@@ -86,15 +79,15 @@ export default function MyCourses() {
     );
 
     const stats = [
-        { label: 'Total Managed Cohorts', count: cohortsList.length, trend: 'Managed', color: '#1a4d3e', icon: CheckCircle2 },
-        { label: 'Active Students', count: cohortsList.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Enrolled', color: '#64748b', icon: Users },
+        { label: 'Active Cohorts', count: cohortsList.length, trend: 'Managed', color: '#1a4d3e', icon: CheckCircle2 },
+        { label: 'Student Body', count: cohortsList.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Enrolled', color: '#64748b', icon: Users },
     ];
 
     if (loading) {
         return (
             <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
                 <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
-                <p style={{ fontWeight: 800, color: '#64748b' }}>Accessing Instructor Records...</p>
+                <p style={{ fontWeight: 800, color: '#64748b' }}>Loading Records...</p>
             </div>
         );
     }
@@ -215,38 +208,6 @@ export default function MyCourses() {
                     vertical-align: middle;
                 }
 
-                .course-identity {
-                    display: flex;
-                    align-items: center;
-                    gap: 1.25rem;
-                }
-
-                .thumb-rounded-premium {
-                    width: 56px;
-                    height: 56px;
-                    border-radius: 16px;
-                    object-fit: cover;
-                    background: #f1f5f9;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: #1a4d3e;
-                    font-weight: 950;
-                }
-
-                .status-pill-premium {
-                    padding: 0.5rem 1rem;
-                    border-radius: 12px;
-                    font-size: 0.75rem;
-                    font-weight: 800;
-                    text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                }
-
-                .status-pill-premium.active { background: #f0fdf4; color: #16a34a; }
-                .status-pill-premium.upcoming { background: #eff6ff; color: #2563eb; }
-                .status-pill-premium.completed { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
-
                 .action-btn-circle {
                     width: 44px;
                     height: 44px;
@@ -259,6 +220,7 @@ export default function MyCourses() {
                     color: #64748b;
                     cursor: pointer;
                     transition: all 0.2s;
+                    text-decoration: none;
                 }
 
                 .action-btn-circle:hover {
@@ -268,36 +230,6 @@ export default function MyCourses() {
                     transform: translateY(-2px);
                 }
 
-                .action-btn-circle.view-btn {
-                    color: #1a4d3e;
-                    background: #f0fdf4;
-                    border-color: #dcfce7;
-                }
-                .action-btn-circle.view-btn:hover {
-                    background: #1a4d3e;
-                    color: white;
-                }
-
-                .action-btn-circle.edit-btn {
-                    color: #0f172a;
-                    background: #f1f5f9;
-                    border-color: #e2e8f0;
-                }
-                .action-btn-circle.edit-btn:hover {
-                    background: #0f172a;
-                    color: white;
-                }
-
-                .action-btn-circle.delete-btn {
-                    color: #ef4444;
-                    background: #fef2f2;
-                    border-color: #fee2e2;
-                }
-                .action-btn-circle.delete-btn:hover {
-                    background: #ef4444;
-                    color: white;
-                }
-                
                 .btn-standard {
                     height: 52px;
                     padding: 0 2rem;
@@ -308,7 +240,7 @@ export default function MyCourses() {
                     align-items: center;
                     justify-content: center;
                     gap: 10px;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: all 0.3s;
                     cursor: pointer;
                     border: none;
                     color: white;
@@ -318,15 +250,15 @@ export default function MyCourses() {
 
             <div className="courses-header">
                 <div>
-                    <h2>Cohort Dashboard</h2>
-                    <p style={{ color: '#64748b', margin: '0.4rem 0 0 0', fontWeight: 600 }}>Manage, track, and optimize your student cohorts and active sessions.</p>
+                    <h2>Cohort Roster</h2>
+                    <p style={{ color: '#64748b', margin: '0.5rem 0 0 0', fontWeight: 600 }}>Overview of active learning sessions and cohort registrations.</p>
                 </div>
                 <Link
                     to="/instructor/cohorts/create"
                     className="btn-standard"
-                    style={{ background: '#1a4d3e', boxShadow: '0 10px 15px -3px rgba(26, 77, 62, 0.2)' }}
+                    style={{ background: '#1a4d3e', boxShadow: '0 10px 15px rgba(26, 77, 62, 0.15)' }}
                 >
-                    <Plus size={20} /> Create New Cohort
+                    <Plus size={20} /> New Cohort
                 </Link>
             </div>
 
@@ -347,31 +279,23 @@ export default function MyCourses() {
                             <stat.icon size={32} />
                         </div>
                         <div>
-                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</p>
+                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</p>
                             <h3 style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: 950, color: '#0f172a' }}>{stat.count}</h3>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="filter-section">
-                <div className="search-pill-container">
+            <div className="filter-section" style={{ marginBottom: '2rem' }}>
+                <div className="search-pill-container" style={{ flex: 1 }}>
                     <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                     <input
                         type="text"
-                        placeholder="Search cohorts or course titles..."
+                        placeholder="Search sessions..."
                         className="search-pill-input"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                </div>
-                <div className="filter-pill-premium">
-                    <span>Category</span>
-                    <ChevronDown size={18} />
-                </div>
-                <div className="filter-pill-premium">
-                    <span>Status</span>
-                    <ChevronDown size={18} />
                 </div>
             </div>
 
@@ -380,64 +304,51 @@ export default function MyCourses() {
                     <table className="course-table">
                         <thead>
                             <tr>
-                                <th>Cohort / Course</th>
-                                <th>Schedule</th>
-                                <th>Enrollment</th>
-                                <th>Pricing</th>
-                                <th style={{ textAlign: 'right' }}>Actions</th>
+                                <th>Session Identity</th>
+                                <th>Operational Data</th>
+                                <th>Population</th>
+                                <th style={{ textAlign: 'right' }}>Management</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredCohorts.map(cohort => (
                                 <tr key={cohort.id}>
                                     <td>
-                                        <div className="course-identity">
-                                            <div className="thumb-rounded-premium">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                                            <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a4d3e', fontWeight: 950 }}>
                                                 {cohort.name.charAt(0)}
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', letterSpacing: '0.05em' }}>{cohort.id}</span>
-                                                <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '1rem' }}>{cohort.name}</span>
-                                                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>{cohort.course?.title || 'No Course Linked'}</span>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '2px 8px', borderRadius: '6px', width: 'fit-content' }}>{cohort.id}</span>
+                                                <span style={{ fontWeight: 900, color: '#0f172a', fontSize: '1rem' }}>{cohort.name}</span>
+                                                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>{cohort.course?.title || 'No Curriculum Linked'}</span>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 700, color: '#475569' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 800, color: '#475569' }}>
                                                 <Clock size={14} /> {new Date(cohort.start_date).toLocaleDateString()}
                                             </div>
-                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Delivery: {cohort.delivery_mode}</div>
+                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Session Active</div>
                                         </div>
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <Users size={18} color="#94a3b8" />
-                                            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>{cohort.students?.length || 0}</span>
+                                            <span style={{ fontWeight: 950, fontSize: '1rem', color: '#0f172a' }}>{cohort.students?.length || 0}</span>
                                         </div>
                                     </td>
-                                    <td>
-                                        <div style={{ fontWeight: 900, color: '#0f172a' }}>${cohort.pricing}</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700 }}>{cohort.payment_model}</div>
-                                    </td>
                                     <td style={{ textAlign: 'right' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
-                                            <Link to={`/instructor/cohort/${cohort.id}`} className="action-btn-circle view-btn shadow-sm" title="View Roster" style={{ width: 'auto', padding: '0 1rem', gap: '8px' }}>
-                                                <Eye size={18} /> <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>Roster</span>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                                            <Link to={`/instructor/cohorts/${cohort.id}`} className="action-btn-circle" style={{ width: 'auto', padding: '0 1.25rem', gap: '8px' }}>
+                                                <Eye size={18} /> <span style={{ fontSize: '0.8rem', fontWeight: 900 }}>Manage</span>
                                             </Link>
-                                            {cohort.course ? (
-                                                <Link to={`/instructor/courses/${cohort.course.id}/edit`} className="action-btn-circle edit-btn shadow-sm" title="Edit Curriculum" style={{ width: 'auto', padding: '0 1rem', gap: '8px' }}>
-                                                    <Edit2 size={18} /> <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>Edit Course</span>
-                                                </Link>
-                                            ) : (
-                                                <Link to={`/instructor/cohorts/${cohort.id}/edit`} className="action-btn-circle edit-btn shadow-sm" title="Edit Cohort" style={{ width: 'auto', padding: '0 1rem', gap: '8px' }}>
-                                                    <Settings size={18} /> <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>Settings</span>
-                                                </Link>
-                                            )}
                                             <button
-                                                className="action-btn-circle delete-btn shadow-sm"
-                                                title="Delete Cohort"
+                                                className="action-btn-circle"
+                                                title="Delete"
                                                 onClick={() => handleDeleteCohort(cohort.id)}
+                                                style={{ color: '#ef4444' }}
                                             >
                                                 <Trash2 size={18} />
                                             </button>
@@ -447,13 +358,6 @@ export default function MyCourses() {
                             ))}
                         </tbody>
                     </table>
-                    {filteredCohorts.length === 0 && (
-                        <div style={{ padding: '5rem', textAlign: 'center' }}>
-                            <BookOpen size={48} color="#e2e8f0" style={{ marginBottom: '1.5rem' }} />
-                            <h3 style={{ color: '#0f172a', fontWeight: 900 }}>No cohorts found</h3>
-                            <p style={{ color: '#64748b', fontWeight: 600 }}>Try adjusting your search or create a new cohort.</p>
-                        </div>
-                    )}
                 </div>
             </div>
         </div >

@@ -20,7 +20,7 @@ import {
 import { useParams, Link } from 'react-router-dom';
 
 // --- TYPES ---
-type SessionType = 'video' | 'live' | 'docs' | 'assessment';
+type SessionType = 'video' | 'live' | 'docs' | 'evaluation';
 
 interface QuizQuestion {
     id: string;
@@ -227,7 +227,7 @@ export default function CurriculumBuilder() {
                 .session-icon.video { background: #eff6ff; color: #1d4ed8; }
                 .session-icon.live { background: #fef2f2; color: #b91c1c; }
                 .session-icon.docs { background: #f0fdf4; color: #166534; }
-                .session-icon.assessment { background: #fefce8; color: #854d0e; }
+                .session-icon.evaluation { background: #fefce8; color: #854d0e; }
                 .session-text h4 { font-size: 1.15rem; font-weight: 900; margin: 0; color: #0f172a; }
                 .session-text p { font-size: 0.85rem; font-weight: 800; color: #64748b; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em; }
 
@@ -324,11 +324,11 @@ export default function CurriculumBuilder() {
                                                         {sess.type === 'video' && <Video size={22} />}
                                                         {sess.type === 'live' && <Activity size={22} />}
                                                         {sess.type === 'docs' && <FileText size={22} />}
-                                                        {sess.type === 'assessment' && <HelpCircle size={22} />}
+                                                        {sess.type === 'evaluation' && <HelpCircle size={22} />}
                                                     </div>
                                                     <div className="session-text">
                                                         <h4>{sess.title}</h4>
-                                                        <p>{sess.type} • {sess.is_locked ? 'Prerequisite Required' : 'Public Access'}</p>
+                                                        <p>{sess.type === 'evaluation' ? 'Evaluation' : sess.type} • {sess.is_locked ? 'Prerequisite Required' : 'Public Access'}</p>
                                                     </div>
                                                 </div>
                                                 <div className="module-controls">
@@ -392,9 +392,9 @@ export default function CurriculumBuilder() {
                                         <h4>Course Material</h4>
                                         <p>PDFs, documents, and resources for students to download.</p>
                                     </div>
-                                    <div className="select-opt assessment" onClick={() => setActiveModal({ ...activeModal, type: 'assessment' })}>
+                                    <div className="select-opt evaluation" onClick={() => setActiveModal({ ...activeModal, type: 'evaluation' })}>
                                         <div className="opt-icon"><HelpCircle size={40} /></div>
-                                        <h4>Assessment</h4>
+                                        <h4>Evaluation</h4>
                                         <p>Create quizzes and tests to evaluate student understanding.</p>
                                     </div>
                                 </div>
@@ -427,7 +427,7 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
         questions: []
     });
 
-    const [assessmentFields, setAssessmentFields] = useState({
+    const [evaluationFields, setEvaluationFields] = useState({
         pass_mark: initialData?.pass_mark || 80,
         questions: initialData?.questions || []
     });
@@ -437,24 +437,24 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
     };
 
     const addQuestion = () => {
-        setAssessmentFields({
-            ...assessmentFields,
-            questions: [...assessmentFields.questions, { id: `q_${Date.now()}`, text: '', options: ['', '', '', ''], correctIndex: 0 }]
+        setEvaluationFields({
+            ...evaluationFields,
+            questions: [...evaluationFields.questions, { id: `q_${Date.now()}`, text: '', options: ['', '', '', ''], correctIndex: 0 }]
         });
     };
 
     const updateQuestion = (qId: string, updates: Partial<QuizQuestion>) => {
-        setAssessmentFields({
-            ...assessmentFields,
-            questions: assessmentFields.questions.map(q => q.id === qId ? { ...q, ...updates } : q)
+        setEvaluationFields({
+            ...evaluationFields,
+            questions: evaluationFields.questions.map(q => q.id === qId ? { ...q, ...updates } : q)
         });
     };
 
     const handleSubmit = () => {
         const payload = { ...formData };
-        if (type === 'assessment') {
-            payload.pass_mark = assessmentFields.pass_mark;
-            payload.questions = assessmentFields.questions;
+        if (type === 'evaluation') {
+            payload.pass_mark = evaluationFields.pass_mark;
+            payload.questions = evaluationFields.questions;
         }
         onSave(payload);
     };
@@ -466,10 +466,10 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                     {type === 'video' && <Video size={36} />}
                     {type === 'live' && <Activity size={36} />}
                     {type === 'docs' && <FileText size={36} />}
-                    {type === 'assessment' && <HelpCircle size={36} />}
+                    {type === 'evaluation' && <HelpCircle size={36} />}
                 </div>
                 <div>
-                    <h2>{initialData ? 'Update Lesson' : `Add New ${type === 'docs' ? 'Resource' : type}`}</h2>
+                    <h2>{initialData ? 'Update Lesson' : `Add New ${type === 'docs' ? 'Resource' : (type === 'evaluation' ? 'Evaluation' : type)}`}</h2>
                     <p>Configure the details for this curriculum unit.</p>
                 </div>
             </header>
@@ -498,9 +498,7 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                         <div>
                             <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#475569', marginBottom: '8px', display: 'block' }}>Live Platform</label>
                             <select className="form-input-premium">
-                                <option>Internal Stream</option>
-                                <option>Zoom</option>
-                                <option>Google Meet</option>
+                                <option>Microsoft Teams</option>
                             </select>
                         </div>
                         <div>
@@ -510,18 +508,18 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                     </div>
                 )}
 
-                {type === 'assessment' && (
+                {type === 'evaluation' && (
                     <div className="questions-builder">
                         <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '24px', border: '2px solid #e2e8f0' }}>
-                            <label style={{ fontWeight: 900, color: '#0f172a' }}>Passing Grade: {assessmentFields.pass_mark}%</label>
-                            <input type="range" min="0" max="100" step="5" value={assessmentFields.pass_mark} onChange={e => setAssessmentFields({ ...assessmentFields, pass_mark: parseInt(e.target.value) })} style={{ width: '100%', marginTop: '1rem', accentColor: '#1a4d3e' }} />
+                            <label style={{ fontWeight: 900, color: '#0f172a' }}>Passing Grade: {evaluationFields.pass_mark}%</label>
+                            <input type="range" min="0" max="100" step="5" value={evaluationFields.pass_mark} onChange={e => setEvaluationFields({ ...evaluationFields, pass_mark: parseInt(e.target.value) })} style={{ width: '100%', marginTop: '1rem', accentColor: '#1a4d3e' }} />
                         </div>
 
-                        {assessmentFields.questions.map((q, idx) => (
+                        {evaluationFields.questions.map((q, idx) => (
                             <div key={q.id} className="q-card">
                                 <div className="q-header">
                                     <span>Question {idx + 1}</span>
-                                    <button onClick={() => setAssessmentFields({ ...assessmentFields, questions: assessmentFields.questions.filter(x => x.id !== q.id) })} className="del-btn"><Trash2 size={16} /></button>
+                                    <button onClick={() => setEvaluationFields({ ...evaluationFields, questions: evaluationFields.questions.filter(x => x.id !== q.id) })} className="del-btn"><Trash2 size={16} /></button>
                                 </div>
                                 <input className="form-input-premium" style={{ marginBottom: '1.5rem' }} value={q.text} onChange={e => updateQuestion(q.id, { text: e.target.value })} placeholder="Enter your question here..." />
                                 <div className="options-grid">

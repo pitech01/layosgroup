@@ -1019,7 +1019,7 @@ export default function EditCourse() {
                                             { id: 'video', label: 'Video Lessons', icon: Video, color: '#1d4ed8' },
                                             { id: 'live', label: 'Live Sessions', icon: Users, color: '#b91c1c' },
                                             { id: 'material', label: 'Document Hub', icon: FileText, color: '#065f46' },
-                                            { id: 'quiz', label: 'Assessments', icon: HelpCircle, color: '#9a3412' }
+                                            { id: 'quiz', label: 'Evaluations', icon: HelpCircle, color: '#9a3412' }
                                         ].map((cat) => (
                                             <div
                                                 key={cat.id}
@@ -1239,7 +1239,7 @@ export default function EditCourse() {
                                                             {lesson.type === 'live' && <Users size={14} />}
                                                             {lesson.type === 'material' && <FileText size={14} />}
                                                             {lesson.type === 'quiz' && <HelpCircle size={14} />}
-                                                            {lesson.type === 'material' ? 'Docs' : lesson.type === 'quiz' ? 'Assessment' : lesson.type === 'live' ? 'Live Class' : 'Video'}
+                                                            {lesson.type === 'material' ? 'Docs' : lesson.type === 'quiz' ? 'Evaluation' : lesson.type === 'live' ? 'Live Class' : 'Video'}
                                                         </div>
                                                         <span style={{ fontWeight: 800, fontSize: '1rem', color: '#334155' }}>{lesson.title}</span>
                                                     </div>
@@ -1397,12 +1397,10 @@ export default function EditCourse() {
                                                                         <label className="input-label">Meeting Provider</label>
                                                                         <select
                                                                             className="custom-input"
-                                                                            value={lesson.livePlatform || 'Zoom'}
+                                                                            value={lesson.livePlatform || 'Microsoft Teams'}
                                                                             onChange={(e) => updateLesson(mod.id, lesson.id, { livePlatform: e.target.value })}
                                                                         >
-                                                                            <option>Zoom Video Communications</option>
-                                                                            <option>Google Meet</option>
-                                                                            <option>Layos Internal Live Room</option>
+                                                                            <option>Microsoft Teams</option>
                                                                         </select>
                                                                     </div>
                                                                     <div>
@@ -1412,7 +1410,7 @@ export default function EditCourse() {
                                                                             className="custom-input"
                                                                             value={lesson.liveLink || ''}
                                                                             onChange={(e) => updateLesson(mod.id, lesson.id, { liveLink: e.target.value })}
-                                                                            placeholder="https://zoom.us/j/..."
+                                                                            placeholder="https://teams.microsoft.com/l/meetup-join/..."
                                                                         />
                                                                     </div>
 
@@ -1592,13 +1590,13 @@ export default function EditCourse() {
                                                                 <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
                                                                         <HelpCircle size={20} color="#020617" />
-                                                                        <h5 style={{ margin: 0, fontWeight: 800 }}>Assessment Logic Configuration</h5>
+                                                                        <h5 style={{ margin: 0, fontWeight: 800 }}>Evaluation Logic Configuration</h5>
                                                                     </div>
                                                                     <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#64748b' }}>Configure passing thresholds and deployment rules for this validation unit.</p>
-                                                                    <div className="assessment-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
+                                                                    <div className="evaluation-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
                                                                         <style>{`
                                                                             @media (max-width: 640px) {
-                                                                                .assessment-grid {
+                                                                                .evaluation-grid {
                                                                                     grid-template-columns: 1fr !important;
                                                                                 }
                                                                             }
@@ -1643,7 +1641,7 @@ export default function EditCourse() {
                                             <button onClick={() => addLesson(mod.id, 'video')} className="type-btn"><Video size={18} /> Video</button>
                                             <button onClick={() => addLesson(mod.id, 'live')} className="type-btn"><Users size={18} /> Live Class</button>
                                             <button onClick={() => addLesson(mod.id, 'material')} className="type-btn"><FileText size={18} /> Docs</button>
-                                            <button onClick={() => addLesson(mod.id, 'quiz')} className="type-btn"><HelpCircle size={18} /> Assessment</button>
+                                            <button onClick={() => addLesson(mod.id, 'quiz')} className="type-btn"><HelpCircle size={18} /> Evaluation</button>
                                         </div>
                                     </div>
                                 )}
@@ -1875,7 +1873,7 @@ export default function EditCourse() {
                                     <div style={{ padding: '3rem', background: '#fefce8', borderRadius: '24px', border: '1.5px solid #ca8a0420', marginBottom: '2rem' }}>
                                         <HelpCircle size={48} color="#ca8a04" style={{ marginBottom: '1.5rem' }} />
                                         <h4 style={{ margin: '0 0 10px 0', fontSize: '1.25rem', fontWeight: 900, color: '#ca8a04' }}>Knowledge Validation</h4>
-                                        <p style={{ margin: 0, fontWeight: 700, color: '#64748b' }}>Curriculum Assessment Node</p>
+                                        <p style={{ margin: 0, fontWeight: 700, color: '#64748b' }}>Curriculum Evaluation Node</p>
                                         <button className="btn-standard" style={{ background: '#ca8a04', padding: '0 2.5rem', marginTop: '2rem' }}>Start Simulator</button>
                                     </div>
                                 )}
@@ -2030,7 +2028,7 @@ export default function EditCourse() {
                                         <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#1a4d3e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                                             <HelpCircle size={18} />
                                         </div>
-                                        <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem', color: '#0f172a' }}>Assessment Intelligence Designer</h3>
+                                        <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem', color: '#0f172a' }}>Evaluation Intelligence Designer</h3>
                                     </div>
                                     <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Crafting validation units for: <span style={{ color: '#1a4d3e' }}>{lesson?.title}</span></p>
                                 </div>
@@ -2048,7 +2046,7 @@ export default function EditCourse() {
                                         <div style={{ width: '80px', height: '80px', borderRadius: '30px', background: '#f8fafc', border: '2px dashed #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: '#94a3b8' }}>
                                             <Plus size={32} />
                                         </div>
-                                        <h4 style={{ fontWeight: 900, color: '#0f172a', marginBottom: '8px' }}>Empty Assessment Pipeline</h4>
+                                        <h4 style={{ fontWeight: 900, color: '#0f172a', marginBottom: '8px' }}>Empty Evaluation Pipeline</h4>
                                         <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2.5rem' }}>Start building your validation unit by adding the first question.</p>
                                     </div>
                                 ) : (
@@ -2230,7 +2228,7 @@ export default function EditCourse() {
                                     className="btn-standard"
                                     style={{ background: '#1a4d3e', color: 'white', padding: '0 3rem' }}
                                 >
-                                    Finalize Assessment
+                                    Finalize Evaluation
                                 </button>
                             </div>
                         </div>

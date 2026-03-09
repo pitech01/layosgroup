@@ -1,16 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Users, BookOpen, ArrowLeft, Layers, Loader2, Upload, FileText, CheckCircle2, Clock } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { ChevronRight, Users, BookOpen, ArrowLeft, Layers, Loader2 } from 'lucide-react';
 
 const Courses = () => {
     const [cohorts, setCohorts] = useState<any[]>([]);
-    const [availableCohorts, setAvailableCohorts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCohort, setSelectedCohort] = useState<any | null>(null);
-    const [activeTab, setActiveTab] = useState<'enrolled' | 'available'>('enrolled');
-    const [uploading, setUploading] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
     const token = localStorage.getItem('token');
@@ -18,25 +13,20 @@ const Courses = () => {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-
             try {
-                // Fetch Enrollments
-                const enrollmentsRes = await fetch(`${API_URL}/my-enrollments`, {
+                const response = await fetch(`${API_URL}/my-enrollments`, {
                     headers: {
                         'Accept': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                const enrollmentsData = await enrollmentsRes.json();
 
-                if (enrollmentsRes.ok) {
-                    const mappedEnrolled = enrollmentsData.cohorts.map((c: any) => ({
+                const data = await response.json();
+
+                if (response.ok) {
+                    const mappedEnrolled = data.cohorts.map((c: any) => ({
                         id: c.id,
                         name: c.name,
-                        price: `$${c.pricing}`,
-                        paymentModel: c.payment_model,
-                        paymentStatus: c.pivot.payment_status,
-                        paymentLink: c.payment_link,
                         isEnrolled: true,
                         courses: c.course ? [{
                             id: c.course.id,
@@ -50,41 +40,6 @@ const Courses = () => {
                     }));
                     setCohorts(mappedEnrolled);
                 }
-
-                // Fetch All Available Cohorts
-                const cohortsRes = await fetch(`${API_URL}/cohorts`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const allCohorts = await cohortsRes.json();
-
-                if (cohortsRes.ok) {
-                    const enrolledIds = enrollmentsData.cohorts?.map((c: any) => c.id) || [];
-                    const mappedAvailable = allCohorts
-                        .filter((c: any) => !enrolledIds.includes(c.id))
-                        .map((c: any) => ({
-                            id: c.id,
-                            name: c.name,
-                            price: `$${c.pricing}`,
-                            paymentModel: c.payment_model,
-                            paymentStatus: 'unpaid',
-                            paymentLink: c.payment_link,
-                            isEnrolled: false,
-                            courses: c.course ? [{
-                                id: c.course.id,
-                                title: c.course.title,
-                                instructor: c.instructor?.name || 'Assigned Instructor',
-                                thumbnail: c.course.thumbnail || 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-                                progress: 0,
-                                totalLessons: c.course.modules?.reduce((acc: number, m: any) => acc + (m.lessons?.length || 0), 0) || 0,
-                                completedLessons: 0,
-                            }] : []
-                        }));
-                    setAvailableCohorts(mappedAvailable);
-                }
-
             } catch (err) {
                 console.error("Fetch Data Error:", err);
             } finally {
@@ -92,7 +47,7 @@ const Courses = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [API_URL, token]);
 
     if (loading) {
         return (
@@ -165,26 +120,6 @@ const Courses = () => {
                         color: #64748b;
                         font-size: 0.9rem;
                         font-weight: 600;
-                    }
-
-                    .tab-btn {
-                        padding: 0.75rem 1.5rem;
-                        font-size: 0.9rem;
-                        font-weight: 800;
-                        border-radius: 14px;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                        border: 1.5px solid transparent;
-                    }
-
-                    .tab-btn.active {
-                        background: #1a4d3e;
-                        color: white;
-                    }
-
-                    .tab-btn:not(.active) {
-                        background: #f1f5f9;
-                        color: #64748b;
                     }
 
                     .back-btn-modern {
@@ -280,31 +215,6 @@ const Courses = () => {
                         transform: translateY(-2px);
                     }
 
-                    .payment-activation-panel {
-                        background: white;
-                        border: 1.5px solid #f1f5f9;
-                        border-radius: 32px;
-                        padding: 5rem 3rem;
-                        text-align: center;
-                    }
-
-                    .enrollment-title {
-                        font-size: 2.5rem;
-                        font-weight: 950;
-                        color: #0f172a;
-                        margin-bottom: 1rem;
-                        letter-spacing: -0.04em;
-                    }
-
-                    .enrollment-desc {
-                        color: #64748b;
-                        font-size: 1.1rem;
-                        font-weight: 600;
-                        max-width: 600px;
-                        margin: 0 auto 3rem auto;
-                        line-height: 1.6;
-                    }
-
                     .empty-state-container {
                         grid-column: 1/-1; 
                         text-align: center; 
@@ -315,44 +225,6 @@ const Courses = () => {
                         transition: all 0.3s ease;
                     }
 
-                    .browse-cohorts-btn {
-                        margin-top: 2rem; 
-                        height: 52px; 
-                        padding: 0 2.5rem; 
-                        background: #1a4d3e; 
-                        color: white; 
-                        border: none; 
-                        border-radius: 14px; 
-                        font-weight: 900; 
-                        cursor: pointer;
-                        transition: all 0.2s;
-                        font-size: 0.95rem;
-                        box-shadow: 0 4px 12px rgba(26, 77, 62, 0.15);
-                    }
-
-                    .browse-cohorts-btn:hover {
-                        background: #153c31;
-                        transform: translateY(-2px);
-                        box-shadow: 0 6px 15px rgba(26, 77, 62, 0.2);
-                    }
-
-                    .payment-action-btn {
-                        height: 64px;
-                        padding: 0 3rem;
-                        background: #1a4d3e;
-                        color: white;
-                        border: none;
-                        border-radius: 20px;
-                        font-size: 1.1rem;
-                        font-weight: 950;
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                        cursor: pointer;
-                        box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
-                        transition: all 0.2s;
-                    }
-
                     @media (max-width: 1024px) {
                         .cohort-selection-grid, .course-grid {
                             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -361,39 +233,11 @@ const Courses = () => {
                     }
 
                     @media (max-width: 768px) {
-                        .section-header-courses {
-                            flex-direction: column;
-                            align-items: flex-start !important;
-                            gap: 1.5rem;
-                        }
                         .section-header-courses h1 {
                             font-size: 1.75rem !important;
                         }
-                        .section-header-courses p {
-                            font-size: 0.95rem !important;
-                        }
                         .cohort-selection-grid, .course-grid {
                             grid-template-columns: 1fr;
-                        }
-                        .cohort-select-card {
-                            padding: 1.5rem;
-                        }
-                        .payment-activation-panel {
-                            padding: 3rem 1.5rem;
-                        }
-                        .enrollment-title {
-                            font-size: 1.75rem;
-                        }
-                        .enrollment-desc {
-                            font-size: 1rem;
-                            margin-bottom: 2rem;
-                        }
-                        .payment-action-btn {
-                            width: 100%;
-                            justify-content: center;
-                            padding: 0 1.5rem;
-                            font-size: 1rem;
-                            height: 56px;
                         }
                         .selected-cohort-header {
                             margin-bottom: 2rem;
@@ -401,59 +245,22 @@ const Courses = () => {
                         .selected-cohort-title {
                             font-size: 1.75rem;
                         }
-                        .empty-state-container {
-                            padding: 3rem 1.5rem;
-                        }
-                        .browse-cohorts-btn {
-                            width: 100%;
-                            height: 48px;
-                            padding: 0 1.5rem;
-                            font-size: 0.9rem;
-                        }
-                    }
-
-                    @media (max-width: 480px) {
-                        .tab-btn {
-                            padding: 0.6rem 1rem;
-                            font-size: 0.8rem;
-                        }
-                        .tabs-container {
-                            width: 100%;
-                            overflow-x: auto;
-                        }
                     }
                 `}</style>
 
-                <div className="section-header-compact section-header-courses" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                    <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', margin: 0 }}>
-                            {activeTab === 'enrolled' ? 'My Curriculum' : 'Discovery Hub'}
-                        </h1>
-                        <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem', margin: '0.5rem 0 0 0' }}>
-                            {activeTab === 'enrolled' ? 'Select a cohort to access your active courses.' : 'Explore and join new available programs.'}
-                        </p>
-                    </div>
-                    <div className="tabs-container" style={{ display: 'flex', gap: '0.75rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '18px', border: '1.5px solid #f1f5f9', flexShrink: 0 }}>
-                        <button
-                            className={`tab-btn ${activeTab === 'enrolled' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('enrolled')}
-                        >
-                            My Cohorts
-                        </button>
-                        <button
-                            className={`tab-btn ${activeTab === 'available' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('available')}
-                        >
-                            Available
-                        </button>
-                    </div>
+                <div className="section-header-compact section-header-courses" style={{ marginBottom: '2.5rem' }}>
+                    <h1 style={{ fontSize: '2.25rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', margin: 0 }}>
+                        My Curriculum
+                    </h1>
+                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem' }}>
+                        Select a cohort to access your active courses.
+                    </p>
                 </div>
 
                 <div className="cohort-selection-grid">
-                    {(activeTab === 'enrolled' ? cohorts : availableCohorts).length > 0 ? (
-                        (activeTab === 'enrolled' ? cohorts : availableCohorts).map(cohort => (
+                    {cohorts.length > 0 ? (
+                        cohorts.map(cohort => (
                             <div key={cohort.id} className="cohort-select-card shadow-sm" onClick={() => setSelectedCohort(cohort)}>
-                                {/* Rest of card content stays same */}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                     <div className="cohort-icon-box">
                                         <Users size={28} />
@@ -463,12 +270,12 @@ const Courses = () => {
                                         borderRadius: '10px',
                                         fontSize: '0.75rem',
                                         fontWeight: 900,
-                                        background: cohort.paymentStatus === 'unpaid' ? '#fef2f2' : (cohort.paymentStatus === 'partial' || cohort.paymentStatus === 'pending_verification') ? '#fff7ed' : '#f0fdf4',
-                                        color: cohort.paymentStatus === 'unpaid' ? '#991b1b' : (cohort.paymentStatus === 'partial' || cohort.paymentStatus === 'pending_verification') ? '#9a3412' : '#166534',
+                                        background: '#f0fdf4',
+                                        color: '#166534',
                                         textTransform: 'uppercase',
                                         letterSpacing: '0.05em'
                                     }}>
-                                        {cohort.paymentStatus === 'unpaid' ? 'Purchase Required' : (cohort.paymentStatus === 'partial' || cohort.paymentStatus === 'pending_verification') ? 'Active (Restricted)' : 'Full Access'}
+                                        Active Enrollment
                                     </div>
                                 </div>
                                 <div>
@@ -482,7 +289,7 @@ const Courses = () => {
                                         <BookOpen size={16} /> {cohort.courses.length} Courses
                                     </div>
                                     <div style={{ color: '#1a4d3e', fontWeight: 800, fontSize: '0.9rem' }}>
-                                        {cohort.paymentStatus === 'unpaid' ? 'Pay to Join' : 'View Access'} <ChevronRight size={18} />
+                                        View Lessons <ChevronRight size={18} />
                                     </div>
                                 </div>
                             </div>
@@ -493,19 +300,11 @@ const Courses = () => {
                                 <Layers size={48} style={{ opacity: 0.5 }} />
                             </div>
                             <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', marginBottom: '0.5rem' }}>
-                                {activeTab === 'enrolled' ? 'No Enrolled Programs' : 'No Programs Available'}
+                                No Active Programs
                             </h3>
                             <p style={{ color: '#64748b', fontWeight: 600 }}>
-                                {activeTab === 'enrolled' ? 'You are not active in any cohorts yet.' : 'Check back later for new academic offerings.'}
+                                You haven't been assigned to any cohorts yet. Please contact your instructor.
                             </p>
-                            {activeTab === 'enrolled' && (
-                                <button
-                                    onClick={() => setActiveTab('available')}
-                                    className="browse-cohorts-btn"
-                                >
-                                    Browse Available Cohorts
-                                </button>
-                            )}
                         </div>
                     )}
                 </div>
@@ -530,203 +329,62 @@ const Courses = () => {
                 <h1 className="selected-cohort-title">{selectedCohort.name}</h1>
             </div>
 
-            {selectedCohort.paymentStatus === 'unpaid' ? (
-                <div className="payment-activation-panel">
-                    <div style={{ width: '80px', height: '80px', background: '#f0fdf4', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto' }}>
-                        <Layers size={40} color="#1a4d3e" />
-                    </div>
-                    <h2 className="enrollment-title">Activate Your Enrollment</h2>
-                    <p className="enrollment-desc">
-                        To access the modules in the <strong>{selectedCohort.name}</strong> cohort, please complete your {selectedCohort.paymentModel === 'split-50' ? 'initial deposit' : 'enrollment payment'}.
-                    </p>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-                        <button
-                            onClick={() => window.open(selectedCohort.paymentLink, '_blank')}
-                            className="payment-action-btn"
-                        >
-                            {selectedCohort.paymentModel === 'split-50' ? 'Pay 50% Deposit' : 'Pay Full Enrollment'} ({selectedCohort.paymentModel === 'split-50' ? `$${parseFloat(selectedCohort.price.replace('$', '').replace(',', '')) / 2}` : selectedCohort.price}) <ChevronRight size={20} />
-                        </button>
-                        <p style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 700 }}>Payment grants access to all courses in this cohort.</p>
-
-                        <div style={{ marginTop: '3rem', width: '100%', maxWidth: '500px', padding: '2rem', background: '#f8fafc', borderRadius: '24px', border: '1.5px dashed #e2e8f0' }}>
-                            <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>Upload Proof of Payment</h4>
-                            <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1.5rem', fontWeight: 600 }}>Please upload your transaction receipt (PDF, JPG, or PNG) for verification.</p>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <div style={{ position: 'relative' }}>
-                                    <input
-                                        type="file"
-                                        id="receipt-upload"
-                                        style={{ display: 'none' }}
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                                    />
-                                    <label
-                                        htmlFor="receipt-upload"
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '10px',
-                                            padding: '1rem',
-                                            background: 'white',
-                                            border: '1.5px solid #e2e8f0',
-                                            borderRadius: '14px',
-                                            cursor: 'pointer',
-                                            fontWeight: 700,
-                                            color: selectedFile ? '#1a4d3e' : '#64748b',
-                                            transition: 'all 0.2s',
-                                            width: '100%',
-                                            boxSizing: 'border-box'
-                                        }}
-                                    >
-                                        {selectedFile ? <FileText size={18} /> : <Upload size={18} />}
-                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>
-                                            {selectedFile ? selectedFile.name : 'Choose Receipt File'}
-                                        </span>
-                                    </label>
-                                </div>
-
-                                <button
-                                    onClick={async () => {
-                                        if (!selectedFile) {
-                                            toast.error("Please select a file first");
-                                            return;
-                                        }
-                                        setUploading(true);
-                                        const formData = new FormData();
-                                        formData.append('receipt', selectedFile);
-
-                                        try {
-                                            const res = await fetch(`${API_URL}/cohorts/${selectedCohort.id}/upload-receipt`, {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Authorization': `Bearer ${token}`,
-                                                    'Accept': 'application/json'
-                                                },
-                                                body: formData
-                                            });
-                                            if (res.ok) {
-                                                toast.success("Receipt uploaded successfully!");
-                                                const updatedCohort = { ...selectedCohort, paymentStatus: 'pending_verification', isEnrolled: true };
-
-                                                // 1. Update active view
-                                                setSelectedCohort(updatedCohort);
-
-                                                // 2. Update Enrollments List (Add if new, update if exists)
-                                                setCohorts(prev => {
-                                                    const exists = prev.some(c => c.id == selectedCohort.id);
-                                                    if (exists) {
-                                                        return prev.map(c => c.id == selectedCohort.id ? updatedCohort : c);
-                                                    }
-                                                    return [updatedCohort, ...prev];
-                                                });
-
-                                                // 3. Remove from Available List if it was there
-                                                setAvailableCohorts(prev => prev.filter(c => c.id != selectedCohort.id));
-
-                                                // 4. Force switch to enrolled tab for future view
-                                                setActiveTab('enrolled');
-
-                                                setSelectedFile(null);
-                                            } else {
-                                                const data = await res.json();
-                                                toast.error(data.message || "Failed to upload receipt");
-                                            }
-                                        } catch (err) {
-                                            console.error("Upload Catch:", err);
-                                            toast.error("An error occurred during upload");
-                                        } finally {
-                                            setUploading(false);
-                                        }
-                                    }}
-                                    disabled={!selectedFile || uploading}
-                                    style={{
-                                        height: '52px',
-                                        background: selectedFile ? '#1a4d3e' : '#e2e8f0',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '14px',
-                                        fontWeight: 800,
-                                        cursor: selectedFile && !uploading ? 'pointer' : 'not-allowed',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '8px',
-                                        transition: 'all 0.2s'
-                                    }}
-                                >
-                                    {uploading ? <Loader2 className="animate-spin" size={20} /> : <CheckCircle2 size={20} />}
-                                    {uploading ? 'Uploading...' : 'Submit Proof'}
-                                </button>
+            <div className="course-grid">
+                {selectedCohort.courses.map((course: any) => (
+                    <div key={course.id} className="course-card shadow-premium">
+                        <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden' }}>
+                            <img
+                                src={course.thumbnail}
+                                alt={course.title}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none' }}
+                                onContextMenu={(e: any) => e.preventDefault()}
+                            />
+                            <div style={{
+                                position: 'absolute',
+                                top: '1rem',
+                                right: '1rem',
+                                padding: '6px 14px',
+                                borderRadius: '10px',
+                                fontSize: '0.75rem',
+                                fontWeight: 900,
+                                background: course.progress === 100 ? '#f0fdf4' : '#eff6ff',
+                                color: course.progress === 100 ? '#166534' : '#1e40af',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                            }}>
+                                {course.progress === 100 ? 'Completed' : course.progress > 0 ? 'In Progress' : 'Ready to Start'}
                             </div>
                         </div>
-                    </div>
-                </div>
-            ) : selectedCohort.paymentStatus === 'pending_verification' ? (
-                <div className="payment-activation-panel">
-                    <div style={{ width: '80px', height: '80px', background: '#fff7ed', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto' }}>
-                        <Clock size={40} color="#9a3412" />
-                    </div>
-                    <h2 className="enrollment-title">Verification in Progress</h2>
-                    <p className="enrollment-desc">
-                        Thank you for submitting your proof of payment for <strong>{selectedCohort.name}</strong>. An instructor is currently reviewing your receipt.
-                    </p>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.75rem 1.5rem', background: '#fff7ed', color: '#9a3412', borderRadius: '12px', fontWeight: 800, fontSize: '0.9rem' }}>
-                        <Loader2 className="animate-spin" size={16} /> Status: Pending Verification
-                    </div>
-                    <p style={{ marginTop: '2.5rem', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>Standard verification usually takes 2-24 hours. You'll receive full access once approved.</p>
-                </div>
-            ) : (
-                <div className="course-grid">
-                    {selectedCohort.courses.map((course: any) => (
-                        <div key={course.id} className="course-card shadow-premium">
-                            <div className="course-image-wrapper">
-                                <img
-                                    src={course.thumbnail}
-                                    alt={course.title}
-                                    className="course-image"
-                                    onContextMenu={(e: any) => e.preventDefault()}
-                                    style={{ userSelect: 'none', pointerEvents: 'none' }}
-                                />
-                                <div className="course-overlay shadow-sm" style={{
-                                    background: course.progress === 100 ? '#f0fdf4' : '#eff6ff',
-                                    color: course.progress === 100 ? '#166534' : '#1e40af'
-                                }}>
-                                    {course.progress === 100 ? 'Completed' : course.progress > 0 ? 'In Progress' : 'Ready to Start'}
+
+                        <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1a4d3e', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                                Instructor: {course.instructor}
+                            </div>
+                            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: '0 0 1.5rem 0', lineHeight: 1.3 }}>{course.title}</h3>
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <div className="course-progress-labels">
+                                    <span>{course.progress}% Complete</span>
+                                    <span>{course.completedLessons}/{course.totalLessons} Lessons</span>
+                                </div>
+                                <div className="course-progress-track">
+                                    <div
+                                        className="course-progress-bar"
+                                        style={{ width: `${course.progress}%` }}
+                                    ></div>
                                 </div>
                             </div>
 
-                            <div className="course-content">
-                                <div className="course-instructor">Instructor: {course.instructor}</div>
-                                <h3 className="course-title">{course.title}</h3>
-
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <div className="course-progress-labels">
-                                        <span>{course.progress}% Complete</span>
-                                        <span>{course.completedLessons}/{course.totalLessons} Lessons</span>
-                                    </div>
-                                    <div className="course-progress-track">
-                                        <div
-                                            className="course-progress-bar"
-                                            style={{ width: `${course.progress}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-
-                                <Link
-                                    to={`/student/courses/${course.id}?cohortId=${selectedCohort.id}`}
-                                    className="course-access-link"
-                                >
-                                    {course.progress > 0 ? 'Continue Learning' : 'Start Course'}
-                                    <ChevronRight size={16} />
-                                </Link>
-                            </div>
+                            <Link
+                                to={`/student/courses/${course.id}?cohortId=${selectedCohort.id}`}
+                                className="course-access-link"
+                            >
+                                {course.progress > 0 ? 'Continue Learning' : 'Start Course'}
+                                <ChevronRight size={16} />
+                            </Link>
                         </div>
-                    ))}
-                </div>
-            )}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };

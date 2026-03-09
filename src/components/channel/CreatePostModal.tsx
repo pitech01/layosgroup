@@ -11,6 +11,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
     const [type, setType] = useState<'message' | 'announcement' | 'assignment'>('message');
     const [content, setContent] = useState('');
     const [dueDate, setDueDate] = useState('');
+    const [attachment, setAttachment] = useState<File | null>(null);
 
     if (!isOpen) return null;
 
@@ -20,10 +21,12 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
             type,
             content,
             dueDate: type === 'assignment' ? dueDate : undefined,
+            attachment,
             createdAt: 'Just now'
         });
         setContent('');
         setDueDate('');
+        setAttachment(null);
         onClose();
     };
 
@@ -101,21 +104,28 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '1rem' }}>
                         <button
                             type="button"
+                            onClick={() => document.getElementById('modal-file-attachment')?.click()}
                             style={{
-                                background: '#f1f5f9',
+                                background: attachment ? '#f0fdf4' : '#f1f5f9',
                                 border: 'none',
                                 padding: '0.875rem 1.25rem',
                                 borderRadius: '12px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
-                                color: '#64748b',
+                                color: attachment ? '#16a34a' : '#64748b',
                                 fontWeight: 700,
                                 fontSize: '0.85rem'
                             }}
                         >
                             <Paperclip size={18} />
-                            Attach File
+                            {attachment ? attachment.name.substring(0, 15) + '...' : 'Attach File'}
+                            <input
+                                type="file"
+                                id="modal-file-attachment"
+                                style={{ display: 'none' }}
+                                onChange={(e) => setAttachment(e.target.files ? e.target.files[0] : null)}
+                            />
                         </button>
 
                         <button

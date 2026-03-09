@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
     Shield,
-    DollarSign,
     ChevronRight,
     ArrowLeft,
     AlertCircle,
@@ -22,11 +21,6 @@ export default function CreateCohort() {
         endDate: '',
         enrollmentDeadline: '',
         timezone: 'UTC+1 (WAT)',
-        deliveryMode: 'recorded',
-        seatLimit: 100,
-        pricing: '',
-        paymentModel: 'full', // 'full' or 'split-50'
-        paymentLink: '',
         visibility: 'public'
     });
 
@@ -56,11 +50,6 @@ export default function CreateCohort() {
                     end_date: formData.endDate,
                     enrollment_deadline: formData.enrollmentDeadline,
                     timezone: formData.timezone,
-                    delivery_mode: formData.deliveryMode,
-                    seat_limit: formData.seatLimit,
-                    pricing: formData.pricing,
-                    payment_model: formData.paymentModel,
-                    payment_link: formData.paymentLink,
                     visibility: formData.visibility,
                     instructor_id: user?.id
                 })
@@ -248,9 +237,11 @@ export default function CreateCohort() {
                 <ArrowLeft size={18} /> Back to Cohorts
             </Link>
 
-            <div className="form-header-premium">
-                <h1>Create New Cohort</h1>
-                <p>Set up a new cohort session for your students to join.</p>
+            <div className="form-header-premium" style={{ marginBottom: '2.5rem' }}>
+                <h1>Create Cohort</h1>
+                <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem' }}>
+                    Configure a new session for student enrollment.
+                </p>
             </div>
 
             {error && (
@@ -282,11 +273,11 @@ export default function CreateCohort() {
             <form className="cohort-form-card shadow-premium" onSubmit={handleSubmit}>
                 <div className="section-tile">
                     <Shield size={20} color="#1a4d3e" />
-                    <span>Cohort Identity</span>
+                    <span>Basic Configuration</span>
                 </div>
 
                 <div className="input-group-premium">
-                    <label>Cohort Name</label>
+                    <label>Cohort Title</label>
                     <input
                         type="text"
                         className="input-premium"
@@ -321,7 +312,7 @@ export default function CreateCohort() {
                 </div>
 
                 <div className="input-group-premium">
-                    <label>Enrollment Deadline</label>
+                    <label>Registration Deadline</label>
                     <input
                         type="date"
                         className="input-premium"
@@ -332,56 +323,16 @@ export default function CreateCohort() {
                 </div>
 
 
-                <div className="section-tile">
-                    <DollarSign size={20} color="#1a4d3e" />
-                    <span>Pricing & Payments</span>
-                </div>
-
-                <div className="form-grid-2">
-                    <div className="input-group-premium">
-                        <label>Course Price (USD)</label>
-                        <input
-                            type="text"
-                            className="input-premium"
-                            placeholder="e.g. 500.00"
-                            required
-                            value={formData.pricing}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, pricing: e.target.value })}
-                        />
-                    </div>
-                    <div className="input-group-premium">
-                        <label>Payment Model</label>
-                        <select
-                            className="input-premium select-premium"
-                            value={formData.paymentModel}
-                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, paymentModel: e.target.value })}
-                        >
-                            <option value="full">Full Upfront Access</option>
-                            <option value="split-50">50/50 Installment Plan (Locked after Half-way)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="input-group-premium">
-                    <label>External Payment Link (Stripe, Paystack, etc.)</label>
-                    <input
-                        type="url"
-                        className="input-premium"
-                        placeholder="https://..."
-                        value={formData.paymentLink}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, paymentLink: e.target.value })}
-                    />
-                </div>
 
                 <button type="submit" className="submit-btn-premium" disabled={loading}>
                     {loading ? (
                         <>
                             <Loader2 className="animate-spin" size={20} />
-                            Creating Cohort...
+                            Processing...
                         </>
                     ) : (
                         <>
-                            Create Cohort <ChevronRight size={20} />
+                            Finalize Cohort <ChevronRight size={20} />
                         </>
                     )}
                 </button>
@@ -389,4 +340,3 @@ export default function CreateCohort() {
         </div>
     );
 }
-

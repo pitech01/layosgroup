@@ -6,7 +6,8 @@ import {
     Video,
     User,
     LogOut,
-    MessageCircle
+    MessageCircle,
+    ClipboardList
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -89,6 +90,16 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
                     <div className="nav-item-indicator" />
                     <MessageCircle size={22} style={{ flexShrink: 0 }} />
                     <span>Channels</span>
+                </Link>
+
+                <Link
+                    to="/student/assignments"
+                    className={`nav-item ${isActive('/student/assignments')}`}
+                    title={collapsed ? "Assignments" : ""}
+                >
+                    <div className="nav-item-indicator" />
+                    <ClipboardList size={22} style={{ flexShrink: 0 }} />
+                    <span>Assignments</span>
                 </Link>
 
                 <Link
