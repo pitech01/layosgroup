@@ -16,13 +16,7 @@ const StudentLayout = () => {
     }, [location]);
 
     return (
-        <div className={`student-layout ${!sidebarCollapsed ? 'sidebar-open' : ''}`}>
-            {/* Mobile Overlay */}
-            <div
-                className="sidebar-mobile-overlay"
-                onClick={() => setSidebarCollapsed(true)}
-            />
-
+        <div className={`student-layout dashboard-layout ${!sidebarCollapsed ? 'sidebar-open' : ''}`}>
             <Sidebar collapsed={sidebarCollapsed} />
 
             <div className="main-content-wrapper">
@@ -33,9 +27,18 @@ const StudentLayout = () => {
                 />
 
                 <main className="main-content">
-                    <Outlet />
+                    <div className="animate-fade-in-up">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
+
+            {!sidebarCollapsed && window.innerWidth <= 1024 && (
+                <div
+                    className="sidebar-mobile-overlay"
+                    onClick={() => setSidebarCollapsed(true)}
+                />
+            )}
         </div>
     );
 };

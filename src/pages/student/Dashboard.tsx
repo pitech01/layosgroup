@@ -147,6 +147,34 @@ export default function StudentDashboard() {
             {/* Main Grid Content */}
             <div className="dashboard-grid-layout">
                 <style>{`
+                    .welcome-card-dark {
+                        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                        color: white;
+                        border-radius: 24px;
+                        padding: 3rem;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 2.5rem;
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    .welcome-content-left h2 { font-size: 2rem; margin-bottom: 1rem; }
+                    .welcome-course-previews { display: flex; gap: 1.5rem; }
+                    .mini-course-card { background: rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 16px; min-width: 180px; }
+                    .section-card { background: white; border-radius: 20px; padding: 1.5rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); margin-bottom: 2rem; }
+                    .section-title-modern { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-weight: 700; color: #0f172a; }
+                    .progress-item-modern { display: flex; align-items: center; gap: 1.5rem; padding: 1rem 0; border-bottom: 1px solid #f8fafc; }
+                    .course-icon-round { width: 48px; height: 48px; border-radius: 12px; background: #f1f5f9; display: flex; alignItems: center; justifyContent: center; }
+                    .course-info-modern { flex: 1; }
+                    .course-info-modern h6 { margin: 0 0 0.5rem 0; font-size: 0.95rem; }
+                    .course-progress-bar-wrapper { display: flex; align-items: center; gap: 1rem; }
+                    .modern-progress-bg { flex: 1; height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+                    .modern-progress-fill { height: 100%; background: #3b82f6; border-radius: 3px; }
+                    .progress-percentage { font-size: 0.75rem; font-weight: 700; color: #64748b; }
+                    .btn-cta-white { background: white; color: #0f172a; padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; margin-top: 1.5rem; }
+                    .dashboard-grid-layout { display: grid; grid-template-columns: 1.6fr 1fr; gap: 2.5rem; }
+
                     @media (max-width: 1024px) {
                         .welcome-card-dark {
                             flex-direction: column;
