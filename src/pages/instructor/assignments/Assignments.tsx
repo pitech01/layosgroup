@@ -10,7 +10,8 @@ import {
     Filter,
     Loader2,
     AlertCircle,
-    FileText
+    FileText,
+    Trash2
 } from 'lucide-react';
 
 export default function InstructorAssignments() {
@@ -23,8 +24,6 @@ export default function InstructorAssignments() {
 
     const fetchAssignments = async () => {
         try {
-            // We use the same Store/Index logic. I'll need to make sure backend has index if not there.
-            // Wait, I only added store, submissions, studentAssignments. I need instructorIndex.
             const response = await fetch(`${API_URL}/instructor/assignments`, {
                 headers: {
                     'Accept': 'application/json',
@@ -35,13 +34,37 @@ export default function InstructorAssignments() {
             if (response.ok) {
                 setAssignments(data);
             } else {
-                // If 404/invalid, maybe I missed adding instructorIndex to controller.
                 throw new Error(data.message || 'Failed to fetch assignments.');
             }
         } catch (err: any) {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm('Are you sure you want to delete this assignment? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/instructor/assignments/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (response.ok) {
+                setAssignments(prev => prev.filter(a => a.id !== id));
+            } else {
+                const data = await response.json();
+                alert(data.message || 'Failed to delete assignment.');
+            }
+        } catch (err: any) {
+            alert('A network error occurred.');
         }
     };
 
@@ -261,8 +284,29 @@ export default function InstructorAssignments() {
                 .file-indicator {
                     position: absolute;
                     top: 2rem;
-                    right: 2rem;
+                    right: 4.5rem;
                     color: #cbd5e1;
+                }
+
+                .btn-delete {
+                    background: transparent;
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #94a3b8;
+                    transition: all 0.2s;
+                    border: 1px solid #f1f5f9;
+                    cursor: pointer;
+                    margin-left: 10px;
+                }
+
+                .btn-delete:hover {
+                    background: #fef2f2;
+                    color: #dc2626;
+                    border-color: #fee2e2;
                 }
             `}</style>
 
@@ -347,9 +391,18 @@ export default function InstructorAssignments() {
                                     <div className="submission-count">{assignment.submissions_count || 0}</div>
                                     <div className="submission-label">Submissions</div>
                                 </div>
-                                <Link to={`/instructor/assignments/${assignment.id}/submissions`} className="btn-submissions" title="Review Submissions">
-                                    <ChevronRight size={24} />
-                                </Link>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <Link to={`/instructor/assignments/${assignment.id}/submissions`} className="btn-submissions" title="Review Submissions">
+                                        <ChevronRight size={24} />
+                                    </Link>
+                                    <button
+                                        onClick={() => handleDelete(assignment.id)}
+                                        className="btn-delete"
+                                        title="Delete Assignment"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
