@@ -5,25 +5,29 @@ import Topbar from '../../../components/layout/Topbar';
 
 const StudentLayout = () => {
     const location = useLocation();
-    // Start collapsed on mobile by default
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth <= 1024);
+    const [collapsed, setCollapsed] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     // Close mobile sidebar on route change
     useEffect(() => {
-        if (window.innerWidth <= 1024) {
-            setSidebarCollapsed(true);
-        }
+        setMobileOpen(false);
     }, [location]);
 
     return (
-        <div className={`student-layout dashboard-layout ${!sidebarCollapsed ? 'sidebar-open' : ''}`}>
-            <Sidebar collapsed={sidebarCollapsed} />
+        <div className={`student-layout dashboard-layout ${mobileOpen ? 'sidebar-open' : ''} ${collapsed ? 'sidebar-collapsed' : ''}`}>
+            <Sidebar collapsed={collapsed} mobileOpen={mobileOpen} />
 
             <div className="main-content-wrapper">
                 <Topbar
                     role="student"
-                    collapsed={sidebarCollapsed}
-                    onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    collapsed={window.innerWidth <= 1024 ? !mobileOpen : collapsed}
+                    onToggle={() => {
+                        if (window.innerWidth <= 1024) {
+                            setMobileOpen(!mobileOpen);
+                        } else {
+                            setCollapsed(!collapsed);
+                        }
+                    }}
                 />
 
                 <main className="main-content">
@@ -33,10 +37,10 @@ const StudentLayout = () => {
                 </main>
             </div>
 
-            {!sidebarCollapsed && window.innerWidth <= 1024 && (
+            {mobileOpen && (
                 <div
                     className="sidebar-mobile-overlay"
-                    onClick={() => setSidebarCollapsed(true)}
+                    onClick={() => setMobileOpen(false)}
                 />
             )}
         </div>

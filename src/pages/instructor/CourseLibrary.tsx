@@ -28,11 +28,16 @@ export default function CourseLibrary() {
     const fetchCourses = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_URL}/courses`);
+            const response = await fetch(`${API_URL}/courses`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
             const data = await response.json();
             if (response.ok) {
                 // Filter by instructor
-                const filtered = data.filter((c: any) => c.instructor_id === user?.id);
+                const filtered = data.filter((c: any) => String(c.instructor_id) === String(user?.id));
                 setCourses(filtered);
             } else {
                 throw new Error(data.message || 'Failed to retrieve course list.');
@@ -52,7 +57,11 @@ export default function CourseLibrary() {
         if (window.confirm('Are you sure you want to permanently delete this course? This action cannot be undone.')) {
             try {
                 const response = await fetch(`${API_URL}/courses/${id}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
                 });
                 if (response.ok) {
                     setCourses(courses.filter(c => c.id !== id));

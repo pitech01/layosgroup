@@ -36,8 +36,8 @@ export default function CohortsPage() {
             });
             const data = await response.json();
             if (response.ok) {
-                // Filter by instructor_id if the user is an instructor
-                const filtered = data.filter((c: any) => c.instructor_id === user?.id);
+                // Filter by instructor_id to be extra safe (though backend now handles this)
+                const filtered = data.filter((c: any) => String(c.instructor_id) === String(user?.id));
                 setCohorts(filtered);
             } else {
                 throw new Error(data.message || 'Failed to connect to the course server.');
@@ -311,15 +311,31 @@ export default function CohortsPage() {
                         gap: 1.5rem;
                         margin-bottom: 2.5rem;
                     }
+
+                    .inventory-header-premium h1 {
+                        font-size: 1.75rem;
+                    }
                     
                     .btn-create-shell {
                         width: 100%;
                         justify-content: center;
+                        height: 52px;
+                        border-radius: 14px;
                     }
 
                     .stats-grid-inventory {
                         grid-template-columns: 1fr;
                         gap: 1rem;
+                    }
+
+                    .stat-card-premium-inventory {
+                        padding: 1.5rem;
+                        border-radius: 20px;
+                    }
+
+                    .icon-box-inventory {
+                        width: 48px;
+                        height: 48px;
                     }
 
                     .search-filter-belt {
@@ -337,6 +353,19 @@ export default function CohortsPage() {
 
                     .cohort-table {
                         min-width: 800px;
+                    }
+
+                    .cohort-table-card {
+                        border-radius: 24px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .inventory-header-premium h1 {
+                        font-size: 1.5rem;
+                    }
+                    .inventory-header-premium p {
+                        font-size: 0.95rem;
                     }
                 }
             `}</style>

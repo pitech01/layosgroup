@@ -37,7 +37,7 @@ export default function InstructorDashboard() {
             }
         };
         fetchDashboardData();
-    }, []);
+    }, [API_URL]);
 
     if (loading) {
         return (
@@ -136,7 +136,7 @@ export default function InstructorDashboard() {
                 
                 .btn-standard {
                     height: 52px;
-                    padding: 0 1.5rem;
+                    padding: 0 2rem;
                     border-radius: 16px;
                     font-weight: 850;
                     display: flex;
@@ -149,11 +149,68 @@ export default function InstructorDashboard() {
                     color: white;
                     text-decoration: none;
                     font-size: 0.95rem;
+                    white-space: nowrap;
                 }
 
                 @media (max-width: 1024px) {
                     .dashboard-content-grid {
                         grid-template-columns: 1fr;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .section-header {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        margin-bottom: 2.5rem;
+                    }
+                    
+                    .section-header h2 {
+                        font-size: 1.5rem;
+                    }
+
+                    .section-header p {
+                        font-size: 1rem !important;
+                    }
+
+                    .btn-standard {
+                        width: 100%;
+                        height: 48px;
+                    }
+
+                    .stats-grid-dashboard {
+                        grid-template-columns: 1fr;
+                        margin-bottom: 2.5rem;
+                    }
+
+                    .stat-card-premium {
+                        padding: 1.5rem;
+                    }
+
+                    .stat-card-premium h3 {
+                        font-size: 2rem !important;
+                    }
+
+                    .glass-panel-premium {
+                        padding: 1.5rem;
+                        border-radius: 24px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .activity-item {
+                        padding: 1rem 0.5rem;
+                        gap: 1rem;
+                    }
+                    
+                    .user-avatar-mini {
+                        width: 38px;
+                        height: 38px;
+                        font-size: 0.9rem;
+                    }
+
+                    .activity-item p {
+                        font-size: 0.85rem !important;
                     }
                 }
             `}</style>
@@ -241,7 +298,18 @@ export default function InstructorDashboard() {
                 <div className="glass-panel-premium">
                     <h3 style={{ margin: '0 0 2rem 0', fontSize: '1.25rem', fontWeight: 950, color: '#0f172a' }}>Performance Overview</h3>
                     <div style={{ padding: '1rem 0', textAlign: 'center' }}>
-                        <div style={{ width: '160px', height: '160px', borderRadius: '50%', border: '12px solid #f8fafc', borderTopColor: '#1a4d3e', margin: '0 auto 2.5rem auto', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                        <div style={{
+                            width: '160px',
+                            height: '160px',
+                            borderRadius: '50%',
+                            border: '12px solid #f8fafc',
+                            borderTopColor: '#1a4d3e',
+                            margin: '0 auto 2.5rem auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column'
+                        }}>
                             <span style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em' }}>{stats?.completion_rate || 0}%</span>
                             <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 900, textTransform: 'uppercase' }}>Completion</span>
                         </div>

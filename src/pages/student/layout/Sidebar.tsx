@@ -12,9 +12,10 @@ import {
 
 interface SidebarProps {
     collapsed: boolean;
+    mobileOpen?: boolean;
 }
 
-const Sidebar = ({ collapsed }: SidebarProps) => {
+const Sidebar = ({ collapsed, mobileOpen }: SidebarProps) => {
     const { logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -32,7 +33,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
     };
 
     return (
-        <aside className={`sidebar-modern ${collapsed ? 'collapsed' : ''}`}>
+        <aside className={`sidebar-modern ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
 
             {/* Header: Logo */}
             <div className="sidebar-header">

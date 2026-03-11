@@ -14,8 +14,8 @@ const InstructorLayout = () => {
     }, [location]);
 
     return (
-        <div className={`dashboard-layout ${mobileOpen ? 'sidebar-open' : ''}`}>
-            <InstructorSidebar collapsed={collapsed} />
+        <div className={`dashboard-layout ${mobileOpen ? 'sidebar-open' : ''} ${collapsed ? 'sidebar-collapsed' : ''}`}>
+            <InstructorSidebar collapsed={collapsed} mobileOpen={mobileOpen} />
 
             <div className="main-content-wrapper">
                 <Topbar

@@ -14,7 +14,9 @@ import {
     MapPin,
     Loader2,
     AlertCircle,
-    User
+    User,
+    CheckCircle2,
+    X
 } from 'lucide-react';
 
 export default function StudentDetails() {
@@ -23,6 +25,10 @@ export default function StudentDetails() {
     const [student, setStudent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+    const [deactivateMessage, setDeactivateMessage] = useState('');
+    const [pendingCohortId, setPendingCohortId] = useState<string | null>(null);
+    const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -45,6 +51,55 @@ export default function StudentDetails() {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const toggleActivation = async (cohortId: string, currentStatus: string, message?: string) => {
+        const newStatus = currentStatus === 'inactive' ? 'active' : 'inactive';
+
+        // If deactivating and no message yet, show modal
+        if (newStatus === 'inactive' && !message) {
+            setPendingCohortId(cohortId);
+            setShowDeactivateModal(true);
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/cohorts/${cohortId}/students/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    status: newStatus,
+                    message: message
+                })
+            });
+
+            if (response.ok) {
+                setShowDeactivateModal(false);
+                setDeactivateMessage('');
+                setPendingCohortId(null);
+                setNotification({ type: 'success', message: `Student status updated to ${newStatus}.` });
+                fetchStudentData();
+                setTimeout(() => setNotification(null), 4000);
+            } else {
+                const data = await response.json();
+                setNotification({ type: 'error', message: data.message || 'Failed to update access status.' });
+                setTimeout(() => setNotification(null), 4000);
+            }
+        } catch (err) {
+            console.error('Toggle status error:', err);
+            setNotification({ type: 'error', message: 'An error occurred while updating access.' });
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
+
+    const confirmDeactivation = () => {
+        if (pendingCohortId) {
+            toggleActivation(pendingCohortId, 'active', deactivateMessage);
         }
     };
 
@@ -259,11 +314,209 @@ export default function StudentDetails() {
                     background: #f8fafc;
                     border-color: #cbd5e1;
                 }
+
+                .btn-toggle-active {
+                    background: #f0fdf4;
+                    color: #1a4d3e;
+                    border: 1.5px solid #dcfce7;
+                    padding: 0.6rem 1.2rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    font-size: 0.85rem;
+                }
+
+                .btn-toggle-active:hover {
+                    background: #dcfce7;
+                }
+
+                .btn-toggle-inactive {
+                    background: #fef2f2;
+                    color: #b91c1c;
+                    border: 1.5px solid #fee2e2;
+                    padding: 0.6rem 1.2rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    font-size: 0.85rem;
+                }
+
+                .btn-toggle-inactive:hover {
+                    background: #fee2e2;
+                }
+
+                .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    backdrop-filter: blur(4px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                }
+
+                .modal-box {
+                    background: white;
+                    padding: 2.5rem;
+                    border-radius: 28px;
+                    width: 100%;
+                    max-width: 500px;
+                    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                }
+
+                .modal-box h3 {
+                    margin: 0 0 1rem 0;
+                    font-weight: 950;
+                    color: #0f172a;
+                    font-size: 1.5rem;
+                }
+
+                .modal-box textarea {
+                    width: 100%;
+                    height: 120px;
+                    padding: 1rem;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 16px;
+                    margin-bottom: 1.5rem;
+                    font-family: inherit;
+                    resize: none;
+                }
+
+                .modal-box textarea:focus {
+                    outline: none;
+                    border-color: #1a4d3e;
+                }
+
+                .modal-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                }
+
+                .btn-confirm {
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                }
+
+                .btn-cancel {
+                    background: #f1f5f9;
+                    color: #64748b;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                }
+
+                @media (max-width: 1024px) {
+                    .profile-header-premium {
+                        padding: 2rem;
+                        gap: 2rem;
+                    }
+                    .avatar-massive {
+                        width: 100px;
+                        height: 100px;
+                        font-size: 2.5rem;
+                        border-radius: 32px;
+                    }
+                    .profile-info h1 {
+                        font-size: 2rem;
+                    }
+                    .details-layout {
+                        grid-template-columns: 1fr;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .profile-header-premium {
+                        flex-direction: column;
+                        text-align: center;
+                        padding: 2.5rem 1.5rem;
+                    }
+                    .contact-grid-mini {
+                        justify-content: center;
+                    }
+                    .enrollment-row {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 1rem;
+                    }
+                    .enrollment-row > div:last-child {
+                        width: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.75rem;
+                    }
+                    .enrollment-row button {
+                        width: 100%;
+                        justify-content: center;
+                        height: 48px;
+                    }
+                    .card-premium-records {
+                        padding: 1.5rem;
+                    }
+                    .metrics-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .stat-box-mini {
+                        min-width: 100%;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .profile-info h1 {
+                        font-size: 1.5rem;
+                    }
+                    .contact-grid-mini {
+                        gap: 1rem;
+                    }
+                    .avatar-massive {
+                        width: 80px;
+                        height: 80px;
+                        font-size: 2rem;
+                    }
+                }
             `}</style>
 
             <button onClick={() => navigate(-1)} className="back-link">
                 <ArrowLeft size={18} /> Back to Students
             </button>
+
+            {notification && (
+                <div className="animate-slide-in" style={{
+                    position: 'fixed',
+                    top: '2rem',
+                    right: '2rem',
+                    zIndex: 1000,
+                    padding: '1rem 1.5rem',
+                    background: notification.type === 'success' ? '#f0fdf4' : '#fff1f2',
+                    border: `1px solid ${notification.type === 'success' ? '#bbf7d0' : '#ffe4e6'}`,
+                    color: notification.type === 'success' ? '#166534' : '#e11d48',
+                    borderRadius: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+                    fontWeight: 700
+                }}>
+                    {notification.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+                    <span>{notification.message}</span>
+                    <button onClick={() => setNotification(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
+                        <X size={16} color={notification.type === 'success' ? '#166534' : '#e11d48'} />
+                    </button>
+                </div>
+            )}
 
             {loading ? (
                 <div style={{ padding: '8rem 0', textAlign: 'center' }}>
@@ -313,12 +566,27 @@ export default function StudentDetails() {
                                                 {cohort.course?.title || 'General Curriculum'} • Joined {new Date(cohort.pivot?.created_at).toLocaleDateString()}
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                                                <div style={{ fontSize: '0.75rem', fontWeight: 850, color: '#10b981', background: '#f0fdf4', padding: '2px 8px', borderRadius: '4px' }}>
+                                                <div style={{
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 850,
+                                                    color: cohort.pivot?.status === 'inactive' ? '#ef4444' : '#10b981',
+                                                    background: cohort.pivot?.status === 'inactive' ? '#fef2f2' : '#f0fdf4',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '4px'
+                                                }}>
                                                     {cohort.pivot?.status?.toUpperCase() || 'ENROLLED'}
                                                 </div>
                                             </div>
                                         </div>
-                                        <button className="btn-secondary-outline" onClick={() => navigate(`/instructor/cohorts/${cohort.id}`)}>Manage Access</button>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <button
+                                                className={cohort.pivot?.status === 'inactive' ? "btn-toggle-active" : "btn-toggle-inactive"}
+                                                onClick={() => toggleActivation(cohort.id, cohort.pivot?.status)}
+                                            >
+                                                {cohort.pivot?.status === 'inactive' ? 'Activate Access' : 'Deactivate Access'}
+                                            </button>
+                                            <button className="btn-secondary-outline" onClick={() => navigate(`/instructor/cohorts/${cohort.id}`)}>View cohort</button>
+                                        </div>
                                     </div>
                                 )) : (
                                     <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>
@@ -332,7 +600,7 @@ export default function StudentDetails() {
                                 <div className="card-title-records">
                                     <h3><Award size={20} color="#1a4d3e" /> Learning Metrics</h3>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+                                <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
                                     <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', textAlign: 'center' }}>
                                         <TrendingUp size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
                                         <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Completion</div>
@@ -390,6 +658,30 @@ export default function StudentDetails() {
                         </div>
                     </div>
                 </>
+            )}
+
+            {showDeactivateModal && (
+                <div className="modal-overlay">
+                    <div className="modal-box animate-fade-in-up">
+                        <h3>Deactivate Access</h3>
+                        <p style={{ color: '#64748b', fontWeight: 600, marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                            You are about to deactivate access for <strong>{student?.name}</strong>. Input a message explaining why (this will be sent to their email).
+                        </p>
+                        <textarea
+                            placeholder="e.g. Your subscription has expired or you've completed the program curriculum..."
+                            value={deactivateMessage}
+                            onChange={(e) => setDeactivateMessage(e.target.value)}
+                        />
+                        <div className="modal-actions">
+                            <button className="btn-cancel" onClick={() => {
+                                setShowDeactivateModal(false);
+                                setPendingCohortId(null);
+                                setDeactivateMessage('');
+                            }}>Cancel</button>
+                            <button className="btn-confirm" onClick={confirmDeactivation}>Deactivate Access</button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

@@ -305,6 +305,108 @@ export default function CohortDetails() {
                     from { opacity: 0; transform: translateY(20px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
+
+                @media (max-width: 1024px) {
+                    .cohort-header-premium {
+                        padding: 1.5rem;
+                    }
+                    .cohort-header-premium h1 {
+                        font-size: 2rem !important;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .cohort-header-premium > div {
+                        flex-direction: column;
+                        gap: 2rem;
+                    }
+                    .cohort-header-premium h1 {
+                        font-size: 1.75rem !important;
+                    }
+                    .stat-box-strip {
+                        flex-wrap: wrap;
+                        gap: 1rem;
+                    }
+                    .stat-box-mini {
+                        flex: 1;
+                        min-width: 140px;
+                        padding: 0.75rem 1rem;
+                    }
+                    .management-tabs-premium {
+                        gap: 1.5rem;
+                        overflow-x: auto;
+                        scrollbar-width: none;
+                        -ms-overflow-style: none;
+                        margin-bottom: 2rem;
+                    }
+                    .management-tabs-premium::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .tab-premium {
+                        white-space: nowrap;
+                        font-size: 0.9rem;
+                    }
+                    .module-header-premium {
+                        padding: 1rem 1.5rem;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 0.5rem;
+                    }
+                    .module-header-premium h4 {
+                        font-size: 1rem;
+                    }
+
+                    .student-table thead {
+                        display: none;
+                    }
+                    .student-table, .student-table tbody, .student-table tr, .student-table td {
+                        display: block;
+                        width: 100%;
+                    }
+                    .student-table tr {
+                        padding: 1rem;
+                        border-bottom: 2px solid #f8fafc;
+                    }
+                    .student-table td {
+                        padding: 0.5rem 0;
+                        border: none;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    .student-table td::before {
+                        content: attr(data-label);
+                        font-weight: 800;
+                        color: #64748b;
+                        font-size: 0.75rem;
+                        text-transform: uppercase;
+                    }
+                    .student-table td:last-child {
+                        border-top: 1px solid #f8fafc;
+                        margin-top: 0.5rem;
+                        padding-top: 1rem;
+                        justify-content: center;
+                    }
+                    .student-table td:first-child {
+                        justify-content: flex-start;
+                    }
+                    .student-table td:first-child::before {
+                        display: none;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .cohort-header-premium h1 {
+                        font-size: 1.5rem !important;
+                    }
+                    .btn-secondary-outline, .btn-primary-forest {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                    .cohort-header-premium > div > div:last-child {
+                        width: 100%;
+                    }
+                }
             `}</style>
 
             <Link to="/instructor/cohorts" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', textDecoration: 'none', fontWeight: 800, fontSize: '0.9rem', marginBottom: '1.5rem' }}>
@@ -443,7 +545,7 @@ export default function CohortDetails() {
                             <tbody>
                                 {cohort.students?.length > 0 ? cohort.students.map((student: Student) => (
                                     <tr key={student.id}>
-                                        <td>
+                                        <td data-label="Student Details">
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                 <div style={{ width: '40px', height: '40px', background: '#f1f5f9', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#1a4d3e' }}>
                                                     {student.name.charAt(0)}
@@ -454,7 +556,7 @@ export default function CohortDetails() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Status">
                                             <span className="badge-premium" style={{
                                                 background: student.pivot.status === 'dropped' ? '#fff1f2' : '#f8fafc',
                                                 color: student.pivot.status === 'dropped' ? '#e11d48' : '#64748b'
@@ -462,10 +564,10 @@ export default function CohortDetails() {
                                                 {student.pivot.status}
                                             </span>
                                         </td>
-                                        <td style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>
+                                        <td data-label="Joining Date" style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>
                                             {new Date(student.pivot.created_at).toLocaleDateString()}
                                         </td>
-                                        <td style={{ textAlign: 'right' }}>
+                                        <td data-label="Management" style={{ textAlign: 'right' }}>
                                             {student.pivot.status !== 'dropped' ? (
                                                 <button
                                                     onClick={() => handleBlockAccess(student.id)}

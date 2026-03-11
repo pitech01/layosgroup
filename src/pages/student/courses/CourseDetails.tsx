@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { PlayCircle, FileText, CheckCircle, ChevronLeft, Clock, Download, Loader2, Video, Calendar, ShieldCheck, BookOpen } from 'lucide-react';
+import { PlayCircle, FileText, CheckCircle, ChevronLeft, Clock, Loader2, Video, Calendar, ShieldCheck, BookOpen } from 'lucide-react';
 
 const CourseDetails = () => {
     const { courseId } = useParams();
@@ -210,18 +210,7 @@ const CourseDetails = () => {
                             {course.description}
                         </div>
 
-                        <div style={{ paddingTop: '1.5rem', borderTop: '1.5px solid #e2e8f0' }}>
-                            <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', marginBottom: '1rem' }}>Academic Materials</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                <div className="resource-card">
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                        <FileText size={18} color="#64748b" />
-                                        <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Syllabus.pdf</span>
-                                    </div>
-                                    <button style={{ background: 'none', border: 'none', color: '#1a4d3e', cursor: 'pointer' }}><Download size={16} /></button>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>

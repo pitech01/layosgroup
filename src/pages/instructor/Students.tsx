@@ -91,14 +91,21 @@ export default function Students() {
                 @media (max-width: 640px) {
                     .users-header {
                         flex-direction: column;
-                        align-items: stretch;
-                        text-align: center;
+                        align-items: flex-start;
+                        margin-bottom: 2rem;
                     }
                     .header-actions {
                         flex-direction: column;
+                        width: 100%;
+                        gap: 1rem;
                     }
-                    .btn-add-user {
+                    .btn-add-user, .btn-export {
+                        width: 100%;
                         justify-content: center;
+                        height: 48px;
+                    }
+                    .search-pill-icon {
+                        display: none;
                     }
                 }
 
@@ -281,7 +288,7 @@ export default function Students() {
                     }
                     .name-cell {
                         width: 100%;
-                        justify-content: flex-end;
+                        justify-content: flex-start;
                     }
                 }
 
@@ -424,8 +431,8 @@ export default function Students() {
                                         </td>
                                         <td data-label="Email & Contact">
                                             <div className="email-cell">
-                                                <span className="email-text" style={{ textAlign: 'right' }}>{user.email}</span>
-                                                {user.phone && <span className="phone-text" style={{ textAlign: 'right' }}>{user.phone}</span>}
+                                                <span className="email-text">{user.email}</span>
+                                                {user.phone && <span className="phone-text">{user.phone}</span>}
                                             </div>
                                         </td>
                                         <td data-label="Enrollment Date">
@@ -433,7 +440,7 @@ export default function Students() {
                                         </td>
                                         <td data-label="Active Cohorts">
                                             {user.cohorts?.length > 0 ? (
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'flex-end' }}>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'flex-start' }}>
                                                     {user.cohorts.map((c: any) => (
                                                         <span key={c.id} style={{ fontSize: '0.7rem', fontWeight: 800, background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', color: '#1e293b' }}>{c.name || c.id}</span>
                                                     ))}

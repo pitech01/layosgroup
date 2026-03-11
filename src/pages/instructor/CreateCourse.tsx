@@ -123,7 +123,12 @@ export default function CreateCourse() {
         const fetchCohorts = async () => {
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
             try {
-                const response = await fetch(`${API_URL}/cohorts`);
+                const response = await fetch(`${API_URL}/cohorts`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 if (response.ok) {
                     const data = await response.json();
                     setCohorts(data);

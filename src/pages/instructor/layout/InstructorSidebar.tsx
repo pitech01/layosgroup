@@ -14,9 +14,10 @@ import {
 
 interface InstructorSidebarProps {
     collapsed: boolean;
+    mobileOpen?: boolean;
 }
 
-const InstructorSidebar = ({ collapsed }: InstructorSidebarProps) => {
+const InstructorSidebar = ({ collapsed, mobileOpen }: InstructorSidebarProps) => {
     const { logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -45,7 +46,7 @@ const InstructorSidebar = ({ collapsed }: InstructorSidebarProps) => {
     ];
 
     return (
-        <aside className={`sidebar-modern instructor-sidebar ${collapsed ? 'collapsed' : ''}`} style={{ overflowY: 'auto' }}>
+        <aside className={`sidebar-modern instructor-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`} style={{ overflowY: 'auto' }}>
             <div className="sidebar-header">
                 <img
                     src="/logo.png"
