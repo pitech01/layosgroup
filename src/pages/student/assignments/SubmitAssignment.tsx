@@ -24,7 +24,6 @@ export default function SubmitAssignment() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-    const BASE_URL = API_URL.replace('/api', '');
 
     const fetchAssignment = async () => {
         try {
@@ -108,10 +107,40 @@ export default function SubmitAssignment() {
         }
     };
 
-    const getFileUrl = (path: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        return `${BASE_URL}/storage/${path}`;
+
+    const handleDownload = async (e: React.MouseEvent, id: string, fileName: string) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/assignments/${id}/download`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Download failed');
+                }
+                throw new Error(`Server Error (${response.status}): The download route was not found on this server.`);
+            }
+
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = fileName || 'assignment-instructions';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error: any) {
+            console.error('Download error:', error);
+            toast.error(error.message || "Failed to download file. Please try again.");
+        }
     };
 
     if (loading) {
@@ -380,9 +409,13 @@ export default function SubmitAssignment() {
                 <p className="instruction-text">{assignment.description}</p>
 
                 {assignment.assignment_file && (
-                    <a href={getFileUrl(assignment.assignment_file)} target="_blank" rel="noreferrer" className="resource-download-btn">
+                    <button
+                        onClick={(e) => handleDownload(e, assignment.id, `${assignment.title.replace(/\s+/g, '-').toLowerCase()}-instructions`)}
+                        className="resource-download-btn"
+                        style={{ border: '1.5px solid rgba(255,255,255,0.2)', cursor: 'pointer' }}
+                    >
                         <Download size={20} /> Download Instructions
-                    </a>
+                    </button>
                 )}
             </div>
 

@@ -18,7 +18,6 @@ export default function StudentAssignments() {
     const [error, setError] = useState<string | null>(null);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-    const BASE_URL = API_URL.replace('/api', '');
 
     const fetchAssignments = async () => {
         try {
@@ -49,10 +48,40 @@ export default function StudentAssignments() {
         return new Date(dueDate) < new Date();
     };
 
-    const getFileUrl = (path: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        return `${BASE_URL}/storage/${path}`;
+
+    const handleDownload = async (e: React.MouseEvent, id: string, fileName: string) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/assignments/${id}/download`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Download failed');
+                }
+                throw new Error(`Server Error (${response.status}): The download route was not found on this server.`);
+            }
+
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = fileName || 'assignment-instructions';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error: any) {
+            console.error('Download error:', error);
+            alert(error.message || "Failed to download file. Please try again.");
+        }
     };
 
     return (
@@ -289,9 +318,13 @@ export default function StudentAssignments() {
 
                                 <div className="card-right">
                                     {a.assignment_file && (
-                                        <a href={getFileUrl(a.assignment_file)} target="_blank" rel="noreferrer" className="download-resource">
+                                        <button
+                                            onClick={(e) => handleDownload(e, a.id, `${a.title.replace(/\s+/g, '-').toLowerCase()}-instructions`)}
+                                            className="download-resource"
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                                        >
                                             <Download size={16} /> Instructions Document
-                                        </a>
+                                        </button>
                                     )}
 
                                     {hasSubmitted ? (
