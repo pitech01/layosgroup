@@ -232,7 +232,7 @@ export default function StudentLogin() {
 
                 <div className="hero-text-content animate-fade-in-up delay-400">
                     <h2>Transform Learning into Skills</h2>
-                    <p>Make informed decisions with Layos's powerful analytics tools. Harness the power of data to drive your learning journey forward.</p>
+                    <p>Make informed decisions with Layos powerful analytics tools. Harness the power of data to drive your learning journey forward.</p>
                 </div>
             </div>
         </div>
