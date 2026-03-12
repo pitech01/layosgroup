@@ -447,7 +447,7 @@ const LessonView = () => {
 
                             <div style={{ paddingTop: '2rem', borderTop: '1.5px solid #f1f5f9' }}>
                                 <button
-                                    onClick={handleCompleteLesson}
+                                    onClick={() => handleCompleteLesson()}
                                     disabled={isCompleting}
                                     style={{
                                         display: 'flex',
