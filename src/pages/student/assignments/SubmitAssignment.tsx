@@ -22,9 +22,9 @@ export default function SubmitAssignment() {
 
     const [answerText, setAnswerText] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string } | null>(null);
-    const [loadingResource, setLoadingResource] = useState(false);
+    const [viewingPdf, setViewingPdf] = useState<{ id: string; url: string | null; title: string } | null>(null);
     const [iframeLoading, setIframeLoading] = useState(true);
+    const [fetchingResource, setFetchingResource] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -111,9 +111,15 @@ export default function SubmitAssignment() {
     };
 
 
-    const handleViewResource = async (e: React.MouseEvent, id: string, title: string) => {
+    const handleViewResource = (e: React.MouseEvent, id: string, title: string) => {
         e.preventDefault();
-        setLoadingResource(true);
+        setViewingPdf({ id, url: null, title });
+        setIframeLoading(true);
+        fetchResource(id);
+    };
+
+    const fetchResource = async (id: string) => {
+        setFetchingResource(true);
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/assignments/${id}/download`, {
@@ -133,12 +139,13 @@ export default function SubmitAssignment() {
 
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
-            setViewingPdf({ url: blobUrl, title });
+            setViewingPdf(prev => prev ? { ...prev, url: blobUrl } : null);
         } catch (error: any) {
             console.error('Resource access error:', error);
             toast.error(error.message || "Failed to load resource. Please try again.");
+            setViewingPdf(null);
         } finally {
-            setLoadingResource(false);
+            setFetchingResource(false);
         }
     };
 
@@ -412,14 +419,9 @@ export default function SubmitAssignment() {
                         type="button"
                         onClick={(e) => handleViewResource(e, assignment.id, assignment.title)}
                         className="resource-download-btn"
-                        disabled={loadingResource}
-                        style={{ border: '1.5px solid rgba(255,255,255,0.2)', cursor: loadingResource ? 'not-allowed' : 'pointer', opacity: loadingResource ? 0.7 : 1 }}
+                        style={{ border: '1.5px solid rgba(255,255,255,0.2)', cursor: 'pointer' }}
                     >
-                        {loadingResource ? (
-                            <><Loader2 className="animate-spin" size={20} /> Accessing...</>
-                        ) : (
-                            <><Eye size={20} /> View Instructions</>
-                        )}
+                        <Eye size={20} /> View Instructions
                     </button>
                 )}
             </div>
@@ -509,24 +511,20 @@ export default function SubmitAssignment() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '2rem',
-                    background: 'rgba(2, 6, 23, 0.9)',
-                    backdropFilter: 'blur(10px)'
+                    padding: 0,
+                    background: 'white',
                 }}>
                     <div style={{
                         background: 'white',
                         overflow: 'hidden',
                         width: '100%',
-                        maxWidth: '1000px',
-                        maxHeight: '92vh',
+                        height: '100%',
                         position: 'relative',
-                        borderRadius: '32px',
                         display: 'flex',
                         flexDirection: 'column',
-                        boxShadow: '0 40px 100px rgba(0,0,0,0.4)'
                     }}>
                         <div style={{
-                            padding: '1.5rem 2.5rem',
+                            padding: '1.25rem 2rem',
                             borderBottom: '1.5px solid #f1f5f9',
                             display: 'flex',
                             alignItems: 'center',
@@ -544,7 +542,7 @@ export default function SubmitAssignment() {
                             </div>
                             <button
                                 onClick={() => {
-                                    window.URL.revokeObjectURL(viewingPdf.url);
+                                    if (viewingPdf.url) window.URL.revokeObjectURL(viewingPdf.url);
                                     setViewingPdf(null);
                                     setIframeLoading(true);
                                 }}
@@ -558,23 +556,38 @@ export default function SubmitAssignment() {
                             style={{ flex: 1, background: '#f8fafc', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             onContextMenu={(e) => e.preventDefault()}
                         >
-                            {iframeLoading && (
+                            {(fetchingResource || iframeLoading) && (
                                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 10 }}>
-                                    <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
-                                    <p style={{ marginTop: '1rem', fontWeight: 800, color: '#64748b' }}>Rendering Secure View...</p>
+                                    <div style={{ position: 'relative', marginBottom: '2rem' }}>
+                                        <div style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid #f1f5f9', borderTopColor: '#1a4d3e', animation: 'spin-submit 1s linear infinite' }}></div>
+                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <FileText size={32} color="#1a4d3e" opacity={0.3} />
+                                        </div>
+                                    </div>
+                                    <h4 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>
+                                        {fetchingResource ? 'Acquiring Secure Document...' : 'Architecting Secure View...'}
+                                    </h4>
+                                    <p style={{ marginTop: '0.75rem', fontWeight: 600, color: '#64748b', fontSize: '0.9rem' }}>
+                                        {fetchingResource ? 'Verifying credentials and establishing encrypted stream' : 'Preparing high-fidelity instructional workspace'}
+                                    </p>
+                                    <style>{`
+                                        @keyframes spin-submit { to { transform: rotate(360deg); } }
+                                    `}</style>
                                 </div>
                             )}
-                            <iframe
-                                src={`${viewingPdf.url}#toolbar=0&navpanes=0`}
-                                style={{ width: '100%', height: '70vh', border: 'none' }}
-                                title="Secure PDF Viewer"
-                                onLoad={() => setIframeLoading(false)}
-                            />
+                            {viewingPdf.url && (
+                                <iframe
+                                    src={`${viewingPdf.url}#toolbar=0&navpanes=0`}
+                                    style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
+                                    title="Secure PDF Viewer"
+                                    onLoad={() => setIframeLoading(false)}
+                                />
+                            )}
                             {/* Overlay to catch clicks on any remaining toolbar elements if browser injects them */}
-                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'transparent', zIndex: 5 }}></div>
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'transparent', zIndex: 5, pointerEvents: 'none' }}></div>
                         </div>
 
-                        <div style={{ padding: '1rem 2.5rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
+                        <div style={{ padding: '0.75rem 2rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
                             <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Protected by Layos Group Security Protocol</p>
                         </div>
                     </div>

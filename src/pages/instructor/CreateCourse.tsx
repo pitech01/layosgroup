@@ -300,6 +300,7 @@ export default function CreateCourse() {
     const [uploadingVideos, setUploadingVideos] = useState<{ [lessonId: string]: boolean }>({});
     const [uploadProgress, setUploadProgress] = useState<{ [lessonId: string]: number }>({});
     const [previewAsset, setPreviewAsset] = useState<{ url: string; type: 'image' | 'pdf' } | null>(null);
+    const [iframeLoading, setIframeLoading] = useState(true);
     const [designingQuiz, setDesigningQuiz] = useState<{ moduleId: string; lessonId: string } | null>(null);
 
     const handleFileUpload = (moduleId: string, lessonId: string, file: File) => {
@@ -1834,30 +1835,30 @@ export default function CreateCourse() {
                     <div
                         className="modal-overlay animate-fade-in"
                         onClick={() => setViewingLesson(null)}
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                         <div
                             className="animate-scale-up"
                             onClick={e => e.stopPropagation()}
-                            style={{ background: 'white', width: '100%', maxWidth: '700px', borderRadius: '40px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
+                            style={{ background: 'white', width: '100%', height: '100%', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column' }}
                         >
-                            <div style={{ padding: '3rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                                    <div className={`lesson-type-badge type-${viewingLesson.type}`} style={{ transform: 'scale(1.2)' }}>
+                                    <div className={`lesson-type-badge type-${viewingLesson.type}`} style={{ transform: 'scale(1.1)' }}>
                                         {viewingLesson.type === 'video' && <Video size={16} />}
                                         {viewingLesson.type === 'live' && <Users size={16} />}
                                         {viewingLesson.type === 'material' && <FileText size={16} />}
                                         {viewingLesson.type === 'quiz' && <HelpCircle size={16} />}
                                     </div>
-                                    <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem', color: '#0f172a' }}>{viewingLesson.title}</h3>
+                                    <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem', color: '#0f172a' }}>{viewingLesson.title}</h3>
                                 </div>
-                                <button onClick={() => setViewingLesson(null)} style={{ background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <button onClick={() => setViewingLesson(null)} style={{ background: '#f1f5f9', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <X size={20} />
                                 </button>
                             </div>
-                            <div style={{ padding: '4rem', textAlign: 'center' }}>
+                            <div style={{ flex: 1, padding: '0', textAlign: 'center', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                                 {viewingLesson.type === 'video' && (
-                                    <div style={{ width: '100%', aspectRatio: '16/9', background: '#0f172a', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexDirection: 'column', overflow: 'hidden' }}>
+                                    <div style={{ width: '100%', height: '100%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexDirection: 'column', overflow: 'hidden' }}>
                                         {viewingLesson.videoUrl || viewingLesson.fileToUpload ? (
                                             <video
                                                 src={viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : viewingLesson.videoUrl}
@@ -1876,16 +1877,16 @@ export default function CreateCourse() {
                                     </div>
                                 )}
                                 {viewingLesson.type === 'live' && (
-                                    <div style={{ padding: '3rem', background: '#f0fdf4', borderRadius: '24px', border: '1.5px solid #1a4d3e20', marginBottom: '2rem' }}>
-                                        <Users size={48} color="#1a4d3e" style={{ marginBottom: '1.5rem' }} />
-                                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1.25rem', fontWeight: 900, color: '#1a4d3e' }}>Live Class Scheduled</h4>
-                                        <p style={{ margin: 0, fontWeight: 700, color: '#64748b' }}>{viewingLesson.liveDate} at {viewingLesson.liveTime}</p>
-                                        <p style={{ margin: '8px 0 2rem 0', fontSize: '0.85rem', color: '#94a3b8' }}>Platform: {viewingLesson.livePlatform}</p>
-                                        <button className="btn-standard" style={{ background: '#1a4d3e', padding: '0 2.5rem' }}>Join Preview Link</button>
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', background: '#f0fdf4' }}>
+                                        <Users size={64} color="#1a4d3e" style={{ marginBottom: '1.5rem' }} />
+                                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1.75rem', fontWeight: 900, color: '#1a4d3e' }}>Live Class Scheduled</h4>
+                                        <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#64748b' }}>{viewingLesson.liveDate} at {viewingLesson.liveTime}</p>
+                                        <p style={{ margin: '8px 0 2rem 0', fontSize: '1rem', color: '#94a3b8' }}>Platform: {viewingLesson.livePlatform}</p>
+                                        <button className="btn-standard" style={{ background: '#1a4d3e', padding: '0 3rem', height: '56px', fontSize: '1.1rem' }}>Join Preview Link</button>
                                     </div>
                                 )}
                                 {viewingLesson.type === 'material' && (
-                                    <div style={{ width: '100%', aspectRatio: '16/9', background: '#eff6ff', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexDirection: 'column', overflow: 'hidden', marginBottom: '2rem', position: 'relative' }}>
+                                    <div style={{ width: '100%', height: '100%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
                                         {viewingLesson.fileUrl || viewingLesson.fileToUpload ? (
                                             <>
                                                 {(() => {
@@ -1900,21 +1901,21 @@ export default function CreateCourse() {
                                                     }
                                                     return (
                                                         <div style={{ textAlign: 'center', padding: '2rem' }}>
-                                                            <FileText size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                                                            <p style={{ fontWeight: 800, margin: 0 }}>Document Unit Ready</p>
-                                                            <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{fileName}</span>
+                                                            <FileText size={64} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                                                            <p style={{ fontWeight: 800, fontSize: '1.25rem', margin: 0 }}>Document Unit Ready</p>
+                                                            <span style={{ fontSize: '1rem', color: '#94a3b8', marginTop: '10px', display: 'block' }}>{fileName}</span>
                                                         </div>
                                                     );
                                                 })()}
                                             </>
                                         ) : (
                                             <>
-                                                <FileText size={48} opacity={0.5} style={{ marginBottom: '1.5rem' }} />
-                                                <h4 style={{ margin: '0 0 10px 0', fontSize: '1.25rem', fontWeight: 900, color: '#2563eb' }}>Document Hub Unit</h4>
-                                                <p style={{ margin: 0, fontWeight: 700, color: '#64748b' }}>PDF/Slides Asset Ready</p>
+                                                <FileText size={64} opacity={0.5} style={{ marginBottom: '1.5rem' }} />
+                                                <h4 style={{ margin: '0 0 10px 0', fontSize: '1.75rem', fontWeight: 900, color: '#2563eb' }}>Document Hub Unit</h4>
+                                                <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#64748b' }}>PDF/Slides Asset Ready</p>
                                             </>
                                         )}
-                                        <button className="btn-standard" style={{ background: '#2563eb', padding: '0 2.5rem', marginTop: (viewingLesson.fileUrl || viewingLesson.fileToUpload) ? '1rem' : '2rem', position: 'absolute', bottom: '2rem' }} onClick={() => {
+                                        <button className="btn-standard" style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: '#2563eb', padding: '0 2.5rem', zIndex: 10 }} onClick={() => {
                                             const url = viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : viewingLesson.fileUrl;
                                             if (url) window.open(url, '_blank');
                                         }}>
@@ -1923,14 +1924,14 @@ export default function CreateCourse() {
                                     </div>
                                 )}
                                 {viewingLesson.type === 'quiz' && (
-                                    <div style={{ padding: '3rem', background: '#fefce8', borderRadius: '24px', border: '1.5px solid #ca8a0420', marginBottom: '2rem' }}>
-                                        <HelpCircle size={48} color="#ca8a04" style={{ marginBottom: '1.5rem' }} />
-                                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1.25rem', fontWeight: 900, color: '#ca8a04' }}>Knowledge Validation</h4>
-                                        <p style={{ margin: 0, fontWeight: 700, color: '#64748b' }}>Curriculum Evaluation Node</p>
-                                        <button className="btn-standard" style={{ background: '#ca8a04', padding: '0 2.5rem', marginTop: '2rem' }}>Start Simulator</button>
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', background: '#fefce8' }}>
+                                        <HelpCircle size={64} color="#ca8a04" style={{ marginBottom: '1.5rem' }} />
+                                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1.75rem', fontWeight: 900, color: '#ca8a04' }}>Knowledge Validation</h4>
+                                        <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#64748b' }}>Curriculum Evaluation Node</p>
+                                        <button className="btn-standard" style={{ background: '#ca8a04', padding: '0 3rem', height: '56px', fontSize: '1.1rem', marginTop: '2rem' }}>Start Simulator</button>
                                     </div>
                                 )}
-                                <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', padding: '1.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: viewingLesson.isLocked ? '#ef4444' : '#10b981', fontWeight: 800, fontSize: '0.85rem' }}>
                                         {viewingLesson.isLocked ? <Lock size={14} /> : <CheckCircle2 size={14} />}
                                         {viewingLesson.isLocked ? 'Locked for Students' : 'Free Access'}
@@ -2064,34 +2065,53 @@ export default function CreateCourse() {
 
             {/* Asset Preview Modal */}
             {previewAsset && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', background: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(8px)' }}>
-                    <div style={{ background: 'white', overflow: 'hidden', width: '100%', maxWidth: '1000px', maxHeight: '90vh', position: 'relative', borderRadius: '32px', display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ padding: '1.5rem 2rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfe' }}>
+                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(8px)' }}>
+                    <div style={{ background: 'white', overflow: 'hidden', width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ padding: '1.25rem 2rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfe' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
+                                <div style={{ padding: '8px', borderRadius: '12px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     {previewAsset.type === 'pdf' ? <FileText size={20} color="#1a4d3e" /> : <Eye size={20} color="#1a4d3e" />}
                                 </div>
-                                <h3 style={{ margin: 0, fontWeight: 900, color: '#0f172a' }}>Material Intelligence Preview</h3>
+                                <h3 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>Material Intelligence Preview</h3>
                             </div>
                             <button
-                                onClick={() => setPreviewAsset(null)}
-                                style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                                onClick={() => {
+                                    setPreviewAsset(null);
+                                    setIframeLoading(true);
+                                }}
+                                style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer', transition: 'all 0.2s ease' }}
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
-                        <div style={{ flex: 1, padding: '2rem', background: '#f8fafc', overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <div style={{ flex: 1, padding: '0', background: '#f8fafc', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                            {iframeLoading && previewAsset.type === 'pdf' && (
+                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 10 }}>
+                                    <div style={{ position: 'relative', marginBottom: '2rem' }}>
+                                        <div style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid #f1f5f9', borderTopColor: '#1a4d3e', animation: 'spin-inst 1s linear infinite' }}></div>
+                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <FileText size={32} color="#1a4d3e" opacity={0.3} />
+                                        </div>
+                                    </div>
+                                    <h4 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>Architecting Secure View...</h4>
+                                    <p style={{ marginTop: '0.75rem', fontWeight: 600, color: '#64748b', fontSize: '0.9rem' }}>Preparing high-fidelity instructional workspace</p>
+                                    <style>{`
+                                        @keyframes spin-inst { to { transform: rotate(360deg); } }
+                                    `}</style>
+                                </div>
+                            )}
                             {previewAsset.type === 'pdf' ? (
                                 <iframe
                                     src={`${previewAsset.url}#toolbar=0`}
-                                    style={{ width: '100%', height: '70vh', border: 'none', borderRadius: '16px', boxShadow: '0 20px 50px rgba(0,0,0,0.1)' }}
+                                    style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
                                     title="PDF Preview"
+                                    onLoad={() => setIframeLoading(false)}
                                 />
                             ) : (
                                 <img
                                     src={previewAsset.url}
-                                    style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '20px', boxShadow: '0 30px 60px rgba(0,0,0,0.15)', userSelect: 'none' }}
+                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }}
                                     alt="Asset Preview"
                                     onContextMenu={(e: any) => e.preventDefault()}
                                 />

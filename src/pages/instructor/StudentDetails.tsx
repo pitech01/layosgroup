@@ -16,7 +16,8 @@ import {
     AlertCircle,
     User,
     CheckCircle2,
-    X
+    X,
+    HelpCircle
 } from 'lucide-react';
 
 export default function StudentDetails() {
@@ -28,6 +29,7 @@ export default function StudentDetails() {
     const [showDeactivateModal, setShowDeactivateModal] = useState(false);
     const [deactivateMessage, setDeactivateMessage] = useState('');
     const [pendingCohortId, setPendingCohortId] = useState<string | null>(null);
+    const [viewingQuizResult, setViewingQuizResult] = useState<any>(null);
     const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -617,10 +619,53 @@ export default function StudentDetails() {
                                     </div>
                                     <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', textAlign: 'center' }}>
                                         <Activity size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
-                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Engagement</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>{student.cohorts?.length > 0 ? 'Normal' : 'N/A'}</div>
+                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Quiz Score</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>
+                                            {student.completed_lessons?.length > 0 ? 
+                                                Math.round(student.completed_lessons.reduce((acc: number, l: any) => acc + (l.pivot?.score || 0), 0) / student.completed_lessons.length)
+                                                : 'N/A'}
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="card-premium-records shadow-premium">
+                                <div className="card-title-records">
+                                    <h3><HelpCircle size={20} color="#1a4d3e" /> Quiz Submissions</h3>
+                                </div>
+
+                                {student.completed_lessons && student.completed_lessons.filter((l: any) => l.type === 'quiz').length > 0 ? (
+                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                        {student.completed_lessons.filter((l: any) => l.type === 'quiz').map((lesson: any) => (
+                                            <div key={lesson.id} className="enrollment-row" style={{ marginBottom: 0 }}>
+                                                <div className="progress-ring-mini" style={{ background: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#f0fdf4' : '#fef2f2', color: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#1a4d3e' : '#ef4444' }}>
+                                                    {lesson.pivot?.score || 0}%
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: 950, color: '#0f172a', fontSize: '1.05rem' }}>{lesson.title}</div>
+                                                    <div style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 700 }}>
+                                                        Submitted on {new Date(lesson.pivot?.updated_at).toLocaleDateString()}
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    className="btn-secondary-outline" 
+                                                    onClick={() => {
+                                                        const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
+                                                        const answers = typeof lesson.pivot.answers === 'string' ? JSON.parse(lesson.pivot.answers) : lesson.pivot.answers;
+                                                        setViewingQuizResult({ ...lesson, quiz_data: quizData, pivot: { ...lesson.pivot, answers } });
+                                                    }}
+                                                >
+                                                    Analysis <Activity size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div style={{ textAlign: 'center', padding: '2rem', background: '#f8fafc', borderRadius: '20px', border: '2px dashed #e2e8f0' }}>
+                                        <HelpCircle size={24} color="#cbd5e1" style={{ marginBottom: '0.5rem' }} />
+                                        <p style={{ color: '#64748b', fontWeight: 600, fontSize: '0.9rem' }}>No quiz submissions available yet.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -679,6 +724,78 @@ export default function StudentDetails() {
                                 setDeactivateMessage('');
                             }}>Cancel</button>
                             <button className="btn-confirm" onClick={confirmDeactivation}>Deactivate Access</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {viewingQuizResult && (
+                <div className="modal-overlay" style={{ zIndex: 1100 }}>
+                    <div className="modal-box animate-fade-in-up" style={{ maxWidth: '800px', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 0 }}>
+                        <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', borderTopLeftRadius: '28px', borderTopRightRadius: '28px' }}>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '1.4rem' }}>Evaluation Intelligence Analysis</h3>
+                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontWeight: 700, fontSize: '0.9rem' }}>
+                                    {viewingQuizResult.title} • Score: <span style={{ color: viewingQuizResult.pivot.score >= (viewingQuizResult.quiz_data?.pass_mark || 80) ? '#10b981' : '#ef4444' }}>{viewingQuizResult.pivot.score}%</span>
+                                </p>
+                            </div>
+                            <button onClick={() => setViewingQuizResult(null)} style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem' }}>
+                            {viewingQuizResult.quiz_data?.questions?.map((q: any, idx: number) => {
+                                const studentAnswer = viewingQuizResult.pivot.answers[idx];
+                                const isCorrect = studentAnswer === q.correct_answer;
+                                
+                                return (
+                                    <div key={idx} style={{ marginBottom: '2rem', padding: '1.5rem', borderRadius: '20px', border: `1.5px solid ${isCorrect ? '#f0fdf4' : '#fef2f2'}`, background: isCorrect ? '#fcfdfe' : '#fffbff' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8' }}>Question {idx + 1}</span>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: isCorrect ? '#10b981' : '#ef4444', background: isCorrect ? '#f0fdf4' : '#fef2f2', padding: '4px 10px', borderRadius: '8px' }}>
+                                                {isCorrect ? 'VALIDATED' : 'ERRONEOUS'}
+                                            </span>
+                                        </div>
+                                        <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: '#0f172a', lineHeight: 1.4 }}>{q.question}</h4>
+                                        <div style={{ display: 'grid', gap: '0.75rem' }}>
+                                            {q.options.map((opt: string, oIdx: number) => {
+                                                const isStudentPick = studentAnswer === oIdx;
+                                                const isRightAnswer = q.correct_answer === oIdx;
+                                                
+                                                return (
+                                                    <div 
+                                                        key={oIdx} 
+                                                        style={{ 
+                                                            padding: '1rem', 
+                                                            borderRadius: '12px', 
+                                                            background: isRightAnswer ? '#f0fdf4' : isStudentPick ? '#fef2f2' : 'white',
+                                                            border: `1.2px solid ${isRightAnswer ? '#10b98140' : isStudentPick ? '#ef444440' : '#f1f5f9'}`,
+                                                            color: isRightAnswer ? '#166534' : isStudentPick ? '#991b1b' : '#334155',
+                                                            fontWeight: (isStudentPick || isRightAnswer) ? 800 : 500,
+                                                            fontSize: '0.9rem',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '12px'
+                                                        }}
+                                                    >
+                                                        <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                            {(isStudentPick || isRightAnswer) && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }}></div>}
+                                                        </div>
+                                                        {opt}
+                                                        {isRightAnswer && <CheckCircle2 size={16} style={{ marginLeft: 'auto' }} />}
+                                                        {!isCorrect && isStudentPick && <X size={16} style={{ marginLeft: 'auto' }} />}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        
+                        <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', borderBottomLeftRadius: '28px', borderBottomRightRadius: '28px' }}>
+                            <button onClick={() => setViewingQuizResult(null)} className="btn-confirm" style={{ background: '#0f172a' }}>Close Analysis</button>
                         </div>
                     </div>
                 </div>

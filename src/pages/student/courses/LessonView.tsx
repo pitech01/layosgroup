@@ -14,6 +14,7 @@ const LessonView = () => {
     const [loading, setLoading] = useState(true);
     const [allLessons, setAllLessons] = useState<any[]>([]);
     const [previewAsset, setPreviewAsset] = useState<{ url: string; type: 'image' | 'pdf' | 'video' } | null>(null);
+    const [iframeLoading, setIframeLoading] = useState(true);
 
     // Quiz State
     const [quizStarted, setQuizStarted] = useState(false);
@@ -54,8 +55,17 @@ const LessonView = () => {
                         const currentLesson = flattenedLessons.find(l => l.id == lessonId);
                         if (currentLesson) {
                             setLesson(currentLesson);
-                            const alreadyCompleted = data.completed_lessons?.some((cl: any) => cl.id == lessonId);
-                            setIsCompleted(!!alreadyCompleted);
+                            const completedEntry = data.completed_lessons?.find((cl: any) => cl.id == lessonId);
+                            if (completedEntry) {
+                                setIsCompleted(true);
+                                if (currentLesson.type === 'quiz' && completedEntry.pivot?.score !== null && completedEntry.pivot?.score !== undefined) {
+                                    const quizData = typeof currentLesson.quiz_data === 'string' ? JSON.parse(currentLesson.quiz_data) : currentLesson.quiz_data;
+                                    setQuizResult({ 
+                                        score: completedEntry.pivot.score, 
+                                        passed: completedEntry.pivot.score >= (quizData?.pass_mark || 80) 
+                                    });
+                                }
+                            }
                         }
                     }
                 }
@@ -96,7 +106,7 @@ const LessonView = () => {
         navigate(`/student/courses/${courseId}/lesson/${id}?cohortId=${cohortId}`);
     };
 
-    const handleCompleteLesson = async () => {
+    const handleCompleteLesson = async (extraData?: { score?: number; answers?: any }) => {
         setIsCompleting(true);
         try {
             const token = localStorage.getItem('token');
@@ -109,7 +119,10 @@ const LessonView = () => {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ completed: newStatus })
+                body: JSON.stringify({ 
+                    completed: newStatus,
+                    ...extraData
+                })
             });
 
             if (response.ok) {
@@ -258,7 +271,7 @@ const LessonView = () => {
                                                     </button>
                                                     {quizResult.passed && !isCompleted && (
                                                         <button
-                                                            onClick={handleCompleteLesson}
+                                                            onClick={() => handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers })}
                                                             className="btn-standard"
                                                             style={{ background: '#1a4d3e', color: 'white', padding: '0.8rem 2.5rem' }}
                                                         >
@@ -478,6 +491,7 @@ const LessonView = () => {
                                                     const url = lesson.file_url || '';
                                                     const isPdf = url.toLowerCase().endsWith('.pdf') || lesson.file_name?.toLowerCase().endsWith('.pdf');
                                                     const isVideo = url.toLowerCase().match(/\.(mp4|webm|ogg|ogv)$/i);
+                                                    setIframeLoading(true);
                                                     setPreviewAsset({ url, type: isPdf ? 'pdf' : isVideo ? 'video' : 'image' });
                                                 }}
                                                 style={{ padding: '8px 12px', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '10px', color: '#1a4d3e', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}
@@ -500,9 +514,9 @@ const LessonView = () => {
             {/* Global Asset Preview Modal */}
             {
                 previewAsset && (
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', background: 'rgba(2, 6, 23, 0.9)', backdropFilter: 'blur(10px)' }}>
-                        <div style={{ background: 'white', overflow: 'hidden', width: '100%', maxWidth: '1000px', maxHeight: '92vh', position: 'relative', borderRadius: '32px', display: 'flex', flexDirection: 'column', boxShadow: '0 40px 100px rgba(0,0,0,0.4)' }}>
-                            <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfe' }}>
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, background: 'white' }}>
+                        <div style={{ background: 'white', overflow: 'hidden', width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ padding: '1.25rem 2rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfe' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                     <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
                                         {previewAsset.type === 'pdf' ? <FileText size={22} color="#1a4d3e" /> : <Eye size={22} color="#1a4d3e" />}
@@ -520,32 +534,48 @@ const LessonView = () => {
                                 </button>
                             </div>
 
-                            <div style={{ flex: 1, padding: '2.5rem', background: '#f8fafc', overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <div style={{ flex: 1, padding: 0, background: '#f8fafc', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                                {iframeLoading && previewAsset.type === 'pdf' && (
+                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 10 }}>
+                                        <div style={{ position: 'relative', marginBottom: '2rem' }}>
+                                            <div style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid #f1f5f9', borderTopColor: '#1a4d3e', animation: 'spin-lesson 1s linear infinite' }}></div>
+                                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <FileText size={32} color="#1a4d3e" opacity={0.3} />
+                                            </div>
+                                        </div>
+                                        <h4 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>Architecting Secure View...</h4>
+                                        <p style={{ marginTop: '0.75rem', fontWeight: 600, color: '#64748b', fontSize: '0.9rem' }}>Preparing high-fidelity instructional workspace</p>
+                                        <style>{`
+                                            @keyframes spin-lesson { to { transform: rotate(360deg); } }
+                                        `}</style>
+                                    </div>
+                                )}
                                 {previewAsset.type === 'pdf' ? (
                                     <iframe
                                         src={`${previewAsset.url}#toolbar=0&navpanes=0`}
-                                        style={{ width: '100%', height: '70vh', border: 'none', borderRadius: '16px' }}
+                                        style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
                                         title="PDF Review"
+                                        onLoad={() => setIframeLoading(false)}
                                         onContextMenu={(e: any) => e.preventDefault()}
                                     />
                                 ) : previewAsset.type === 'video' ? (
                                     <video
                                         controls
                                         src={previewAsset.url}
-                                        style={{ width: '100%', maxHeight: '70vh', borderRadius: '16px' }}
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                         controlsList="nodownload"
                                         onContextMenu={(e: any) => e.preventDefault()}
                                     />
                                 ) : (
                                     <img
                                         src={previewAsset.url}
-                                        style={{ maxWidth: '100%', maxHeight: '72vh', objectFit: 'contain', borderRadius: '20px', userSelect: 'none', pointerEvents: 'none' }}
+                                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none', pointerEvents: 'none' }}
                                         alt="Asset Review"
                                         onContextMenu={(e: any) => e.preventDefault()}
                                     />
                                 )}
                             </div>
-                            <div style={{ padding: '1rem 2.5rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
+                            <div style={{ padding: '0.75rem 2rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
                                 <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Protected by Global Security Protocol</p>
                             </div>
                         </div>
