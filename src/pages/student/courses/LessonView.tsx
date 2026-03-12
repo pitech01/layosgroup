@@ -15,12 +15,15 @@ const LessonView = () => {
     const [allLessons, setAllLessons] = useState<any[]>([]);
     const [previewAsset, setPreviewAsset] = useState<{ url: string; type: 'image' | 'pdf' | 'video' } | null>(null);
     const [iframeLoading, setIframeLoading] = useState(true);
+    const [mainIframeLoading, setMainIframeLoading] = useState(true);
 
     // Quiz State
     const [quizStarted, setQuizStarted] = useState(false);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: number }>({});
     const [quizResult, setQuizResult] = useState<{ score: number, passed: boolean } | null>(null);
+    const [showReview, setShowReview] = useState(false);
+    const [isMaximized, setIsMaximized] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -58,12 +61,22 @@ const LessonView = () => {
                             const completedEntry = data.completed_lessons?.find((cl: any) => cl.id == lessonId);
                             if (completedEntry) {
                                 setIsCompleted(true);
-                                if (currentLesson.type === 'quiz' && completedEntry.pivot?.score !== null && completedEntry.pivot?.score !== undefined) {
+                                if (currentLesson.type === 'quiz' || (currentLesson.quiz_data && currentLesson.type === 'material')) {
                                     const quizData = typeof currentLesson.quiz_data === 'string' ? JSON.parse(currentLesson.quiz_data) : currentLesson.quiz_data;
-                                    setQuizResult({ 
-                                        score: completedEntry.pivot.score, 
-                                        passed: completedEntry.pivot.score >= (quizData?.pass_mark || 80) 
-                                    });
+                                    if (completedEntry.pivot?.score !== null && completedEntry.pivot?.score !== undefined) {
+                                        setQuizResult({
+                                            score: completedEntry.pivot.score,
+                                            passed: completedEntry.pivot.score >= (quizData?.pass_mark || 80)
+                                        });
+                                        if (completedEntry.pivot.answers) {
+                                            try {
+                                                const parsedAnswers = typeof completedEntry.pivot.answers === 'string' ? JSON.parse(completedEntry.pivot.answers) : completedEntry.pivot.answers;
+                                                setSelectedAnswers(parsedAnswers);
+                                            } catch (e) {
+                                                console.error("Failed to parse previous answers", e);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -119,7 +132,7 @@ const LessonView = () => {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     completed: newStatus,
                     ...extraData
                 })
@@ -169,14 +182,41 @@ const LessonView = () => {
                     {/* Content Player Container */}
                     <div style={{
                         background: 'black',
-                        borderRadius: '24px',
+                        borderRadius: isMaximized ? '0' : '24px',
                         overflow: 'hidden',
-                        aspectRatio: '16/9',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                        aspectRatio: isMaximized ? 'unset' : '16/9',
+                        boxShadow: isMaximized ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
                         marginBottom: '2.5rem',
-                        position: 'relative',
-                        border: '1.5px solid #1e293b'
+                        position: isMaximized ? 'fixed' : 'relative',
+                        inset: isMaximized ? 0 : 'unset',
+                        zIndex: isMaximized ? 2000 : 1,
+                        border: isMaximized ? 'none' : '1.5px solid #1e293b'
                     }}>
+                        <button
+                            onClick={() => setIsMaximized(!isMaximized)}
+                            style={{
+                                position: 'absolute',
+                                top: '1.5rem',
+                                right: '1.5rem',
+                                zIndex: 2100,
+                                background: 'rgba(15, 23, 42, 0.6)',
+                                backdropFilter: 'blur(8px)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: 'white',
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.3s'
+                            }}
+                            title={isMaximized ? "Minimize" : "Maximize view"}
+                        >
+                            {isMaximized ? <X size={20} /> : <Eye size={20} />}
+                        </button>
+
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #020617 0%, #0f172a 100%)' }}>
                             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                 {lesson.type === 'live' ? (
@@ -269,15 +309,31 @@ const LessonView = () => {
                                                     >
                                                         Retry Evaluation
                                                     </button>
-                                                    {quizResult.passed && !isCompleted && (
-                                                        <button
-                                                            onClick={() => handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers })}
-                                                            className="btn-standard"
-                                                            style={{ background: '#1a4d3e', color: 'white', padding: '0.8rem 2.5rem' }}
-                                                        >
-                                                            Mark as Completed
-                                                        </button>
+                                                    {quizResult.passed ? (
+                                                        <div style={{ color: '#10b981', background: '#f0fdf4', padding: '0.75rem 1.5rem', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 900, fontSize: '0.9rem', marginBottom: '2rem' }}>
+                                                            <CheckCircle size={18} /> CRITERIA EXCEEDED
+                                                        </div>
+                                                    ) : (
+                                                        <div style={{ color: '#ef4444', background: '#fef2f2', padding: '0.75rem 1.5rem', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 900, fontSize: '0.9rem', marginBottom: '2rem' }}>
+                                                            <X size={18} /> CRITERIA NOT MET
+                                                        </div>
                                                     )}
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                                                    <button
+                                                        onClick={() => setShowReview(true)}
+                                                        className="btn-cta-white"
+                                                        style={{ border: '1.5px solid #e2e8f0', padding: '1rem 2rem', fontWeight: 800 }}
+                                                    >
+                                                        Review Evaluation
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers })}
+                                                        className="btn-standard"
+                                                        style={{ background: '#1a4d3e', color: 'white', padding: '1rem 3rem' }}
+                                                    >
+                                                        {isCompleted ? 'Update Evaluation' : 'Finalize & Continue'}
+                                                    </button>
                                                 </div>
                                             </div>
                                         ) : (
@@ -404,12 +460,21 @@ const LessonView = () => {
                                                 onContextMenu={(e: any) => e.preventDefault()}
                                             />
                                         ) : lesson.file_url.match(/\.pdf$/i) ? (
-                                            <iframe
-                                                src={`${lesson.file_url}#toolbar=0&navpanes=0`}
-                                                style={{ width: '100%', height: '100%', border: 'none', borderRadius: '16px' }}
-                                                title="Document Preview"
-                                                onContextMenu={(e: any) => e.preventDefault()}
-                                            />
+                                            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                                                {mainIframeLoading && (
+                                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 5 }}>
+                                                        <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
+                                                        <p style={{ marginTop: '1rem', color: '#1a4d3e', fontWeight: 700 }}>Decrypting Document...</p>
+                                                    </div>
+                                                )}
+                                                <iframe
+                                                    src={`${lesson.file_url}#toolbar=0&navpanes=0`}
+                                                    style={{ width: '100%', height: '100%', border: 'none', borderRadius: '16px', opacity: mainIframeLoading ? 0 : 1 }}
+                                                    title="Document Preview"
+                                                    onLoad={() => setMainIframeLoading(false)}
+                                                    onContextMenu={(e: any) => e.preventDefault()}
+                                                />
+                                            </div>
                                         ) : (
                                             <div style={{ textAlign: 'center' }}>
                                                 <FileText size={64} color="#1a4d3e" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
@@ -447,30 +512,25 @@ const LessonView = () => {
 
                             <div style={{ paddingTop: '2rem', borderTop: '1.5px solid #f1f5f9' }}>
                                 <button
-                                    onClick={() => handleCompleteLesson()}
-                                    disabled={isCompleting}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.75rem',
-                                        padding: '1rem 2rem',
-                                        borderRadius: '16px',
-                                        fontWeight: 900,
-                                        border: isCompleted ? '1.5px solid #bbf7d0' : 'none',
-                                        backgroundColor: isCompleted ? '#f0fdf4' : '#1a4d3e',
-                                        color: isCompleted ? '#166534' : 'white',
-                                        cursor: isCompleting ? 'not-allowed' : 'pointer',
-                                        transition: 'all 0.2s',
-                                        boxShadow: isCompleted ? 'none' : '0 10px 15px -3px rgba(26, 77, 62, 0.2)',
-                                        opacity: isCompleting ? 0.7 : 1
+                                    onClick={() => {
+                                        const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
+                                        if (quizData && quizData.questions && quizData.questions.length > 0) {
+                                            setQuizStarted(true);
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        } else {
+                                            handleCompleteLesson();
+                                        }
                                     }}
+                                    disabled={isCompleted || isCompleting}
+                                    className="btn-primary-forest"
+                                    style={{ padding: '1rem 3rem', height: '60px', fontSize: '1.1rem', background: isCompleted ? '#f1f5f9' : '#1a4d3e', color: isCompleted ? '#94a3b8' : 'white' }}
                                 >
-                                    {isCompleting ? <Loader2 className="animate-spin" size={22} /> : <CheckCircle size={22} />}
-                                    {isCompleted ? 'Learning Objective Achieved' : 'Complete Lesson'}
+                                    {isCompleting ? <Loader2 className="animate-spin" /> : isCompleted ? 'Session Validated' : (lesson.quiz_data ? 'Initialize Validation Quiz' : 'Finalize Lesson')}
                                 </button>
                             </div>
                         </div>
 
+                        {/* Sidebar */}
                         <div>
                             <div style={{ padding: '2rem', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '24px' }}>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -582,7 +642,80 @@ const LessonView = () => {
                     </div>
                 )
             }
-        </div >
+
+            {/* Review Modal */}
+            {showReview && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.8)', backdropFilter: 'blur(8px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                    <div style={{ background: 'white', width: '100%', maxWidth: '800px', maxHeight: '90vh', borderRadius: '32px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                        <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                            <div>
+                                <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a' }}>Evaluation Intelligence Review</h3>
+                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontWeight: 700, fontSize: '0.9rem' }}>
+                                    Analysis of your responses • Score: {quizResult?.score}%
+                                </p>
+                            </div>
+                            <button onClick={() => setShowReview(false)} style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem' }}>
+                            {(() => {
+                                const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
+                                return quizData?.questions?.map((q: any, idx: number) => {
+                                    const studentAnswer = selectedAnswers[idx];
+                                    const isCorrect = studentAnswer === q.correct_answer;
+                                    
+                                    return (
+                                        <div key={idx} style={{ marginBottom: '2rem', padding: '1.5rem', borderRadius: '20px', border: `1.5px solid ${isCorrect ? '#f0fdf4' : '#fef2f2'}`, background: isCorrect ? '#fcfdfe' : '#fffbff' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8' }}>Question {idx + 1}</span>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 900, color: isCorrect ? '#10b981' : '#ef4444', background: isCorrect ? '#f0fdf4' : '#fef2f2', padding: '4px 10px', borderRadius: '8px' }}>
+                                                    {isCorrect ? 'VALIDATED' : 'ERRONEOUS'}
+                                                </span>
+                                            </div>
+                                            <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: '#0f172a', lineHeight: 1.4 }}>{q.question}</h4>
+                                            <div style={{ display: 'grid', gap: '0.75rem' }}>
+                                                {q.options.map((opt: string, oIdx: number) => {
+                                                    const isStudentPick = studentAnswer === oIdx;
+                                                    const isRightAnswer = q.correct_answer === oIdx;
+                                                    
+                                                    return (
+                                                        <div 
+                                                            key={oIdx} 
+                                                            style={{ 
+                                                                padding: '1rem', 
+                                                                borderRadius: '12px', 
+                                                                background: isRightAnswer ? '#f0fdf4' : isStudentPick ? '#fef2f2' : 'white',
+                                                                border: `1.2px solid ${isRightAnswer ? '#10b98140' : isStudentPick ? '#ef444440' : '#f1f5f9'}`,
+                                                                color: isRightAnswer ? '#166534' : isStudentPick ? '#991b1b' : '#334155',
+                                                                fontWeight: (isStudentPick || isRightAnswer) ? 800 : 500,
+                                                                fontSize: '0.9rem',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '12px'
+                                                            }}
+                                                        >
+                                                            <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                                {(isStudentPick || isRightAnswer) && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }}></div>}
+                                                            </div>
+                                                            {opt}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                });
+                            })()}
+                        </div>
+                        <div style={{ padding: '1.5rem 2.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+                            <button onClick={() => setShowReview(false)} className="btn-standard" style={{ width: '100%', background: '#0f172a', color: 'white' }}>Close Review</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 

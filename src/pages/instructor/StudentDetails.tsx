@@ -634,9 +634,9 @@ export default function StudentDetails() {
                                     <h3><HelpCircle size={20} color="#1a4d3e" /> Quiz Submissions</h3>
                                 </div>
 
-                                {student.completed_lessons && student.completed_lessons.filter((l: any) => l.type === 'quiz').length > 0 ? (
+                                 {student.completed_lessons && student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.type === 'material' && (l.pivot?.score !== undefined || l.quiz_data))).length > 0 ? (
                                     <div style={{ display: 'grid', gap: '1rem' }}>
-                                        {student.completed_lessons.filter((l: any) => l.type === 'quiz').map((lesson: any) => (
+                                        {student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.type === 'material' && (l.pivot?.score !== undefined || l.quiz_data))).map((lesson: any) => (
                                             <div key={lesson.id} className="enrollment-row" style={{ marginBottom: 0 }}>
                                                 <div className="progress-ring-mini" style={{ background: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#f0fdf4' : '#fef2f2', color: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#1a4d3e' : '#ef4444' }}>
                                                     {lesson.pivot?.score || 0}%
