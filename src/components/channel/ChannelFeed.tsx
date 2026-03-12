@@ -27,7 +27,7 @@ const ChannelFeed = ({ messages, userRole }: ChannelFeedProps) => {
     return (
         <div className="channel-feed-container">
             {messages.map((msg) => (
-                <MessageCard key={msg.id} message={msg} />
+                <MessageCard key={msg.id} message={msg} viewerRole={userRole} />
             ))}
         </div>
     );

@@ -392,16 +392,17 @@ const LessonView = () => {
                                             />
                                         ) : lesson.file_url.match(/\.pdf$/i) ? (
                                             <iframe
-                                                src={`${lesson.file_url}#toolbar=0`}
+                                                src={`${lesson.file_url}#toolbar=0&navpanes=0`}
                                                 style={{ width: '100%', height: '100%', border: 'none', borderRadius: '16px' }}
                                                 title="Document Preview"
+                                                onContextMenu={(e: any) => e.preventDefault()}
                                             />
                                         ) : (
                                             <div style={{ textAlign: 'center' }}>
                                                 <FileText size={64} color="#1a4d3e" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-                                                <p style={{ color: '#1a4d3e', fontWeight: 800 }}>Document Resource Ready</p>
+                                                <p style={{ color: '#1a4d3e', fontWeight: 800 }}>Document Resource Prepared</p>
                                                 <p style={{ color: '#64748b', fontSize: '0.9rem' }}>{lesson.file_name || 'Attached File'}</p>
-                                                <a href={lesson.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', marginTop: '1.5rem', background: '#e2e8f0', color: '#1e293b', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, textDecoration: 'none' }}>Download Resource</a>
+                                                <div style={{ marginTop: '1.5rem', background: '#f1f5f9', color: '#64748b', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, fontSize: '0.85rem' }}>View Lesson Assets</div>
                                             </div>
                                         )}
                                     </div>
@@ -522,9 +523,10 @@ const LessonView = () => {
                             <div style={{ flex: 1, padding: '2.5rem', background: '#f8fafc', overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                 {previewAsset.type === 'pdf' ? (
                                     <iframe
-                                        src={`${previewAsset.url}#toolbar=0`}
+                                        src={`${previewAsset.url}#toolbar=0&navpanes=0`}
                                         style={{ width: '100%', height: '70vh', border: 'none', borderRadius: '16px' }}
                                         title="PDF Review"
+                                        onContextMenu={(e: any) => e.preventDefault()}
                                     />
                                 ) : previewAsset.type === 'video' ? (
                                     <video

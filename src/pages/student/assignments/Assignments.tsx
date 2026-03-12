@@ -9,13 +9,18 @@ import {
     AlertCircle,
     Loader2,
     FileText,
-    Download
+    Eye,
+    X
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export default function StudentAssignments() {
     const [assignments, setAssignments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string } | null>(null);
+    const [loadingResource, setLoadingResource] = useState<string | null>(null);
+    const [iframeLoading, setIframeLoading] = useState(true);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -49,14 +54,14 @@ export default function StudentAssignments() {
     };
 
 
-    const handleDownload = async (e: React.MouseEvent, id: string, fileName: string) => {
+    const handleViewResource = async (e: React.MouseEvent, id: string, title: string) => {
         e.preventDefault();
+        setLoadingResource(id);
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/assignments/${id}/download`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
+                    'Authorization': `Bearer ${token}`
                 }
             });
 
@@ -64,23 +69,19 @@ export default function StudentAssignments() {
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Download failed');
+                    throw new Error(errorData.message || 'Access failed');
                 }
-                throw new Error(`Server Error (${response.status}): The download route was not found on this server.`);
+                throw new Error(`Server Error (${response.status}): The resource could not be loaded.`);
             }
 
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = fileName || 'assignment-instructions';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
+            setViewingPdf({ url: blobUrl, title });
         } catch (error: any) {
-            console.error('Download error:', error);
-            alert(error.message || "Failed to download file. Please try again.");
+            console.error('Resource access error:', error);
+            toast.error(error.message || "Failed to load resource. Please try again.");
+        } finally {
+            setLoadingResource(null);
         }
     };
 
@@ -319,11 +320,17 @@ export default function StudentAssignments() {
                                 <div className="card-right">
                                     {a.assignment_file && (
                                         <button
-                                            onClick={(e) => handleDownload(e, a.id, `${a.title.replace(/\s+/g, '-').toLowerCase()}-instructions`)}
+                                            type="button"
+                                            onClick={(e) => handleViewResource(e, a.id, a.title)}
                                             className="download-resource"
-                                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                                            disabled={!!loadingResource}
+                                            style={{ background: 'none', border: 'none', cursor: loadingResource ? 'not-allowed' : 'pointer', padding: 0, opacity: loadingResource ? 0.6 : 1 }}
                                         >
-                                            <Download size={16} /> Instructions Document
+                                            {loadingResource === a.id ? (
+                                                <><Loader2 size={16} className="animate-spin" /> Fetching...</>
+                                            ) : (
+                                                <><Eye size={16} /> View Instructions</>
+                                            )}
                                         </button>
                                     )}
 
@@ -340,6 +347,87 @@ export default function StudentAssignments() {
                             </div>
                         );
                     })}
+                </div>
+            )}
+
+            {/* Secure PDF Viewer Modal */}
+            {viewingPdf && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '2rem',
+                    background: 'rgba(2, 6, 23, 0.9)',
+                    backdropFilter: 'blur(10px)'
+                }}>
+                    <div style={{
+                        background: 'white',
+                        overflow: 'hidden',
+                        width: '100%',
+                        maxWidth: '1000px',
+                        maxHeight: '92vh',
+                        position: 'relative',
+                        borderRadius: '32px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        boxShadow: '0 40px 100px rgba(0,0,0,0.4)'
+                    }}>
+                        <div style={{
+                            padding: '1.5rem 2.5rem',
+                            borderBottom: '1.5px solid #f1f5f9',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            background: '#fcfdfe'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
+                                    <FileText size={22} color="#1a4d3e" />
+                                </div>
+                                <div>
+                                    <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>{viewingPdf.title}</h3>
+                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure PDF Viewer • Download Disabled</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    window.URL.revokeObjectURL(viewingPdf.url);
+                                    setViewingPdf(null);
+                                    setIframeLoading(true);
+                                }}
+                                style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                            >
+                                <X size={22} />
+                            </button>
+                        </div>
+
+                        <div
+                            style={{ flex: 1, background: '#f8fafc', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            onContextMenu={(e) => e.preventDefault()}
+                        >
+                            {iframeLoading && (
+                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 10 }}>
+                                    <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
+                                    <p style={{ marginTop: '1rem', fontWeight: 800, color: '#64748b' }}>Rendering Secure View...</p>
+                                </div>
+                            )}
+                            <iframe
+                                src={`${viewingPdf.url}#toolbar=0&navpanes=0`}
+                                style={{ width: '100%', height: '70vh', border: 'none' }}
+                                title="Secure PDF Viewer"
+                                onLoad={() => setIframeLoading(false)}
+                            />
+                            {/* Overlay to catch clicks on any remaining toolbar elements if browser injects them */}
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'transparent', zIndex: 5 }}></div>
+                        </div>
+
+                        <div style={{ padding: '1rem 2.5rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Protected by Layos Group Security Protocol</p>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
