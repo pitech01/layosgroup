@@ -453,107 +453,118 @@ const LessonView = () => {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '3rem' }}>
-                                                {/* Cognitive Progress bar */}
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
-                                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                                                        <span style={{ color: '#10b981', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Target Module: Intelligence Diagnostic</span>
-                                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                                            {lesson.quiz_data.questions.map((_: any, i: number) => (
-                                                                <div key={i} className={`progress-orb ${i <= currentQuestionIndex ? 'active' : ''}`}></div>
-                                                            ))}
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+                                                {/* Cognitive Progress bar - Pinned at top */}
+                                                <div style={{ padding: '2rem 3rem 0', flexShrink: 0 }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                                        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                                                            <span style={{ color: '#10b981', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Target Module: Intelligence Diagnostic</span>
+                                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                                {lesson.quiz_data.questions.map((_: any, i: number) => (
+                                                                    <div key={i} className={`progress-orb ${i <= currentQuestionIndex ? 'active' : ''}`}></div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ color: '#64748b', fontWeight: 800, fontSize: '0.9rem' }}>
+                                                            {currentQuestionIndex + 1} <span style={{ opacity: 0.4 }}>/</span> {lesson.quiz_data.questions.length}
                                                         </div>
                                                     </div>
-                                                    <div style={{ color: '#64748b', fontWeight: 800, fontSize: '0.9rem' }}>
-                                                        {currentQuestionIndex + 1} <span style={{ opacity: 0.4 }}>/</span> {lesson.quiz_data.questions.length}
+                                                </div>
+                                                
+                                                {/* Scrollable Content Area */}
+                                                <div style={{ flex: 1, overflowY: 'auto', padding: '0 3rem 2rem' }}>
+                                                    <div style={{ maxWidth: '900px', margin: '0 auto', width: '100%' }}>
+                                                        <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
+                                                            <span style={{ color: '#10b981', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '4px 12px', borderRadius: '100px', marginBottom: '1.5rem', display: 'inline-block' }}>Block {currentQuestionIndex + 1}</span>
+                                                            <h3 style={{ color: 'white', fontSize: '2rem', fontWeight: 900, lineHeight: 1.25, letterSpacing: '-0.03em' }}>
+                                                                {lesson.quiz_data.questions[currentQuestionIndex].question}
+                                                            </h3>
+                                                        </div>
+                                                        
+                                                        <div className="options-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                                                            <style>{`
+                                                                @media (max-width: 900px) {
+                                                                    .options-grid { grid-template-columns: 1fr !important; }
+                                                                }
+                                                                @media (max-height: 800px) {
+                                                                    .option-modern { padding: 1rem 1.5rem !important; }
+                                                                }
+                                                            `}</style>
+                                                            {lesson.quiz_data.questions[currentQuestionIndex].options.map((opt: string, idx: number) => {
+                                                                const isSelected = selectedAnswers[currentQuestionIndex] === idx;
+                                                                return (
+                                                                    <button
+                                                                        key={idx}
+                                                                        onClick={() => setSelectedAnswers({ ...selectedAnswers, [currentQuestionIndex]: idx })}
+                                                                        className={`option-modern ${isSelected ? 'selected' : ''}`}
+                                                                    >
+                                                                        <div style={{ 
+                                                                            width: '28px', 
+                                                                            height: '28px', 
+                                                                            borderRadius: '10px', 
+                                                                            border: '2px solid', 
+                                                                            borderColor: isSelected ? '#10b981' : 'rgba(255,255,255,0.1)', 
+                                                                            display: 'flex', 
+                                                                            alignItems: 'center', 
+                                                                            justifyContent: 'center',
+                                                                            flexShrink: 0,
+                                                                            background: isSelected ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                                                                        }}>
+                                                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: isSelected ? 'white' : '#64748b' }}>{String.fromCharCode(65 + idx)}</span>
+                                                                        </div>
+                                                                        {opt}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 
-                                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
-                                                    <div style={{ marginBottom: '4rem', textAlign: 'center' }}>
-                                                        <span style={{ color: '#10b981', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '4px 12px', borderRadius: '100px', marginBottom: '1.5rem', display: 'inline-block' }}>Block {currentQuestionIndex + 1}</span>
-                                                        <h3 style={{ color: 'white', fontSize: '2.5rem', fontWeight: 900, lineHeight: 1.25, letterSpacing: '-0.03em' }}>
-                                                            {lesson.quiz_data.questions[currentQuestionIndex].question}
-                                                        </h3>
-                                                    </div>
-                                                    
-                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                                                        <style>{`
-                                                            @media (max-width: 900px) {
-                                                                .options-grid { grid-template-columns: 1fr !important; }
-                                                            }
-                                                        `}</style>
-                                                        {lesson.quiz_data.questions[currentQuestionIndex].options.map((opt: string, idx: number) => {
-                                                            const isSelected = selectedAnswers[currentQuestionIndex] === idx;
-                                                            return (
-                                                                <button
-                                                                    key={idx}
-                                                                    onClick={() => setSelectedAnswers({ ...selectedAnswers, [currentQuestionIndex]: idx })}
-                                                                    className={`option-modern ${isSelected ? 'selected' : ''}`}
-                                                                >
-                                                                    <div style={{ 
-                                                                        width: '28px', 
-                                                                        height: '28px', 
-                                                                        borderRadius: '10px', 
-                                                                        border: '2px solid', 
-                                                                        borderColor: isSelected ? '#10b981' : 'rgba(255,255,255,0.1)', 
-                                                                        display: 'flex', 
-                                                                        alignItems: 'center', 
-                                                                        justifyContent: 'center',
-                                                                        flexShrink: 0,
-                                                                        background: isSelected ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
-                                                                    }}>
-                                                                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: isSelected ? 'white' : '#64748b' }}>{String.fromCharCode(65 + idx)}</span>
-                                                                    </div>
-                                                                    {opt}
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                                
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4rem', paddingTop: '2.5rem', borderTop: '1.5px solid rgba(255,255,255,0.05)' }}>
-                                                    <button
-                                                        onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-                                                        disabled={currentQuestionIndex === 0}
-                                                        style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 850, fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', opacity: currentQuestionIndex === 0 ? 0 : 1 }}
-                                                    >
-                                                        <ChevronLeft size={20} /> PREVIOUS LOGIC
-                                                    </button>
-                                                    
-                                                    {currentQuestionIndex < lesson.quiz_data.questions.length - 1 ? (
+                                                {/* Pinned Footer */}
+                                                <div style={{ padding: '2rem 3rem', background: 'rgba(2, 6, 23, 0.5)', backdropFilter: 'blur(10px)', borderTop: '1.5px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '900px', margin: '0 auto' }}>
                                                         <button
-                                                            onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
-                                                            className="btn-standard"
-                                                            style={{ background: 'white', color: '#0f172a', padding: '1rem 3rem', borderRadius: '16px', fontWeight: 900, boxShadow: '0 10px 25px -5px rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}
+                                                            onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+                                                            disabled={currentQuestionIndex === 0}
+                                                            style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 850, fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', opacity: currentQuestionIndex === 0 ? 0 : 1 }}
                                                         >
-                                                            NEXT BLOCK <ChevronRight size={20} />
+                                                            <ChevronLeft size={20} /> PREVIOUS LOGIC
                                                         </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => {
-                                                                let correctCount = 0;
-                                                                lesson.quiz_data.questions.forEach((q: any, idx: number) => {
-                                                                    if (selectedAnswers[idx] === q.correct_answer) {
-                                                                        correctCount++;
-                                                                    }
-                                                                });
-                                                                const score = Math.round((correctCount / lesson.quiz_data.questions.length) * 100);
-                                                                const passMark = lesson.quiz_data.pass_mark || 80;
-                                                                setQuizResult({ score, passed: score >= passMark });
-                                                            }}
-                                                            disabled={selectedAnswers[currentQuestionIndex] === undefined}
-                                                            className="btn-evaluation-start"
-                                                            style={{ 
-                                                                padding: '1rem 4rem', 
-                                                                borderRadius: '16px',
-                                                                opacity: selectedAnswers[currentQuestionIndex] === undefined ? 0.3 : 1,
-                                                                cursor: selectedAnswers[currentQuestionIndex] === undefined ? 'not-allowed' : 'pointer'
-                                                            }}
-                                                        >
-                                                            CALCULATE PROFICIENCY
-                                                        </button>
-                                                    )}
+                                                        
+                                                        {currentQuestionIndex < lesson.quiz_data.questions.length - 1 ? (
+                                                            <button
+                                                                onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
+                                                                className="btn-standard"
+                                                                style={{ background: 'white', color: '#0f172a', padding: '1rem 3rem', borderRadius: '16px', fontWeight: 900, boxShadow: '0 10px 25px -5px rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}
+                                                            >
+                                                                NEXT BLOCK <ChevronRight size={20} />
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => {
+                                                                    let correctCount = 0;
+                                                                    lesson.quiz_data.questions.forEach((q: any, idx: number) => {
+                                                                        if (selectedAnswers[idx] === q.correct_answer) {
+                                                                            correctCount++;
+                                                                        }
+                                                                    });
+                                                                    const score = Math.round((correctCount / lesson.quiz_data.questions.length) * 100);
+                                                                    const passMark = lesson.quiz_data.pass_mark || 80;
+                                                                    setQuizResult({ score, passed: score >= passMark });
+                                                                }}
+                                                                disabled={selectedAnswers[currentQuestionIndex] === undefined}
+                                                                className="btn-evaluation-start"
+                                                                style={{ 
+                                                                    padding: '1rem 4rem', 
+                                                                    borderRadius: '16px',
+                                                                    opacity: selectedAnswers[currentQuestionIndex] === undefined ? 0.3 : 1,
+                                                                    cursor: selectedAnswers[currentQuestionIndex] === undefined ? 'not-allowed' : 'pointer'
+                                                                }}
+                                                            >
+                                                                CALCULATE PROFICIENCY
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
