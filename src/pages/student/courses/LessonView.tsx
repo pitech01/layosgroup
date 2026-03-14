@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, CheckCircle, Play, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Play, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle } from 'lucide-react';
 
 const LessonView = () => {
     const { courseId, lessonId } = useParams();
@@ -30,6 +30,10 @@ const LessonView = () => {
     useEffect(() => {
         const fetchLessonData = async () => {
             setLoading(true);
+            setQuizStarted(false);
+            setCurrentQuestionIndex(0);
+            setQuizResult(null);
+            setShowReview(false);
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`${API_URL}/my-enrollments`, {
@@ -57,6 +61,14 @@ const LessonView = () => {
 
                         const currentLesson = flattenedLessons.find(l => l.id == lessonId);
                         if (currentLesson) {
+                            // Ensure quiz_data is an object
+                            if (currentLesson.quiz_data && typeof currentLesson.quiz_data === 'string') {
+                                try {
+                                    currentLesson.quiz_data = JSON.parse(currentLesson.quiz_data);
+                                } catch (e) {
+                                    console.error("Failed to parse quiz_data", e);
+                                }
+                            }
                             setLesson(currentLesson);
                             const completedEntry = data.completed_lessons?.find((cl: any) => cl.id == lessonId);
                             if (completedEntry) {
@@ -153,6 +165,93 @@ const LessonView = () => {
         <div style={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
             <div style={{ flex: 1, overflowY: 'auto' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+                    <style>{`
+                        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(26, 77, 62, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(26, 77, 62, 0); } 100% { box-shadow: 0 0 0 0 rgba(26, 77, 62, 0); } }
+                        
+                        .evaluation-premium-card {
+                            background: rgba(15, 23, 42, 0.7) !important;
+                            backdrop-filter: blur(12px);
+                            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+                        }
+                        
+                        .option-modern {
+                            background: rgba(255, 255, 255, 0.03);
+                            border: 1.5px solid rgba(255, 255, 255, 0.08);
+                            border-radius: 20px;
+                            padding: 1.5rem 2rem;
+                            color: #cbd5e1;
+                            font-weight: 600;
+                            display: flex;
+                            align-items: center;
+                            gap: 1.5rem;
+                            cursor: pointer;
+                            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                            text-align: left;
+                            width: 100%;
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .option-modern:hover:not(:disabled) {
+                            background: rgba(255, 255, 255, 0.06);
+                            border-color: rgba(255,255,255,0.2);
+                            transform: translateX(8px);
+                            color: white;
+                        }
+
+                        .option-modern.selected {
+                            background: rgba(16, 185, 129, 0.1);
+                            border-color: #10b981;
+                            color: white;
+                            box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.2);
+                        }
+
+                        .option-modern.selected::before {
+                            content: '';
+                            position: absolute;
+                            left: 0;
+                            top: 0;
+                            bottom: 0;
+                            width: 6px;
+                            background: #10b981;
+                        }
+
+                        .progress-orb {
+                            width: 12px;
+                            height: 12px;
+                            border-radius: 50%;
+                            background: rgba(255,255,255,0.1);
+                            transition: all 0.3s;
+                        }
+
+                        .progress-orb.active {
+                            background: #10b981;
+                            box-shadow: 0 0 12px #10b981;
+                            transform: scale(1.2);
+                        }
+                        
+                        .btn-evaluation-start {
+                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                            color: white;
+                            border: none;
+                            padding: 1.25rem 3.5rem;
+                            border-radius: 100px;
+                            font-weight: 850;
+                            font-size: 1.1rem;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+                        }
+                        
+                        .btn-evaluation-start:hover {
+                            transform: translateY(-4px) scale(1.02);
+                            box-shadow: 0 20px 35px -8px rgba(16, 185, 129, 0.5);
+                        }
+                    `}</style>
+
                     {/* Navigation Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                         <Link to={`/student/courses/${courseId}?cohortId=${cohortId}`} style={{ display: 'flex', alignItems: 'center', color: '#64748b', fontSize: '0.95rem', fontWeight: 700, textDecoration: 'none' }}>
@@ -239,175 +338,196 @@ const LessonView = () => {
                                             </div>
                                         </div>
 
-                                        <div>
-                                            {lesson.live_link ? (
-                                                <a
-                                                    href={lesson.live_link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    style={{ display: 'inline-flex', background: '#3b82f6', color: 'white', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 800, textDecoration: 'none', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.4)', alignItems: 'center', gap: '0.5rem' }}
-                                                >
-                                                    <Video size={18} /> Join Live Class
-                                                </a>
-                                            ) : (
-                                                <span style={{ padding: '0.75rem 1.5rem', background: '#1e293b', color: '#64748b', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem' }}>Meeting Link Pending</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                ) : lesson.type === 'quiz' ? (
-                                    <div style={{ width: '100%', height: '100%', padding: '3rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                                <div>
+                                    {lesson.live_link ? (
+                                        <a
+                                            href={lesson.live_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ display: 'inline-flex', background: '#3b82f6', color: 'white', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 800, textDecoration: 'none', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.4)', alignItems: 'center', gap: '0.5rem' }}
+                                        >
+                                            <Video size={18} /> Join Live Class
+                                        </a>
+                                    ) : (
+                                        <span style={{ padding: '0.75rem 1.5rem', background: '#1e293b', color: '#64748b', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem' }}>Meeting Link Pending</span>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (lesson.type === 'quiz' || quizStarted) ? (
+                                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(165deg, #020617 0%, #0f172a 100%)', display: 'flex', flexDirection: 'column' }}>
                                         {!quizStarted ? (
-                                            <div style={{ textAlign: 'center', margin: 'auto' }}>
-                                                <div style={{ width: '100px', height: '100px', background: 'rgba(26, 77, 62, 0.1)', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', border: '1px solid rgba(26, 77, 62, 0.3)' }}>
-                                                    <HelpCircle size={48} color="#1a4d3e" />
+                                            <div style={{ margin: 'auto', textAlign: 'center', maxWidth: '700px', padding: '3rem' }} className="evaluation-premium-card">
+                                                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.5rem' }}>
+                                                    <div style={{ position: 'relative' }}>
+                                                        <div style={{ position: 'absolute', inset: -15, background: 'rgba(16, 185, 129, 0.1)', borderRadius: '40px', filter: 'blur(10px)' }}></div>
+                                                        <div style={{ width: '120px', height: '120px', background: 'rgba(255, 255, 255, 0.03)', border: '1.5px solid rgba(255, 255, 255, 0.1)', borderRadius: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                                                            <HelpCircle size={56} color="#10b981" />
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <h2 style={{ color: 'white', fontWeight: 900, fontSize: '2rem', marginBottom: '1rem' }}>Knowledge Validation Unit</h2>
-                                                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2.5rem', maxWidth: '500px', margin: '0 auto 2.5rem' }}>
-                                                    Complete this evaluation to validate your mastery of the concepts covered in this module.
+                                                
+                                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '6px 14px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '0.05em', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                                    <ShieldCheck size={14} /> Knowledge Validation Unit
+                                                </div>
+                                                
+                                                <h2 style={{ color: 'white', fontWeight: 900, fontSize: '2.5rem', marginBottom: '1rem', letterSpacing: '-0.04em' }}>Evaluation Intelligence</h2>
+                                                <p style={{ color: '#94a3b8', fontSize: '1.15rem', lineHeight: 1.6, marginBottom: '3rem', fontWeight: 500 }}>
+                                                    Complete this diagnostic module to validate your proficiency in the core concepts covered. Minimum <span style={{ color: '#10b981', fontWeight: 900 }}>{lesson.quiz_data?.pass_mark || 80}%</span> required for certification.
                                                 </p>
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', maxWidth: '400px', margin: '0 auto 3rem', background: '#0f172a', padding: '1.5rem', borderRadius: '20px', border: '1px solid #1e293b' }}>
-                                                    <div style={{ textAlign: 'left' }}>
-                                                        <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 800 }}>Items</div>
-                                                        <div style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem' }}>{lesson.quiz_data?.questions?.length || 0} Questions</div>
+                                                
+                                                <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3.5rem' }}>
+                                                    <div style={{ textAlign: 'left', padding: '1rem 2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                        <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>Question Payload</div>
+                                                        <div style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem' }}>{lesson.quiz_data?.questions?.length || 0} Blocks</div>
                                                     </div>
-                                                    <div style={{ textAlign: 'left' }}>
-                                                        <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 800 }}>Pass Mark</div>
-                                                        <div style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem' }}>{lesson.quiz_data?.pass_mark || 80}% Proficiency</div>
+                                                    <div style={{ textAlign: 'left', padding: '1rem 2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                        <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>Passing Criteria</div>
+                                                        <div style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem' }}>{lesson.quiz_data?.pass_mark || 80}% Proficiency</div>
                                                     </div>
                                                 </div>
-                                                <button
-                                                    onClick={() => setQuizStarted(true)}
-                                                    className="btn-standard"
-                                                    style={{ background: '#1a4d3e', color: 'white', padding: '1rem 3rem', fontSize: '1.1rem' }}
-                                                >
-                                                    Initialize Evaluation
+                                                
+                                                <button onClick={() => setQuizStarted(true)} className="btn-evaluation-start">
+                                                    INITIALIZE ASSESSMENT
                                                 </button>
                                             </div>
                                         ) : quizResult ? (
-                                            <div style={{ textAlign: 'center', margin: 'auto' }}>
-                                                <div style={{ width: '100px', height: '100px', background: quizResult.passed ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', border: `1px solid ${quizResult.passed ? '#10b98140' : '#ef444440'}` }}>
-                                                    {quizResult.passed ? <CheckCircle size={48} color="#10b981" /> : <X size={48} color="#ef4444" />}
+                                            <div style={{ margin: 'auto', textAlign: 'center', maxWidth: '750px', padding: '4rem' }} className="evaluation-premium-card">
+                                                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.5rem' }}>
+                                                    <div style={{ 
+                                                        width: '140px', 
+                                                        height: '140px', 
+                                                        background: quizResult.passed ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+                                                        borderRadius: '50%', 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        justifyContent: 'center', 
+                                                        border: `2px solid ${quizResult.passed ? '#10b981' : '#ef4444'}`,
+                                                        animation: 'pulseGlow 2s infinite'
+                                                    }}>
+                                                        {quizResult.passed ? <CheckCircle size={64} color="#10b981" /> : <X size={64} color="#ef4444" />}
+                                                    </div>
                                                 </div>
-                                                <h2 style={{ color: 'white', fontWeight: 900, fontSize: '2rem', marginBottom: '1rem' }}>
-                                                    {quizResult.passed ? 'Evaluation Mastered' : 'Action Required: Knowledge Gap Detected'}
+                                                
+                                                <div style={{ color: quizResult.passed ? '#10b981' : '#ef4444', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.85rem', letterSpacing: '0.15em', marginBottom: '1rem' }}>
+                                                    {quizResult.passed ? 'Criteria Validated' : 'Deficiency Identified'}
+                                                </div>
+                                                
+                                                <h2 style={{ color: 'white', fontWeight: 950, fontSize: '3.5rem', marginBottom: '1rem', letterSpacing: '-0.05em' }}>
+                                                    {quizResult.score}<span style={{ fontSize: '1.5rem', verticalAlign: 'middle', marginLeft: '4px', opacity: 0.6 }}>%</span>
                                                 </h2>
-                                                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
-                                                    You scored <span style={{ color: quizResult.passed ? '#10b981' : '#ef4444', fontWeight: 900 }}>{quizResult.score}%</span>
-                                                    {quizResult.passed ? '. You have met the proficiency threshold.' : `. A minimum of ${lesson.quiz_data.pass_mark}% is required to advance.`}
+                                                
+                                                <p style={{ color: '#94a3b8', fontSize: '1.25rem', marginBottom: '3.5rem', maxWidth: '600px', margin: '0 auto 3.5rem', fontWeight: 500 }}>
+                                                    {quizResult.passed 
+                                                        ? `Exceptional work! You have mastered this cognitive module with a score of ${quizResult.score}%.` 
+                                                        : `You achieved a proficiency level of ${quizResult.score}%, which is below the mandatory ${lesson.quiz_data.pass_mark}% threshold for this curriculum unit.`}
                                                 </p>
-
+                                                
                                                 <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
                                                     <button
-                                                        onClick={() => {
-                                                            setQuizStarted(false);
-                                                            setQuizResult(null);
-                                                            setSelectedAnswers({});
-                                                            setCurrentQuestionIndex(0);
-                                                        }}
-                                                        className="btn-standard"
-                                                        style={{ background: 'white', color: '#0f172a', padding: '0.8rem 2rem' }}
-                                                    >
-                                                        Retry Evaluation
-                                                    </button>
-                                                    {quizResult.passed ? (
-                                                        <div style={{ color: '#10b981', background: '#f0fdf4', padding: '0.75rem 1.5rem', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 900, fontSize: '0.9rem', marginBottom: '2rem' }}>
-                                                            <CheckCircle size={18} /> CRITERIA EXCEEDED
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{ color: '#ef4444', background: '#fef2f2', padding: '0.75rem 1.5rem', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 900, fontSize: '0.9rem', marginBottom: '2rem' }}>
-                                                            <X size={18} /> CRITERIA NOT MET
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                                    <button
                                                         onClick={() => setShowReview(true)}
-                                                        className="btn-cta-white"
-                                                        style={{ border: '1.5px solid #e2e8f0', padding: '1rem 2rem', fontWeight: 800 }}
+                                                        style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1.5px solid rgba(255,255,255,0.1)', padding: '1rem 2.5rem', borderRadius: '16px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                     >
-                                                        Review Evaluation
+                                                        <Eye size={18} /> Analysis Review
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers })}
-                                                        className="btn-standard"
-                                                        style={{ background: '#1a4d3e', color: 'white', padding: '1rem 3rem' }}
-                                                    >
-                                                        {isCompleted ? 'Update Evaluation' : 'Finalize & Continue'}
-                                                    </button>
+                                                    
+                                                    {quizResult.passed ? (
+                                                        <button
+                                                            onClick={() => handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers })}
+                                                            style={{ background: '#10b981', color: 'white', border: 'none', padding: '1rem 3rem', borderRadius: '16px', fontWeight: 850, cursor: 'pointer', boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.4)' }}
+                                                        >
+                                                            {isCompleted ? 'SYNC UPDATES' : 'FINALIZE & ADVANCE'}
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => {
+                                                                setQuizStarted(false);
+                                                                setQuizResult(null);
+                                                                setSelectedAnswers({});
+                                                                setCurrentQuestionIndex(0);
+                                                            }}
+                                                            style={{ background: 'white', color: '#0f172a', border: 'none', padding: '1rem 3rem', borderRadius: '16px', fontWeight: 850, cursor: 'pointer' }}
+                                                        >
+                                                            RETRY ASSESSMENT
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-                                                    <div style={{ color: '#64748b', fontWeight: 800, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.1em' }}>
-                                                        Question {currentQuestionIndex + 1} of {lesson.quiz_data.questions.length}
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '3rem' }}>
+                                                {/* Cognitive Progress bar */}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
+                                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                                                        <span style={{ color: '#10b981', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Target Module: Intelligence Diagnostic</span>
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            {lesson.quiz_data.questions.map((_: any, i: number) => (
+                                                                <div key={i} className={`progress-orb ${i <= currentQuestionIndex ? 'active' : ''}`}></div>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                    <div style={{ width: '200px', height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
-                                                        <div style={{ width: `${((currentQuestionIndex + 1) / lesson.quiz_data.questions.length) * 100}%`, height: '100%', background: '#1a4d3e', borderRadius: '3px', transition: 'width 0.3s ease' }}></div>
-                                                    </div>
-                                                </div>
-
-                                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                                    <h3 style={{ color: 'white', fontSize: '1.75rem', fontWeight: 800, marginBottom: '3rem', textAlign: 'center', maxWidth: '800px', margin: '0 auto 3rem' }}>
-                                                        {lesson.quiz_data.questions[currentQuestionIndex].question}
-                                                    </h3>
-
-                                                    <div style={{ display: 'grid', gap: '1rem', maxWidth: '600px', width: '100%', margin: '0 auto' }}>
-                                                        {lesson.quiz_data.questions[currentQuestionIndex].options.map((opt: string, idx: number) => (
-                                                            <button
-                                                                key={idx}
-                                                                onClick={() => setSelectedAnswers({ ...selectedAnswers, [currentQuestionIndex]: idx })}
-                                                                style={{
-                                                                    padding: '1.25rem 2rem',
-                                                                    background: selectedAnswers[currentQuestionIndex] === idx ? 'rgba(26, 77, 62, 0.2)' : 'rgba(255,255,255,0.03)',
-                                                                    border: `1.5px solid ${selectedAnswers[currentQuestionIndex] === idx ? '#1a4d3e' : 'rgba(255,255,255,0.1)'}`,
-                                                                    borderRadius: '16px',
-                                                                    color: 'white',
-                                                                    textAlign: 'left',
-                                                                    fontSize: '1rem',
-                                                                    fontWeight: 700,
-                                                                    cursor: 'pointer',
-                                                                    transition: 'all 0.2s',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '1.25rem'
-                                                                }}
-                                                            >
-                                                                <div style={{
-                                                                    width: '24px',
-                                                                    height: '24px',
-                                                                    borderRadius: '50%',
-                                                                    border: '2px solid',
-                                                                    borderColor: selectedAnswers[currentQuestionIndex] === idx ? '#1a4d3e' : '#64748b',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center'
-                                                                }}>
-                                                                    {selectedAnswers[currentQuestionIndex] === idx && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#1a4d3e' }}></div>}
-                                                                </div>
-                                                                {opt}
-                                                            </button>
-                                                        ))}
+                                                    <div style={{ color: '#64748b', fontWeight: 800, fontSize: '0.9rem' }}>
+                                                        {currentQuestionIndex + 1} <span style={{ opacity: 0.4 }}>/</span> {lesson.quiz_data.questions.length}
                                                     </div>
                                                 </div>
-
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                                
+                                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
+                                                    <div style={{ marginBottom: '4rem', textAlign: 'center' }}>
+                                                        <span style={{ color: '#10b981', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '4px 12px', borderRadius: '100px', marginBottom: '1.5rem', display: 'inline-block' }}>Block {currentQuestionIndex + 1}</span>
+                                                        <h3 style={{ color: 'white', fontSize: '2.5rem', fontWeight: 900, lineHeight: 1.25, letterSpacing: '-0.03em' }}>
+                                                            {lesson.quiz_data.questions[currentQuestionIndex].question}
+                                                        </h3>
+                                                    </div>
+                                                    
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                                                        <style>{`
+                                                            @media (max-width: 900px) {
+                                                                .options-grid { grid-template-columns: 1fr !important; }
+                                                            }
+                                                        `}</style>
+                                                        {lesson.quiz_data.questions[currentQuestionIndex].options.map((opt: string, idx: number) => {
+                                                            const isSelected = selectedAnswers[currentQuestionIndex] === idx;
+                                                            return (
+                                                                <button
+                                                                    key={idx}
+                                                                    onClick={() => setSelectedAnswers({ ...selectedAnswers, [currentQuestionIndex]: idx })}
+                                                                    className={`option-modern ${isSelected ? 'selected' : ''}`}
+                                                                >
+                                                                    <div style={{ 
+                                                                        width: '28px', 
+                                                                        height: '28px', 
+                                                                        borderRadius: '10px', 
+                                                                        border: '2px solid', 
+                                                                        borderColor: isSelected ? '#10b981' : 'rgba(255,255,255,0.1)', 
+                                                                        display: 'flex', 
+                                                                        alignItems: 'center', 
+                                                                        justifyContent: 'center',
+                                                                        flexShrink: 0,
+                                                                        background: isSelected ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
+                                                                    }}>
+                                                                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: isSelected ? 'white' : '#64748b' }}>{String.fromCharCode(65 + idx)}</span>
+                                                                    </div>
+                                                                    {opt}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                                
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4rem', paddingTop: '2.5rem', borderTop: '1.5px solid rgba(255,255,255,0.05)' }}>
                                                     <button
                                                         onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
                                                         disabled={currentQuestionIndex === 0}
-                                                        style={{ background: 'none', border: 'none', color: '#94a3b8', fontWeight: 700, cursor: 'pointer', opacity: currentQuestionIndex === 0 ? 0.3 : 1 }}
+                                                        style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 850, fontSize: '0.95rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', opacity: currentQuestionIndex === 0 ? 0 : 1 }}
                                                     >
-                                                        Previous Question
+                                                        <ChevronLeft size={20} /> PREVIOUS LOGIC
                                                     </button>
-
+                                                    
                                                     {currentQuestionIndex < lesson.quiz_data.questions.length - 1 ? (
                                                         <button
                                                             onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
-                                                            disabled={selectedAnswers[currentQuestionIndex] === undefined}
                                                             className="btn-standard"
-                                                            style={{ background: '#1a4d3e', color: 'white', padding: '0.75rem 2rem', opacity: selectedAnswers[currentQuestionIndex] === undefined ? 0.5 : 1 }}
+                                                            style={{ background: 'white', color: '#0f172a', padding: '1rem 3rem', borderRadius: '16px', fontWeight: 900, boxShadow: '0 10px 25px -5px rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}
                                                         >
-                                                            Next Question
+                                                            NEXT BLOCK <ChevronRight size={20} />
                                                         </button>
                                                     ) : (
                                                         <button
@@ -423,10 +543,15 @@ const LessonView = () => {
                                                                 setQuizResult({ score, passed: score >= passMark });
                                                             }}
                                                             disabled={selectedAnswers[currentQuestionIndex] === undefined}
-                                                            className="btn-standard"
-                                                            style={{ background: '#1a4d3e', color: 'white', padding: '0.75rem 2.5rem', opacity: selectedAnswers[currentQuestionIndex] === undefined ? 0.5 : 1 }}
+                                                            className="btn-evaluation-start"
+                                                            style={{ 
+                                                                padding: '1rem 4rem', 
+                                                                borderRadius: '16px',
+                                                                opacity: selectedAnswers[currentQuestionIndex] === undefined ? 0.3 : 1,
+                                                                cursor: selectedAnswers[currentQuestionIndex] === undefined ? 'not-allowed' : 'pointer'
+                                                            }}
                                                         >
-                                                            Submit Analysis
+                                                            CALCULATE PROFICIENCY
                                                         </button>
                                                     )}
                                                 </div>
@@ -643,23 +768,39 @@ const LessonView = () => {
                 )
             }
 
-            {/* Review Modal */}
+            {/* Premium Review Modal */}
             {showReview && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.8)', backdropFilter: 'blur(8px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-                    <div style={{ background: 'white', width: '100%', maxWidth: '800px', maxHeight: '90vh', borderRadius: '32px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                        <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.9)', backdropFilter: 'blur(16px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                    <div style={{ background: '#0f172a', width: '100%', maxWidth: '900px', maxHeight: '90vh', borderRadius: '40px', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.1)', boxShadow: '0 50px 100px -20px rgba(0,0,0,0.5)' }}>
+                        <div style={{ padding: '2.5rem 3.5rem', borderBottom: '1.5px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
                             <div>
-                                <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a' }}>Evaluation Intelligence Review</h3>
-                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontWeight: 700, fontSize: '0.9rem' }}>
-                                    Analysis of your responses • Score: {quizResult?.score}%
-                                </p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#10b981', marginBottom: '8px' }}>
+                                    <ShieldCheck size={20} />
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}>Decision Intelligence Analysis</span>
+                                </div>
+                                <h3 style={{ margin: 0, fontWeight: 950, color: 'white', fontSize: '1.75rem', letterSpacing: '-0.02em' }}>Evaluation Performance Audit</h3>
                             </div>
-                            <button onClick={() => setShowReview(false)} style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <X size={20} />
+                            <button onClick={() => setShowReview(false)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', width: '48px', height: '48px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                                <X size={24} />
                             </button>
                         </div>
                         
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem' }}>
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '3.5rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '4rem' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 800, marginBottom: '0.5rem' }}>SCORE RATIO</div>
+                                    <div style={{ color: quizResult?.passed ? '#10b981' : '#ef4444', fontWeight: 950, fontSize: '2rem' }}>{quizResult?.score}%</div>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 800, marginBottom: '0.5rem' }}>STATUS</div>
+                                    <div style={{ color: 'white', fontWeight: 950, fontSize: '1.25rem', marginTop: '0.75rem' }}>{quizResult?.passed ? 'VALIDATED' : 'ACTION REQUIRED'}</div>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 800, marginBottom: '0.5rem' }}>TOTAL BLOCKS</div>
+                                    <div style={{ color: 'white', fontWeight: 950, fontSize: '1.25rem', marginTop: '0.75rem' }}>{lesson.quiz_data?.questions?.length} Units</div>
+                                </div>
+                            </div>
+
                             {(() => {
                                 const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
                                 return quizData?.questions?.map((q: any, idx: number) => {
@@ -667,15 +808,16 @@ const LessonView = () => {
                                     const isCorrect = studentAnswer === q.correct_answer;
                                     
                                     return (
-                                        <div key={idx} style={{ marginBottom: '2rem', padding: '1.5rem', borderRadius: '20px', border: `1.5px solid ${isCorrect ? '#f0fdf4' : '#fef2f2'}`, background: isCorrect ? '#fcfdfe' : '#fffbff' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8' }}>Question {idx + 1}</span>
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 900, color: isCorrect ? '#10b981' : '#ef4444', background: isCorrect ? '#f0fdf4' : '#fef2f2', padding: '4px 10px', borderRadius: '8px' }}>
-                                                    {isCorrect ? 'VALIDATED' : 'ERRONEOUS'}
-                                                </span>
+                                        <div key={idx} style={{ marginBottom: '3rem', padding: '2.5rem', borderRadius: '32px', border: `1.5px solid ${isCorrect ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`, background: 'rgba(255, 255, 255, 0.02)', position: 'relative', overflow: 'hidden' }}>
+                                            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: isCorrect ? '#10b981' : '#ef4444' }}></div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.1em' }}>Intelligence Block {idx + 1}</span>
+                                                <div style={{ fontSize: '0.75rem', fontWeight: 900, color: isCorrect ? '#10b981' : '#ef4444', background: isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: '6px 14px', borderRadius: '100px', border: `1px solid ${isCorrect ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}` }}>
+                                                    {isCorrect ? 'VALIDATED' : 'LOGIC ERROR'}
+                                                </div>
                                             </div>
-                                            <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: '#0f172a', lineHeight: 1.4 }}>{q.question}</h4>
-                                            <div style={{ display: 'grid', gap: '0.75rem' }}>
+                                            <h4 style={{ margin: '0 0 2rem 0', fontWeight: 850, color: 'white', lineHeight: 1.4, fontSize: '1.35rem', letterSpacing: '-0.02em' }}>{q.question}</h4>
+                                            <div style={{ display: 'grid', gap: '1rem' }}>
                                                 {q.options.map((opt: string, oIdx: number) => {
                                                     const isStudentPick = studentAnswer === oIdx;
                                                     const isRightAnswer = q.correct_answer === oIdx;
@@ -684,22 +826,23 @@ const LessonView = () => {
                                                         <div 
                                                             key={oIdx} 
                                                             style={{ 
-                                                                padding: '1rem', 
-                                                                borderRadius: '12px', 
-                                                                background: isRightAnswer ? '#f0fdf4' : isStudentPick ? '#fef2f2' : 'white',
-                                                                border: `1.2px solid ${isRightAnswer ? '#10b98140' : isStudentPick ? '#ef444440' : '#f1f5f9'}`,
-                                                                color: isRightAnswer ? '#166534' : isStudentPick ? '#991b1b' : '#334155',
-                                                                fontWeight: (isStudentPick || isRightAnswer) ? 800 : 500,
-                                                                fontSize: '0.9rem',
+                                                                padding: '1.25rem 1.5rem', 
+                                                                borderRadius: '16px', 
+                                                                background: isRightAnswer ? 'rgba(16, 185, 129, 0.1)' : isStudentPick ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.02)',
+                                                                border: `1.5px solid ${isRightAnswer ? '#10b981' : isStudentPick ? '#ef4444' : 'rgba(255,255,255,0.05)'}`,
+                                                                color: isRightAnswer ? 'white' : isStudentPick ? '#ef4444' : '#94a3b8',
+                                                                fontWeight: (isStudentPick || isRightAnswer) ? 800 : 600,
+                                                                fontSize: '1rem',
                                                                 display: 'flex',
                                                                 alignItems: 'center',
-                                                                gap: '12px'
+                                                                gap: '14px'
                                                             }}
                                                         >
-                                                            <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                                                {(isStudentPick || isRightAnswer) && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }}></div>}
+                                                            <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                                {(isStudentPick || isRightAnswer) && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'currentColor' }}></div>}
                                                             </div>
                                                             {opt}
+                                                            {isRightAnswer && <CheckCircle2 size={18} style={{ marginLeft: 'auto', color: '#10b981' }} />}
                                                         </div>
                                                     );
                                                 })}
@@ -709,8 +852,8 @@ const LessonView = () => {
                                 });
                             })()}
                         </div>
-                        <div style={{ padding: '1.5rem 2.5rem', background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
-                            <button onClick={() => setShowReview(false)} className="btn-standard" style={{ width: '100%', background: '#0f172a', color: 'white' }}>Close Review</button>
+                        <div style={{ padding: '2rem 3.5rem', background: 'rgba(255,255,255,0.02)', borderTop: '1.5px solid rgba(255,255,255,0.05)' }}>
+                            <button onClick={() => setShowReview(false)} className="btn-evaluation-start" style={{ width: '100%', borderRadius: '20px' }}>CLOSE AUDIT REPORT</button>
                         </div>
                     </div>
                 </div>
