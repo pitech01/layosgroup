@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { User, Mail, Lock, Shield, Camera, LogOut, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Mail, Lock, Shield, Camera, LogOut, Loader2, Monitor, Globe } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -24,6 +24,51 @@ const Account = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isSavingSecurity, setIsSavingSecurity] = useState(false);
+    
+    // Sessions State
+    const [sessions, setSessions] = useState<any[]>([]);
+    const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const token = localStorage.getItem('token');
+
+    useEffect(() => {
+        if (activeTab === 'security') {
+            fetchSessions();
+        }
+    }, [activeTab]);
+
+    const fetchSessions = async () => {
+        setIsLoadingSessions(true);
+        try {
+            const res = await fetch(`${API_URL}/active-sessions`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSessions(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch sessions', err);
+        } finally {
+            setIsLoadingSessions(false);
+        }
+    };
+
+    const handleTerminateSession = async (sessionId: number) => {
+        try {
+            const res = await fetch(`${API_URL}/active-sessions/${sessionId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                toast.success('Session terminated');
+                fetchSessions();
+            }
+        } catch (err) {
+            toast.error('Failed to terminate session');
+        }
+    };
 
     const handleLogout = () => {
         logout();
@@ -228,20 +273,50 @@ const Account = () => {
 
                                 <div className="session-management">
                                     <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginBottom: '1.25rem' }}>Active Sessions</h4>
-                                    <div className="session-card-modern">
-                                        <div className="session-info">
-                                            <h5>Windows PC • Lagos, Nigeria</h5>
-                                            <p>This Device • Active Now</p>
+                                    
+                                    {isLoadingSessions ? (
+                                        <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                                            <Loader2 size={24} className="animate-spin" color="#3b82f6" />
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={handleLogout}
-                                            className="btn-outline-danger"
-                                        >
-                                            <LogOut size={16} />
-                                            Sign Out All
-                                        </button>
-                                    </div>
+                                    ) : (
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            {sessions.map((session) => (
+                                                <div key={session.id} className="session-card-modern" style={{ opacity: session.is_current ? 1 : 0.8 }}>
+                                                    <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+                                                        <div style={{ width: '40px', height: '40px', background: session.is_current ? '#ecfdf5' : '#f1f5f9', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: session.is_current ? '#10b981' : '#64748b' }}>
+                                                            {session.name.includes('PC') || session.name.includes('Mac') || session.name.includes('Linux') ? <Monitor size={20} /> : <Monitor size={20} />}
+                                                        </div>
+                                                        <div className="session-info">
+                                                            <h5 style={{ fontWeight: 800 }}>{session.name}</h5>
+                                                            <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                <Globe size={12} /> {session.is_current ? 'Current Device • Active Now' : `Last active ${session.last_used_at}`} 
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    {!session.is_current && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleTerminateSession(session.id)}
+                                                            className="btn-outline-danger"
+                                                            style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+                                                        >
+                                                            Terminate
+                                                        </button>
+                                                    )}
+                                                    {session.is_current && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleLogout}
+                                                            className="btn-outline-danger"
+                                                            style={{ border: 'none', background: '#fef2f2' }}
+                                                        >
+                                                            <LogOut size={16} /> Sign Out
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </form>
                         </div>
