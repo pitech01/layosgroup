@@ -15,11 +15,12 @@ export default function StudentLogin() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showForceOption, setShowForceOption] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleLogin = async (e: React.FormEvent, isForce: boolean = false) => {
+        if (e) e.preventDefault();
         setLoading(true);
         setError(null);
 
@@ -32,12 +33,20 @@ export default function StudentLogin() {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ email, password, role: 'student' })
+                body: JSON.stringify({ 
+                    email, 
+                    password, 
+                    role: 'student',
+                    force: isForce 
+                })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
+                if (response.status === 423 && data.action_required === 'confirm_force_login') {
+                    setShowForceOption(true);
+                }
                 throw new Error(data.message || 'Login failed. Please verify your credentials.');
             }
 
@@ -72,7 +81,7 @@ export default function StudentLogin() {
 
                     {error && (
                         <div className="animate-slide-in" style={{
-                            padding: '1rem 1.25rem',
+                            padding: '1.25rem',
                             background: '#fff1f2',
                             border: '1px solid #ffe4e6',
                             color: '#e11d48',
@@ -80,19 +89,38 @@ export default function StudentLogin() {
                             marginBottom: '1.5rem',
                             fontSize: '0.95rem',
                             fontWeight: 500,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.75rem',
                             boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
                         }}>
-                            <AlertCircle size={20} strokeWidth={2.5} />
-                            <span style={{ flex: 1 }}>{error}</span>
-                            <button
-                                onClick={() => setError(null)}
-                                style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px' }}
-                            >
-                                <X size={16} />
-                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: showForceOption ? '1rem' : 0 }}>
+                                <AlertCircle size={20} strokeWidth={2.5} />
+                                <span style={{ flex: 1 }}>{error}</span>
+                                <button
+                                    onClick={() => { setError(null); setShowForceOption(false); }}
+                                    style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px' }}
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            {showForceOption && (
+                                <button
+                                    onClick={() => handleLogin(null as any, true)}
+                                    style={{
+                                        width: '100%',
+                                        background: '#e11d48',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '0.75rem',
+                                        borderRadius: '12px',
+                                        fontWeight: 800,
+                                        cursor: 'pointer',
+                                        marginTop: '0.5rem',
+                                        fontSize: '0.85rem'
+                                    }}
+                                >
+                                    SIGN OUT OTHER DEVICES & ENTER
+                                </button>
+                            )}
                         </div>
                     )}
 

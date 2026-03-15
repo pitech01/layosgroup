@@ -10,9 +10,10 @@ export default function AdminLogin() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showForceOption, setShowForceOption] = useState(false);
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleLogin = async (e: React.FormEvent, isForce: boolean = false) => {
+        if (e) e.preventDefault();
         setLoading(true);
         setError(null);
 
@@ -25,12 +26,20 @@ export default function AdminLogin() {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ email, password, role: 'admin' })
+                body: JSON.stringify({ 
+                    email, 
+                    password, 
+                    role: 'admin',
+                    force: isForce 
+                })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
+                if (response.status === 423 && data.action_required === 'confirm_force_login') {
+                    setShowForceOption(true);
+                }
                 throw new Error(data.message || 'Access Denied: Administrative credentials invalid.');
             }
 
@@ -52,7 +61,16 @@ export default function AdminLogin() {
                 <form onSubmit={handleLogin}>
                     {error && (
                         <div style={{ color: '#ef4444', fontSize: '0.8rem', marginBottom: '1rem', background: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' }}>
-                            {error}
+                            <div style={{ marginBottom: showForceOption ? '0.5rem' : 0 }}>{error}</div>
+                            {showForceOption && (
+                                <button
+                                    type="button"
+                                    onClick={() => handleLogin(null as any, true)}
+                                    style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', width: '100%' }}
+                                >
+                                    SIGN OUT OTHERS & ENTER
+                                </button>
+                            )}
                         </div>
                     )}
                     <div>
