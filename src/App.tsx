@@ -41,6 +41,9 @@ import InstructorChannelPage from './pages/instructor/InstructorChannelPage';
 import InstructorSettings from './pages/instructor/Settings';
 import StudentChannelsPage from './pages/student/StudentChannelsPage';
 import StudentChannelPage from './pages/student/StudentChannelPage';
+import InstructorInterviews from './pages/instructor/interviews/Interviews';
+import CreateInterview from './pages/instructor/interviews/CreateInterview';
+import StudentInterviews from './pages/student/interviews/Interviews';
 import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 
@@ -85,6 +88,7 @@ function App() {
                 <Route path="/student/courses/:courseId/channel" element={<StudentChannelPage />} />
                 <Route path="/student/assignments" element={<StudentAssignments />} />
                 <Route path="/student/assignments/:id/submit" element={<SubmitAssignment />} />
+                <Route path="/student/interview" element={<StudentInterviews />} />
                 {/* Redirect legacy dashboard route if needed, or just keep /student/dashboard as main */}
                 <Route path="/student-dashboard" element={<Navigate to="/student/dashboard" replace />} />
               </Route>
@@ -115,6 +119,8 @@ function App() {
                 <Route path="/instructor/live/create" element={<CreateLiveSession />} />
                 <Route path="/instructor/channels" element={<InstructorChannelsPage />} />
                 <Route path="/instructor/courses/:courseId/channel" element={<InstructorChannelPage />} />
+                <Route path="/instructor/interview" element={<InstructorInterviews />} />
+                <Route path="/instructor/interviews/create" element={<CreateInterview />} />
                 <Route path="/instructor/settings" element={<InstructorSettings />} />
               </Route>
             </Route>

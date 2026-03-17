@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import {
+    Mic2,
     LayoutDashboard,
     Users,
     BookOpen,
@@ -40,6 +41,7 @@ const InstructorSidebar = ({ collapsed, mobileOpen }: InstructorSidebarProps) =>
         { path: '/instructor/course-library', label: 'Courses', icon: BookOpen },
         { path: '/instructor/students', label: 'Students', icon: GraduationCap },
         { path: '/instructor/assignments', label: 'Assignments', icon: ClipboardList },
+        { path: '/instructor/interview', label: 'Interview', icon: Mic2 },
         { path: '/instructor/live', label: 'Live Classes', icon: Video },
         { path: '/instructor/channels', label: 'Channels', icon: MessageCircle },
         { path: '/instructor/settings', label: 'Settings', icon: Settings },

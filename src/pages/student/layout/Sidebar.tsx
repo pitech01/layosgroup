@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import {
+    Mic2,
     LayoutDashboard,
     BookOpen,
     Video,
@@ -101,6 +102,16 @@ const Sidebar = ({ collapsed, mobileOpen }: SidebarProps) => {
                     <div className="nav-item-indicator" />
                     <ClipboardList size={22} style={{ flexShrink: 0 }} />
                     <span>Assignments</span>
+                </Link>
+
+                <Link
+                    to="/student/interview"
+                    className={`nav-item ${isActive('/student/interview')}`}
+                    title={collapsed ? "Interview" : ""}
+                >
+                    <div className="nav-item-indicator" />
+                    <Mic2 size={22} style={{ flexShrink: 0 }} />
+                    <span>Interview</span>
                 </Link>
 
                 <Link
