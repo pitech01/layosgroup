@@ -4,7 +4,9 @@ import {
     ExternalLink,
     Loader2,
     AlertCircle,
-    Trash2
+    Trash2,
+    Edit,
+    X
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +16,9 @@ export default function Students() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [editModal, setEditModal] = useState<{ show: boolean, student: any | null }>({ show: false, student: null });
+    const [updating, setUpdating] = useState(false);
+    const [editForm, setEditForm] = useState({ name: '', email: '', password: '' });
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -61,6 +66,43 @@ export default function Students() {
             }
         } catch (err) {
             alert('Signal lost. Check your network connectivity.');
+        }
+    };
+
+    const handleEdit = (student: any) => {
+        setEditModal({ show: true, student });
+        setEditForm({
+            name: student.name,
+            email: student.email,
+            password: ''
+        });
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editModal.student) return;
+        setUpdating(true);
+        try {
+            const response = await fetch(`${API_URL}/students/${editModal.student.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(editForm)
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setUsers(users.map(u => u.id === data.id ? data : u));
+                setEditModal({ show: false, student: null });
+                alert('Student profile updated successfully.');
+            } else {
+                alert(data.message || 'Validation failed. Check your inputs.');
+            }
+        } catch (err) {
+            alert('Sync failed. Please check your connection.');
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -452,6 +494,13 @@ export default function Students() {
                                         <td data-label="Management">
                                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                                                 <button
+                                                    onClick={() => handleEdit(user)}
+                                                    style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}
+                                                    title="Edit Student"
+                                                >
+                                                    <Edit size={16} />
+                                                </button>
+                                                <button
                                                     onClick={() => handleDeleteStudent(user.id)}
                                                     style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}
                                                     title="Delete Student"
@@ -474,6 +523,67 @@ export default function Students() {
                 )}
             </div>
 
+            {editModal.show && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <h3 style={{ margin: 0, fontWeight: 800 }}>Edit Student Profile</h3>
+                            <button onClick={() => setEditModal({ show: false, student: null })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="form-group">
+                            <label>Full Name</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={editForm.name}
+                                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Email Address</label>
+                            <input
+                                type="email"
+                                className="form-input"
+                                value={editForm.email}
+                                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>New Password (Optional)</label>
+                            <input
+                                type="password"
+                                className="form-input"
+                                placeholder="Leave blank to keep current"
+                                value={editForm.password}
+                                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                            />
+                        </div>
+
+                        <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem' }}>
+                            <button
+                                className="filter-pill"
+                                style={{ flex: 1, justifyContent: 'center', height: '48px' }}
+                                onClick={() => setEditModal({ show: false, student: null })}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn-add-user"
+                                style={{ flex: 2, justifyContent: 'center', height: '48px' }}
+                                onClick={handleSaveEdit}
+                                disabled={updating}
+                            >
+                                {updating ? 'Saving...' : 'Update Student profile'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -11,7 +11,9 @@ import {
     CheckCircle2,
     X,
     Save,
-    FileVideo
+    FileVideo,
+    Edit,
+    Trash2
 } from 'lucide-react';
 
 interface LiveSession {
@@ -39,6 +41,17 @@ export default function LiveClass() {
     const [recordingModal, setRecordingModal] = useState<{ show: boolean, sessionId: number | null }>({ show: false, sessionId: null });
     const [recordingFile, setRecordingFile] = useState<File | null>(null);
     const [savingRecording, setSavingRecording] = useState(false);
+    const [editModal, setEditModal] = useState<{ show: boolean, session: LiveSession | null }>({ show: false, session: null });
+    const [courses, setCourses] = useState<any[]>([]);
+    const [updating, setUpdating] = useState(false);
+    const [editForm, setEditForm] = useState({
+        title: '',
+        course_id: '',
+        scheduled_date: '',
+        start_time: '',
+        end_time: '',
+        meeting_link: ''
+    });
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -61,9 +74,89 @@ export default function LiveClass() {
         }
     };
 
+    const fetchCourses = async () => {
+        try {
+            const response = await fetch(`${API_URL}/courses`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setCourses(data);
+            }
+        } catch (err) {
+            console.error("Fetch Courses Error:", err);
+        }
+    };
+
     useEffect(() => {
         fetchSessions();
+        fetchCourses();
     }, [API_URL]);
+
+    const handleEdit = (session: LiveSession) => {
+        setEditModal({ show: true, session });
+        setEditForm({
+            title: session.title,
+            course_id: session.course_id.toString(),
+            scheduled_date: session.scheduled_date,
+            start_time: session.start_time,
+            end_time: session.end_time,
+            meeting_link: session.meeting_link
+        });
+    };
+
+    const handleUpdateSession = async () => {
+        if (!editModal.session) return;
+        setUpdating(true);
+        try {
+            const response = await fetch(`${API_URL}/live-sessions/${editModal.session.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(editForm)
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setSessions(sessions.map(s => s.id === data.id ? { ...data, course: courses.find(c => c.id === parseInt(editForm.course_id)) } : s));
+                setEditModal({ show: false, session: null });
+                // We should refetch or update state carefully. data might not have the full course object loaded.
+                fetchSessions(); // Simpler to refetch
+            } else {
+                alert(data.message || 'Update failed');
+            }
+        } catch (err) {
+            console.error("Update Session Error:", err);
+            alert('A network error occurred.');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleDeleteSession = async (id: number) => {
+        if (!window.confirm('Are you sure you want to cancel and delete this live session?')) return;
+        try {
+            const response = await fetch(`${API_URL}/live-sessions/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (response.ok) {
+                setSessions(sessions.filter(s => s.id !== id));
+            } else {
+                alert('Deletion failed. Retry later.');
+            }
+        } catch (err) {
+            alert('A network error occurred.');
+        }
+    };
 
     // Show success toast if redirected from creation page
     useEffect(() => {
@@ -419,8 +512,24 @@ export default function LiveClass() {
 
                         return (
                             <div key={session.id} className="live-session-card">
-                                <div className="session-status-badge" style={{ background: style.bg, color: style.color }}>
-                                    {style.label}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                                    <div className="session-status-badge" style={{ background: style.bg, color: style.color, margin: 0 }}>
+                                        {style.label}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button 
+                                            onClick={() => handleEdit(session)}
+                                            style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer' }}
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDeleteSession(session.id)}
+                                            style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer' }}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>{session.title}</h3>
@@ -527,6 +636,108 @@ export default function LiveClass() {
                         >
                             {savingRecording ? 'Saving...' : <><Save size={18} /> Save Recording</>}
                         </button>
+                    </div>
+                </div>
+            )}
+            {editModal.show && (
+                <div className="modal-overlay">
+                    <div className="recording-modal" style={{ maxWidth: '600px' }}>
+                        <div className="modal-title">
+                            Edit Live Session
+                            <button
+                                onClick={() => setEditModal({ show: false, session: null })}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Session Title</label>
+                                <input 
+                                    className="form-input"
+                                    type="text"
+                                    value={editForm.title}
+                                    onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
+                            </div>
+
+                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Course</label>
+                                <select 
+                                    className="form-input"
+                                    value={editForm.course_id}
+                                    onChange={(e) => setEditForm({...editForm, course_id: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                >
+                                    {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Date</label>
+                                <input 
+                                    className="form-input"
+                                    type="date"
+                                    value={editForm.scheduled_date}
+                                    onChange={(e) => setEditForm({...editForm, scheduled_date: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Meeting Link</label>
+                                <input 
+                                    className="form-input"
+                                    type="url"
+                                    value={editForm.meeting_link}
+                                    onChange={(e) => setEditForm({...editForm, meeting_link: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Start Time</label>
+                                <input 
+                                    className="form-input"
+                                    type="time"
+                                    value={editForm.start_time}
+                                    onChange={(e) => setEditForm({...editForm, start_time: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>End Time</label>
+                                <input 
+                                    className="form-input"
+                                    type="time"
+                                    value={editForm.end_time}
+                                    onChange={(e) => setEditForm({...editForm, end_time: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                            <button 
+                                className="btn-standard" 
+                                style={{ flex: 1, background: '#f1f5f9', color: '#64748b' }}
+                                onClick={() => setEditModal({ show: false, session: null })}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                className="btn-standard" 
+                                style={{ flex: 2, background: '#020617' }}
+                                onClick={handleUpdateSession}
+                                disabled={updating}
+                            >
+                                {updating ? 'Updating...' : 'Save Changes'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
