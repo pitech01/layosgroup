@@ -153,68 +153,8 @@ export default function CreateCourse() {
         const token = localStorage.getItem('token');
 
         try {
-            // Process pending file uploads first
+            // Pending file uploads are now handled immediately upon selection
             const updatedModules = [...modules];
-            for (let i = 0; i < updatedModules.length; i++) {
-                const mod = updatedModules[i];
-                for (let j = 0; j < mod.lessons.length; j++) {
-                    const l = mod.lessons[j];
-                    if (l.fileToUpload || l.videoToUpload) {
-                        const file = l.fileToUpload || l.videoToUpload;
-                        if (!file) continue;
-
-                        setLoadingText(`Uploading: ${file.name}...`);
-                        setUploadingVideos((prev: any) => ({ ...prev, [l.id]: true }));
-                        setUploadProgress((prev: any) => ({ ...prev, [l.id]: 0 }));
-
-                        const formData = new FormData();
-                        formData.append('video', file);
-
-                        try {
-                            const url = await new Promise((resolve, reject) => {
-                                const xhr = new XMLHttpRequest();
-                                xhr.open('POST', `${API_URL}/upload-video`, true);
-                                xhr.setRequestHeader('Accept', 'application/json');
-                                if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-
-                                xhr.upload.onprogress = (event) => {
-                                    if (event.lengthComputable) {
-                                        const percentComplete = Math.round((event.loaded / event.total) * 100);
-                                        setUploadProgress((prev: any) => ({ ...prev, [l.id]: percentComplete }));
-                                        setLoadingText(`Uploading: ${file.name} (${percentComplete}%)`);
-                                    }
-                                };
-
-                                xhr.onload = () => {
-                                    if (xhr.status >= 200 && xhr.status < 300) {
-                                        try {
-                                            const data = JSON.parse(xhr.responseText);
-                                            if (data.success && data.video_url) resolve(data.video_url);
-                                            else reject(data.message || 'Failed to upload');
-                                        } catch { reject('Error parsing response.'); }
-                                    } else { reject('Error uploading file. Status: ' + xhr.status); }
-                                };
-
-                                xhr.onerror = () => reject('Network error during upload.');
-                                xhr.send(formData);
-                            });
-
-                            if (l.type === 'video' || l.videoToUpload) {
-                                l.videoUrl = url as string;
-                            } else {
-                                l.fileUrl = url as string;
-                                l.fileName = file.name;
-                            }
-                            delete l.fileToUpload;
-                            delete l.videoToUpload;
-                            setUploadingVideos((prev: any) => ({ ...prev, [l.id]: false }));
-                        } catch (err) {
-                            setUploadingVideos((prev: any) => ({ ...prev, [l.id]: false }));
-                            throw new Error(typeof err === 'string' ? err : 'Upload failed');
-                        }
-                    }
-                }
-            }
             setModules(updatedModules);
             setLoadingText('Saving course blueprint...');
 
@@ -305,8 +245,82 @@ export default function CreateCourse() {
     const [designingQuiz, setDesigningQuiz] = useState<{ moduleId: string; lessonId: string } | null>(null);
     const [viewingQuizKey, setViewingQuizKey] = useState<{ moduleId: string; lessonId: string } | null>(null);
 
-    const handleFileUpload = (moduleId: string, lessonId: string, file: File) => {
-        updateLesson(moduleId, lessonId, { fileToUpload: file, videoUrl: undefined, fileUrl: undefined });
+    const handleFileUpload = async (moduleId: string, lessonId: string, file: File) => {
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+        const token = localStorage.getItem('token');
+
+        setUploadingVideos((prev: any) => ({ ...prev, [lessonId]: true }));
+        setUploadProgress((prev: any) => ({ ...prev, [lessonId]: 0 }));
+
+        const formData = new FormData();
+        formData.append('video', file);
+
+        try {
+            const url = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', `${API_URL}/upload-video`, true);
+                xhr.setRequestHeader('Accept', 'application/json');
+                if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = Math.round((event.loaded / event.total) * 100);
+                        setUploadProgress((prev: any) => ({ ...prev, [lessonId]: percentComplete }));
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            if (data.success && data.video_url) resolve(data.video_url);
+                            else reject(data.message || 'Failed to upload');
+                        } catch { reject('Error parsing response.'); }
+                    } else { reject('Error uploading file. Status: ' + xhr.status); }
+                };
+
+                xhr.onerror = () => reject('Network error during upload.');
+                xhr.send(formData);
+            });
+
+            // Find lesson type for proper field update
+            const lesson = modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
+            if (lesson?.type === 'material') {
+                updateLesson(moduleId, lessonId, { fileUrl: url as string, fileName: file.name, fileToUpload: undefined });
+            } else {
+                updateLesson(moduleId, lessonId, { videoUrl: url as string, videoToUpload: undefined, fileToUpload: undefined });
+            }
+        } catch (err: any) {
+            setError(err.message || 'Upload failed');
+        } finally {
+            setUploadingVideos((prev: any) => ({ ...prev, [lessonId]: false }));
+        }
+    };
+
+    const handleDeleteVideo = async (moduleId: string, lessonId: string, videoUrl: string) => {
+        if (!window.confirm('Delete this file permanently from storage?')) return;
+        
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch(`${API_URL}/delete-video`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ video_url: videoUrl })
+            });
+
+            if (response.ok) {
+                updateLesson(moduleId, lessonId, { videoUrl: '', fileUrl: '', fileName: '' });
+            } else {
+                throw new Error('Failed to delete file');
+            }
+        } catch (err: any) {
+            setError(err.message || 'Deletion failed');
+        }
     };
 
 
@@ -1371,7 +1385,7 @@ export default function CreateCourse() {
                                                                                     <button
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
-                                                                                            updateLesson(mod.id, lesson.id, { videoUrl: '' });
+                                                                                            handleDeleteVideo(mod.id, lesson.id, lesson.videoUrl || '');
                                                                                         }}
                                                                                         style={{ marginTop: '15px', padding: '8px 16px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                     >
@@ -1485,7 +1499,7 @@ export default function CreateCourse() {
                                                                                         style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
                                                                                     />
                                                                                     <button
-                                                                                        onClick={() => updateLesson(mod.id, lesson.id, { videoUrl: '' })}
+                                                                                         onClick={() => handleDeleteVideo(mod.id, lesson.id, lesson.videoUrl || '')}
                                                                                         style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', zIndex: 10 }}
                                                                                     >
                                                                                         Delete Recording
@@ -1501,8 +1515,8 @@ export default function CreateCourse() {
                                                                                     <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>Drag and drop or click to browse (MP4, MKV)</p>
                                                                                     <input
                                                                                         type="file"
-                                                                                        id={`recording-upload-${lesson.id}`}
                                                                                         style={{ display: 'none' }}
+                                                                                        id={`recording-upload-${lesson.id}`}
                                                                                         accept="video/*"
                                                                                         onChange={(e: any) => {
                                                                                             if (e.target.files && e.target.files[0]) {
@@ -1593,7 +1607,7 @@ export default function CreateCourse() {
                                                                                         <button
                                                                                             onClick={(e: any) => {
                                                                                                 e.stopPropagation();
-                                                                                                updateLesson(mod.id, lesson.id, { fileUrl: '', fileName: '' });
+                                                                                                 handleDeleteVideo(mod.id, lesson.id, lesson.fileUrl || '');
                                                                                             }}
                                                                                             style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                         >

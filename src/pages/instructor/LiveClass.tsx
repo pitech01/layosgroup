@@ -39,8 +39,10 @@ export default function LiveClass() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [showSuccessToast, setShowSuccessToast] = useState(false);
     const [recordingModal, setRecordingModal] = useState<{ show: boolean, sessionId: number | null }>({ show: false, sessionId: null });
-    const [recordingFile, setRecordingFile] = useState<File | null>(null);
     const [savingRecording, setSavingRecording] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploading, setUploading] = useState(false);
+    const [uploadedUrl, setUploadedUrl] = useState('');
     const [editModal, setEditModal] = useState<{ show: boolean, session: LiveSession | null }>({ show: false, session: null });
     const [courses, setCourses] = useState<any[]>([]);
     const [updating, setUpdating] = useState(false);
@@ -219,34 +221,108 @@ export default function LiveClass() {
             show: true,
             sessionId: session.id,
         });
-        setRecordingFile(null);
+        setUploadedUrl(session.recording_link || '');
+        setUploadProgress(0);
+        setUploading(false);
+    };
+
+    const handleFileUpload = async (file: File) => {
+        const token = localStorage.getItem('token');
+        setUploading(true);
+        setUploadProgress(0);
+
+        const formData = new FormData();
+        formData.append('video', file);
+
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${API_URL}/upload-video`, true);
+            xhr.setRequestHeader('Accept', 'application/json');
+            if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    setUploadProgress(Math.round((event.loaded / event.total) * 100));
+                }
+            };
+
+            const response: any = await new Promise((resolve, reject) => {
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            resolve(JSON.parse(xhr.responseText));
+                        } catch { reject(new Error('Invalid response')); }
+                    } else {
+                        reject(new Error('Upload failed'));
+                    }
+                };
+                xhr.onerror = () => reject(new Error('Network error'));
+                xhr.send(formData);
+            });
+
+            if (response.success) {
+                setUploadedUrl(response.video_url);
+            } else {
+                alert(response.message || 'Upload failed');
+            }
+        } catch (err: any) {
+            alert(err.message || 'An error occurred during upload');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDeleteVideo = async () => {
+        if (!window.confirm('Delete this recording permanently?')) return;
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch(`${API_URL}/delete-video`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ video_url: uploadedUrl })
+            });
+
+            if (response.ok) {
+                setUploadedUrl('');
+            } else {
+                alert('Failed to delete video');
+            }
+        } catch (err) {
+            alert('An error occurred during deletion');
+        }
     };
 
     const handleSaveRecording = async () => {
-        if (!recordingModal.sessionId || !recordingFile) return;
+        if (!recordingModal.sessionId || !uploadedUrl) return;
         setSavingRecording(true);
         try {
-            const submitData = new FormData();
-            submitData.append('recording_file', recordingFile);
-            submitData.append('_method', 'PUT'); // For Laravel to handle files with PUT
-
             const response = await fetch(`${API_URL}/live-sessions/${recordingModal.sessionId}`, {
-                method: 'POST', // Use POST with _method override
+                method: 'PUT',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: submitData
+                body: JSON.stringify({
+                    recording_link: uploadedUrl
+                })
             });
 
             if (response.ok) {
                 await fetchSessions();
                 setRecordingModal({ show: false, sessionId: null });
-                setRecordingFile(null);
-                // Show success toast manually
+                setUploadedUrl('');
+            } else {
+                const data = await response.json();
+                alert(data.message || 'Failed to save recording link');
             }
         } catch (err) {
             console.error("Save Recording Error:", err);
+            alert('A network error occurred.');
         } finally {
             setSavingRecording(false);
         }
@@ -620,13 +696,32 @@ export default function LiveClass() {
                             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem' }}>
                                 <FileVideo size={16} /> Choose Video File
                             </label>
-                            <input
-                                type="file"
-                                accept="video/*"
-                                onChange={(e) => setRecordingFile(e.target.files?.[0] || null)}
-                                style={{ width: '100%', marginBottom: 0, padding: '0.6rem' }}
-                                className="custom-input-modern"
-                            />
+                            
+                            {uploading ? (
+                                <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '14px', textAlign: 'center' }}>
+                                    <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '0.85rem' }}>Uploading... {uploadProgress}%</div>
+                                    <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                                        <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                                    </div>
+                                </div>
+                            ) : uploadedUrl ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f0fdf4', padding: '0.85rem', borderRadius: '12px', border: '1px solid #bcf0da' }}>
+                                    <CheckCircle2 size={16} color="#10b981" />
+                                    <div style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#1a4d3e', wordBreak: 'break-all' }}>Recording Uploaded</div>
+                                    <button type="button" onClick={handleDeleteVideo} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800 }}>Delete</button>
+                                </div>
+                            ) : (
+                                <input
+                                    type="file"
+                                    accept="video/*"
+                                    onChange={(e) => {
+                                        if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                                        e.target.value = '';
+                                    }}
+                                    style={{ width: '100%', marginBottom: 0, padding: '0.6rem' }}
+                                    className="custom-input-modern"
+                                />
+                            )}
                         </div>
                         <button
                             className="btn-standard"

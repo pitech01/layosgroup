@@ -29,7 +29,9 @@ export default function CreateLiveSession() {
         endTime: '',
         meetingLink: '',
     });
-    const [recordingFile, setRecordingFile] = useState<File | null>(null);
+    const [recordingUrl, setRecordingUrl] = useState<string>('');
+    const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -100,8 +102,8 @@ export default function CreateLiveSession() {
                 submitData.append('start_time', formData.startTime);
                 submitData.append('end_time', formData.endTime);
                 submitData.append('meeting_link', formData.meetingLink);
-                if (recordingFile) {
-                    submitData.append('recording_file', recordingFile);
+                if (recordingUrl) {
+                    submitData.append('recording_link', recordingUrl);
                 }
 
                 const response = await fetch(`${API_URL}/live-sessions`, {
@@ -125,6 +127,76 @@ export default function CreateLiveSession() {
             } finally {
                 setIsSubmitting(false);
             }
+        }
+    };
+
+    const handleFileUpload = async (file: File) => {
+        const token = localStorage.getItem('token');
+        setUploading(true);
+        setUploadProgress(0);
+
+        const formData = new FormData();
+        formData.append('video', file);
+
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${API_URL}/upload-video`, true);
+            xhr.setRequestHeader('Accept', 'application/json');
+            if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    setUploadProgress(Math.round((event.loaded / event.total) * 100));
+                }
+            };
+
+            const response: any = await new Promise((resolve, reject) => {
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            resolve(JSON.parse(xhr.responseText));
+                        } catch { reject(new Error('Invalid response')); }
+                    } else {
+                        reject(new Error('Upload failed'));
+                    }
+                };
+                xhr.onerror = () => reject(new Error('Network error'));
+                xhr.send(formData);
+            });
+
+            if (response.success) {
+                setRecordingUrl(response.video_url);
+            } else {
+                alert(response.message || 'Upload failed');
+            }
+        } catch (err: any) {
+            alert(err.message || 'An error occurred during upload');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDeleteVideo = async () => {
+        if (!window.confirm('Delete this recording permanently?')) return;
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch(`${API_URL}/delete-video`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ video_url: recordingUrl })
+            });
+
+            if (response.ok) {
+                setRecordingUrl('');
+            } else {
+                alert('Failed to delete video');
+            }
+        } catch (err) {
+            alert('An error occurred during deletion');
         }
     };
 
@@ -376,14 +448,34 @@ export default function CreateLiveSession() {
                         <label className="form-label-modern">
                             <FileVideo size={16} /> Pre-recorded Session (Optional)
                         </label>
-                        <input
-                            type="file"
-                            accept="video/*"
-                            className="form-input-modern"
-                            onChange={e => setRecordingFile(e.target.files?.[0] || null)}
-                            style={{ padding: '0.6rem' }}
-                        />
-                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Upload a video file for students to watch later.</p>
+                        {uploading ? (
+                            <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '14px', textAlign: 'center' }}>
+                                <div style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Uploading... {uploadProgress}%</div>
+                                <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                                </div>
+                            </div>
+                        ) : recordingUrl ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#f0fdf4', padding: '1rem', borderRadius: '14px', border: '1px solid #bcf0da' }}>
+                                <FileVideo size={20} color="#10b981" />
+                                <div style={{ flex: 1, fontSize: '0.85rem', fontWeight: 600, color: '#1a4d3e', wordBreak: 'break-all' }}>{recordingUrl}</div>
+                                <button type="button" onClick={handleDeleteVideo} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>Remove</button>
+                            </div>
+                        ) : (
+                            <>
+                                <input
+                                    type="file"
+                                    accept="video/*"
+                                    className="form-input-modern"
+                                    onChange={e => {
+                                        if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                                        e.target.value = '';
+                                    }}
+                                    style={{ padding: '0.6rem' }}
+                                />
+                                <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Upload a video file for students to watch later.</p>
+                            </>
+                        )}
                     </div>
 
                     <button type="submit" className="btn-submit-live" disabled={isSubmitting}>
