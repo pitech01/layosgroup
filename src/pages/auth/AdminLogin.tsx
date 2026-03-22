@@ -26,11 +26,11 @@ export default function AdminLogin() {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ 
-                    email, 
-                    password, 
+                body: JSON.stringify({
+                    email,
+                    password,
                     role: 'admin',
-                    force: isForce 
+                    force: isForce
                 })
             });
 

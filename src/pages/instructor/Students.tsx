@@ -5,8 +5,7 @@ import {
     Loader2,
     AlertCircle,
     Trash2,
-    Edit,
-    X
+    Edit
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,9 +15,6 @@ export default function Students() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [editModal, setEditModal] = useState<{ show: boolean, student: any | null }>({ show: false, student: null });
-    const [updating, setUpdating] = useState(false);
-    const [editForm, setEditForm] = useState({ name: '', email: '', password: '' });
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -66,43 +62,6 @@ export default function Students() {
             }
         } catch (err) {
             alert('Signal lost. Check your network connectivity.');
-        }
-    };
-
-    const handleEdit = (student: any) => {
-        setEditModal({ show: true, student });
-        setEditForm({
-            name: student.name,
-            email: student.email,
-            password: ''
-        });
-    };
-
-    const handleSaveEdit = async () => {
-        if (!editModal.student) return;
-        setUpdating(true);
-        try {
-            const response = await fetch(`${API_URL}/students/${editModal.student.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(editForm)
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setUsers(users.map(u => u.id === data.id ? data : u));
-                setEditModal({ show: false, student: null });
-                alert('Student profile updated successfully.');
-            } else {
-                alert(data.message || 'Validation failed. Check your inputs.');
-            }
-        } catch (err) {
-            alert('Sync failed. Please check your connection.');
-        } finally {
-            setUpdating(false);
         }
     };
 
@@ -387,37 +346,95 @@ export default function Students() {
                 .modal-content {
                     background: white;
                     width: 100%;
-                    max-width: 450px;
-                    border-radius: 20px;
-                    padding: 2rem;
+                    max-width: 550px;
+                    border-radius: 28px;
+                    padding: 2.5rem;
                     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
                     position: relative;
                 }
 
+                .modal-header-premium {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 2rem;
+                }
+
+                .icon-box-premium {
+                    background: #f8fafc;
+                    padding: 12px;
+                    border-radius: 14px;
+                    color: #0f172a;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
                 .form-group {
-                    margin-bottom: 1.25rem;
+                    margin-bottom: 1.5rem;
                 }
 
                 .form-group label {
                     display: block;
-                    font-weight: 600;
-                    color: #1e293b;
+                    font-weight: 700;
+                    color: #0f172a;
                     margin-bottom: 0.5rem;
                     font-size: 0.9rem;
+                    letter-spacing: -0.01em;
+                }
+
+                .premium-input-wrapper {
+                    position: relative;
+                }
+
+                .premium-input-icon {
+                    position: absolute;
+                    left: 16px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #94a3b8;
                 }
 
                 .form-input {
                     width: 100%;
-                    padding: 0.75rem 1rem;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 8px;
+                    padding: 0.85rem 1.25rem 0.85rem 3rem;
+                    background: #fcfdfe;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 16px;
                     font-family: inherit;
                     font-size: 0.95rem;
-                    color: #1e293b;
+                    font-weight: 600;
+                    color: #0f172a;
+                    transition: all 0.3s;
                 }
 
                 .form-input:focus {
                     outline: none;
+                    border-color: #020617;
+                    background: white;
+                    box-shadow: 0 0 0 4px rgba(2, 6, 23, 0.05);
+                }
+
+                .cohort-item-premium {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 1rem;
+                    background: #fcfdfe;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 16px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    margin-bottom: 0.75rem;
+                }
+
+                .cohort-item-premium:hover {
+                    border-color: #020617;
+                    background: #f8fafc;
+                }
+
+                .cohort-item-premium.selected {
+                    background: #f8fafc;
                     border-color: #020617;
                 }
             `}</style>
@@ -494,7 +511,7 @@ export default function Students() {
                                         <td data-label="Management">
                                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                                                 <button
-                                                    onClick={() => handleEdit(user)}
+                                                    onClick={() => navigate(`/instructor/students/${user.id}/edit`)}
                                                     style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}
                                                     title="Edit Student"
                                                 >
@@ -522,68 +539,6 @@ export default function Students() {
                     </div>
                 )}
             </div>
-
-            {editModal.show && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h3 style={{ margin: 0, fontWeight: 800 }}>Edit Student Profile</h3>
-                            <button onClick={() => setEditModal({ show: false, student: null })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        <div className="form-group">
-                            <label>Full Name</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                value={editForm.name}
-                                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Email Address</label>
-                            <input
-                                type="email"
-                                className="form-input"
-                                value={editForm.email}
-                                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>New Password (Optional)</label>
-                            <input
-                                type="password"
-                                className="form-input"
-                                placeholder="Leave blank to keep current"
-                                value={editForm.password}
-                                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
-                            />
-                        </div>
-
-                        <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem' }}>
-                            <button
-                                className="filter-pill"
-                                style={{ flex: 1, justifyContent: 'center', height: '48px' }}
-                                onClick={() => setEditModal({ show: false, student: null })}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="btn-add-user"
-                                style={{ flex: 2, justifyContent: 'center', height: '48px' }}
-                                onClick={handleSaveEdit}
-                                disabled={updating}
-                            >
-                                {updating ? 'Saving...' : 'Update Student profile'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

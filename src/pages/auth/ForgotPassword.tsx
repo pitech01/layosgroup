@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import loginHero from '../../assets/login-hero.jpeg';
+import toast from 'react-hot-toast';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
@@ -10,21 +11,88 @@ export default function ForgotPassword() {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleSendCode = (e: React.FormEvent) => {
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    const handleSendCode = async (e: React.FormEvent) => {
         e.preventDefault();
-        setStep(2);
+        setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/forgot-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success(data.message);
+                setStep(2);
+            } else {
+                toast.error(data.message || 'Something went wrong');
+            }
+        } catch {
+            toast.error('Network error');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleVerifyCode = (e: React.FormEvent) => {
+    const handleVerifyCode = async (e: React.FormEvent) => {
         e.preventDefault();
-        setStep(3);
+        setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/verify-reset-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, code: code.join('') })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success(data.message);
+                setStep(3);
+            } else {
+                toast.error(data.message || 'Invalid code');
+            }
+        } catch {
+            toast.error('Network error');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleResetPassword = (e: React.FormEvent) => {
+    const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
-        navigate('/login');
+        if (newPassword !== confirmPassword) {
+            toast.error('Passwords do not match');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    email, 
+                    code: code.join(''),
+                    password: newPassword,
+                    password_confirmation: confirmPassword
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success(data.message);
+                navigate('/login');
+            } else {
+                toast.error(data.message || 'Reset failed');
+            }
+        } catch {
+            toast.error('Network error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCodeChange = (index: number, value: string) => {
@@ -66,7 +134,9 @@ export default function ForgotPassword() {
                                         required
                                     />
                                 </div>
-                                <button type="submit" className="login-btn-primary">Send Reset Code</button>
+                                <button type="submit" className="login-btn-primary" disabled={loading}>
+                                    {loading ? <Loader2 size={20} className="animate-spin" /> : 'Send Reset Code'}
+                                </button>
                             </form>
                         </div>
                     )}
@@ -75,7 +145,7 @@ export default function ForgotPassword() {
                         <div className="delay-200">
                             <div className="login-header">
                                 <h1>Verify Code</h1>
-                                <p>We've sent a 6-digit code to your email.</p>
+                                <p>We've sent a 6-digit code to <strong>{email}</strong>.</p>
                             </div>
                             <form onSubmit={handleVerifyCode}>
                                 <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginBottom: '2rem' }}>
@@ -93,7 +163,30 @@ export default function ForgotPassword() {
                                         />
                                     ))}
                                 </div>
-                                <button type="submit" className="login-btn-primary">Verify Code</button>
+                                <button type="submit" className="login-btn-primary" disabled={loading}>
+                                    {loading ? <Loader2 size={20} className="animate-spin" /> : 'Verify Code'}
+                                </button>
+                                
+                                <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                                    <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                                        Didn't receive the code?{' '}
+                                        <button 
+                                            type="button" 
+                                            onClick={handleSendCode} 
+                                            disabled={loading}
+                                            style={{ 
+                                                background: 'none', 
+                                                border: 'none', 
+                                                color: '#1e293b', 
+                                                fontWeight: 700, 
+                                                cursor: 'pointer',
+                                                textDecoration: 'underline'
+                                            }}
+                                        >
+                                            Resend Code
+                                        </button>
+                                    </p>
+                                </div>
                             </form>
                         </div>
                     )}
@@ -156,7 +249,9 @@ export default function ForgotPassword() {
                                         />
                                     </div>
                                 </div>
-                                <button type="submit" className="login-btn-primary">Reset Password</button>
+                                <button type="submit" className="login-btn-primary" disabled={loading}>
+                                    {loading ? <Loader2 size={20} className="animate-spin" /> : 'Reset Password'}
+                                </button>
                             </form>
                         </div>
                     )}

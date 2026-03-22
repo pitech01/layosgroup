@@ -24,6 +24,7 @@ import CourseLibrary from './pages/instructor/CourseLibrary';
 import CohortDetails from './pages/instructor/CohortDetails';
 import Students from './pages/instructor/Students';
 import AddStudent from './pages/instructor/AddStudent';
+import EditStudent from './pages/instructor/EditStudent';
 import StudentDetails from './pages/instructor/StudentDetails';
 import LiveClass from './pages/instructor/LiveClass';
 import CreateLiveSession from './pages/instructor/CreateLiveSession';
@@ -112,6 +113,7 @@ function App() {
                 <Route path="/instructor/students" element={<Students />} />
                 <Route path="/instructor/students/add" element={<AddStudent />} />
                 <Route path="/instructor/students/:id" element={<StudentDetails />} />
+                <Route path="/instructor/students/:id/edit" element={<EditStudent />} />
                 <Route path="/instructor/assignments" element={<InstructorAssignments />} />
                 <Route path="/instructor/assignments/create" element={<CreateAssignment />} />
                 <Route path="/instructor/assignments/:id/submissions" element={<AssignmentSubmissions />} />

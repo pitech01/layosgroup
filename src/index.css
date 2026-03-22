@@ -2866,3 +2866,73 @@ h3 {
   color: #cbd5e1;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
+
+/* Chat & Sidebar Badges */
+.badge {
+  background: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 6px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  animation: badgeIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes badgeIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.role-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge-instructor {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.badge-announcement {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.badge-question {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.date-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  gap: 16px;
+}
+
+.date-divider::before,
+.date-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #f1f5f9;
+}
+
+.date-divider span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
