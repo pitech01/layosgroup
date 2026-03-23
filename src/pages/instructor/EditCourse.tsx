@@ -21,7 +21,10 @@ import {
     Lock,
     X,
     ChevronRight,
-    AlertCircle
+    AlertCircle,
+    Cloud,
+    Upload,
+    CloudOff
 } from 'lucide-react';
 
 interface Lesson {
@@ -92,6 +95,9 @@ export default function EditCourse() {
     const [designingQuiz, setDesigningQuiz] = useState<{ moduleId: string; lessonId: string } | null>(null);
     const [viewingQuizKey, setViewingQuizKey] = useState<{ moduleId: string; lessonId: string } | null>(null);
     const [notification, setNotification] = useState<{ show: boolean, message: string, type: 'success' | 'error' | 'info' }>({ show: false, message: '', type: 'success' });
+    const [existingVideos, setExistingVideos] = useState<any[]>([]);
+    const [isBrowsingVideos, setIsBrowsingVideos] = useState(false);
+    const [browsingLessonContext, setBrowsingLessonContext] = useState<{ moduleId: string; lessonId: string } | null>(null);
 
     const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
         setNotification({ show: true, message, type });
@@ -272,6 +278,33 @@ export default function EditCourse() {
         } catch (err: any) {
             setError(err.message || 'Deletion failed');
             showNotification(err.message || 'Deletion failed', 'error');
+        }
+    };
+
+    const fetchExistingVideos = async (moduleId: string, lessonId: string) => {
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`${API_URL}/course-videos`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setExistingVideos(data);
+                setBrowsingLessonContext({ moduleId, lessonId });
+                setIsBrowsingVideos(true);
+            }
+        } catch (err) {
+            console.error("Failed to fetch videos:", err);
+            showNotification("Failed to load existing videos.", 'error');
+        }
+    };
+
+    const selectExistingVideo = (videoUrl: string) => {
+        if (browsingLessonContext) {
+            updateLesson(browsingLessonContext.moduleId, browsingLessonContext.lessonId, { videoUrl });
+            setIsBrowsingVideos(false);
+            setBrowsingLessonContext(null);
         }
     };
 
@@ -1372,7 +1405,29 @@ export default function EditCourse() {
                                                                             <>
                                                                                 <UploadCloud size={40} color="#020617" style={{ marginBottom: '1rem' }} />
                                                                                 <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Upload Video File</h5>
-                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Supports 4K/HD formats up to 2GB</p>
+                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', marginBottom: '1.5rem' }}>Supports 4K/HD formats up to 2GB</p>
+                                                                                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                                                                                    <button 
+                                                                                        className="btn-standard" 
+                                                                                        style={{ background: '#020617', color: 'white', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            document.getElementById(`video-upload-${lesson.id}`)?.click();
+                                                                                        }}
+                                                                                    >
+                                                                                        <Upload size={14} style={{ marginRight: '6px' }} /> Upload New
+                                                                                    </button>
+                                                                                    <button 
+                                                                                        className="btn-standard" 
+                                                                                        style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            fetchExistingVideos(mod.id, lesson.id);
+                                                                                        }}
+                                                                                    >
+                                                                                        <Cloud size={14} style={{ marginRight: '6px' }} /> Browse Server
+                                                                                    </button>
+                                                                                </div>
                                                                             </>
                                                                         )}
                                                                         <input
@@ -1482,13 +1537,25 @@ export default function EditCourse() {
                                                                                 </button>
                                                                             </div>
                                                                         ) : (
-                                                                            <div
-                                                                                onClick={() => document.getElementById(`recording-upload-${lesson.id}`)?.click()}
-                                                                                style={{ padding: '2.5rem', background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '16px', textAlign: 'center', cursor: 'pointer' }}
-                                                                            >
-                                                                                <Plus size={32} color="#64748b" style={{ marginBottom: '1rem' }} />
-                                                                                <h5 style={{ margin: '0 0 5px 0', fontWeight: 800 }}>Upload Session Recording</h5>
-                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>Drag and drop or click to browse (MP4, MKV)</p>
+                                                                            <div style={{ padding: '2.5rem', background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '16px', textAlign: 'center' }}>
+                                                                                <Video size={32} color="#64748b" style={{ marginBottom: '1rem' }} />
+                                                                                <h5 style={{ margin: '0 0 10px 0', fontWeight: 800 }}>Upload Session Recording</h5>
+                                                                                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                                                                                    <button 
+                                                                                        className="btn-standard" 
+                                                                                        style={{ background: '#020617', color: 'white', fontSize: '0.75rem', height: '36px' }}
+                                                                                        onClick={() => document.getElementById(`recording-upload-${lesson.id}`)?.click()}
+                                                                                    >
+                                                                                        <Upload size={14} style={{ marginRight: '6px' }} /> Upload New
+                                                                                    </button>
+                                                                                    <button 
+                                                                                        className="btn-standard" 
+                                                                                        style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', fontSize: '0.75rem', height: '36px' }}
+                                                                                        onClick={() => fetchExistingVideos(mod.id, lesson.id)}
+                                                                                    >
+                                                                                        <Cloud size={14} style={{ marginRight: '6px' }} /> Browse Server
+                                                                                    </button>
+                                                                                </div>
                                                                                 <input
                                                                                     type="file"
                                                                                     id={`recording-upload-${lesson.id}`}
@@ -2681,6 +2748,62 @@ export default function EditCourse() {
                     </div>
                 );
             })()}
+
+            {isBrowsingVideos && (
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1210, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                    <div style={{ background: 'white', width: '100%', maxWidth: '900px', maxHeight: '90vh', borderRadius: '32px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+                        <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                            <div>
+                                <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.4rem' }}>Cloud Repository: Course Videos</h3>
+                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontWeight: 600, fontSize: '0.9rem' }}>Deploy existing assets without re-uploading.</p>
+                            </div>
+                            <button onClick={() => setIsBrowsingVideos(false)} style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
+                            {existingVideos.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '5rem 0' }}>
+                                    <CloudOff size={60} color="#cbd5e1" style={{ marginBottom: '1.5rem' }} />
+                                    <h4 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>No assets detected in repository.</h4>
+                                    <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.95rem' }}>Upload original content to populate your cloud vault.</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' }}>
+                                    {existingVideos.map((video, idx) => (
+                                        <div key={idx} className="video-asset-card" style={{ background: 'white', border: '1.5px solid #f1f5f9', borderRadius: '24px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer', position: 'relative' }}>
+                                            <div style={{ aspectRatio: '16/9', background: '#0f172a', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Video size={40} color="#334155" style={{ opacity: 0.3 }} />
+                                                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)', display: 'flex', alignItems: 'flex-end', padding: '1.25rem' }}>
+                                                    <span style={{ color: 'white', fontSize: '0.7rem', fontWeight: 900, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)', padding: '4px 8px', borderRadius: '6px' }}>
+                                                        {(video.size / (1024 * 1024)).toFixed(2)} MB
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div style={{ padding: '1.25rem' }}>
+                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 850, fontSize: '0.9rem', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{video.name}</h5>
+                                                <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Modified: {new Date(video.last_modified).toLocaleDateString()}</p>
+                                                <button 
+                                                    onClick={() => selectExistingVideo(video.url)}
+                                                    className="btn-standard"
+                                                    style={{ width: '100%', background: '#0f172a', color: 'white', height: '40px', fontWeight: 800, fontSize: '0.85rem' }}
+                                                >
+                                                    Deploy Asset
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
+                            <button onClick={() => setIsBrowsingVideos(false)} className="btn-standard" style={{ background: 'white', color: '#64748b', border: '1.5px solid #e2e8f0', padding: '0 2rem' }}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
