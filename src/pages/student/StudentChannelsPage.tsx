@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { 
-    Search, Hash, Users, Circle, 
-    Send, Paperclip, Download, Image as ImageIcon, 
-    FileText, MessageSquare, Filter, X, File as FileGeneric, Check,
-    Pin, AlertCircle, HelpCircle, BookOpen, GraduationCap, Smile, Trash2, Loader2
+    Search, Hash, Users, Circle, Download, Image as ImageIcon, 
+    FileText, MessageSquare, Filter, X, File as FileGeneric,
+    Pin, AlertCircle, HelpCircle, BookOpen, GraduationCap, Loader2
 } from 'lucide-react';
 import echo from '../../utils/echo';
-import EmojiPicker from 'emoji-picker-react';
+import MessageCard from '../../components/channel/MessageCard';
+import type { Message } from '../../components/channel/MessageCard';
+import ChatInput from '../../components/channel/ChatInput';
 
 interface Channel {
     id: string;
@@ -53,19 +54,13 @@ const StudentChannelsPage = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [pinnedMessages, setPinnedMessages] = useState<ChatMessage[]>([]);
     
-    const [inputValue, setInputValue] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [isAskingQuestion, setIsAskingQuestion] = useState(false);
     const [showPinned, setShowPinned] = useState(false);
     const [activeTab, setActiveTab] = useState<'chat' | 'resources'>('chat');
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [uploadProgress, setUploadProgress] = useState(0);
-
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const formatTime = (ts: string) => {
         try {
@@ -435,47 +430,16 @@ const StudentChannelsPage = () => {
         }
     }, [messages, activeTab]);
 
-    const handleDeleteMessage = async (messageId: string) => {
-        if (!confirm('Are you sure you want to delete this message?')) return;
-        
-        try {
-            const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-            
-            let url = '';
-            if (activeChannel?.type === 'dm') {
-                url = `${API_URL}/direct-messages/${activeChannel.id}/${messageId}`;
-            } else {
-                url = `${API_URL}/channel-messages/${messageId}`;
-            }
-
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (response.ok) {
-                setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isDeleted: true } : m));
-                toast.success('Message deleted');
-            } else {
-                toast.error('Failed to delete message');
-            }
-        } catch (error) {
-            console.error('Delete error', error);
-            toast.error('Error deleting message');
-        }
-    };
-
-    const handleSendMessage = async () => {
-        if (!inputValue.trim() && !selectedFile) return;
+    const handleSendMessage = async (content: string, attachment?: File) => {
+        if (!content.trim() && !attachment) return;
         if (!activeChannel) return;
 
-        let originalMessage = inputValue.trim();
+        let originalMessage = content.trim();
         if (isAskingQuestion) {
             originalMessage = '[QUESTION] ' + originalMessage;
         }
         
-        const fileToUpload = selectedFile;
+        const fileToUpload = attachment;
         const optimisticId = 'temp-' + Date.now();
         
         const tempMsg: ChatMessage = {
@@ -495,11 +459,7 @@ const StudentChannelsPage = () => {
         };
         setMessages(prev => [...prev, tempMsg]);
 
-        setInputValue('');
-        setSelectedFile(null);
-        setUploadProgress(0);
         setIsAskingQuestion(false);
-        setShowEmojiPicker(false);
 
         try {
             const token = localStorage.getItem('token');
@@ -574,19 +534,6 @@ const StudentChannelsPage = () => {
         } catch (error) {
             console.error('Error posting message.', error);
         }
-    };
-
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 100 * 1024 * 1024) {
-                alert('File size exceeds 100MB limit.');
-                return;
-            }
-            setSelectedFile(file);
-            setUploadProgress(100); // UI visual indicator that file is attached
-        }
-        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const extractSharedFiles = () => {
@@ -683,52 +630,56 @@ const StudentChannelsPage = () => {
                 /* Sub Sidebar Profile (Left Panel) */
                 .sub-sidebar {
                     width: 280px;
-                    background: #f1f5f9; /* Soft gray for student panel */
-                    color: #334155;
+                    background: #ffffff;
                     display: flex;
                     flex-direction: column;
-                    border-right: 1px solid #e2e8f0;
+                    border-right: 1px solid #f1f5f9;
                     flex-shrink: 0;
                     overflow-y: auto;
                 }
-                .sub-sidebar::-webkit-scrollbar { width: 6px; }
-                .sub-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+                .sub-sidebar::-webkit-scrollbar { width: 4px; }
+                .sub-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
 
                 .sidebar-section {
                     padding: 1.5rem 1rem 0.5rem;
                 }
                 .sidebar-section h3 {
-                    font-size: 0.75rem;
+                    font-size: 0.7rem;
                     text-transform: uppercase;
-                    letter-spacing: 0.05em;
+                    letter-spacing: 0.1em;
                     font-weight: 800;
-                    margin: 0 0 0.75rem 0.5rem;
-                    color: #64748b;
+                    margin: 0 0 1rem 0.75rem;
+                    color: #94a3b8;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
                 }
 
                 .nav-item {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
-                    padding: 0.5rem 0.75rem;
-                    border-radius: 8px;
+                    gap: 12px;
+                    padding: 0.75rem 1rem;
+                    border-radius: 12px;
                     cursor: pointer;
-                    transition: all 0.2s;
-                    color: #475569;
-                    margin-bottom: 2px;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    color: #64748b;
+                    margin-bottom: 4px;
                     text-decoration: none;
                     font-size: 0.95rem;
                     font-weight: 600;
+                    position: relative;
                 }
                 .nav-item:hover {
-                    background: #e2e8f0;
+                    background: #f8fafc;
                     color: #0f172a;
+                    transform: translateX(4px);
                 }
                 .nav-item.active {
-                    background: white;
-                    color: #0f172a;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                    border: 1px solid #e2e8f0;
+                    background: #0f172a;
+                    color: white;
+                    font-weight: 700;
+                    box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.15);
                 }
                 .nav-item .truncate {
                     white-space: nowrap;
@@ -809,225 +760,6 @@ const StudentChannelsPage = () => {
                     font-weight: 700;
                     color: #64748b;
                     text-transform: uppercase;
-                }
-
-                /* Role-based Message Styling */
-                .message-item {
-                    display: flex;
-                    gap: 1rem;
-                    margin-bottom: 1.25rem;
-                    padding: 0.75rem;
-                    border-radius: 12px;
-                    border: 1px solid transparent;
-                    transition: background 0.2s;
-                }
-                .message-item:hover {
-                    background: #f8fafc;
-                }
-                .message-instructor {
-                    background: #f0f9ff;
-                    border-color: #bae6fd;
-                }
-                .message-instructor:hover {
-                    background: #e0f2fe;
-                }
-                .message-question {
-                    background: #fffbeb;
-                    border-color: #fde68a;
-                    border-left: 4px solid #f59e0b;
-                }
-
-                .message-avatar {
-                    width: 42px;
-                    height: 42px;
-                    border-radius: 12px;
-                    background: #e2e8f0;
-                    color: #475569;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-weight: 800;
-                    font-size: 1.1rem;
-                    flex-shrink: 0;
-                }
-                .avatar-instructor {
-                    background: #3b82f6;
-                    color: white;
-                }
-                
-                .message-content {
-                    flex: 1;
-                }
-                .message-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-bottom: 4px;
-                }
-                .message-user {
-                    font-weight: 800;
-                    color: #0f172a;
-                    font-size: 0.95rem;
-                }
-                .badge {
-                    background: #ef4444;
-                    color: white;
-                    font-size: 0.7rem;
-                    font-weight: 900;
-                    padding: 2px 8px;
-                    border-radius: 20px;
-                    margin-left: auto;
-                    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
-                    animation: pulse 2s infinite;
-                }
-
-                @keyframes pulse {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.1); }
-                    100% { transform: scale(1); }
-                }
-                .role-badge {
-                    font-size: 0.65rem;
-                    font-weight: 800;
-                    padding: 2px 6px;
-                    border-radius: 6px;
-                    letter-spacing: 0.05em;
-                    text-transform: uppercase;
-                }
-                .badge-instructor {
-                    background: #1e40af;
-                    color: white;
-                }
-                .badge-announcement {
-                    background: #ef4444;
-                    color: white;
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                }
-                .badge-question {
-                    background: #f59e0b;
-                    color: white;
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                }
-                
-                .message-time {
-                    font-size: 0.75rem;
-                    color: #94a3b8;
-                    font-weight: 600;
-                }
-                .message-text {
-                    color: #334155;
-                    font-size: 0.95rem;
-                    line-height: 1.5;
-                }
-                .message-deleted {
-                    color: #94a3b8;
-                    font-style: italic;
-                }
-
-                /* File Attachment display */
-                .file-attachment {
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                    padding: 0.75rem 1rem;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 12px;
-                    margin-top: 0.75rem;
-                    background: #ffffff;
-                    max-width: 420px;
-                    transition: all 0.2s;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                }
-                .file-attachment:hover {
-                    border-color: #cbd5e1;
-                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-                }
-                .file-icon-box {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 10px;
-                    background: #eff6ff;
-                    color: #3b82f6;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                /* Pinned Banner */
-                .pinned-banner {
-                    background: #fef2f2;
-                    border-bottom: 1px solid #fecaca;
-                    padding: 0.75rem 1.5rem;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    font-size: 0.9rem;
-                    color: #991b1b;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: background 0.2s;
-                }
-                .pinned-banner:hover {
-                    background: #fee2e2;
-                }
-
-                /* Empty State */
-                .empty-state {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    flex: 1;
-                    text-align: center;
-                    padding: 2rem;
-                    color: #64748b;
-                }
-
-                /* Resources Tab Grid */
-                .resources-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: 1rem;
-                    padding: 1.5rem;
-                    overflow-y: auto;
-                    flex: 1;
-                }
-
-                /* Input Area */
-                .chat-input-container {
-                    padding: 0 1.5rem 1.5rem;
-                    background: white;
-                }
-                .chat-input-wrapper {
-                    border: 1.5px solid #e2e8f0;
-                    border-radius: 16px;
-                    background: white;
-                    padding: 0.5rem;
-                    transition: all 0.2s;
-                }
-                .chat-input-wrapper.is-question {
-                    border-color: #f59e0b;
-                    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-                    background: #fffbeb;
-                }
-                .chat-input-wrapper:focus-within {
-                    border-color: #3b82f6;
-                    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
-                }
-                .chat-input-wrapper.is-question:focus-within {
-                    border-color: #f59e0b;
-                    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2);
-                }
-                .file-preview-strip {
-                    padding: 0.5rem;
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                    border-bottom: 1px solid #e2e8f0;
                 }
 
                 @media (max-width: 768px) {
@@ -1211,6 +943,17 @@ const StudentChannelsPage = () => {
                                         <>
                                             {messages.map((msg, index) => {
                                                 const showDate = index === 0 || formatDateDivider(msg.timestamp) !== formatDateDivider(messages[index - 1].timestamp);
+                                                
+                                                const premiumMsg: Message = {
+                                                    id: msg.id,
+                                                    senderName: msg.user.name,
+                                                    senderRole: msg.user.role,
+                                                    type: msg.isAnnouncement ? 'announcement' : 'message',
+                                                    content: msg.content,
+                                                    attachmentUrl: msg.file?.url,
+                                                    createdAt: formatTime(msg.timestamp)
+                                                };
+
                                                 return (
                                                     <React.Fragment key={msg.id}>
                                                         {showDate && (
@@ -1218,79 +961,7 @@ const StudentChannelsPage = () => {
                                                                 <span>{formatDateDivider(msg.timestamp)}</span>
                                                             </div>
                                                         )}
-                                                        <div className={`message-item ${msg.user.role === 'instructor' ? 'message-instructor' : ''} ${msg.isQuestion ? 'message-question' : ''}`}>
-                                                            <div className={`message-avatar ${msg.user.role === 'instructor' ? 'avatar-instructor' : ''}`}>
-                                                                {msg.user.avatar}
-                                                            </div>
-                                                            <div className="message-content">
-                                                                <div className="message-header">
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                        <span className="message-user">{msg.user.name}</span>
-                                                                        {msg.user.role === 'instructor' && (
-                                                                            <span className="role-badge badge-instructor">Instructor</span>
-                                                                        )}
-                                                                        {msg.isAnnouncement && <span className="role-badge badge-announcement">Announcement</span>}
-                                                                        {msg.isQuestion && <span className="role-badge badge-question">Question</span>}
-                                                                        <span className="message-time">{formatTime(msg.timestamp)}</span>
-                                                                        
-                                                                        {/* Delete Action (Instructor can delete anyone, Student can only their own) */}
-                                                                        {!msg.isDeleted && (currentUser?.role === 'instructor' || String(msg.user.id) === String(currentUser?.id)) && (
-                                                                            <button 
-                                                                                onClick={() => handleDeleteMessage(msg.id)}
-                                                                                style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: '#94a3b8', opacity: 0.5 }}
-                                                                                className="hover:text-red-500 hover:opacity-100 transition-all"
-                                                                                title="Delete message"
-                                                                            >
-                                                                                <Trash2 size={12} />
-                                                                            </button>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-
-                                                                {msg.isDeleted ? (
-                                                                    <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic', padding: '4px 0' }}>
-                                                                        This message has been deleted
-                                                                    </div>
-                                                                ) : (
-                                                                    <>
-                                                                        <div className="message-text">
-                                                                            {msg.content}
-                                                                        </div>
-                                                                        
-                                                                        {msg.file && (
-                                                                            <div key={msg.file.url}>
-                                                                                {msg.file.type === 'image' ? (
-                                                                                    <div style={{ marginTop: '0.75rem', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', position: 'relative', width: 'fit-content', background: '#f8fafc' }}>
-                                                                                        <img src={msg.file.url} alt="Attachment" style={{ display: 'block', maxWidth: '100%', maxHeight: '280px', objectFit: 'contain' }} />
-                                                                                        <div style={{ padding: '8px 12px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #e2e8f0' }}>
-                                                                                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}><ImageIcon size={14} /> Image Attachment</div>
-                                                                                            <a title="Download Image" href={msg.file.url} onClick={(e) => forceDownload(e, msg.file!.url, msg.file!.name || 'image')} style={{ cursor: 'pointer', color: '#3b82f6', display: 'flex', alignItems: 'center', padding: '6px', background: '#eff6ff', borderRadius: '8px', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = '#dbeafe'} onMouseOut={e => e.currentTarget.style.background = '#eff6ff'}>
-                                                                                                <Download size={16} />
-                                                                                            </a>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <a href={msg.file.url} onClick={(e) => forceDownload(e, msg.file!.url, msg.file!.name || 'document')} style={{ textDecoration: 'none', color: 'inherit', display: 'block', width: 'fit-content' }}>
-                                                                                        <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', width: 'fit-content', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.borderColor = '#cbd5e1'} onMouseOut={e => e.currentTarget.style.borderColor = '#e2e8f0'}>
-                                                                                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: msg.file.type === 'pdf' ? '#fee2e2' : '#e0e7ff', color: msg.file.type === 'pdf' ? '#ef4444' : '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                                                <FileText size={20} />
-                                                                                            </div>
-                                                                                            <div style={{ paddingRight: '12px' }}>
-                                                                                                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>{msg.file.name}</div>
-                                                                                                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Click to download</div>
-                                                                                            </div>
-                                                                                            <div style={{ marginLeft: 'auto', padding: '8px', background: 'white', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-                                                                                                <Download size={16} color="#64748b" />
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </a>
-                                                                                )}
-                                                                            </div>
-                                                                        )}
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                        </div>
+                                                        <MessageCard message={premiumMsg} viewerRole="student" />
                                                     </React.Fragment>
                                                 );
                                             })}
@@ -1301,120 +972,23 @@ const StudentChannelsPage = () => {
 
                                 {/* Input Area */}
                                 <div className="chat-input-container">
-                                    <div className={`chat-input-wrapper ${isAskingQuestion ? 'is-question' : ''}`}>
-                                        {isAskingQuestion && (
-                                            <div style={{ background: '#fef3c7', padding: '6px 12px', borderRadius: '8px 8px 0 0', color: '#b45309', fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><HelpCircle size={14} /> You are asking a highlighted question</div>
-                                                <X size={14} style={{ cursor: 'pointer' }} onClick={() => setIsAskingQuestion(false)} />
-                                            </div>
-                                        )}
-                                        
-                                        {selectedFile && (
-                                            <div className="file-preview-strip">
-                                                <div style={{ background: '#eff6ff', padding: '8px', borderRadius: '8px', color: '#3b82f6' }}>
-                                                    <FileGeneric size={16} />
-                                                </div>
-                                                <div style={{ flex: 1, overflow: 'hidden' }}>
-                                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                                                        {selectedFile.name}
-                                                    </div>
-                                                    {uploadProgress < 100 ? (
-                                                        <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '2px', marginTop: '4px' }}>
-                                                            <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', borderRadius: '2px', transition: 'width 0.2s' }}></div>
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                                                            <Check size={12} /> Ready to send
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <button onClick={() => setSelectedFile(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
-                                                    <X size={16} />
-                                                </button>
-                                            </div>
-                                        )}
-                                        
-                                        <textarea 
-                                            style={{
-                                                width: '100%',
-                                                border: 'none',
-                                                outline: 'none',
-                                                resize: 'none',
-                                                padding: '0.75rem',
-                                                fontFamily: 'inherit',
-                                                fontSize: '0.95rem',
-                                                minHeight: '60px',
-                                                maxHeight: '200px',
-                                                background: 'transparent'
-                                            }}
-                                            placeholder={isAskingQuestion ? "Type your question here (instructors will be notified)..." : "Message your classmates and instructors..."}
-                                            value={inputValue}
-                                            onChange={(e) => setInputValue(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                    e.preventDefault();
-                                                    handleSendMessage();
-                                                }
-                                            }}
-                                        />
-                                        
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0.5rem 0.5rem' }}>
-                                            <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
-                                                <button 
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px', borderRadius: '6px' }}
-                                                    title="Attach file (Max 100MB)"
-                                                >
-                                                    <Paperclip size={18} />
-                                                </button>
-                                                <button 
-                                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                                    style={{ background: showEmojiPicker ? '#e2e8f0' : 'none', border: 'none', cursor: 'pointer', color: showEmojiPicker ? '#0f172a' : '#64748b', padding: '6px', borderRadius: '6px', transition: 'background 0.2s' }}
-                                                    title="Add Emoji"
-                                                >
-                                                    <Smile size={18} />
-                                                </button>
-                                                
-                                                {showEmojiPicker && (
-                                                    <div style={{ position: 'absolute', bottom: '100%', left: '40px', marginBottom: '8px', zIndex: 100, boxShadow: '0 4px 15px rgba(0,0,0,0.1)', borderRadius: '8px' }}>
-                                                        <EmojiPicker 
-                                                            onEmojiClick={(e) => setInputValue(prev => prev + e.emoji)}
-                                                        />
-                                                    </div>
-                                                )}
-                                                <button 
-                                                    onClick={() => setIsAskingQuestion(!isAskingQuestion)}
-                                                    style={{ background: isAskingQuestion ? '#fef3c7' : 'none', border: 'none', cursor: 'pointer', color: isAskingQuestion ? '#b45309' : '#64748b', padding: '6px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.8rem' }}
-                                                >
-                                                    <HelpCircle size={16} /> Need Help?
-                                                </button>
-                                                <input 
-                                                    type="file" 
-                                                    ref={fileInputRef} 
-                                                    onChange={handleFileUpload} 
-                                                    style={{ display: 'none' }} 
-                                                />
-                                            </div>
-                                            <button 
-                                                onClick={handleSendMessage}
-                                                disabled={!inputValue.trim() && !selectedFile}
-                                                style={{ 
-                                                    background: (inputValue.trim() || selectedFile) ? (isAskingQuestion ? '#f59e0b' : '#3b82f6') : '#f1f5f9', 
-                                                    color: (inputValue.trim() || selectedFile) ? 'white' : '#94a3b8', 
-                                                    border: 'none', 
-                                                    cursor: (inputValue.trim() || selectedFile) ? 'pointer' : 'not-allowed', 
-                                                    padding: '8px 16px', 
-                                                    borderRadius: '8px',
-                                                    fontWeight: 800,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px',
-                                                    transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                {(inputValue.trim() || selectedFile) ? (isAskingQuestion ? 'Ask Question' : <><Send size={16} /> Send</>) : 'Send'}
-                                            </button>
+                                    {isAskingQuestion && (
+                                        <div style={{ background: '#fef3c7', padding: '10px 1.5rem', borderTop: '1px solid #fde68a', color: '#b45309', fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><HelpCircle size={16} /> YOU ARE IN QUESTION MODE (HIGHLIGHTED)</div>
+                                            <X size={16} style={{ cursor: 'pointer' }} onClick={() => setIsAskingQuestion(false)} />
                                         </div>
+                                    )}
+                                    <ChatInput 
+                                        onSendMessage={handleSendMessage} 
+                                        placeholder={isAskingQuestion ? "Ask your question to the instructor..." : "Message the class..."}
+                                    />
+                                    <div style={{ background: 'white', padding: '0 1.5rem 1rem', display: 'flex', gap: '12px' }}>
+                                        <button 
+                                            onClick={() => setIsAskingQuestion(!isAskingQuestion)}
+                                            style={{ background: isAskingQuestion ? '#fef3c7' : '#f1f5f9', border: 'none', cursor: 'pointer', color: isAskingQuestion ? '#b45309' : '#64748b', padding: '6px 14px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '0.75rem', transition: 'all 0.2s' }}
+                                        >
+                                            <HelpCircle size={16} /> {isAskingQuestion ? 'Question Mode Active' : 'Need Help? Ask a Question'}
+                                        </button>
                                     </div>
                                 </div>
                             </>

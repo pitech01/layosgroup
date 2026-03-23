@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Send, Paperclip, Loader2, Mic, Square, Trash2 } from 'lucide-react';
+import { Send, Paperclip, Loader2, Mic, Trash2 } from 'lucide-react';
 
 interface ChatInputProps {
     onSendMessage: (content: string, attachment?: File) => void;
@@ -100,49 +100,127 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
     };
 
     return (
-        <form onSubmit={handleSubmit} className="chat-input-form" style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            background: 'white',
-            padding: '0.75rem 1.25rem',
-            borderTop: '1px solid #e2e8f0',
-            position: 'sticky',
-            bottom: 0,
-            zIndex: 10
-        }}>
+        <form onSubmit={handleSubmit} className="luxury-chat-input-container">
             <style>{`
-                @media (max-width: 640px) {
-                    .chat-input-form {
-                        padding: 0.5rem 0.75rem !important;
-                        gap: 0.4rem !important;
-                    }
-                    .ci-btn-icon {
-                        padding: 0.4rem !important;
-                    }
-                    .ci-btn-icon svg {
-                        width: 18px !important;
-                        height: 18px !important;
-                    }
-                    .ci-input-main {
-                        padding: 0.6rem 0.85rem !important;
-                        font-size: 0.85rem !important;
-                    }
-                    .audio-status-box {
-                        padding: 0.5rem 0.75rem !important;
-                        font-size: 0.85rem !important;
-                    }
+                .luxury-chat-input-container {
+                    background: #ffffff;
+                    padding: 1rem 1.5rem;
+                    border-top: 1px solid #f1f5f9;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    transition: all 0.2s;
+                }
+                
+                .chat-input-field-wrapper {
+                    flex: 1;
+                    background: #f8fafc;
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 16px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 12px;
+                    transition: all 0.2s;
+                }
+                
+                .chat-input-field-wrapper:focus-within {
+                    background: white;
+                    border-color: #3b82f6;
+                    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+                }
+                
+                .chat-text-input {
+                    flex: 1;
+                    background: transparent;
+                    border: none;
+                    outline: none;
+                    padding: 12px 8px;
+                    font-size: 0.95rem;
+                    color: #0f172a;
+                    font-family: 'Inter', sans-serif;
+                }
+                
+                .chat-action-btn {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    border: none;
+                    background: transparent;
+                    color: #64748b;
+                }
+                
+                .chat-action-btn:hover {
+                    background: #f1f5f9;
+                    color: #0f172a;
+                    transform: translateY(-1px);
+                }
+                
+                .chat-send-btn {
+                    background: #0f172a;
+                    color: white;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: none;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+                }
+                
+                .chat-send-btn:hover:not(:disabled) {
+                    background: #334155;
+                    transform: scale(1.05);
+                    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+                }
+                
+                .chat-send-btn:disabled {
+                    background: #f1f5f9;
+                    color: #cbd5e1;
+                    box-shadow: none;
+                    cursor: not-allowed;
+                }
+
+                .audio-recording-overlay {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: #fef2f2;
+                    border: 1.5px solid #fee2e2;
+                    border-radius: 16px;
+                    padding: 0 12px;
+                    height: 48px;
+                    color: #ef4444;
+                }
+
+                @keyframes pulse-red {
+                    0% { transform: scale(1); opacity: 1; }
+                    50% { transform: scale(1.2); opacity: 0.7; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+
+                .recording-dot {
+                    width: 10px;
+                    height: 10px;
+                    background: #ef4444;
+                    border-radius: 50%;
+                    animation: pulse-red 1s infinite ease-in-out;
                 }
             `}</style>
+
             <button
                 type="button"
-                className="ci-btn-icon"
-                style={{
-                    background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', borderRadius: '50%'
-                }}
-                onMouseEnter={(e: any) => e.currentTarget.style.background = '#f1f5f9'}
-                onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}
+                className="chat-action-btn"
                 onClick={() => document.getElementById('chat-file-upload')?.click()}
+                title="Attach file"
             >
                 <Paperclip size={20} />
                 <input
@@ -152,69 +230,52 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                     onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
                 />
             </button>
-            <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+
+            <div className="chat-input-field-wrapper">
                 {isRecording ? (
-                    <div className="audio-status-box" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#fee2e2', borderRadius: '24px', color: '#ef4444' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444', animation: 'pulse 1s infinite' }} />
-                            <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>Rec... {formatTime(recordingTime)}</span>
+                    <div className="audio-recording-overlay">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div className="recording-dot" />
+                            <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>RECORDING {formatTime(recordingTime)}</span>
                         </div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button type="button" onClick={cancelRecording} className="ci-btn-icon" style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button type="button" onClick={cancelRecording} className="chat-action-btn" style={{ color: '#ef4444' }}>
                                 <Trash2 size={18} />
                             </button>
-                            <button type="button" onClick={stopRecording} style={{ background: '#ef4444', border: 'none', color: 'white', cursor: 'pointer', padding: '0.25rem 0.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 700 }}>
-                                <Square size={12} fill="white" /> Stop
+                            <button type="button" onClick={stopRecording} style={{ background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', padding: '4px 12px', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer' }}>
+                                STOP
                             </button>
                         </div>
                     </div>
                 ) : file && file.type.startsWith('audio') ? (
-                    <div className="audio-status-box" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f0fdf4', borderRadius: '24px', color: '#16a34a' }}>
-                        <span style={{ fontWeight: 600, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>🎤 Voice note</span>
-                        <button type="button" onClick={() => setFile(null)} className="ci-btn-icon" style={{ background: 'transparent', border: 'none', color: '#16a34a', cursor: 'pointer', padding: '0.25rem' }}>
+                    <div className="audio-recording-overlay" style={{ background: '#f0fdf4', borderColor: '#dcfce7', color: '#16a34a' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <Mic size={18} />
+                            <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Voice Note Ready</span>
+                        </div>
+                        <button type="button" onClick={() => setFile(null)} className="chat-action-btn" style={{ color: '#16a34a' }}>
                             <Trash2 size={18} />
                         </button>
                     </div>
                 ) : (
                     <input
                         type="text"
-                        placeholder={file ? `Attached: ${file.name.substring(0, 10)}...` : placeholder}
+                        placeholder={file ? `Attached: ${file.name.substring(0, 15)}...` : placeholder}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        className="ci-input-main"
-                        style={{
-                            width: '100%',
-                            padding: '0.75rem 1rem',
-                            borderRadius: '24px',
-                            border: '1px solid #e2e8f0',
-                            fontSize: '0.95rem',
-                            outline: 'none',
-                            background: '#f8fafc'
-                        }}
+                        className="chat-text-input"
                         disabled={isSending}
                     />
                 )}
             </div>
 
-            {!isRecording && (
+            {!isRecording && !file && (
                 <button
                     type="button"
                     onClick={startRecording}
                     disabled={isSending}
-                    className="ci-btn-icon"
-                    style={{
-                        background: 'transparent',
-                        color: '#64748b',
-                        border: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        padding: '0.5rem',
-                        borderRadius: '50%'
-                    }}
-                    onMouseEnter={(e: any) => e.currentTarget.style.background = '#f1f5f9'}
-                    onMouseLeave={(e: any) => e.currentTarget.style.background = 'transparent'}
+                    className="chat-action-btn"
+                    title="Record voice note"
                 >
                     <Mic size={20} />
                 </button>
@@ -223,23 +284,9 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
             <button
                 type="submit"
                 disabled={(!message.trim() && !file) || isSending || isRecording}
-                className="ci-btn-icon"
-                style={{
-                    background: 'transparent',
-                    color: (!message.trim() && !file) || isSending || isRecording ? '#cbd5e1' : '#3b82f6',
-                    border: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: (!message.trim() && !file) || isSending || isRecording ? 'not-allowed' : 'pointer',
-                    padding: '0.5rem',
-                    transition: 'color 0.2s, transform 0.1s'
-                }}
-                onMouseDown={(e: any) => { if (!((!message.trim() && !file) || isSending || isRecording)) e.currentTarget.style.transform = 'scale(0.95)'; }}
-                onMouseUp={(e: any) => e.currentTarget.style.transform = 'scale(1)'}
-                onMouseLeave={(e: any) => e.currentTarget.style.transform = 'scale(1)'}
+                className="chat-send-btn"
             >
-                {isSending ? <Loader2 size={24} className="animate-spin" /> : <Send size={24} />}
+                {isSending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
             </button>
         </form>
     );

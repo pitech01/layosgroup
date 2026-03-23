@@ -98,7 +98,29 @@ const StudentChannelPage = () => {
     }
 
     return (
-        <div className="animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 150px)', overflow: 'hidden' }}>
+        <div className="animate-fade-in-up student-channel-container">
+            <style>{`
+                .student-channel-container {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(100vh - 120px);
+                    background: white;
+                    border-radius: 24px;
+                    border: 1.5px solid #e2e8f0;
+                    overflow: hidden;
+                    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+                    padding: 2rem;
+                }
+
+                @media (max-width: 1024px) {
+                    .student-channel-container {
+                        height: calc(100dvh - 100px);
+                        padding: 1rem;
+                        border-radius: 0;
+                        border: none;
+                    }
+                }
+            `}</style>
             <Link to="/student/channels" style={{
                 display: 'inline-flex',
                 alignItems: 'center',

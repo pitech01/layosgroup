@@ -52,7 +52,8 @@ export default function LiveClass() {
         scheduled_date: '',
         start_time: '',
         end_time: '',
-        meeting_link: ''
+        meeting_link: '',
+        recording_link: ''
     });
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -106,8 +107,10 @@ export default function LiveClass() {
             scheduled_date: session.scheduled_date,
             start_time: session.start_time,
             end_time: session.end_time,
-            meeting_link: session.meeting_link
+            meeting_link: session.meeting_link,
+            recording_link: session.recording_link || ''
         });
+        setUploadedUrl(session.recording_link || '');
     };
 
     const handleUpdateSession = async () => {
@@ -262,6 +265,9 @@ export default function LiveClass() {
 
             if (response.success) {
                 setUploadedUrl(response.video_url);
+                if (editModal.show) {
+                    setEditForm(prev => ({ ...prev, recording_link: response.video_url }));
+                }
             } else {
                 alert(response.message || 'Upload failed');
             }
@@ -288,6 +294,9 @@ export default function LiveClass() {
 
             if (response.ok) {
                 setUploadedUrl('');
+                if (editModal.show) {
+                    setEditForm(prev => ({ ...prev, recording_link: '' }));
+                }
             } else {
                 alert('Failed to delete video');
             }
@@ -813,6 +822,37 @@ export default function LiveClass() {
                                     onChange={(e) => setEditForm({...editForm, end_time: e.target.value})}
                                     style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
                                 />
+                            </div>
+
+                            <div className="form-group" style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
+                                <label style={{ display: 'block', fontWeight: 700, marginBottom: '0.75rem', fontSize: '0.9rem' }}>
+                                    <FileVideo size={16} /> Pre-recorded Video (Optional)
+                                </label>
+                                
+                                {uploading ? (
+                                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '14px', textAlign: 'center' }}>
+                                        <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '0.85rem' }}>Uploading... {uploadProgress}%</div>
+                                        <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                                            <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                                        </div>
+                                    </div>
+                                ) : editForm.recording_link ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f0fdf4', padding: '0.85rem', borderRadius: '12px', border: '1px solid #bcf0da' }}>
+                                        <CheckCircle2 size={16} color="#10b981" />
+                                        <div style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#1a4d3e', wordBreak: 'break-all' }}>Video Ready</div>
+                                        <button type="button" onClick={handleDeleteVideo} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800 }}>Remove</button>
+                                    </div>
+                                ) : (
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={(e) => {
+                                            if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                                            e.target.value = '';
+                                        }}
+                                        style={{ width: '100%', padding: '0.6rem', border: '1px solid #e2e8f0', borderRadius: '10px' }}
+                                    />
+                                )}
                             </div>
                         </div>
 

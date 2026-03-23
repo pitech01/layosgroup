@@ -45,6 +45,8 @@ import StudentChannelPage from './pages/student/StudentChannelPage';
 import InstructorInterviews from './pages/instructor/interviews/Interviews';
 import CreateInterview from './pages/instructor/interviews/CreateInterview';
 import StudentInterviews from './pages/student/interviews/Interviews';
+import CertificateTemplateManager from './pages/instructor/CertificateTemplateManager';
+import CertificateVerification from './pages/CertificateVerification';
 import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 
@@ -72,6 +74,7 @@ function App() {
             <Route path="/instructor-login" element={<InstructorLogin />} />
             {/* <Route path="/admin-login" element={<AdminLogin />} /> */}
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/verify/:uuid" element={<CertificateVerification />} />
 
             {/* Default Route */}
             <Route path="/" element={<Navigate to="/login" replace />} />
@@ -124,6 +127,7 @@ function App() {
                 <Route path="/instructor/interview" element={<InstructorInterviews />} />
                 <Route path="/instructor/interviews/create" element={<CreateInterview />} />
                 <Route path="/instructor/settings" element={<InstructorSettings />} />
+                <Route path="/instructor/courses/:courseId/certificate-design" element={<CertificateTemplateManager />} />
               </Route>
             </Route>
 

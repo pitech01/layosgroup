@@ -127,22 +127,24 @@ const InstructorChannelPage = () => {
                 .instructor-channel-container {
                     display: flex;
                     flex-direction: column;
-                    height: calc(100vh - 150px);
+                    height: calc(100vh - 120px);
+                    background: white;
+                    border-radius: 24px;
+                    border: 1.5px solid #e2e8f0;
                     overflow: hidden;
+                    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+                    padding: 2rem;
                 }
 
-                @media (max-width: 768px) {
+                @media (max-width: 1024px) {
                     .instructor-channel-container {
-                        height: calc(100dvh - 120px);
+                        height: calc(100dvh - 100px);
+                        padding: 1rem;
+                        border-radius: 0;
+                        border: none;
                     }
                     .channel-breadcrumb {
                         margin-bottom: 1rem !important;
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    .instructor-channel-container {
-                        padding: 0;
                     }
                 }
             `}</style>

@@ -11,7 +11,8 @@ import {
     Video,
     Users,
     FileText,
-    HelpCircle
+    HelpCircle,
+    UserCheck
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -449,6 +450,9 @@ export default function CourseLibrary() {
                                 <div style={{ display: 'flex', gap: '0.75rem', width: '100%', justifyContent: 'flex-end' }}>
                                     <Link to={`/instructor/courses/${course.id}/edit`} className="action-fab-library edit-btn shadow-sm" title="Edit Course" style={{ textDecoration: 'none', flex: 1, gap: '8px', minWidth: '100px' }}>
                                         <Edit2 size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Edit Course</span>
+                                    </Link>
+                                    <Link to={`/instructor/courses/${course.id}/certificate-design`} className="action-fab-library shadow-sm" title="Certificate" style={{ textDecoration: 'none', flex: 1, gap: '8px', minWidth: '100px', background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd' }}>
+                                        <UserCheck size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Certificate</span>
                                     </Link>
                                     <button
                                         className="action-fab-library delete-btn shadow-sm"

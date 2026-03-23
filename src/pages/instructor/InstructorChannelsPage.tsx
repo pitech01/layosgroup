@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { 
     Search, Hash, Users, Circle, Trash2,
-    Send, Paperclip, Smile, Download, Image as ImageIcon, 
-    FileText, Plus, MessageSquare, Filter, X, Info, File as FileGeneric, Check,
-    Megaphone, Layout, Play, Lightbulb, Loader2
+    Plus, Filter, X, Info, 
+    Megaphone, Loader2
 } from 'lucide-react';
 import echo from '../../utils/echo';
-import EmojiPicker from 'emoji-picker-react';
+import MessageCard from '../../components/channel/MessageCard';
+import type { Message } from '../../components/channel/MessageCard';
+import ChatInput from '../../components/channel/ChatInput';
 
 interface Channel {
     id: string;
@@ -47,13 +48,8 @@ const InstructorChannelsPage = () => {
     const [dms, setDms] = useState<Channel[]>([]);
     const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [inputValue, setInputValue] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-    
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [uploadProgress, setUploadProgress] = useState(0);
 
     // Announcement Modal State
     const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
@@ -73,9 +69,7 @@ const InstructorChannelsPage = () => {
     const [targetCourseId, setTargetCourseId] = useState<string>('general');
     const [instructorCourses, setInstructorCourses] = useState<any[]>([]);
 
-    const inputRef = useRef<HTMLTextAreaElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const formatTime = (ts: string) => {
         try {
             const date = new Date(ts);
@@ -534,13 +528,13 @@ const InstructorChannelsPage = () => {
         }
     };
 
-    const handleSendMessage = async (msgType: 'message' | 'announcement' = 'message', overrideContent?: string) => {
-        const finalContent = overrideContent || inputValue;
-        if (!finalContent.trim() && !selectedFile) return;
+    const handleSendMessage = async (content: string, attachment: File | null = null, msgType: 'message' | 'announcement' = 'message') => {
+        const finalContent = content || '';
+        if (!finalContent.trim() && !attachment) return;
         if (!activeChannel) return;
 
         const originalMessage = finalContent;
-        const fileToUpload = selectedFile;
+        const fileToUpload = attachment;
         const optimisticId = 'temp-' + Date.now();
 
         const tempMsg: ChatMessage = {
@@ -558,12 +552,6 @@ const InstructorChannelsPage = () => {
              isDeleted: false
         };
         setMessages(prev => [...prev, tempMsg]);
-
-        // Reset inputs
-        if (!overrideContent) setInputValue('');
-        setSelectedFile(null);
-        setUploadProgress(0);
-        setShowEmojiPicker(false);
 
         try {
             const token = localStorage.getItem('token');
@@ -632,41 +620,9 @@ const InstructorChannelsPage = () => {
         }
     };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 100 * 1024 * 1024) {
-                alert('File size exceeds 100MB limit.');
-                return;
-            }
-            setSelectedFile(file);
-            setUploadProgress(100);
-        }
-        if (fileInputRef.current) fileInputRef.current.value = '';
-    };
 
-    const forceDownload = async (e: React.MouseEvent, url: string, filename: string) => {
-        e.preventDefault();
-        try {
-            const toastId = toast.loading('Starting download...');
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Network response was not ok');
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(downloadUrl);
-            toast.dismiss(toastId);
-        } catch (error) {
-            console.error("Download failed, falling back to direct link", error);
-            toast.dismiss();
-            window.open(url, '_blank');
-        }
-    };
+
+
 
     const StatusDot = ({ status }: { status?: string }) => {
         const color = status === 'online' ? '#10b981' : status === 'away' ? '#f59e0b' : '#64748b';
@@ -732,27 +688,26 @@ const InstructorChannelsPage = () => {
                 /* Sub Sidebar Profile (Left Panel) */
                 .sub-sidebar {
                     width: 280px;
-                    background: #f8fafc; /* Light modern gray to match instructor theme */
-                    color: #475569;
+                    background: #ffffff;
                     display: flex;
                     flex-direction: column;
-                    border-right: 1px solid #e2e8f0;
+                    border-right: 1px solid #f1f5f9;
                     flex-shrink: 0;
                     overflow-y: auto;
                 }
-                .sub-sidebar::-webkit-scrollbar { width: 6px; }
-                .sub-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+                .sub-sidebar::-webkit-scrollbar { width: 4px; }
+                .sub-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
 
                 .sidebar-section {
                     padding: 1.5rem 1rem 0.5rem;
                 }
                 .sidebar-section h3 {
-                    font-size: 0.75rem;
+                    font-size: 0.7rem;
                     text-transform: uppercase;
-                    letter-spacing: 0.05em;
+                    letter-spacing: 0.1em;
                     font-weight: 800;
-                    margin: 0 0 0.75rem 0.5rem;
-                    color: #64748b;
+                    margin: 0 0 1rem 0.75rem;
+                    color: #94a3b8;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -761,26 +716,28 @@ const InstructorChannelsPage = () => {
                 .nav-item {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
-                    padding: 0.6rem 0.85rem;
-                    border-radius: 10px;
+                    gap: 12px;
+                    padding: 0.75rem 1rem;
+                    border-radius: 12px;
                     cursor: pointer;
-                    transition: all 0.2s;
-                    color: #475569;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    color: #64748b;
                     margin-bottom: 4px;
                     text-decoration: none;
                     font-size: 0.95rem;
                     font-weight: 600;
+                    position: relative;
                 }
                 .nav-item:hover {
-                    background: #e2e8f0;
+                    background: #f8fafc;
                     color: #0f172a;
+                    transform: translateX(4px);
                 }
                 .nav-item.active {
-                    background: #3b82f6;
+                    background: #0f172a;
                     color: white;
                     font-weight: 700;
-                    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+                    box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.15);
                 }
                 .nav-item .truncate {
                     white-space: nowrap;
@@ -788,16 +745,16 @@ const InstructorChannelsPage = () => {
                     text-overflow: ellipsis;
                     flex: 1;
                 }
-                .status-dot-wrapper {
-                    position: absolute;
-                    bottom: -2px;
-                    right: -2px;
-                    background: #f8fafc;
-                    border-radius: 50%;
-                    padding: 1px;
-                    transition: all 0.2s;
+                .unread-pill {
+                    background: #3b82f6;
+                    color: white;
+                    font-size: 0.7rem;
+                    font-weight: 900;
+                    padding: 2px 8px;
+                    border-radius: 20px;
+                    min-width: 20px;
+                    text-align: center;
                 }
-                .nav-item:hover .status-dot-wrapper {
                     background: #e2e8f0;
                 }
                 .nav-item.active .status-dot-wrapper {
@@ -1158,70 +1115,27 @@ const InstructorChannelsPage = () => {
                                     <p style={{ margin: '0 0 2.5rem', fontSize: '1.05rem', color: '#64748b', maxWidth: '450px', lineHeight: 1.6 }}>
                                         This channel is empty. As the instructor, you can kick things off by sharing a welcome message, uploading course materials, or posting an announcement.
                                     </p>
-                                    
-                                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '3rem' }}>
-                                        <button 
-                                            onClick={() => inputRef.current?.focus()}
-                                            style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-                                        >
-                                            <Send size={18} /> Send First Message
-                                        </button>
-                                        <button 
-                                            onClick={() => fileInputRef.current?.click()}
-                                            style={{ background: 'white', color: '#0f172a', border: '1px solid #e2e8f0', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-                                        >
-                                            <Paperclip size={18} /> Upload Resource
-                                        </button>
-                                        <button 
-                                            onClick={() => setIsAnnouncementModalOpen(true)}
-                                            style={{ background: '#fef2f2', color: '#991b1b', border: '1px solid #fee2e2', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-                                        >
-                                            <Megaphone size={18} /> Post Announcement
-                                        </button>
-                                    </div>
-
-                                    <div style={{ width: '100%', maxWidth: '600px' }}>
-                                        <h4 style={{ fontSize: '0.9rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', fontWeight: 800 }}>Quick Start Templates</h4>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
-                                            {[
-                                                { icon: <Layout size={16} />, text: "Welcome to the course! I'm excited to start this journey with you all." },
-                                                { icon: <Play size={16} />, text: "Our first live session is scheduled for tomorrow. Please review the prep materials." },
-                                                { icon: <Lightbulb size={16} />, text: "I've just uploaded the syllabus and initial resource pack for Module 1." },
-                                                { icon: <Check size={16} />, text: "Drop a quick 'Hi' here so I know everyone has successfully joined the channel!" }
-                                            ].map((tpl, i) => (
-                                                <div 
-                                                    key={i}
-                                                    onClick={() => setInputValue(tpl.text)}
-                                                    style={{ background: 'white', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', transition: 'border-color 0.2s' }}
-                                                    onMouseOver={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
-                                                    onMouseOut={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
-                                                >
-                                                    <span style={{ color: '#3b82f6' }}>{tpl.icon}</span>
-                                                    <span className="truncate">{tpl.text}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
                                 </div>
                             ) : isLoadingMessages ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '4rem 2rem' }}>
                                     <Loader2 size={48} className="animate-spin" style={{ color: '#0f172a', margin: '0 auto 1.5rem' }} />
                                     <p style={{ margin: '0', fontSize: '1rem', color: '#64748b', fontWeight: 600 }}>Loading messages...</p>
                                 </div>
-                            ) : messages.length === 0 ? (
-                                <div style={{ textAlign: 'center', marginBottom: '3rem', marginTop: 'auto', padding: '2rem' }}>
-                                    <div style={{ width: '60px', height: '60px', background: '#f1f5f9', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-                                        {activeChannel.type === 'channel' ? <Hash size={30} color="#0f172a" /> : <MessageSquare size={30} color="#0f172a" />}
-                                    </div>
-                                    <h2 style={{ margin: '0 0 0.5rem', fontWeight: 900, fontSize: '1.5rem', color: '#0f172a' }}>
-                                        Welcome to {activeChannel.type === 'channel' ? '#' : ''}{activeChannel.title}!
-                                    </h2>
-                                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>This is the start of your communication history.</p>
-                                </div>
                             ) : (
                                 <>
                                     {messages.map((msg, index) => {
                                         const showDate = index === 0 || formatDateDivider(msg.timestamp) !== formatDateDivider(messages[index - 1].timestamp);
+                                        
+                                        const premiumMsg: Message = {
+                                            id: msg.id,
+                                            senderName: msg.user.name,
+                                            senderRole: msg.user.role || 'student',
+                                            type: msg.isAnnouncement ? 'announcement' : 'message',
+                                            content: msg.content,
+                                            attachmentUrl: msg.file?.url,
+                                            createdAt: formatTime(msg.timestamp)
+                                        };
+
                                         return (
                                             <React.Fragment key={msg.id}>
                                                 {showDate && (
@@ -1229,79 +1143,12 @@ const InstructorChannelsPage = () => {
                                                         <span>{formatDateDivider(msg.timestamp)}</span>
                                                     </div>
                                                 )}
-                                                <div className={`message-item ${msg.user.role === 'instructor' ? 'message-instructor' : ''} ${msg.isAnnouncement ? 'message-instructor' : ''}`}>
-                                                    <div className={`message-avatar ${msg.user.role === 'instructor' ? 'avatar-instructor' : ''}`}>
-                                                        {msg.user.avatar}
-                                                    </div>
-                                                            <div className="message-content">
-                                                                <div className="message-header">
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                        <span className="message-user">{msg.user.name}</span>
-                                                                        <span className={`role-badge ${msg.user.role === 'instructor' ? 'badge-instructor' : 'badge-student'}`}>
-                                                                            {msg.user.role === 'instructor' ? 'Instructor' : 'Student'}
-                                                                        </span>
-                                                                        {msg.isAnnouncement && <span className="role-badge badge-announcement">Announcement</span>}
-                                                                        <span className="message-time">{formatTime(msg.timestamp)}</span>
-                                                                        
-                                                                        {/* Delete Action (Instructor can delete anyone, Student can only their own if they were here) */}
-                                                                        {!msg.isDeleted && (
-                                                                            <button 
-                                                                                onClick={() => handleDeleteMessage(msg.id)}
-                                                                                style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: '#94a3b8', opacity: 0.5 }}
-                                                                                className="hover:text-red-500 hover:opacity-100 transition-all"
-                                                                                title="Delete message"
-                                                                            >
-                                                                                <Trash2 size={12} />
-                                                                            </button>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-
-                                                                {msg.isDeleted ? (
-                                                                    <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic', padding: '4px 0' }}>
-                                                                        This message has been deleted
-                                                                    </div>
-                                                                ) : (
-                                                                    <>
-                                                                        <div className="message-text">
-                                                                            {msg.content}
-                                                                        </div>
-                                                                        
-                                                                        {msg.file && (
-                                                                            <div key={msg.file.url}>
-                                                                                {msg.file.type === 'image' ? (
-                                                                                    <div style={{ marginTop: '0.75rem', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', position: 'relative', width: 'fit-content', background: '#f8fafc' }}>
-                                                                                        <img src={msg.file.url} alt="Attachment" style={{ display: 'block', maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} />
-                                                                                        <div style={{ padding: '8px 12px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #e2e8f0' }}>
-                                                                                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}><ImageIcon size={14} /> Image Attachment</div>
-                                                                                             <a title="Download Image" href={msg.file.url} onClick={(e) => forceDownload(e, msg.file!.url, msg.file!.name || 'image')} style={{ cursor: 'pointer', color: '#3b82f6', display: 'flex', alignItems: 'center', padding: '6px', background: '#eff6ff', borderRadius: '8px', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = '#dbeafe'} onMouseOut={e => e.currentTarget.style.background = '#eff6ff'}>
-                                                                                                 <Download size={16} />
-                                                                                             </a>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                ) : (
-                                                                                     <a href={msg.file.url} onClick={(e) => forceDownload(e, msg.file!.url, msg.file!.name || 'document')} style={{ textDecoration: 'none', color: 'inherit', display: 'block', width: 'fit-content' }}>
-                                                                                         <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', width: 'fit-content', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.borderColor = '#cbd5e1'} onMouseOut={e => e.currentTarget.style.borderColor = '#e2e8f0'}>
-                                                                                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: msg.file.type === 'pdf' ? '#fee2e2' : '#e0e7ff', color: msg.file.type === 'pdf' ? '#ef4444' : '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                                                <FileText size={20} />
-                                                                                            </div>
-                                                                                            <div style={{ paddingRight: '12px' }}>
-                                                                                                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>{msg.file.name}</div>
-                                                                                                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Click to download</div>
-                                                                                            </div>
-                                                                                            <div style={{ marginLeft: 'auto', padding: '8px', background: 'white', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-                                                                                                <Download size={16} color="#64748b" />
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </a>
-                                                                                )}
-                                                                            </div>
-                                                                        )}
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </React.Fragment>
+                                                <MessageCard 
+                                                    message={premiumMsg} 
+                                                    viewerRole="instructor" 
+                                                    onDelete={() => handleDeleteMessage(msg.id)}
+                                                />
+                                            </React.Fragment>
                                         );
                                     })}
                                 </>
@@ -1311,103 +1158,10 @@ const InstructorChannelsPage = () => {
 
                         {/* Input Area */}
                         <div className="chat-input-container">
-                            <div className="chat-input-wrapper">
-                                {selectedFile && (
-                                    <div className="file-preview-strip">
-                                        <div style={{ background: '#eff6ff', padding: '8px', borderRadius: '8px', color: '#3b82f6' }}>
-                                            <FileGeneric size={16} />
-                                        </div>
-                                        <div style={{ flex: 1, overflow: 'hidden' }}>
-                                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                                                {selectedFile.name}
-                                            </div>
-                                            {uploadProgress < 100 ? (
-                                                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '2px', marginTop: '4px' }}>
-                                                    <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', borderRadius: '2px', transition: 'width 0.2s' }}></div>
-                                                </div>
-                                            ) : (
-                                                <div style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                                                    <Check size={12} /> Uploaded successfully
-                                                </div>
-                                            )}
-                                        </div>
-                                        <button onClick={() => setSelectedFile(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
-                                            <X size={16} />
-                                        </button>
-                                    </div>
-                                )}
-                                
-                                <textarea 
-                                    ref={inputRef}
-                                    style={{
-                                        width: '100%', border: 'none', outline: 'none', resize: 'none', padding: '0.75rem', 
-                                        fontFamily: 'inherit', fontSize: '0.95rem', minHeight: '60px', maxHeight: '200px', background: 'transparent'
-                                    }}
-                                    placeholder={activeChannel.type === 'channel' ? `Message #${activeChannel.title}` : `Message ${activeChannel.title}`}
-                                    value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSendMessage();
-                                        }
-                                    }}
-                                />
-                                
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0.5rem 0.5rem' }}>
-                                    <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
-                                        <button 
-                                            onClick={() => fileInputRef.current?.click()}
-                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px', borderRadius: '6px' }}
-                                            title="Attach file (Max 100MB)"
-                                        >
-                                            <Paperclip size={18} />
-                                        </button>
-                                        <button 
-                                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                            style={{ background: showEmojiPicker ? '#e2e8f0' : 'none', border: 'none', cursor: 'pointer', color: showEmojiPicker ? '#0f172a' : '#64748b', padding: '6px', borderRadius: '6px', transition: 'background 0.2s' }}
-                                            title="Add Emoji"
-                                        >
-                                            <Smile size={18} />
-                                        </button>
-
-                                        {showEmojiPicker && (
-                                            <div style={{ position: 'absolute', bottom: '100%', left: '40px', marginBottom: '8px', zIndex: 100, boxShadow: '0 4px 15px rgba(0,0,0,0.1)', borderRadius: '8px' }}>
-                                                <EmojiPicker 
-                                                    onEmojiClick={(e) => {
-                                                        setInputValue(prev => prev + e.emoji);
-                                                    }}
-                                                />
-                                            </div>
-                                        )}
-                                        <input 
-                                            type="file" 
-                                            ref={fileInputRef} 
-                                            onChange={handleFileUpload} 
-                                            style={{ display: 'none' }} 
-                                        />
-                                    </div>
-                                    <button 
-                                        onClick={() => handleSendMessage()}
-                                        disabled={!inputValue.trim() && !selectedFile}
-                                        style={{ 
-                                            background: (inputValue.trim() || selectedFile) ? '#3b82f6' : '#f1f5f9', 
-                                            color: (inputValue.trim() || selectedFile) ? 'white' : '#94a3b8', 
-                                            border: 'none', 
-                                            cursor: (inputValue.trim() || selectedFile) ? 'pointer' : 'not-allowed', 
-                                            padding: '8px 16px', 
-                                            borderRadius: '8px',
-                                            fontWeight: 800,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px',
-                                            transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        {(inputValue.trim() || selectedFile) ? <><Send size={16} /> Send</> : 'Send'}
-                                    </button>
-                                </div>
-                            </div>
+                            <ChatInput 
+                                onSendMessage={handleSendMessage} 
+                                placeholder={activeChannel ? (activeChannel.type === 'channel' ? `Message #${activeChannel.title}` : `Message ${activeChannel.title}`) : 'Select a channel to send a message'}
+                            />
                         </div>
                     </div>
                 ) : (
@@ -1460,7 +1214,7 @@ const InstructorChannelsPage = () => {
                             <div style={{ display: 'flex', gap: '12px' }}>
                                 <button onClick={() => setIsAnnouncementModalOpen(false)} style={{ flex: 1, border: 'none', background: '#f1f5f9', padding: '0.75rem', borderRadius: '10px' }}>Cancel</button>
                                 <button 
-                                    onClick={() => handleSendMessage('announcement', announcementTitle + ": " + announcementContent)}
+                                    onClick={() => handleSendMessage(announcementTitle + ": " + announcementContent, null, 'announcement')}
                                     style={{ flex: 2, border: 'none', background: '#3b82f6', color: 'white', padding: '0.75rem', borderRadius: '10px' }}
                                 >
                                     Post

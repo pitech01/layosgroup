@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Download, FileAudio, Eye, X, FileText } from 'lucide-react';
+import { Calendar, Download, FileAudio, Eye, X, FileText, Trash2 } from 'lucide-react';
 
 export interface Message {
     id: string;
@@ -15,9 +15,10 @@ export interface Message {
 interface MessageCardProps {
     message: Message;
     viewerRole?: 'instructor' | 'student';
+    onDelete?: () => Promise<void>;
 }
 
-const MessageCard = ({ message, viewerRole }: MessageCardProps) => {
+const MessageCard = ({ message, viewerRole, onDelete }: MessageCardProps) => {
     const isInstructor = message.senderRole === 'instructor';
     const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string } | null>(null);
 
@@ -33,99 +34,104 @@ const MessageCard = ({ message, viewerRole }: MessageCardProps) => {
     };
 
     return (
-        <div className={`channel-message-card ${message.type}`}>
-            <div className="message-header">
-                <div className="sender-info">
-                    <div className="sender-avatar">
-                        {message.senderName.charAt(0)}
+        <div className={`channel-message-wrapper ${message.type}`}>
+            <div className="message-avatar-sidebar">
+                <div className={`avatar-circle ${isInstructor ? 'instructor' : 'student'}`}>
+                    {message.senderName.charAt(0)}
+                </div>
+            </div>
+            
+            <div className="message-main-content">
+                <div className="message-upper-meta">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span className="sender-displayName">{message.senderName}</span>
+                        {isInstructor && <span className="instructor-badge-premium">Instructor</span>}
+                        <span className="timestamp-minimal">{message.createdAt}</span>
                     </div>
-                    <div className="sender-details">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span className="sender-name">{message.senderName}</span>
-                            <span className={`message-role-badge ${isInstructor ? 'role-instructor' : 'role-student'}`}>
-                                {message.senderRole}
-                            </span>
+                    {message.type !== 'message' && (
+                        <div className={`type-indicator-tag ${message.type}`}>
+                            {message.type.toUpperCase()}
                         </div>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
-                            {message.createdAt}
-                        </span>
-                    </div>
+                    )}
+                    {onDelete && (
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                            style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', opacity: 0.6, transition: 'opacity 0.2s' }}
+                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                            title="Delete Message"
+                        >
+                            <Trash2 size={14} />
+                        </button>
+                    )}
                 </div>
 
-                {message.type !== 'message' && (
-                    <span className={`message-type-badge type-${message.type}`}>
-                        {message.type}
-                    </span>
-                )}
-            </div>
-
-            <div className="message-content">
-                <p style={{ margin: 0 }}>{message.content}</p>
+                <div className="message-text-body">
+                    {message.content}
+                </div>
 
                 {message.attachmentUrl && (message.type === 'message' || message.type === 'announcement') && (
-                    <div style={{ marginTop: '0.75rem' }}>
+                    <div className="message-attachment-container">
                         {/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(message.attachmentUrl.split('?')[0]) ? (
-                            <div style={{ maxWidth: '300px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', marginTop: '0.5rem' }}>
-                                <img src={message.attachmentUrl} alt="Attachment" style={{ width: '100%', display: 'block' }} loading="lazy" />
+                            <div className="image-attachment-preview">
+                                <img src={message.attachmentUrl} alt="Attachment" loading="lazy" />
+                                <div className="img-overlay-actions">
+                                    <a href={message.attachmentUrl} target="_blank" rel="noreferrer" className="action-pill"><Eye size={14}/> Full Preview</a>
+                                </div>
                             </div>
                         ) : /\.(mp3|wav|ogg|webm|m4a)(\?.*)?$/i.test(message.attachmentUrl.split('?')[0]) ? (
-                            <div style={{ marginTop: '0.5rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '32px', display: 'inline-flex', alignItems: 'center', gap: '10px', border: '1px solid #e2e8f0' }}>
-                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
-                                    <FileAudio size={20} />
-                                </div>
-                                <audio controls src={message.attachmentUrl} style={{ height: '40px', outline: 'none' }} />
+                            <div className="audio-attachment-pill">
+                                <div className="audio-icon-box"><FileAudio size={20} /></div>
+                                <audio controls src={message.attachmentUrl} />
                             </div>
                         ) : (
                             <a
                                 href={message.attachmentUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="attachment-link"
-                                style={{ display: 'inline-flex', marginTop: '0.5rem' }}
+                                className="generic-file-attachment"
                                 onClick={(e) => handleViewPdf(e, message.attachmentUrl!, 'Attachment')}
                             >
-                                {viewerRole === 'student' && isPdf(message.attachmentUrl) ? (
-                                    <><Eye size={14} /> View Attachment</>
-                                ) : (
-                                    <><Download size={14} /> Download Attachment</>
-                                )}
+                                <div className="file-icon-square"><Download size={18} /></div>
+                                <div className="file-info-text">
+                                    <span className="file-name-label">{message.attachmentUrl.split('/').pop()?.split('?')[0] || 'Download Attachment'}</span>
+                                    <span className="file-action-hint">{viewerRole === 'student' && isPdf(message.attachmentUrl) ? 'Click to view secure PDF' : 'Click to download file'}</span>
+                                </div>
                             </a>
                         )}
                     </div>
                 )}
 
                 {message.type === 'assignment' && (
-                    <div className="assignment-details">
-                        <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Calendar size={18} /> Assignment Details
+                    <div className="luxury-assignment-card">
+                        <div className="assignment-card-header">
+                            <Calendar size={18} />
+                            <span>Academic Assignment Detail</span>
                         </div>
-                        <div className="assignment-meta-row">
+                        <div className="assignment-card-body">
                             {message.dueDate && (
-                                <div style={{ fontSize: '0.85rem', color: '#444' }}>
-                                    <span style={{ fontWeight: 700 }}>Due:</span> {message.dueDate}
+                                <div className="due-date-row">
+                                    <span className="label">SUBMISSION DEADLINE</span>
+                                    <span className="value">{message.dueDate}</span>
                                 </div>
                             )}
                             {message.attachmentUrl && (
-                                <a
-                                    href={message.attachmentUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="attachment-link"
-                                    onClick={(e) => handleViewPdf(e, message.attachmentUrl!, 'Course Material')}
+                                <button
+                                    className="assignment-action-btn"
+                                    onClick={(e: any) => handleViewPdf(e, message.attachmentUrl!, 'Course Material')}
                                 >
                                     {viewerRole === 'student' && isPdf(message.attachmentUrl) ? (
-                                        <><Eye size={14} /> View Material</>
+                                        <><Eye size={16} /> Open Resource Module</>
                                     ) : (
-                                        <><Download size={14} /> Download Material</>
+                                        <><Download size={16} /> Download Material Asset</>
                                     )}
-                                </a>
+                                </button>
                             )}
                         </div>
                     </div>
                 )}
-
-
             </div>
+
             {/* Secure PDF Viewer Modal for Messaging */}
             {viewingPdf && (
                 <div style={{

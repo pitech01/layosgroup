@@ -78,10 +78,8 @@ export default function CreateLiveSession() {
             errors.endTime = 'End time must be after start time';
         }
 
-        // Meeting link is now mandatory
-        if (!formData.meetingLink) {
-            errors.meetingLink = 'Meeting link is required';
-        } else if (!/^https?:\/\/.+/.test(formData.meetingLink)) {
+        // Meeting link is now optional
+        if (formData.meetingLink && !/^https?:\/\/.+/.test(formData.meetingLink)) {
             errors.meetingLink = 'Must be a valid URL (starting with http/https)';
         }
 
@@ -441,7 +439,7 @@ export default function CreateLiveSession() {
                             onChange={e => setFormData({ ...formData, meetingLink: e.target.value })}
                         />
                         {formErrors.meetingLink && <p className="error-text"><AlertCircle size={14} /> {formErrors.meetingLink}</p>}
-                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>This link will be visible to students when the session is live.</p>
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Optional. Visible to students when the session is live.</p>
                     </div>
 
                     <div className="form-group-modern">
