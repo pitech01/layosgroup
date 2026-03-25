@@ -21,7 +21,9 @@ export default function StudentDashboard() {
     const { user } = useAuth();
     const [enrollments, setEnrollments] = useState<any[]>([]);
     const [liveSessions, setLiveSessions] = useState<any[]>([]);
+    const [certificates, setCertificates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [claiming, setClaiming] = useState<number | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
@@ -31,11 +33,14 @@ export default function StudentDashboard() {
 
             try {
                 // Fetch concurrently for better performance
-                const [enrollmentsRes, sessionsRes] = await Promise.all([
+                const [enrollmentsRes, sessionsRes, certsRes] = await Promise.all([
                     fetch(`${API_URL}/my-enrollments`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     }),
                     fetch(`${API_URL}/student/live-sessions`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch(`${API_URL}/certificates`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     })
                 ]);
@@ -50,6 +55,11 @@ export default function StudentDashboard() {
                 if (sessionsRes.ok) {
                     const data = await sessionsRes.json();
                     setLiveSessions(data);
+                }
+
+                if (certsRes.ok) {
+                    const data = await certsRes.json();
+                    setCertificates(data);
                 }
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
@@ -84,11 +94,60 @@ export default function StudentDashboard() {
         return 'ended';
     };
 
+    const handleClaimCertificate = async (courseId: number) => {
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+        const token = localStorage.getItem('token');
+        setClaiming(courseId);
+        
+        try {
+            const res = await fetch(`${API_URL}/certificates/claim/${courseId}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                toast.success('Certificate generated successfully!');
+                const certsRes = await fetch(`${API_URL}/certificates`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (certsRes.ok) setCertificates(await certsRes.json());
+            } else {
+                toast.error(data.message || 'Failed to claim certificate');
+            }
+        } catch (err) {
+            toast.error('An error occurred while claiming your certificate.');
+        } finally {
+            setClaiming(null);
+        }
+    };
+
+    const downloadCertificate = async (uuid: string) => {
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/certificates/download/${uuid}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Certificate-${uuid}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            window.open(`${API_URL}/certificates/download/${uuid}`, '_blank');
+        }
+    };
+
     const stats = [
         { label: 'Enrolled Courses', value: enrollments.length.toString(), icon: <BookOpen size={20} />, color: '#3b82f6' },
         { label: 'Live Classes Today', value: liveSessions.filter(s => new Date(s.scheduled_date).toDateString() === new Date().toDateString()).length.toString(), icon: <Video size={20} />, color: '#8b5cf6' },
         { label: 'Completed', value: enrollments.filter(e => e.pivot?.progress === 100).length.toString(), icon: <CheckCircle2 size={20} />, color: '#10b981' },
-        { label: 'Certificates', value: '0', icon: <Star size={20} />, color: '#f59e0b' },
+        { label: 'Certificates', value: certificates.length.toString(), icon: <Star size={20} />, color: '#f59e0b' },
     ];
 
 
@@ -173,6 +232,10 @@ export default function StudentDashboard() {
                     .modern-progress-fill { height: 100%; background: #3b82f6; border-radius: 3px; }
                     .progress-percentage { font-size: 0.75rem; font-weight: 700; color: #64748b; }
                     .btn-cta-white { background: white; color: #0f172a; padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 600; margin-top: 1.5rem; }
+                    .btn-claim { background: #f59e0b; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: 0.2s; }
+                    .btn-claim:hover { background: #d97706; transform: scale(1.05); }
+                    .btn-download-cert { background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: 0.2s; }
+                    .btn-download-cert:hover { background: #059669; transform: scale(1.05); }
                     .dashboard-grid-layout { display: grid; grid-template-columns: 1.6fr 1fr; gap: 2.5rem; }
 
                     @media (max-width: 1024px) {
@@ -247,10 +310,32 @@ export default function StudentDashboard() {
                                             <span className="progress-percentage">{cohort.pivot?.progress || 0}%</span>
                                         </div>
                                     </div>
-                                    <div style={{ color: '#94a3b8' }}>
-                                        <div className="sidebar-icon-btn" style={{ padding: '0.5rem', cursor: 'pointer', background: '#f8fafc' }}>
-                                            <Play size={18} fill="#3b82f6" color="#3b82f6" />
-                                        </div>
+                                    <div style={{ color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        {Number(cohort.pivot?.progress) >= 100 ? (
+                                            (() => {
+                                                const cert = certificates.find(c => Number(c.course_id) === Number(cohort.course?.id));
+                                                if (cert) {
+                                                    return (
+                                                        <button onClick={() => downloadCertificate(cert.certificate_uuid)} className="btn-download-cert">
+                                                            Download Certificate
+                                                        </button>
+                                                    );
+                                                }
+                                                return (
+                                                    <button 
+                                                        onClick={() => handleClaimCertificate(cohort.course?.id)} 
+                                                        disabled={claiming === cohort.course?.id}
+                                                        className="btn-claim"
+                                                    >
+                                                        {claiming === cohort.course?.id ? <Loader2 size={12} className="animate-spin" /> : 'Claim Certificate'}
+                                                    </button>
+                                                );
+                                            })()
+                                        ) : (
+                                            <Link to={`/student/courses/${cohort.course?.id}?cohortId=${cohort.id}`} className="sidebar-icon-btn" style={{ padding: '0.5rem', cursor: 'pointer', background: '#f8fafc' }}>
+                                                <Play size={18} fill="#3b82f6" color="#3b82f6" />
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             ))}

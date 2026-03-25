@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { PlayCircle, FileText, CheckCircle, ChevronLeft, Clock, Loader2, Video, Calendar, ShieldCheck, BookOpen } from 'lucide-react';
+import { PlayCircle, FileText, CheckCircle, ChevronLeft, Clock, Loader2, Video, Calendar, ShieldCheck, BookOpen, Star } from 'lucide-react';
 
 const CourseDetails = () => {
     const { courseId } = useParams();
@@ -8,7 +8,9 @@ const CourseDetails = () => {
     const cohortId = searchParams.get('cohortId');
 
     const [course, setCourse] = useState<any>(null);
+    const [certificate, setCertificate] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [claiming, setClaiming] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -16,15 +18,19 @@ const CourseDetails = () => {
         const fetchCourseData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${API_URL}/my-enrollments`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const data = await response.json();
+                const [courseRes, certsRes] = await Promise.all([
+                    fetch(`${API_URL}/my-enrollments`, {
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch(`${API_URL}/certificates`, {
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
 
-                if (response.ok) {
+                const data = await courseRes.json();
+                const certsData = await certsRes.json();
+
+                if (courseRes.ok) {
                     const enrolledCohort = data.cohorts.find((c: any) => c.id == cohortId);
                     if (enrolledCohort) {
                         setCourse({
@@ -38,6 +44,10 @@ const CourseDetails = () => {
                             isEnrolled: true,
                             completedLessons: data.completed_lessons || []
                         });
+                        
+                        // Link existing certificate if any
+                        const matchingCert = certsData.find((c: any) => c.course_id === enrolledCohort.course.id);
+                        if (matchingCert) setCertificate(matchingCert);
                     }
                 }
             } catch (err) {
@@ -49,6 +59,47 @@ const CourseDetails = () => {
 
         fetchCourseData();
     }, [courseId, cohortId, API_URL]);
+
+    const handleClaim = async () => {
+        if (!course) return;
+        setClaiming(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/certificates/claim/${course.id}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setCertificate(data);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setClaiming(false);
+        }
+    };
+
+    const downloadCert = async (uuid: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/certificates/download/${uuid}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Certificate-${uuid}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Download Error:", err);
+            window.open(`${API_URL}/certificates/download/${uuid}`, '_blank');
+        }
+    };
 
     if (loading) {
         return (
@@ -212,6 +263,48 @@ const CourseDetails = () => {
 
 
                     </div>
+
+                    {Number(course.progress) >= 100 && (
+                        <div className="shadow-premium animate-bounce-subtle" style={{ background: 'linear-gradient(135deg, #1a4d3e 0%, #064e3b 100%)', borderRadius: '32px', padding: '2.5rem', border: 'none', color: 'white' }}>
+                            <div style={{ background: 'rgba(255,255,255,0.1)', width: 'fit-content', padding: '10px', borderRadius: '14px', marginBottom: '1.5rem' }}>
+                                <Star size={26} color="#fbbf24" fill="#fbbf24" />
+                            </div>
+                            <h4 style={{ fontSize: '1.25rem', fontWeight: 950, marginBottom: '1rem' }}>COURSE COMPLETED!</h4>
+                            <p style={{ fontSize: '0.9rem', opacity: 0.9, fontWeight: 500, lineHeight: 1.6, marginBottom: '2rem' }}>
+                                Congratulations! You have successfully mastered all modules and earned your official certificate of completion.
+                            </p>
+                            
+                            {certificate ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <button
+                                        onClick={() => downloadCert(certificate.certificate_uuid)}
+                                        style={{ width: '100%', background: 'white', color: '#1a4d3e', border: 'none', borderRadius: '16px', padding: '1rem', fontWeight: 900, cursor: 'pointer', transition: '0.2s', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
+                                        onMouseEnter={(e: any) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                        onMouseLeave={(e: any) => e.currentTarget.style.transform = 'none'}
+                                    >
+                                        DOWNLOAD CERTIFICATE
+                                    </button>
+                                    <button
+                                        onClick={handleClaim}
+                                        disabled={claiming}
+                                        style={{ width: '100%', background: 'transparent', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '14px', padding: '0.75rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: '0.2s' }}
+                                    >
+                                        {claiming ? <Loader2 className="animate-spin inline mr-2" /> : 'REGENERATE NEW DESIGN'}
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={handleClaim}
+                                    disabled={claiming}
+                                    style={{ width: '100%', background: '#fbbf24', color: '#000', border: 'none', borderRadius: '16px', padding: '1rem', fontWeight: 900, cursor: 'pointer', transition: '0.2s', boxShadow: '0 10px 20px rgba(0,0,0,0.2)' }}
+                                    onMouseEnter={(e: any) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                    onMouseLeave={(e: any) => e.currentTarget.style.transform = 'none'}
+                                >
+                                    {claiming ? <Loader2 className="animate-spin inline" /> : 'GENERATE CERTIFICATE'}
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
