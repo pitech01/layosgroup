@@ -17,6 +17,8 @@ interface Channel {
     type: 'channel' | 'dm';
     status?: 'online' | 'offline' | 'away';
     avatar?: string;
+    description?: string;
+    participants?: number;
 }
 
 interface ChatMessage {
@@ -60,6 +62,9 @@ const InstructorChannelsPage = () => {
     const [isUserSearchOpen, setIsUserSearchOpen] = useState(false);
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<Channel[]>([]);
+    
+    // UI Layout State
+    const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
     
     // Create Channel State
     const [isCreateChannelModalOpen, setIsCreateChannelModalOpen] = useState(false);
@@ -379,11 +384,13 @@ const InstructorChannelsPage = () => {
                     };
                     
                     setMessages(prev => {
-                        // Avoid duplicates
-                        if (!prev.find(m => m.id === finalMessage.id)) {
+                        const index = prev.findIndex(m => String(m.id) === String(finalMessage.id));
+                        if (index === -1) {
                             return [...prev, finalMessage];
                         }
-                        return prev;
+                        const newMessages = [...prev];
+                        newMessages[index] = { ...prev[index], ...finalMessage };
+                        return newMessages;
                     });
                     
                     // Instantly mark as read in local storage so background poll doesn't mark it unread
@@ -405,28 +412,35 @@ const InstructorChannelsPage = () => {
                     
                     if (activeChannel && activeChannel.type === 'dm' && String(activeChannel.id) === String(msg.senderId)) {
                         setMessages((prev: any) => {
-                            if (!prev.find((m: any) => m.id === msg.id)) {
-                                return [...prev, {
-                                    id: msg.id,
-                                    user: { 
-                                        id: msg.senderId,
-                                        name: msg.senderName, 
-                                        role: msg.senderRole, 
-                                        avatar: msg.senderName.charAt(0).toUpperCase() 
-                                    },
-                                    content: cleanContent(msg.content, msg.attachmentUrl),
-                                    timestamp: msg.createdAt,
-                                    date: 'Feed',
-                                    isDeleted: !!msg.isDeleted,
-                                    file: msg.attachmentUrl ? {
-                                        name: msg.attachmentName || (msg.attachmentUrl.split('?')[0].split('/').pop()?.match(/^[0-9a-f-]{36}/i) ? 'Shared File' : msg.attachmentUrl.split('?')[0].split('/').pop() || 'Attachment'),
-                                        size: 'Linked',
-                                        type: (msg.attachmentUrl.split('?')[0].match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().split('?')[0].endsWith('.pdf') ? 'pdf' : 'other')),
-                                        url: msg.attachmentUrl
-                                    } : undefined
-                                }];
+                            const dmId = String(msg.id);
+                            const index = prev.findIndex((m: any) => String(m.id) === dmId);
+                            const finalMsg = {
+                                id: dmId,
+                                user: { 
+                                    id: msg.senderId,
+                                    name: msg.senderName, 
+                                    role: msg.senderRole, 
+                                    avatar: msg.senderName.charAt(0).toUpperCase() 
+                                },
+                                content: cleanContent(msg.content, msg.attachmentUrl),
+                                timestamp: msg.createdAt,
+                                date: 'Feed',
+                                isDeleted: !!msg.isDeleted,
+                                file: msg.attachmentUrl ? {
+                                    name: msg.attachmentName || (msg.attachmentUrl.split('?')[0].split('/').pop()?.match(/^[0-9a-f-]{36}/i) ? 'Shared File' : msg.attachmentUrl.split('?')[0].split('/').pop() || 'Attachment'),
+                                    size: 'Linked',
+                                    type: (msg.attachmentUrl.split('?')[0].match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().split('?')[0].endsWith('.pdf') ? 'pdf' : 'other')),
+                                    url: msg.attachmentUrl
+                                } : undefined
+                            };
+
+                            if (index === -1) {
+                                return [...prev, finalMsg];
+                            } else {
+                                const newMessages = [...prev];
+                                newMessages[index] = { ...prev[index], ...finalMsg };
+                                return newMessages;
                             }
-                            return prev;
                         });
                         
                         // Mark instantly read in local storage
@@ -525,6 +539,37 @@ const InstructorChannelsPage = () => {
         } catch (error) {
             console.error('Delete error', error);
             toast.error('Error deleting message');
+        }
+    };
+
+    const handleEditMessage = async (messageId: string, newContent: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+            
+            // Note: DB doesn't support DM editing yet in this quick fix, but we can add it if route exists
+            // For now, focusing on ChannelMessage editing
+            const url = `${API_URL}/channel-messages/${messageId}`;
+            
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: newContent })
+            });
+
+            if (response.ok) {
+                const updatedMsg = await response.json();
+                setMessages(prev => prev.map(m => String(m.id) === String(messageId) ? { ...m, content: updatedMsg.content } : m));
+                toast.success('Message updated');
+            } else {
+                toast.error('Failed to update message');
+            }
+        } catch (error) {
+            console.error('Edit error', error);
+            toast.error('Error updating message');
         }
     };
 
@@ -683,30 +728,31 @@ const InstructorChannelsPage = () => {
                     display: flex;
                     flex: 1;
                     overflow: hidden;
+                    min-height: 0;
                 }
 
                 /* Sub Sidebar Profile (Left Panel) */
                 .sub-sidebar {
-                    width: 280px;
-                    background: #ffffff;
+                    width: 260px;
+                    background: #0f172a;
                     display: flex;
                     flex-direction: column;
-                    border-right: 1px solid #f1f5f9;
+                    border-right: 1px solid #1e293b;
                     flex-shrink: 0;
                     overflow-y: auto;
                 }
                 .sub-sidebar::-webkit-scrollbar { width: 4px; }
-                .sub-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
+                .sub-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
                 .sidebar-section {
                     padding: 1.5rem 1rem 0.5rem;
                 }
                 .sidebar-section h3 {
-                    font-size: 0.7rem;
+                    font-size: 0.75rem;
                     text-transform: uppercase;
-                    letter-spacing: 0.1em;
-                    font-weight: 800;
-                    margin: 0 0 1rem 0.75rem;
+                    letter-spacing: 0.05em;
+                    font-weight: 700;
+                    margin: 0 0 0.5rem 0.75rem;
                     color: #94a3b8;
                     display: flex;
                     justify-content: space-between;
@@ -717,27 +763,24 @@ const InstructorChannelsPage = () => {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    padding: 0.75rem 1rem;
-                    border-radius: 12px;
+                    padding: 0.5rem 0.75rem;
+                    border-radius: 6px;
                     cursor: pointer;
-                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                    color: #64748b;
-                    margin-bottom: 4px;
+                    color: #cbd5e1;
+                    margin-bottom: 2px;
                     text-decoration: none;
                     font-size: 0.95rem;
-                    font-weight: 600;
+                    font-weight: 500;
                     position: relative;
                 }
                 .nav-item:hover {
-                    background: #f8fafc;
-                    color: #0f172a;
-                    transform: translateX(4px);
+                    background: rgba(255,255,255,0.08);
+                    color: #f1f5f9;
                 }
                 .nav-item.active {
-                    background: #0f172a;
+                    background: #2563eb;
                     color: white;
-                    font-weight: 700;
-                    box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.15);
+                    font-weight: 600;
                 }
                 .nav-item .truncate {
                     white-space: nowrap;
@@ -745,9 +788,26 @@ const InstructorChannelsPage = () => {
                     text-overflow: ellipsis;
                     flex: 1;
                 }
+
+                .status-dot-wrapper {
+                    position: absolute;
+                    bottom: -2px;
+                    right: -2px;
+                    border: 2px solid #0f172a;
+                    border-radius: 50%;
+                    background: #0f172a;
+                }
+                .nav-item:hover .status-dot-wrapper {
+                    border-color: #1e293b;
+                }
+                .nav-item.active .status-dot-wrapper {
+                    border-color: #2563eb;
+                    background: #2563eb;
+                }
+
                 .unread-pill {
-                    background: #3b82f6;
-                    color: white;
+                    background: white;
+                    color: #0f172a;
                     font-size: 0.7rem;
                     font-weight: 900;
                     padding: 2px 8px;
@@ -755,9 +815,11 @@ const InstructorChannelsPage = () => {
                     min-width: 20px;
                     text-align: center;
                 }
-                    background: #e2e8f0;
+                .nav-item.active .unread-pill {
+                    background: white;
+                    color: #2563eb;
                 }
-                .nav-item.active .status-dot-wrapper {
+
                 .badge {
                     background: #ef4444;
                     color: white;
@@ -783,6 +845,29 @@ const InstructorChannelsPage = () => {
                     flex-direction: column;
                     background: white;
                     min-width: 0;
+                    min-height: 0;
+                    position: relative;
+                }
+
+                /* Right Sidebar */
+                .right-sidebar {
+                    width: 300px;
+                    background: #f8fafc;
+                    border-left: 1px solid #e2e8f0;
+                    display: flex;
+                    flex-direction: column;
+                    flex-shrink: 0;
+                    overflow-y: auto;
+                }
+                .right-sidebar h3 {
+                    margin: 0;
+                    font-weight: 800;
+                    color: #0f172a;
+                    font-size: 1rem;
+                }
+                .right-sidebar-section {
+                    padding: 1.5rem;
+                    border-bottom: 1px solid #e2e8f0;
                 }
 
                 .chat-header {
@@ -808,6 +893,7 @@ const InstructorChannelsPage = () => {
                     padding: 1.5rem;
                     display: flex;
                     flex-direction: column;
+                    min-height: 0;
                 }
 
                 .date-divider {
@@ -950,19 +1036,55 @@ const InstructorChannelsPage = () => {
                     border-bottom: 1px solid #e2e8f0;
                 }
 
-                @media (max-width: 768px) {
+                /* Responsiveness Overrides */
+                @media (max-width: 1024px) {
+                    .right-sidebar {
+                        position: fixed;
+                        top: 0;
+                        right: 0;
+                        height: 100%;
+                        z-index: 2000;
+                        box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+                        width: 280px;
+                        display: ${isRightSidebarOpen ? 'flex' : 'none'};
+                    }
                     .comm-module {
-                        height: calc(100vh - 80px);
+                        height: calc(100vh - 120px);
+                        border-radius: 0;
+                        border: none;
                     }
-                    .sub-sidebar {
-                        display: ${activeChannel ? 'none' : 'flex'};
-                        width: 100%;
-                    }
-                    .chat-area {
-                        display: ${activeChannel ? 'flex' : 'none'};
+                }
+
+                @media (max-width: 768px) {
+                    .comm-header {
+                        padding: 0.75rem 1rem;
                     }
                     .search-bar-global {
-                        display: none; /* Hide on small screens or move to toggle */
+                        display: none;
+                    }
+                    .sub-sidebar {
+                        width: 100%;
+                        display: ${activeChannel ? 'none' : 'flex'};
+                    }
+                    .chat-area {
+                        width: 100%;
+                        display: ${activeChannel ? 'flex' : 'none'};
+                    }
+                    .comm-module {
+                        height: calc(100vh - 120px);
+                    }
+                    .nav-item {
+                        padding: 1rem;
+                        font-size: 1.1rem;
+                    }
+                    .chat-header {
+                        padding: 0.75rem 1rem;
+                    }
+                    .chat-messages {
+                        padding: 1rem;
+                    }
+                    .chat-input-container {
+                        padding: 0 0.75rem 0.75rem;
                     }
                 }
 
@@ -1057,6 +1179,7 @@ const InstructorChannelsPage = () => {
 
                 {/* Right Panel (Main Chat Interface) */}
                 {activeChannel ? (
+                    <>
                     <div className="chat-area">
                         {/* Chat Header */}
                         <div className="chat-header">
@@ -1065,15 +1188,18 @@ const InstructorChannelsPage = () => {
                                 {activeChannel.title}
                             </div>
                             <div style={{ display: 'flex', gap: '16px', color: '#64748b', alignItems: 'center' }}>
-                                {activeChannel.type === 'channel' && <Users size={20} style={{ cursor: 'pointer' }} />}
-                                <Info size={20} style={{ cursor: 'pointer' }} />
+                                <div 
+                                    onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+                                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', background: isRightSidebarOpen ? '#f1f5f9' : 'transparent', padding: '6px 12px', borderRadius: '8px', transition: 'all 0.2s' }}
+                                >
+                                    {activeChannel.type === 'channel' ? <Users size={18} /> : <Info size={18} />}
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Details</span>
+                                </div>
                                 {activeChannel.type === 'channel' && activeChannel.title !== 'general-discussion' && (
                                     <button 
                                         onClick={handleDeleteChannel}
-                                        style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', borderRadius: '8px', transition: 'all 0.2s', marginLeft: '4px' }}
+                                        style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '6px', borderRadius: '8px', transition: 'all 0.2s', marginLeft: '4px' }}
                                         title="Delete Channel"
-                                        onMouseOver={(e) => e.currentTarget.style.background = '#fee2e2'}
-                                        onMouseOut={(e) => e.currentTarget.style.background = '#fef2f2'}
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -1126,6 +1252,10 @@ const InstructorChannelsPage = () => {
                                     {messages.map((msg, index) => {
                                         const showDate = index === 0 || formatDateDivider(msg.timestamp) !== formatDateDivider(messages[index - 1].timestamp);
                                         
+                                        const isMine = currentUser && String(msg.user.id) === String(currentUser.id);
+                                        const compact = !showDate && index > 0 && String(messages[index - 1].user.id) === String(msg.user.id) &&
+                                                        (new Date(msg.timestamp).getTime() - new Date(messages[index - 1].timestamp).getTime() < 5 * 60 * 1000);
+
                                         const premiumMsg: Message = {
                                             id: msg.id,
                                             senderName: msg.user.name,
@@ -1147,6 +1277,9 @@ const InstructorChannelsPage = () => {
                                                     message={premiumMsg} 
                                                     viewerRole="instructor" 
                                                     onDelete={() => handleDeleteMessage(msg.id)}
+                                                    onEdit={isMine ? (newContent) => handleEditMessage(msg.id, newContent) : undefined}
+                                                    isMine={isMine}
+                                                    compact={compact}
                                                 />
                                             </React.Fragment>
                                         );
@@ -1164,6 +1297,36 @@ const InstructorChannelsPage = () => {
                             />
                         </div>
                     </div>
+                    {isRightSidebarOpen && (
+                        <div className="right-sidebar">
+                            <div className="right-sidebar-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <h3>Details</h3>
+                                <X size={20} style={{ cursor: 'pointer', color: '#64748b' }} onClick={() => setIsRightSidebarOpen(false)} />
+                            </div>
+                            <div className="right-sidebar-section">
+                                <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>About</h4>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {activeChannel?.type === 'channel' ? <Hash size={24} color="#64748b" /> : <Users size={24} color="#64748b" />}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 800, color: '#0f172a' }}>{activeChannel.title}</div>
+                                        {activeChannel.type === 'channel' && <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{activeChannel.participants || 'Instructor'} participants</div>}
+                                    </div>
+                                </div>
+                                <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', lineHeight: 1.5 }}>
+                                    {activeChannel.description || 'No description available for this channel.'}
+                                </p>
+                            </div>
+                            {activeChannel.type === 'channel' && (
+                                <div className="right-sidebar-section">
+                                    <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Files & Links</h4>
+                                    <div style={{ fontSize: '0.9rem', color: '#64748b', fontStyle: 'italic' }}>Shared files will appear here...</div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </>
                 ) : (
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', flexDirection: 'column', color: '#94a3b8', padding: '2rem', textAlign: 'center' }}>
                         <div style={{ width: '80px', height: '80px', background: 'white', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
