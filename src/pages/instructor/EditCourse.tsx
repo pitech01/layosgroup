@@ -255,7 +255,7 @@ export default function EditCourse() {
 
     const handleDeleteVideo = async (moduleId: string, lessonId: string, videoUrl: string) => {
         if (!window.confirm('Delete this file permanently from storage?')) return;
-        
+
         const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
         const token = localStorage.getItem('token');
 
@@ -1407,8 +1407,8 @@ export default function EditCourse() {
                                                                                 <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Upload Video File</h5>
                                                                                 <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', marginBottom: '1.5rem' }}>Supports 4K/HD formats up to 2GB</p>
                                                                                 <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                                                                    <button 
-                                                                                        className="btn-standard" 
+                                                                                    <button
+                                                                                        className="btn-standard"
                                                                                         style={{ background: '#020617', color: 'white', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
@@ -1417,8 +1417,8 @@ export default function EditCourse() {
                                                                                     >
                                                                                         <Upload size={14} style={{ marginRight: '6px' }} /> Upload New
                                                                                     </button>
-                                                                                    <button 
-                                                                                        className="btn-standard" 
+                                                                                    <button
+                                                                                        className="btn-standard"
                                                                                         style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
@@ -1541,15 +1541,15 @@ export default function EditCourse() {
                                                                                 <Video size={32} color="#64748b" style={{ marginBottom: '1rem' }} />
                                                                                 <h5 style={{ margin: '0 0 10px 0', fontWeight: 800 }}>Upload Session Recording</h5>
                                                                                 <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                                                                                    <button 
-                                                                                        className="btn-standard" 
+                                                                                    <button
+                                                                                        className="btn-standard"
                                                                                         style={{ background: '#020617', color: 'white', fontSize: '0.75rem', height: '36px' }}
                                                                                         onClick={() => document.getElementById(`recording-upload-${lesson.id}`)?.click()}
                                                                                     >
                                                                                         <Upload size={14} style={{ marginRight: '6px' }} /> Upload New
                                                                                     </button>
-                                                                                    <button 
-                                                                                        className="btn-standard" 
+                                                                                    <button
+                                                                                        className="btn-standard"
                                                                                         style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', fontSize: '0.75rem', height: '36px' }}
                                                                                         onClick={() => fetchExistingVideos(mod.id, lesson.id)}
                                                                                     >
@@ -1577,199 +1577,199 @@ export default function EditCourse() {
                                                                 </div>
                                                             )}
 
-                                                                {lesson.type === 'material' && (
-                                                                    <>
-                                                                        <div
-                                                                            style={{ padding: '3rem', border: '2.5px dashed #cbd5e1', borderRadius: '20px', textAlign: 'center', background: 'white', cursor: uploadingVideos[lesson.id] ? 'not-allowed' : 'pointer' }}
-                                                                            onClick={() => {
-                                                                                if (!uploadingVideos[lesson.id] && !lesson.fileUrl && !lesson.fileToUpload) {
-                                                                                    document.getElementById(`file-upload-${lesson.id}`)?.click();
-                                                                                }
-                                                                            }}
-                                                                        >
-                                                                            {uploadingVideos[lesson.id] ? (
-                                                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
-                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#f8fafc', marginBottom: '1rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
-                                                                                        <UploadCloud size={32} color="#1a4d3e" />
-                                                                                    </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#1a4d3e' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
-                                                                                    <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
-                                                                                        <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: '#10b981', transition: 'width 0.3s ease' }}></div>
-                                                                                    </div>
+                                                            {lesson.type === 'material' && (
+                                                                <>
+                                                                    <div
+                                                                        style={{ padding: '3rem', border: '2.5px dashed #cbd5e1', borderRadius: '20px', textAlign: 'center', background: 'white', cursor: uploadingVideos[lesson.id] ? 'not-allowed' : 'pointer' }}
+                                                                        onClick={() => {
+                                                                            if (!uploadingVideos[lesson.id] && !lesson.fileUrl && !lesson.fileToUpload) {
+                                                                                document.getElementById(`file-upload-${lesson.id}`)?.click();
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        {uploadingVideos[lesson.id] ? (
+                                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+                                                                                <div style={{ padding: '12px', borderRadius: '50%', background: '#f8fafc', marginBottom: '1rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+                                                                                    <UploadCloud size={32} color="#1a4d3e" />
                                                                                 </div>
-                                                                            ) : lesson.fileToUpload ? (
-                                                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#fffbeb', marginBottom: '1rem', border: '1.5px dashed #f59e0b' }}>
-                                                                                        <Clock size={32} color="#f59e0b" />
-                                                                                    </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#f59e0b' }}>Pending Upload</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>{lesson.fileToUpload.name}</p>
-                                                                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                                                                                        <button
-                                                                                            onClick={(e: any) => {
-                                                                                                e.stopPropagation();
-                                                                                                if (lesson.fileToUpload) {
-                                                                                                    const url = URL.createObjectURL(lesson.fileToUpload);
-                                                                                                    const isPdf = lesson.fileToUpload.type === 'application/pdf' || lesson.fileToUpload.name.toLowerCase().endsWith('.pdf');
-                                                                                                    setPreviewAsset({ url, type: isPdf ? 'pdf' : 'image' });
-                                                                                                }
-                                                                                            }}
-                                                                                            style={{ padding: '8px 16px', background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '8px', color: '#b45309', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-                                                                                        >
-                                                                                            <Eye size={16} /> Preview
-                                                                                        </button>
-                                                                                        <button
-                                                                                            onClick={(e: any) => {
-                                                                                                e.stopPropagation();
-                                                                                                updateLesson(mod.id, lesson.id, { fileToUpload: undefined });
-                                                                                                const fileInput = document.getElementById(`file-upload-${lesson.id}`) as HTMLInputElement;
-                                                                                                if (fileInput) fileInput.value = '';
-                                                                                            }}
-                                                                                            style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-                                                                                        >
-                                                                                            <X size={16} /> Remove
-                                                                                        </button>
-                                                                                    </div>
+                                                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#1a4d3e' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
+                                                                                <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
+                                                                                    <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: '#10b981', transition: 'width 0.3s ease' }}></div>
                                                                                 </div>
-                                                                            ) : lesson.fileUrl ? (
-                                                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#f0fdf4', marginBottom: '1rem' }}>
-                                                                                        <CheckCircle2 size={32} color="#10b981" />
-                                                                                    </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#10b981' }}>File Ready</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>{lesson.fileName || 'Resource Document'}</p>
-                                                                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                                                                                        <button
-                                                                                            onClick={(e: any) => {
-                                                                                                e.stopPropagation();
-                                                                                                const url = lesson.fileUrl || '';
-                                                                                                const isPdf = url.toLowerCase().endsWith('.pdf') || lesson.fileName?.toLowerCase().endsWith('.pdf');
-                                                                                                setPreviewAsset({ url, type: isPdf ? 'pdf' : 'image' });
-                                                                                            }}
-                                                                                            style={{ padding: '8px 16px', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '8px', color: '#1a4d3e', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-                                                                                        >
-                                                                                            <Eye size={16} /> Preview
-                                                                                        </button>
-                                                                                        <button
-                                                                                            onClick={(e: any) => {
-                                                                                                e.stopPropagation();                                                                                                 handleDeleteVideo(mod.id, lesson.id, lesson.fileUrl || '');
-                                                                                            }}
-                                                                                            style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-                                                                                        >
-                                                                                            <Trash2 size={16} /> Delete
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            ) : (
-                                                                                <>
-                                                                                    <FileText size={40} color="#020617" style={{ marginBottom: '1rem' }} />
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Deploy Document Resource</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Upload PDFs, Slides, or Blueprint assets (Max 50MB)</p>
-                                                                                    <button
-                                                                                        className="btn-standard"
-                                                                                        style={{ marginTop: '1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#020617' }}
-                                                                                        onClick={() => document.getElementById(`file-upload-${lesson.id}`)?.click()}
-                                                                                    >
-                                                                                        Browse Files
-                                                                                    </button>
-                                                                                </>
-                                                                            )}
-                                                                            <input
-                                                                                type="file"
-                                                                                style={{ display: 'none' }}
-                                                                                id={`file-upload-${lesson.id}`}
-                                                                                onChange={(e: any) => {
-                                                                                    if (e.target.files && e.target.files[0]) {
-                                                                                        handleFileUpload(mod.id, lesson.id, e.target.files[0]);
-                                                                                    }
-                                                                                    e.target.value = '';
-                                                                                }}
-                                                                            />
-                                                                        </div>
-
-                                                                        {/* Document Questions Integration */}
-                                                                        <div style={{ marginTop: '2.5rem', padding: '2rem', background: '#f8fafc', borderRadius: '24px', border: '1.5px solid #e2e8f0' }}>
-                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.25rem' }}>
-                                                                                <HelpCircle size={20} color="#1a4d3e" />
-                                                                                <h5 style={{ margin: 0, fontWeight: 850, color: '#0f172a' }}>Material-Linked Questions</h5>
                                                                             </div>
-                                                                            <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Enable this to require students to complete a validation quiz after studying this document.</p>
-                                                                            
-                                                                            <div className="evaluation-grid-material" style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr 1fr', gap: '1.5rem', alignItems: 'flex-end' }}>
-                                                                                <style>{`
+                                                                        ) : lesson.fileToUpload ? (
+                                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <div style={{ padding: '12px', borderRadius: '50%', background: '#fffbeb', marginBottom: '1rem', border: '1.5px dashed #f59e0b' }}>
+                                                                                    <Clock size={32} color="#f59e0b" />
+                                                                                </div>
+                                                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#f59e0b' }}>Pending Upload</h5>
+                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>{lesson.fileToUpload.name}</p>
+                                                                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                                                                                    <button
+                                                                                        onClick={(e: any) => {
+                                                                                            e.stopPropagation();
+                                                                                            if (lesson.fileToUpload) {
+                                                                                                const url = URL.createObjectURL(lesson.fileToUpload);
+                                                                                                const isPdf = lesson.fileToUpload.type === 'application/pdf' || lesson.fileToUpload.name.toLowerCase().endsWith('.pdf');
+                                                                                                setPreviewAsset({ url, type: isPdf ? 'pdf' : 'image' });
+                                                                                            }
+                                                                                        }}
+                                                                                        style={{ padding: '8px 16px', background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '8px', color: '#b45309', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <Eye size={16} /> Preview
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={(e: any) => {
+                                                                                            e.stopPropagation();
+                                                                                            updateLesson(mod.id, lesson.id, { fileToUpload: undefined });
+                                                                                            const fileInput = document.getElementById(`file-upload-${lesson.id}`) as HTMLInputElement;
+                                                                                            if (fileInput) fileInput.value = '';
+                                                                                        }}
+                                                                                        style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <X size={16} /> Remove
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : lesson.fileUrl ? (
+                                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <div style={{ padding: '12px', borderRadius: '50%', background: '#f0fdf4', marginBottom: '1rem' }}>
+                                                                                    <CheckCircle2 size={32} color="#10b981" />
+                                                                                </div>
+                                                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#10b981' }}>File Ready</h5>
+                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>{lesson.fileName || 'Resource Document'}</p>
+                                                                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                                                                                    <button
+                                                                                        onClick={(e: any) => {
+                                                                                            e.stopPropagation();
+                                                                                            const url = lesson.fileUrl || '';
+                                                                                            const isPdf = url.toLowerCase().endsWith('.pdf') || lesson.fileName?.toLowerCase().endsWith('.pdf');
+                                                                                            setPreviewAsset({ url, type: isPdf ? 'pdf' : 'image' });
+                                                                                        }}
+                                                                                        style={{ padding: '8px 16px', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '8px', color: '#1a4d3e', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <Eye size={16} /> Preview
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={(e: any) => {
+                                                                                            e.stopPropagation(); handleDeleteVideo(mod.id, lesson.id, lesson.fileUrl || '');
+                                                                                        }}
+                                                                                        style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                    >
+                                                                                        <Trash2 size={16} /> Delete
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <>
+                                                                                <FileText size={40} color="#020617" style={{ marginBottom: '1rem' }} />
+                                                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Deploy Document Resource</h5>
+                                                                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Upload PDFs, Slides, or Blueprint assets (Max 50MB)</p>
+                                                                                <button
+                                                                                    className="btn-standard"
+                                                                                    style={{ marginTop: '1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#020617' }}
+                                                                                    onClick={() => document.getElementById(`file-upload-${lesson.id}`)?.click()}
+                                                                                >
+                                                                                    Browse Files
+                                                                                </button>
+                                                                            </>
+                                                                        )}
+                                                                        <input
+                                                                            type="file"
+                                                                            style={{ display: 'none' }}
+                                                                            id={`file-upload-${lesson.id}`}
+                                                                            onChange={(e: any) => {
+                                                                                if (e.target.files && e.target.files[0]) {
+                                                                                    handleFileUpload(mod.id, lesson.id, e.target.files[0]);
+                                                                                }
+                                                                                e.target.value = '';
+                                                                            }}
+                                                                        />
+                                                                    </div>
+
+                                                                    {/* Document Questions Integration */}
+                                                                    <div style={{ marginTop: '2.5rem', padding: '2rem', background: '#f8fafc', borderRadius: '24px', border: '1.5px solid #e2e8f0' }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.25rem' }}>
+                                                                            <HelpCircle size={20} color="#1a4d3e" />
+                                                                            <h5 style={{ margin: 0, fontWeight: 850, color: '#0f172a' }}>Material-Linked Questions</h5>
+                                                                        </div>
+                                                                        <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Enable this to require students to complete a validation quiz after studying this document.</p>
+
+                                                                        <div className="evaluation-grid-material" style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr 1fr', gap: '1.5rem', alignItems: 'flex-end' }}>
+                                                                            <style>{`
                                                                                     .evaluation-grid-material { grid-template-columns: min-content 1fr 1fr !important; }
                                                                                     @media (max-width: 640px) { .evaluation-grid-material { grid-template-columns: 1fr !important; } }
                                                                                 `}</style>
-                                                                                <div>
-                                                                                    <label className="input-label">Enabled</label>
-                                                                                    <div 
-                                                                                        onClick={() => {
-                                                                                            const isEnabled = !!lesson.quizData;
-                                                                                            updateLesson(mod.id, lesson.id, {
-                                                                                                quizData: isEnabled ? undefined : { pass_mark: 80, questions: [] as any[] }
-                                                                                            });
-                                                                                        }}
-                                                                                        style={{ 
-                                                                                            width: '50px', 
-                                                                                            height: '26px', 
-                                                                                            background: lesson.quizData ? '#1a4d3e' : '#e2e8f0', 
-                                                                                            borderRadius: '13px', 
-                                                                                            position: 'relative', 
-                                                                                            cursor: 'pointer',
-                                                                                            transition: 'all 0.3s'
-                                                                                        }}
-                                                                                    >
-                                                                                        <div style={{ 
-                                                                                            width: '20px', 
-                                                                                            height: '20px', 
-                                                                                            background: 'white', 
-                                                                                            borderRadius: '50%', 
-                                                                                            position: 'absolute', 
-                                                                                            top: '3px', 
-                                                                                            left: lesson.quizData ? '27px' : '3px',
-                                                                                            transition: 'left 0.3s'
-                                                                                        }}></div>
-                                                                                    </div>
+                                                                            <div>
+                                                                                <label className="input-label">Enabled</label>
+                                                                                <div
+                                                                                    onClick={() => {
+                                                                                        const isEnabled = !!lesson.quizData;
+                                                                                        updateLesson(mod.id, lesson.id, {
+                                                                                            quizData: isEnabled ? undefined : { pass_mark: 80, questions: [] as any[] }
+                                                                                        });
+                                                                                    }}
+                                                                                    style={{
+                                                                                        width: '50px',
+                                                                                        height: '26px',
+                                                                                        background: lesson.quizData ? '#1a4d3e' : '#e2e8f0',
+                                                                                        borderRadius: '13px',
+                                                                                        position: 'relative',
+                                                                                        cursor: 'pointer',
+                                                                                        transition: 'all 0.3s'
+                                                                                    }}
+                                                                                >
+                                                                                    <div style={{
+                                                                                        width: '20px',
+                                                                                        height: '20px',
+                                                                                        background: 'white',
+                                                                                        borderRadius: '50%',
+                                                                                        position: 'absolute',
+                                                                                        top: '3px',
+                                                                                        left: lesson.quizData ? '27px' : '3px',
+                                                                                        transition: 'left 0.3s'
+                                                                                    }}></div>
                                                                                 </div>
-                                                                                {lesson.quizData && (
-                                                                                    <>
-                                                                                        <div>
-                                                                                            <label className="input-label">Pass Mark (%)</label>
-                                                                                            <input
-                                                                                                type="number"
-                                                                                                className="custom-input"
-                                                                                                placeholder="80"
-                                                                                                value={lesson.quizData.pass_mark || 80}
-                                                                                                onChange={(e) => updateLesson(mod.id, lesson.id, {
-                                                                                                     quizData: {
-                                                                                                         pass_mark: parseInt(e.target.value) || 0,
-                                                                                                         questions: lesson.quizData?.questions || [] as any[]
-                                                                                                     }
-                                                                                                 })}
-                                                                                            />
-                                                                                        </div>
-                                                                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                                                                            <button
-                                                                                                className="btn-standard"
-                                                                                                style={{ background: '#020617', whiteSpace: 'nowrap' }}
-                                                                                                onClick={() => setDesigningQuiz({ moduleId: mod.id, lessonId: lesson.id })}
-                                                                                            >
-                                                                                                Design ({lesson.quizData.questions?.length || 0}) Questions
-                                                                                            </button>
-                                                                                            <button
-                                                                                                className="btn-standard"
-                                                                                                style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#0f172a', whiteSpace: 'nowrap' }}
-                                                                                                onClick={() => setViewingQuizKey({ moduleId: mod.id, lessonId: lesson.id })}
-                                                                                            >
-                                                                                                Preview Key
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </>
-                                                                                )}
                                                                             </div>
+                                                                            {lesson.quizData && (
+                                                                                <>
+                                                                                    <div>
+                                                                                        <label className="input-label">Pass Mark (%)</label>
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            className="custom-input"
+                                                                                            placeholder="80"
+                                                                                            value={lesson.quizData.pass_mark || 80}
+                                                                                            onChange={(e) => updateLesson(mod.id, lesson.id, {
+                                                                                                quizData: {
+                                                                                                    pass_mark: parseInt(e.target.value) || 0,
+                                                                                                    questions: lesson.quizData?.questions || [] as any[]
+                                                                                                }
+                                                                                            })}
+                                                                                        />
+                                                                                    </div>
+                                                                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                                                                        <button
+                                                                                            className="btn-standard"
+                                                                                            style={{ background: '#020617', whiteSpace: 'nowrap' }}
+                                                                                            onClick={() => setDesigningQuiz({ moduleId: mod.id, lessonId: lesson.id })}
+                                                                                        >
+                                                                                            Design ({lesson.quizData.questions?.length || 0}) Questions
+                                                                                        </button>
+                                                                                        <button
+                                                                                            className="btn-standard"
+                                                                                            style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#0f172a', whiteSpace: 'nowrap' }}
+                                                                                            onClick={() => setViewingQuizKey({ moduleId: mod.id, lessonId: lesson.id })}
+                                                                                        >
+                                                                                            Preview Key
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </>
+                                                                            )}
                                                                         </div>
-                                                                    </>
-                                                                )}
+                                                                    </div>
+                                                                </>
+                                                            )}
 
                                                             {lesson.type === 'quiz' && (
                                                                 <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
@@ -2037,9 +2037,9 @@ export default function EditCourse() {
                                                         return <img src={url} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onContextMenu={(e: any) => e.preventDefault()} />;
                                                     }
                                                     if (fileName.match(/\.pdf$/i)) {
-                                                        return <iframe 
-                                                            src={`${url}#toolbar=0`} 
-                                                            style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }} 
+                                                        return <iframe
+                                                            src={`${url}#toolbar=0`}
+                                                            style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
                                                             onLoad={() => setIframeLoading(false)}
                                                         />;
                                                     }
@@ -2452,10 +2452,10 @@ export default function EditCourse() {
                                 </button>
                             </div>                             <div style={{ padding: '2rem 3rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem' }}>
                                 <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                     <button
+                                    <button
                                         onClick={() => {
                                             // Toggle a simple preview of the answer key
-                                            alert("Evaluation Key:\n" + quizData.questions.map((q, i) => `Q${i+1}: Option ${q.correct_answer + 1}`).join('\n'));
+                                            alert("Evaluation Key:\n" + quizData.questions.map((q, i) => `Q${i + 1}: Option ${q.correct_answer + 1}`).join('\n'));
                                         }}
                                         className="btn-standard"
                                         style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#1a4d3e', fontWeight: 800 }}
@@ -2647,10 +2647,10 @@ export default function EditCourse() {
                                 </button>
                             </div>                             <div style={{ padding: '2rem 3rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem' }}>
                                 <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                     <button
+                                    <button
                                         onClick={() => {
                                             // Toggle a simple preview of the answer key
-                                            alert("Evaluation Key:\n" + quizData.questions.map((q, i) => `Q${i+1}: Option ${q.correct_answer + 1}`).join('\n'));
+                                            alert("Evaluation Key:\n" + quizData.questions.map((q, i) => `Q${i + 1}: Option ${q.correct_answer + 1}`).join('\n'));
                                         }}
                                         className="btn-standard"
                                         style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#1a4d3e', fontWeight: 800 }}
@@ -2696,7 +2696,7 @@ export default function EditCourse() {
                                     <X size={20} />
                                 </button>
                             </div>
-                            
+
                             <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem' }}>
                                 {questions.length === 0 ? (
                                     <div style={{ textAlign: 'center', padding: '4rem 0' }}>
@@ -2714,11 +2714,11 @@ export default function EditCourse() {
                                             {q.options.map((opt: string, oIdx: number) => {
                                                 const isRightAnswer = q.correct_answer === oIdx;
                                                 return (
-                                                    <div 
-                                                        key={oIdx} 
-                                                        style={{ 
-                                                            padding: '1.1rem 1.5rem', 
-                                                            borderRadius: '16px', 
+                                                    <div
+                                                        key={oIdx}
+                                                        style={{
+                                                            padding: '1.1rem 1.5rem',
+                                                            borderRadius: '16px',
                                                             background: isRightAnswer ? '#f0fdf4' : 'white',
                                                             border: `1.5px solid ${isRightAnswer ? '#10b98140' : '#f1f5f9'}`,
                                                             color: isRightAnswer ? '#166534' : '#64748b',
@@ -2726,7 +2726,7 @@ export default function EditCourse() {
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             gap: '12px'
-                                                         }}
+                                                        }}
                                                     >
                                                         <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                                             {isRightAnswer && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'currentColor' }}></div>}
@@ -2740,7 +2740,7 @@ export default function EditCourse() {
                                     </div>
                                 ))}
                             </div>
-                            
+
                             <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
                                 <button onClick={() => setViewingQuizKey(null)} style={{ background: '#0f172a', color: 'white', border: 'none', padding: '0.75rem 2rem', borderRadius: '12px', fontWeight: 900, cursor: 'pointer' }}>Close Answer Key</button>
                             </div>
@@ -2761,7 +2761,7 @@ export default function EditCourse() {
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
                             {existingVideos.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '5rem 0' }}>
@@ -2784,7 +2784,7 @@ export default function EditCourse() {
                                             <div style={{ padding: '1.25rem' }}>
                                                 <h5 style={{ margin: '0 0 8px 0', fontWeight: 850, fontSize: '0.9rem', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{video.name}</h5>
                                                 <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Modified: {new Date(video.last_modified).toLocaleDateString()}</p>
-                                                <button 
+                                                <button
                                                     onClick={() => selectExistingVideo(video.url)}
                                                     className="btn-standard"
                                                     style={{ width: '100%', background: '#0f172a', color: 'white', height: '40px', fontWeight: 800, fontSize: '0.85rem' }}
@@ -2797,7 +2797,7 @@ export default function EditCourse() {
                                 </div>
                             )}
                         </div>
-                        
+
                         <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
                             <button onClick={() => setIsBrowsingVideos(false)} className="btn-standard" style={{ background: 'white', color: '#64748b', border: '1.5px solid #e2e8f0', padding: '0 2rem' }}>Cancel</button>
                         </div>

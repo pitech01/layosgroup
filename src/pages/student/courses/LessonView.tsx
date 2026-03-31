@@ -16,7 +16,6 @@ const LessonView = () => {
     const [allLessons, setAllLessons] = useState<any[]>([]);
     const [previewAsset, setPreviewAsset] = useState<{ url: string; type: 'image' | 'pdf' | 'video' | 'ppt' } | null>(null);
     const [iframeLoading, setIframeLoading] = useState(true);
-    const [mainIframeLoading, setMainIframeLoading] = useState(true);
 
     // Quiz State
     const [quizStarted, setQuizStarted] = useState(false);
@@ -25,7 +24,6 @@ const LessonView = () => {
     const [isMaximized, setIsMaximized] = useState(false);
     const [quizResult, setQuizResult] = useState<{ score: number, passed: boolean } | null>(null);
     const [showReview, setShowReview] = useState(false);
-    const [isPdfFullscreen, setIsPdfFullscreen] = useState(false);
 
     // TTS hook — full Read Aloud system
     const tts = usePdfTts();
@@ -403,23 +401,22 @@ const LessonView = () => {
                                                 <span style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem' }}>{lesson.live_time || 'TBA'}</span>
                                             </div>
                                         </div>
-
-                                <div>
-                                    {lesson.live_link ? (
-                                        <a
-                                            href={lesson.live_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{ display: 'inline-flex', background: '#3b82f6', color: 'white', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 800, textDecoration: 'none', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.4)', alignItems: 'center', gap: '0.5rem' }}
-                                        >
-                                            <Video size={18} /> Join Live Class
-                                        </a>
-                                    ) : (
-                                        <span style={{ padding: '0.75rem 1.5rem', background: '#1e293b', color: '#64748b', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem' }}>Meeting Link Pending</span>
-                                    )}
-                                </div>
-                            </div>
-                        ) : (lesson.type === 'quiz' || quizStarted) ? (
+                                        <div>
+                                            {lesson.live_link ? (
+                                                <a
+                                                    href={lesson.live_link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ display: 'inline-flex', background: '#3b82f6', color: 'white', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 800, textDecoration: 'none', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.4)', alignItems: 'center', gap: '0.5rem' }}
+                                                >
+                                                    <Video size={18} /> Join Live Class
+                                                </a>
+                                            ) : (
+                                                <span style={{ padding: '0.75rem 1.5rem', background: '#1e293b', color: '#64748b', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem' }}>Meeting Link Pending</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (lesson.type === 'quiz' || quizStarted) ? (
                                     <div style={{ width: '100%', height: '100%', background: 'linear-gradient(165deg, #020617 0%, #0f172a 100%)', display: 'flex', flexDirection: 'column' }}>
                                         {!quizStarted ? (
                                             <div style={{ margin: 'auto', textAlign: 'center', maxWidth: '700px', padding: '3rem' }} className="evaluation-premium-card">
@@ -444,15 +441,8 @@ const LessonView = () => {
                                                 <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3.5rem' }}>
                                                     <div style={{ textAlign: 'left', padding: '1rem 2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                         <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>Question Payload</div>
-                                                        <div style={{ color: 'white', fontWeight: 900, fontSize: '1.05rem', letterSpacing: '-0.02em' }}>
-                                         {tts.ttsState === 'extracting' ? 'Analyzing... ' : tts.ttsState === 'playing' ? 'Reading Mode' : tts.ttsState === 'paused' ? 'Paused' : 'Ready to Start'}
-                                         {tts.isIndexing && <span style={{ color: '#10b981', marginLeft: '6px', fontSize: '0.7rem', fontWeight: 800, background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '100px' }}>Indexing {tts.indexingProgress}%</span>}
-                                     </div>
-                                     <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>
-                                         {tts.ttsState === 'extracting' ? 'Extracting text intelligence...' : `Chunk ${tts.currentChunk} / ${tts.totalChunks}`}
-                                         {tts.ttsState === 'error'      && 'Extraction Failed'}
-                                     </div>
-                              </div>
+                                                        <div style={{ color: 'white', fontWeight: 900, fontSize: '1.25rem' }}>{lesson.quiz_data?.questions?.length || 0} Critical Blocks</div>
+                                                    </div>
                                                     <div style={{ textAlign: 'left', padding: '1rem 2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                         <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>Passing Criteria</div>
                                                         <div style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem' }}>{lesson.quiz_data?.pass_mark || 80}% Proficiency</div>
@@ -671,55 +661,80 @@ const LessonView = () => {
                                         ) : (lesson.file_url.match(/\.pdf([?#]|$)/i) || lesson.file_url.match(/\.(pptx?)([?#]|$)/i)) ? (
                                             <div
                                                 id="document-lesson-viewer"
-                                                ref={pdfContainerRef}
                                                 style={{
-                                                    width: '100%', height: '100%', position: 'relative', minHeight: '600px',
-                                                    ...(isPdfFullscreen ? {
-                                                        position: 'fixed', inset: 0, zIndex: 8000,
-                                                        background: '#fff', height: '100vh',
-                                                    } : {})
+                                                    width: '100%', height: '100%', display: 'flex',
+                                                    flexDirection: 'column', alignItems: 'center',
+                                                    justifyContent: 'center', background: '#f8fafc',
+                                                    borderRadius: '32px', border: '1.5px solid #f1f5f9',
+                                                    padding: '4rem', textAlign: 'center', minHeight: '600px'
                                                 }}
                                             >
-                                                {/* Fullscreen toggle */}
-                                                <button
-                                                    onClick={() => setIsPdfFullscreen(f => !f)}
-                                                    title={isPdfFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-                                                    style={{
-                                                        position: 'absolute', top: 12, right: 12, zIndex: 20,
-                                                        background: 'rgba(0,0,0,0.5)', border: 'none',
-                                                        borderRadius: '10px', padding: '7px', color: 'white',
-                                                        cursor: 'pointer', display: 'flex', alignItems: 'center',
-                                                        backdropFilter: 'blur(8px)',
-                                                    }}
-                                                >
-                                                    {isPdfFullscreen 
-                                                        ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v5H3M21 8h-5V3M3 16h5v5M16 21v-5h5"/></svg> 
-                                                        : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>}
-                                                </button>
-
-                                                {mainIframeLoading && (
-                                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 5 }}>
-                                                        <div className="animate-spin" style={{ width: 40, height: 40, border: '4px solid #10b981', borderTopColor: 'transparent', borderRadius: '50%', marginBottom: '1rem' }} />
-                                                        <p style={{ color: '#1a4d3e', fontWeight: 800 }}>Preparing Instructional Assets...</p>
-                                                    </div>
-                                                )}
-                                                <iframe
-                                                    src={lesson.file_url.match(/\.(pptx?)([?#]|$)/i) 
-                                                        ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(lesson.file_url)}`
-                                                        : `${lesson.file_url}#toolbar=0&navpanes=0`}
-                                                    style={{ width: '100%', height: '100%', border: 'none', borderRadius: isPdfFullscreen ? 0 : '16px', opacity: mainIframeLoading ? 0 : 1 }}
-                                                    title="Document Preview"
-                                                    onLoad={() => setMainIframeLoading(false)}
-                                                    onContextMenu={(e: any) => e.preventDefault()}
-                                                />
+                                                <div style={{
+                                                    width: '100px', height: '100px', background: '#f0fdf4',
+                                                    borderRadius: '32px', display: 'flex', alignItems: 'center',
+                                                    justifyContent: 'center', marginBottom: '2rem',
+                                                    boxShadow: '0 20px 40px rgba(26, 77, 62, 0.08)'
+                                                }}>
+                                                    <FileText size={48} color="#1a4d3e" />
+                                                </div>
+                                                <h3 style={{ margin: '0 0 12px 0', fontSize: '1.85rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>
+                                                    Interactive Resource Ready
+                                                </h3>
+                                                <p style={{ margin: '0 0 2.5rem 0', color: '#64748b', fontSize: '1.15rem', fontWeight: 600, maxWidth: '480px', lineHeight: 1.6 }}>
+                                                    This {lesson.file_url.match(/\.pdf/i) ? 'document' : 'presentation'} has been prepared for your session. Use the high-fidelity narrator below or access the visual assets for deep review.
+                                                </p>
+                                                <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center' }}>
+                                                    <button
+                                                        onClick={toggleReadAloud}
+                                                        className="btn-primary-forest"
+                                                        style={{ padding: '0 2.5rem', height: '56px', fontSize: '1rem', boxShadow: '0 15px 30px rgba(26, 77, 62, 0.2)' }}
+                                                    >
+                                                        <PlayCircle size={20} /> Listen to Lesson
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            const assetsSection = document.getElementById('lesson-assets-sidebar');
+                                                            if (assetsSection) {
+                                                                assetsSection.scrollIntoView({ behavior: 'smooth' });
+                                                                assetsSection.style.borderColor = '#1a4d3e';
+                                                                assetsSection.style.boxShadow = '0 0 0 4px rgba(26, 77, 62, 0.1)';
+                                                                setTimeout(() => {
+                                                                    assetsSection.style.borderColor = '#e2e8f0';
+                                                                    assetsSection.style.boxShadow = 'none';
+                                                                }, 2000);
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            padding: '0 2.5rem', height: '56px', fontSize: '1rem',
+                                                            background: 'white', border: '2px solid #e2e8f0', borderRadius: '16px',
+                                                            color: '#64748b', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s',
+                                                            display: 'flex', alignItems: 'center', gap: '10px'
+                                                        }}
+                                                        onMouseEnter={(e: any) => { e.currentTarget.style.borderColor = '#1a4d3e'; e.currentTarget.style.color = '#1a4d3e'; }}
+                                                        onMouseLeave={(e: any) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
+                                                    >
+                                                        <Eye size={20} /> View Assets
+                                                    </button>
+                                                </div>
                                             </div>
                                         ) : (
-                                            <div style={{ textAlign: 'center' }}>
-                                                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#1a4d3e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '1.5rem', opacity: 0.5 }}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-                                                <p style={{ color: '#1a4d3e', fontWeight: 800 }}>Document Resource Prepared</p>
-                                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>{lesson.file_name || 'Attached File'}</p>
-                                                <div style={{ marginTop: '1.5rem', background: '#f1f5f9', color: '#64748b', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, fontSize: '0.85rem' }}>View Lesson Assets</div>
+                                            <div style={{ textAlign: 'center', padding: '4rem' }}>
+                                                <div style={{ width: '80px', height: '80px', background: '#f1f5f9', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+                                                    <FileText size={40} color="#1a4d3e" opacity={0.5} />
+                                                </div>
+                                                <p style={{ color: '#1a4d3e', fontWeight: 900, fontSize: '1.25rem', margin: '0 0 8px 0' }}>Material Resource Prepared</p>
+                                                <p style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>{lesson.file_name || 'Attached File'}</p>
+                                                <div
+                                                    onClick={() => {
+                                                        const assetsSection = document.getElementById('lesson-assets-sidebar');
+                                                        if (assetsSection) assetsSection.scrollIntoView({ behavior: 'smooth' });
+                                                    }}
+                                                    style={{ marginTop: '2rem', background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#1a4d3e', padding: '0.85rem 2rem', borderRadius: '14px', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                                                >
+                                                    <Eye size={18} /> Review Lesson Assets
+                                                </div>
                                             </div>
+
                                         )}
                                     </div>
                                 ) : (
@@ -793,7 +808,7 @@ const LessonView = () => {
 
                         {/* Sidebar */}
                         <div>
-                            <div style={{ padding: '2rem', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '24px' }}>
+                            <div id="lesson-assets-sidebar" style={{ padding: '2rem', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '24px', transition: 'all 0.4s ease' }}>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <Eye size={20} color="#1a4d3e" /> Lesson Assets
                                 </h3>

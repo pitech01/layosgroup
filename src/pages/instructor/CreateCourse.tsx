@@ -305,7 +305,7 @@ export default function CreateCourse() {
 
     const handleDeleteVideo = async (moduleId: string, lessonId: string, videoUrl: string) => {
         if (!window.confirm('Delete this file permanently from storage?')) return;
-        
+
         const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
         const token = localStorage.getItem('token');
 
@@ -1431,8 +1431,8 @@ export default function CreateCourse() {
                                                                                     <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Upload Video File</h5>
                                                                                     <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', marginBottom: '1.5rem' }}>Supports 4K/HD formats up to 2GB</p>
                                                                                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                                                                        <button 
-                                                                                            className="btn-standard" 
+                                                                                        <button
+                                                                                            className="btn-standard"
                                                                                             style={{ background: '#020617', color: 'white', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
@@ -1441,8 +1441,8 @@ export default function CreateCourse() {
                                                                                         >
                                                                                             <Upload size={14} style={{ marginRight: '6px' }} /> Upload New
                                                                                         </button>
-                                                                                        <button 
-                                                                                            className="btn-standard" 
+                                                                                        <button
+                                                                                            className="btn-standard"
                                                                                             style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
@@ -1554,7 +1554,7 @@ export default function CreateCourse() {
                                                                                         style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
                                                                                     />
                                                                                     <button
-                                                                                         onClick={() => handleDeleteVideo(mod.id, lesson.id, lesson.videoUrl || '')}
+                                                                                        onClick={() => handleDeleteVideo(mod.id, lesson.id, lesson.videoUrl || '')}
                                                                                         style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', zIndex: 10 }}
                                                                                     >
                                                                                         Delete Recording
@@ -1565,15 +1565,15 @@ export default function CreateCourse() {
                                                                                     <Video size={32} color="#64748b" style={{ marginBottom: '1rem' }} />
                                                                                     <h5 style={{ margin: '0 0 10px 0', fontWeight: 800 }}>Upload Session Recording</h5>
                                                                                     <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                                                                                        <button 
-                                                                                            className="btn-standard" 
+                                                                                        <button
+                                                                                            className="btn-standard"
                                                                                             style={{ background: '#020617', color: 'white', fontSize: '0.75rem', height: '36px' }}
                                                                                             onClick={() => document.getElementById(`recording-upload-${lesson.id}`)?.click()}
                                                                                         >
                                                                                             <Upload size={14} style={{ marginRight: '6px' }} /> Upload New
                                                                                         </button>
-                                                                                        <button 
-                                                                                            className="btn-standard" 
+                                                                                        <button
+                                                                                            className="btn-standard"
                                                                                             style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', fontSize: '0.75rem', height: '36px' }}
                                                                                             onClick={() => fetchExistingVideos(mod.id, lesson.id)}
                                                                                         >
@@ -1674,7 +1674,7 @@ export default function CreateCourse() {
                                                                                         <button
                                                                                             onClick={(e: any) => {
                                                                                                 e.stopPropagation();
-                                                                                                 handleDeleteVideo(mod.id, lesson.id, lesson.fileUrl || '');
+                                                                                                handleDeleteVideo(mod.id, lesson.id, lesson.fileUrl || '');
                                                                                             }}
                                                                                             style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                         >
@@ -1716,7 +1716,7 @@ export default function CreateCourse() {
                                                                                 <h5 style={{ margin: 0, fontWeight: 850, color: '#0f172a' }}>Material-Linked Questions</h5>
                                                                             </div>
                                                                             <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Enable this to require students to complete a validation quiz after studying this document.</p>
-                                                                            
+
                                                                             <div className="evaluation-grid-material" style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr 1fr', gap: '1.5rem', alignItems: 'flex-end' }}>
                                                                                 <style>{`
                                                                                     .evaluation-grid-material { grid-template-columns: min-content 1fr 1fr !important; }
@@ -1724,30 +1724,30 @@ export default function CreateCourse() {
                                                                                 `}</style>
                                                                                 <div>
                                                                                     <label className="input-label">Enabled</label>
-                                                                                    <div 
+                                                                                    <div
                                                                                         onClick={() => {
                                                                                             const isEnabled = !!lesson.quizData;
                                                                                             updateLesson(mod.id, lesson.id, {
                                                                                                 quizData: isEnabled ? undefined : { pass_mark: 80, questions: [] as any[] }
                                                                                             });
                                                                                         }}
-                                                                                        style={{ 
-                                                                                            width: '50px', 
-                                                                                            height: '26px', 
-                                                                                            background: lesson.quizData ? '#1a4d3e' : '#e2e8f0', 
-                                                                                            borderRadius: '13px', 
-                                                                                            position: 'relative', 
+                                                                                        style={{
+                                                                                            width: '50px',
+                                                                                            height: '26px',
+                                                                                            background: lesson.quizData ? '#1a4d3e' : '#e2e8f0',
+                                                                                            borderRadius: '13px',
+                                                                                            position: 'relative',
                                                                                             cursor: 'pointer',
                                                                                             transition: 'all 0.3s'
                                                                                         }}
                                                                                     >
-                                                                                        <div style={{ 
-                                                                                            width: '20px', 
-                                                                                            height: '20px', 
-                                                                                            background: 'white', 
-                                                                                            borderRadius: '50%', 
-                                                                                            position: 'absolute', 
-                                                                                            top: '3px', 
+                                                                                        <div style={{
+                                                                                            width: '20px',
+                                                                                            height: '20px',
+                                                                                            background: 'white',
+                                                                                            borderRadius: '50%',
+                                                                                            position: 'absolute',
+                                                                                            top: '3px',
                                                                                             left: lesson.quizData ? '27px' : '3px',
                                                                                             transition: 'left 0.3s'
                                                                                         }}></div>
@@ -1762,12 +1762,12 @@ export default function CreateCourse() {
                                                                                                 className="custom-input"
                                                                                                 placeholder="80"
                                                                                                 value={lesson.quizData.pass_mark || 80}
-                                                                                                 onChange={(e) => updateLesson(mod.id, lesson.id, {
-                                                                                                     quizData: {
-                                                                                                         pass_mark: parseInt(e.target.value) || 0,
-                                                                                                         questions: lesson.quizData?.questions || [] as any[]
-                                                                                                     }
-                                                                                                 })}
+                                                                                                onChange={(e) => updateLesson(mod.id, lesson.id, {
+                                                                                                    quizData: {
+                                                                                                        pass_mark: parseInt(e.target.value) || 0,
+                                                                                                        questions: lesson.quizData?.questions || [] as any[]
+                                                                                                    }
+                                                                                                })}
                                                                                             />
                                                                                         </div>
                                                                                         <div style={{ display: 'flex', gap: '1rem' }}>
@@ -2590,7 +2590,7 @@ export default function CreateCourse() {
                                     <X size={20} />
                                 </button>
                             </div>
-                            
+
                             <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem' }}>
                                 {questions.length === 0 ? (
                                     <div style={{ textAlign: 'center', padding: '4rem 0' }}>
@@ -2608,11 +2608,11 @@ export default function CreateCourse() {
                                             {q.options.map((opt: string, oIdx: number) => {
                                                 const isRightAnswer = q.correct_answer === oIdx;
                                                 return (
-                                                    <div 
-                                                        key={oIdx} 
-                                                        style={{ 
-                                                            padding: '1.1rem 1.5rem', 
-                                                            borderRadius: '16px', 
+                                                    <div
+                                                        key={oIdx}
+                                                        style={{
+                                                            padding: '1.1rem 1.5rem',
+                                                            borderRadius: '16px',
                                                             background: isRightAnswer ? '#f0fdf4' : 'white',
                                                             border: `1.5px solid ${isRightAnswer ? '#10b98140' : '#f1f5f9'}`,
                                                             color: isRightAnswer ? '#166534' : '#64748b',
@@ -2620,7 +2620,7 @@ export default function CreateCourse() {
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             gap: '12px'
-                                                         }}
+                                                        }}
                                                     >
                                                         <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                                             {isRightAnswer && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'currentColor' }}></div>}
@@ -2634,7 +2634,7 @@ export default function CreateCourse() {
                                     </div>
                                 ))}
                             </div>
-                            
+
                             <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
                                 <button onClick={() => setViewingQuizKey(null)} style={{ background: '#0f172a', color: 'white', border: 'none', padding: '0.75rem 2rem', borderRadius: '12px', fontWeight: 900, cursor: 'pointer' }}>Close Answer Key</button>
                             </div>
@@ -2654,7 +2654,7 @@ export default function CreateCourse() {
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
                             {existingVideos.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '5rem 0' }}>
@@ -2677,7 +2677,7 @@ export default function CreateCourse() {
                                             <div style={{ padding: '1.25rem' }}>
                                                 <h5 style={{ margin: '0 0 8px 0', fontWeight: 850, fontSize: '0.9rem', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{video.name}</h5>
                                                 <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Modified: {new Date(video.last_modified).toLocaleDateString()}</p>
-                                                <button 
+                                                <button
                                                     onClick={() => selectExistingVideo(video.url)}
                                                     className="btn-standard"
                                                     style={{ width: '100%', background: '#0f172a', color: 'white', height: '40px', fontWeight: 800, fontSize: '0.85rem' }}
@@ -2690,7 +2690,7 @@ export default function CreateCourse() {
                                 </div>
                             )}
                         </div>
-                        
+
                         <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
                             <button onClick={() => setIsBrowsingVideos(false)} className="btn-standard" style={{ background: 'white', color: '#64748b', border: '1.5px solid #e2e8f0', padding: '0 2rem' }}>Cancel</button>
                         </div>
