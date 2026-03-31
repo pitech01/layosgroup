@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Play, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle } from 'lucide-react';
+import { usePdfTts, cleanVoiceName } from '../../../utils/usePdfTts';
 
 const LessonView = () => {
     const { courseId, lessonId } = useParams();
@@ -13,7 +14,7 @@ const LessonView = () => {
     const [isCompleting, setIsCompleting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [allLessons, setAllLessons] = useState<any[]>([]);
-    const [previewAsset, setPreviewAsset] = useState<{ url: string; type: 'image' | 'pdf' | 'video' } | null>(null);
+    const [previewAsset, setPreviewAsset] = useState<{ url: string; type: 'image' | 'pdf' | 'video' | 'ppt' } | null>(null);
     const [iframeLoading, setIframeLoading] = useState(true);
     const [mainIframeLoading, setMainIframeLoading] = useState(true);
 
@@ -21,11 +22,46 @@ const LessonView = () => {
     const [quizStarted, setQuizStarted] = useState(false);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: number }>({});
+    const [isMaximized, setIsMaximized] = useState(false);
     const [quizResult, setQuizResult] = useState<{ score: number, passed: boolean } | null>(null);
     const [showReview, setShowReview] = useState(false);
-    const [isMaximized, setIsMaximized] = useState(false);
+    const [isPdfFullscreen, setIsPdfFullscreen] = useState(false);
 
-    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    // TTS hook — full Read Aloud system
+    const tts = usePdfTts();
+
+    // Ref to the PDF container div (used for auto-scroll sync)
+    const pdfContainerRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll: proportional scroll synced to reading progress.
+    // Strategy: try the PDF container first (works in fullscreen),
+    // then fall back to window scroll (works in normal embedded view).
+    const handleChunkChange = (idx: number, total: number) => {
+        if (total === 0) return;
+        const progress = idx / total;
+
+        const container = pdfContainerRef.current;
+        if (container && container.scrollHeight > container.clientHeight) {
+            // Container has scrollable content (fullscreen mode)
+            container.scrollTo({
+                top: container.scrollHeight * progress,
+                behavior: 'smooth',
+            });
+        } else {
+            // Normal mode: scroll the page to show the PDF section
+            const el = container ?? document.getElementById('pdf-lesson-viewer');
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const absoluteTop = rect.top + window.scrollY;
+            const scrollTarget = absoluteTop + el.clientHeight * progress - window.innerHeight * 0.3;
+            window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+        }
+    };
+
+    // @ts-ignore
+    const API_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    // @ts-ignore
+    const IS_DEV = (import.meta as any).env.DEV;
 
     useEffect(() => {
         const fetchLessonData = async () => {
@@ -102,7 +138,37 @@ const LessonView = () => {
         };
 
         fetchLessonData();
+        return () => { tts.cancelLoad(); };
     }, [courseId, lessonId, cohortId, API_URL]);
+
+    useEffect(() => {
+        if (lesson) {
+            console.log('[DEBUG] Lesson Data:', lesson);
+            console.log('[DEBUG] File URL:', lesson.file_url);
+            if (lesson.file_url) {
+                console.log('[DEBUG] Is PDF Match:', /\.pdf([?#]|$)/i.test(lesson.file_url));
+            }
+        }
+    }, [lesson]);
+
+    // Stop TTS whenever the lesson changes
+    useEffect(() => { tts.cancelLoad(); }, [lessonId]);
+
+
+
+
+
+
+    const toggleReadAloud = () => {
+        if (!lesson?.file_url) return;
+        if (['playing', 'paused'].includes(tts.ttsState)) {
+            tts.stop();
+        } else {
+            tts.loadAndPlay(lesson.file_url, lesson.file_name, handleChunkChange);
+        }
+    };
+
+
 
     if (loading) {
         return (
@@ -378,8 +444,15 @@ const LessonView = () => {
                                                 <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3.5rem' }}>
                                                     <div style={{ textAlign: 'left', padding: '1rem 2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                         <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>Question Payload</div>
-                                                        <div style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem' }}>{lesson.quiz_data?.questions?.length || 0} Blocks</div>
-                                                    </div>
+                                                        <div style={{ color: 'white', fontWeight: 900, fontSize: '1.05rem', letterSpacing: '-0.02em' }}>
+                                         {tts.ttsState === 'extracting' ? 'Analyzing... ' : tts.ttsState === 'playing' ? 'Reading Mode' : tts.ttsState === 'paused' ? 'Paused' : 'Ready to Start'}
+                                         {tts.isIndexing && <span style={{ color: '#10b981', marginLeft: '6px', fontSize: '0.7rem', fontWeight: 800, background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '100px' }}>Indexing {tts.indexingProgress}%</span>}
+                                     </div>
+                                     <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>
+                                         {tts.ttsState === 'extracting' ? 'Extracting text intelligence...' : `Chunk ${tts.currentChunk} / ${tts.totalChunks}`}
+                                         {tts.ttsState === 'error'      && 'Extraction Failed'}
+                                     </div>
+                              </div>
                                                     <div style={{ textAlign: 'left', padding: '1rem 2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                         <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>Passing Criteria</div>
                                                         <div style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem' }}>{lesson.quiz_data?.pass_mark || 80}% Proficiency</div>
@@ -573,21 +646,21 @@ const LessonView = () => {
                                     <video
                                         controls
                                         src={lesson.video_url}
-                                        autoPlay
+                                                        autoPlay
                                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                         controlsList="nodownload"
                                         onContextMenu={(e: any) => e.preventDefault()}
                                     />
                                 ) : lesson.file_url ? (
                                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
-                                        {lesson.file_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                        {lesson.file_url.match(/\.(jpg|jpeg|png|gif|webp)([?#]|$)/i) ? (
                                             <img
                                                 src={lesson.file_url}
                                                 alt={lesson.title}
                                                 style={{ maxWidth: '100%', maxHeight: '100%', userSelect: 'none', pointerEvents: 'none', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
                                                 onContextMenu={(e: any) => e.preventDefault()}
                                             />
-                                        ) : lesson.file_url.match(/\.(mp4|webm|ogg|ogv)$/i) ? (
+                                        ) : lesson.file_url.match(/\.(mp4|webm|ogg|ogv)([?#]|$)/i) ? (
                                             <video
                                                 controls
                                                 src={lesson.file_url}
@@ -595,17 +668,46 @@ const LessonView = () => {
                                                 controlsList="nodownload"
                                                 onContextMenu={(e: any) => e.preventDefault()}
                                             />
-                                        ) : lesson.file_url.match(/\.pdf$/i) ? (
-                                            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                                        ) : (lesson.file_url.match(/\.pdf([?#]|$)/i) || lesson.file_url.match(/\.(pptx?)([?#]|$)/i)) ? (
+                                            <div
+                                                id="document-lesson-viewer"
+                                                ref={pdfContainerRef}
+                                                style={{
+                                                    width: '100%', height: '100%', position: 'relative', minHeight: '600px',
+                                                    ...(isPdfFullscreen ? {
+                                                        position: 'fixed', inset: 0, zIndex: 8000,
+                                                        background: '#fff', height: '100vh',
+                                                    } : {})
+                                                }}
+                                            >
+                                                {/* Fullscreen toggle */}
+                                                <button
+                                                    onClick={() => setIsPdfFullscreen(f => !f)}
+                                                    title={isPdfFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                                                    style={{
+                                                        position: 'absolute', top: 12, right: 12, zIndex: 20,
+                                                        background: 'rgba(0,0,0,0.5)', border: 'none',
+                                                        borderRadius: '10px', padding: '7px', color: 'white',
+                                                        cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                                        backdropFilter: 'blur(8px)',
+                                                    }}
+                                                >
+                                                    {isPdfFullscreen 
+                                                        ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v5H3M21 8h-5V3M3 16h5v5M16 21v-5h5"/></svg> 
+                                                        : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>}
+                                                </button>
+
                                                 {mainIframeLoading && (
                                                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 5 }}>
-                                                        <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
-                                                        <p style={{ marginTop: '1rem', color: '#1a4d3e', fontWeight: 700 }}>Decrypting Document...</p>
+                                                        <div className="animate-spin" style={{ width: 40, height: 40, border: '4px solid #10b981', borderTopColor: 'transparent', borderRadius: '50%', marginBottom: '1rem' }} />
+                                                        <p style={{ color: '#1a4d3e', fontWeight: 800 }}>Preparing Instructional Assets...</p>
                                                     </div>
                                                 )}
                                                 <iframe
-                                                    src={`${lesson.file_url}#toolbar=0&navpanes=0`}
-                                                    style={{ width: '100%', height: '100%', border: 'none', borderRadius: '16px', opacity: mainIframeLoading ? 0 : 1 }}
+                                                    src={lesson.file_url.match(/\.(pptx?)([?#]|$)/i) 
+                                                        ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(lesson.file_url)}`
+                                                        : `${lesson.file_url}#toolbar=0&navpanes=0`}
+                                                    style={{ width: '100%', height: '100%', border: 'none', borderRadius: isPdfFullscreen ? 0 : '16px', opacity: mainIframeLoading ? 0 : 1 }}
                                                     title="Document Preview"
                                                     onLoad={() => setMainIframeLoading(false)}
                                                     onContextMenu={(e: any) => e.preventDefault()}
@@ -613,7 +715,7 @@ const LessonView = () => {
                                             </div>
                                         ) : (
                                             <div style={{ textAlign: 'center' }}>
-                                                <FileText size={64} color="#1a4d3e" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                                                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#1a4d3e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '1.5rem', opacity: 0.5 }}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
                                                 <p style={{ color: '#1a4d3e', fontWeight: 800 }}>Document Resource Prepared</p>
                                                 <p style={{ color: '#64748b', fontSize: '0.9rem' }}>{lesson.file_name || 'Attached File'}</p>
                                                 <div style={{ marginTop: '1.5rem', background: '#f1f5f9', color: '#64748b', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, fontSize: '0.85rem' }}>View Lesson Assets</div>
@@ -623,7 +725,7 @@ const LessonView = () => {
                                 ) : (
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ width: '90px', height: '90px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)', margin: '0 auto 1.5rem auto', cursor: 'pointer', transition: 'all 0.3s', border: '1.5px solid rgba(255,255,255,0.1)' }}>
-                                            <Play size={44} color="white" style={{ marginLeft: '6px' }} />
+                                            <svg width="44" height="44" viewBox="0 0 24 24" fill="white" style={{ marginLeft: '6px' }}><path d="M8 5v14l11-7z"/></svg>
                                         </div>
                                         <p style={{ color: '#94a3b8', fontSize: '1rem', fontWeight: 600 }}>Secure Content Stream Prepared</p>
                                     </div>
@@ -639,7 +741,30 @@ const LessonView = () => {
                                     <PlayCircle size={18} />
                                     <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lesson.moduleTitle}</span>
                                 </div>
-                                <h1 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', marginBottom: '1.5rem' }}>{lesson.title}</h1>
+                                <h1 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    {lesson.title}
+                                    {lesson.file_url && (
+                                        <button
+                                            onClick={toggleReadAloud}
+                                            disabled={tts.ttsState === 'extracting'}
+                                            style={{
+                                                background: ['playing','paused'].includes(tts.ttsState) ? 'rgba(26, 77, 62, 0.12)' : '#f8fafc',
+                                                border: '1.5px solid',
+                                                borderColor: ['playing','paused'].includes(tts.ttsState) ? '#1a4d3e' : '#e2e8f0',
+                                                padding: '8px 16px', borderRadius: '100px', color: '#1a4d3e',
+                                                fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px',
+                                                cursor: tts.ttsState === 'extracting' ? 'not-allowed' : 'pointer',
+                                                opacity: tts.ttsState === 'extracting' ? 0.6 : 1,
+                                                transition: 'all 0.3s', boxShadow: ['playing','paused'].includes(tts.ttsState) ? '0 4px 15px rgba(26,77,62,0.2)' : 'none'
+                                            }}
+                                        >
+                                            {tts.ttsState === 'extracting' ? <><div className="animate-spin" style={{ width: 14, height: 14, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%' }} /> Extracting...</>
+                                            : ['playing','paused','switching'].includes(tts.ttsState) ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Stop Narrator</>
+                                            : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> Read Aloud</>}
+                                        </button>
+                                    )}
+                                </h1>
+
                             </div>
 
                             <div style={{ color: '#475569', fontSize: '1.1rem', lineHeight: 1.8, marginBottom: '3rem', fontWeight: 500 }}>
@@ -685,10 +810,11 @@ const LessonView = () => {
                                             <button
                                                 onClick={() => {
                                                     const url = lesson.file_url || '';
-                                                    const isPdf = url.toLowerCase().endsWith('.pdf') || lesson.file_name?.toLowerCase().endsWith('.pdf');
-                                                    const isVideo = url.toLowerCase().match(/\.(mp4|webm|ogg|ogv)$/i);
+                                                    const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
+                                                    const isPpt = /\.(pptx?)([?#]|$)/i.test(url);
+                                                    const isVideo = /\.(mp4|webm|ogg|ogv)([?#]|$)/i.test(url);
                                                     setIframeLoading(true);
-                                                    setPreviewAsset({ url, type: isPdf ? 'pdf' : isVideo ? 'video' : 'image' });
+                                                    setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
                                                 }}
                                                 style={{ padding: '8px 12px', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '10px', color: '#1a4d3e', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}
                                             >
@@ -715,28 +841,53 @@ const LessonView = () => {
                             <div style={{ padding: '1.25rem 2rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfe' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                     <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
-                                        {previewAsset.type === 'pdf' ? <FileText size={22} color="#1a4d3e" /> : <Eye size={22} color="#1a4d3e" />}
+                                        {previewAsset.type === 'pdf' || previewAsset.type === 'ppt' ? <FileText size={22} color="#1a4d3e" /> : <Eye size={22} color="#1a4d3e" />}
                                     </div>
                                     <div>
                                         <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>Unit Resource Review</h3>
                                         <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure Curriculum Stream • Unauthorized distribution is prohibited</p>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => setPreviewAsset(null)}
-                                    style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer', transition: 'all 0.2s' }}
-                                >
-                                    <X size={22} />
-                                </button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <button 
+                                        onClick={toggleReadAloud}
+                                        disabled={tts.ttsState === 'extracting'}
+                                        style={{ 
+                                            background: ['playing','paused'].includes(tts.ttsState) ? 'rgba(26, 77, 62, 0.1)' : '#f8fafc', 
+                                            border: '1.5px solid', 
+                                            borderColor: ['playing','paused'].includes(tts.ttsState) ? '#1a4d3e' : '#e2e8f0',
+                                            padding: '6px 14px',
+                                            borderRadius: '100px',
+                                            color: '#1a4d3e',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 800,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                            opacity: tts.ttsState === 'extracting' ? 0.6 : 1
+                                        }}
+                                    >
+                                        {tts.ttsState === 'extracting' ? <div className="animate-spin" style={{ width: 14, height: 14, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%' }} /> : ['playing','paused'].includes(tts.ttsState) ? <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>}
+                                        {tts.ttsState === 'extracting' ? 'Extracting...' : ['playing','paused'].includes(tts.ttsState) ? 'Stop' : 'Read Aloud'}
+                                    </button>
+                                    <button
+                                        onClick={() => setPreviewAsset(null)}
+                                        style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer', transition: 'all 0.2s' }}
+                                    >
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </div>
                             </div>
 
                             <div style={{ flex: 1, padding: 0, background: '#f8fafc', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-                                {iframeLoading && previewAsset.type === 'pdf' && (
+                                {iframeLoading && (previewAsset.type === 'pdf' || previewAsset.type === 'ppt') && (
                                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 10 }}>
                                         <div style={{ position: 'relative', marginBottom: '2rem' }}>
                                             <div style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid #f1f5f9', borderTopColor: '#1a4d3e', animation: 'spin-lesson 1s linear infinite' }}></div>
                                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <FileText size={32} color="#1a4d3e" opacity={0.3} />
+                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a4d3e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.3 }}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
                                             </div>
                                         </div>
                                         <h4 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>Architecting Secure View...</h4>
@@ -746,11 +897,13 @@ const LessonView = () => {
                                         `}</style>
                                     </div>
                                 )}
-                                {previewAsset.type === 'pdf' ? (
+                                {(previewAsset.type === 'pdf' || previewAsset.type === 'ppt') ? (
                                     <iframe
-                                        src={`${previewAsset.url}#toolbar=0&navpanes=0`}
+                                        src={previewAsset.type === 'ppt' 
+                                            ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewAsset.url)}`
+                                            : `${previewAsset.url}#toolbar=0&navpanes=0`}
                                         style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
-                                        title="PDF Review"
+                                        title="Asset Review"
                                         onLoad={() => setIframeLoading(false)}
                                         onContextMenu={(e: any) => e.preventDefault()}
                                     />
@@ -778,6 +931,40 @@ const LessonView = () => {
                     </div>
                 )
             }
+
+            {/* ── Text Highlight Overlay: shows currently spoken chunk ── */}
+            {['playing', 'paused'].includes(tts.ttsState) && tts.currentChunkText && (
+                <div style={{
+                    position: 'fixed', bottom: '10rem', left: '50%', transform: 'translateX(-50%)',
+                    zIndex: 9998, maxWidth: '680px', width: '92vw',
+                    background: 'rgba(255, 251, 200, 0.97)',
+                    border: '1.5px solid rgba(234, 179, 8, 0.35)',
+                    backdropFilter: 'blur(12px)',
+                    borderRadius: '16px', padding: '0.875rem 1.25rem',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                    animation: 'tts-fadein 0.25s ease',
+                }}>
+                    <style>{`
+                        @keyframes tts-fadein {
+                            from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+                            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+                        }
+                        @keyframes tts-pulse {
+                            0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+                        }
+                    `}</style>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                        <div style={{
+                            width: 8, height: 8, borderRadius: '50%', background: '#eab308',
+                            flexShrink: 0, marginTop: 6,
+                            animation: tts.ttsState === 'playing' ? 'tts-pulse 1.2s ease infinite' : 'none',
+                        }} />
+                        <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.65, color: '#713f12', fontWeight: 500 }}>
+                            {tts.currentChunkText.slice(0, 300)}{tts.currentChunkText.length > 300 ? '…' : ''}
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Premium Review Modal */}
             {showReview && (
@@ -865,6 +1052,175 @@ const LessonView = () => {
                         </div>
                         <div style={{ padding: '2rem 3.5rem', background: 'rgba(255,255,255,0.02)', borderTop: '1.5px solid rgba(255,255,255,0.05)' }}>
                             <button onClick={() => setShowReview(false)} className="btn-evaluation-start" style={{ width: '100%', borderRadius: '20px' }}>CLOSE AUDIT REPORT</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Text Highlight Overlay ── */}
+            {['playing', 'paused', 'switching'].includes(tts.ttsState) && tts.currentChunkText && (
+                <div className="tts-highlight" style={{
+                    position: 'fixed', bottom: '180px', left: '2rem', right: '2rem',
+                    zIndex: 9998, background: 'rgba(255, 246, 143, 0.15)', backdropFilter: 'blur(16px)',
+                    padding: '1.25rem 2rem', borderRadius: '24px',
+                    border: '2px solid rgba(255, 246, 143, 0.4)',
+                    boxShadow: '0 20px 50px -10px rgba(0,0,0,0.5)',
+                    animation: 'tts-pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    textAlign: 'center'
+                }}>
+                    <style>{`
+                        @keyframes tts-pop-in {
+                            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+                            to   { opacity: 1; transform: translateY(0) scale(1); }
+                        }
+                    `}</style>
+                    <p style={{ margin: 0, fontSize: '1.1rem', lineHeight: 1.6, color: '#ffeb3b', fontWeight: 700, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                        {tts.currentChunkText}
+                    </p>
+                </div>
+            )}
+
+            {/* ── Premium Floating TTS Control Bar ── */}
+            {tts.ttsState !== 'idle' && (
+                <div id="tts-player" style={{
+                    position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
+                    zIndex: 9999, background: 'rgba(15, 23, 42, 0.98)', borderRadius: '32px',
+                    padding: '1.25rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem',
+                    boxShadow: '0 30px 100px -20px rgba(0,0,0,0.8)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(30px)', width: 'auto', minWidth: '580px', maxWidth: '95vw'
+                }}>
+                    <style>{`
+                        #tts-player select:focus { outline: none; border-color: #10b981 !important; }
+                        #tts-player input[type=range] { -webkit-appearance: none; background: transparent; }
+                        #tts-player input[type=range]::-webkit-slider-runnable-track { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; }
+                        #tts-player input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: #10b981; cursor: pointer; margin-top: -5px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+                    `}</style>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                        {/* 1. Status Section */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '180px' }}>
+                            <div style={{ width: 44, height: 44, background: 'rgba(16,185,129,0.15)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {['extracting', 'switching'].includes(tts.ttsState)
+                                    ? <div className="animate-spin" style={{ width: 20, height: 20, border: '3px solid #10b981', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                                    : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                                }
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '2px', display: 'flex', alignItems: 'center' }}>
+                                    {tts.ttsError ? 'Narrator Fault' : 'Intelligent Reader'}
+                                    {tts.isIndexing && <span style={{ marginLeft: '8px', color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '1px 6px', borderRadius: '4px', fontSize: '0.6rem' }}>Indexing {tts.indexingProgress}%</span>}
+                                </div>
+                                <div style={{ fontSize: '0.88rem', color: '#f8fafc', fontWeight: 700 }}>
+                                    {tts.ttsState === 'extracting' && 'Decrypting PDF...'}
+                                    {tts.ttsState === 'switching'  && 'Voice Syncing...'}
+                                    {tts.ttsState === 'playing'    && `Passage ${tts.currentChunk} / ${tts.totalChunks}`}
+                                    {tts.ttsState === 'paused'     && 'Narrator Halted'}
+                                    {tts.ttsState === 'done'       && 'Goal Reached ✓'}
+                                    {tts.ttsState === 'error'      && 'Extraction Failed'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 2. Main Progress Bar */}
+                        <div style={{ flex: 1, position: 'relative', paddingTop: '4px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>Session Progress</span>
+                                <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 900 }}>{tts.progressPct}%</span>
+                            </div>
+                            <div style={{ height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${tts.progressPct}%`, background: 'linear-gradient(90deg, #10b981, #34d399, #10b981)', borderRadius: '10px', transition: 'width 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1)' }} />
+                            </div>
+                        </div>
+
+                        {/* 3. Controls Section */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            {/* Play/Pause Toggle */}
+                            <button
+                                onClick={tts.ttsState === 'paused' ? tts.resume : tts.pause}
+                                style={{
+                                    height: 50, padding: '0 1.5rem', borderRadius: '14px', border: 'none',
+                                    background: '#10b981', color: 'white',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                                    cursor: 'pointer', transition: 'all 0.2s',
+                                    fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.05em',
+                                    boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)'
+                                }}
+                            >
+                                {tts.ttsState === 'paused' ? (
+                                    <><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> PLAY</>
+                                ) : (
+                                    <><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> PAUSE</>
+                                )}
+                            </button>
+
+                            {/* Restart */}
+                            <button 
+                                onClick={tts.restart} 
+                                style={{ 
+                                    height: 50, padding: '0 1.25rem', borderRadius: '14px', 
+                                    background: 'rgba(255,255,255,0.08)', border: '1.5px solid rgba(255,255,255,0.1)',
+                                    color: 'white', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                }}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                RESTART
+                            </button>
+
+                            {/* Stop */}
+                            <button 
+                                onClick={tts.stop} 
+                                style={{ 
+                                    height: 50, padding: '0 1.25rem', borderRadius: '14px', 
+                                    background: 'rgba(239, 68, 68, 0.15)', border: '1.5px solid rgba(239, 68, 68, 0.2)',
+                                    color: '#ef4444', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                }}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                                STOP
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Bottom Utility Bar */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '1rem', background: 'rgba(0,0,0,0.25)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        {/* Voice Selector */}
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '14px' }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                            <select
+                                value={tts.selectedVoice?.name ?? ''}
+                                onChange={e => {
+                                    const v = tts.availableVoices.find(v => v.name === e.target.value);
+                                    if (v) tts.setVoice(v);
+                                }}
+                                style={{
+                                    flex: 1, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '14px', color: '#f8fafc', fontSize: '0.82rem', fontWeight: 700,
+                                    padding: '10px 14px', cursor: 'pointer', appearance: 'none',
+                                }}
+                            >
+                                {tts.availableVoices.map(v => (
+                                    <option key={v.name} value={v.name} style={{ background: '#0f172a' }}>
+                                        {cleanVoiceName(v.name)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Horizontal Speed Control */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '18px', minWidth: '180px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pace</span>
+                                <span style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: 900, width: '40px' }}>{tts.rate}x</span>
+                            </div>
+                            <input
+                                type="range" min="0.5" max="2" step="0.1"
+                                value={tts.rate}
+                                onChange={e => tts.setRate(parseFloat(e.target.value))}
+                                style={{ flex: 1 }}
+                            />
                         </div>
                     </div>
                 </div>
