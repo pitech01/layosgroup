@@ -13,7 +13,22 @@ const isNarratableUrl = (url?: string, fileName?: string) => {
   return { isPdf, isPpt, any: isPdf || isPpt };
 };
 
-const splitIntoChunks = (text: string, size = 200): string[] => {
+const cleanText = (text: string): string => {
+    return text
+      .replace(/\s+/g, " ")
+      .replace(/([a-z])([A-Z])/g, "$1. $2") // fix merged sentences
+      .trim();
+};
+
+const formatTextForSpeech = (text: string): string => {
+    return text
+      .replace(/\./g, ". ... ")
+      .replace(/,/g, ", ... ")
+      .replace(/\?/g, "? ... ")
+      .replace(/\!/g, "! ... ");
+};
+
+const splitIntoChunks = (text: string, size = 180): string[] => {
   const words = text.split(/\s+/).filter(Boolean);
   const out: string[] = [];
   for (let i = 0; i < words.length; i += size) {
@@ -60,7 +75,7 @@ export function usePdfTts(): UsePdfTtsResult {
   const [indexingProgress, setIndexingProgress] = useState(0);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice]     = useState<SpeechSynthesisVoice | null>(null);
-  const [rate, _setRate] = useState(0.9); // Slower rate for more natural feel
+  const [rate, _setRate] = useState(0.85); // African conversational tone priority
 
   const chunksRef       = useRef<string[]>([]);
   const voiceRef        = useRef<SpeechSynthesisVoice | null>(null);
@@ -72,21 +87,24 @@ export function usePdfTts(): UsePdfTtsResult {
   voiceRef.current = selectedVoice;
   rateRef.current  = rate;
 
-  // ── Voice Selection ───────────────────────────────────────────────────────
+  // ── Voice Selection (Female + Natural Priority) ───────────────────────────
   useEffect(() => {
     const load = () => {
       const all = window.speechSynthesis.getVoices();
-      // Natural voices preference: Google, Natural, Online, Female, English
-      const eng = all.filter(v => v.lang.startsWith('en-'));
+      const eng = all.filter(v => v.lang.includes("en"));
       
       const sorted = [...eng].sort((a, b) => {
         const score = (v: SpeechSynthesisVoice) => {
           let s = 0;
           const n = v.name.toLowerCase();
-          if (n.includes('natural')) s += 100;
-          if (n.includes('google'))  s += 50;
-          if (n.includes('online'))  s += 30;
-          if (n.includes('female'))  s += 10;
+          const l = v.lang.toLowerCase();
+          
+          if (n.includes('female')) s += 100;
+          if (n.includes('natural')) s += 50;
+          if (n.includes('google'))  s += 30;
+          if (n.includes('microsoft')) s += 30;
+          if (l.includes('en-gb')) s += 20; // Closest tone to African English
+          
           return s;
         };
         return score(b) - score(a);
@@ -99,7 +117,7 @@ export function usePdfTts(): UsePdfTtsResult {
           seen.add(v.name);
           uniq.push(v);
         }
-        if (uniq.length >= 10) break;
+        if (uniq.length >= 12) break;
       }
 
       setAvailableVoices(uniq);
@@ -118,27 +136,36 @@ export function usePdfTts(): UsePdfTtsResult {
     if (index >= chunksRef.current.length) {
       setTtsState('done');
       setCurrentChunk(chunksRef.current.length);
+      setCurrentChunkText('');
       return;
     }
 
     currentIndexRef.current = index;
-    const text = chunksRef.current[index];
-    const utterance = new SpeechSynthesisUtterance(text);
+    const rawText = chunksRef.current[index];
+    const processedText = formatTextForSpeech(rawText);
+    
+    const utterance = new SpeechSynthesisUtterance(processedText);
     
     utterance.rate  = rateRef.current;
-    utterance.pitch = 1.0;
+    utterance.pitch = 1.05; // Slight warmth
+    utterance.volume = 1;
     if (voiceRef.current) utterance.voice = voiceRef.current;
 
     utterance.onstart = () => {
       if (isStoppedRef.current) return;
       setTtsState('playing');
       setCurrentChunk(index + 1);
-      setCurrentChunkText(text);
+      setCurrentChunkText(rawText);
     };
 
     utterance.onend = () => {
       if (isStoppedRef.current || isPausedRef.current) return;
-      speakAt(index + 1);
+      // Small pause between chunks for human-like flow
+      setTimeout(() => {
+          if (!isStoppedRef.current && !isPausedRef.current) {
+              speakAt(index + 1);
+          }
+      }, 350);
     };
 
     utterance.onerror = (e) => {
@@ -193,7 +220,8 @@ export function usePdfTts(): UsePdfTtsResult {
         }
       }
 
-      const chunks = splitIntoChunks(fullText, 220);
+      const cleaned = cleanText(fullText);
+      const chunks = splitIntoChunks(cleaned, 160); // Smaller chunks for better responsiveness
       chunksRef.current = chunks;
       setTotalChunks(chunks.length);
       setTtsState('playing');
