@@ -6,15 +6,19 @@ import { loadPdf, extractPdfPageText, loadPptx, extractPptxSlideText } from './p
 const getUrlPath = (url: string) => {
   try { return new URL(url).pathname; } catch { return url; }
 };
+
 const isNarratableUrl = (url?: string, fileName?: string) => {
   const isPdf = (url && getUrlPath(url).toLowerCase().endsWith('.pdf')) || (fileName && fileName.toLowerCase().endsWith('.pdf'));
   const isPpt = (url && url.toLowerCase().match(/\.pptx?([?#]|$)/i)) || (fileName && fileName.toLowerCase().match(/\.pptx?$/i));
   return { isPdf, isPpt, any: isPdf || isPpt };
 };
-const splitIntoChunks = (text: string, size = 220): string[] => {
+
+const splitIntoChunks = (text: string, size = 200): string[] => {
   const words = text.split(/\s+/).filter(Boolean);
   const out: string[] = [];
-  for (let i = 0; i < words.length; i += size) out.push(words.slice(i, i + size).join(' '));
+  for (let i = 0; i < words.length; i += size) {
+    out.push(words.slice(i, i + size).join(' '));
+  }
   return out;
 };
 
@@ -23,7 +27,7 @@ export const cleanVoiceName = (name: string) =>
 
 // ── types ─────────────────────────────────────────────────────────────────────
 
-export type TtsState = 'idle' | 'extracting' | 'playing' | 'paused' | 'done' | 'error' | 'switching';
+export type TtsState = 'idle' | 'extracting' | 'playing' | 'paused' | 'done' | 'error';
 
 export interface UsePdfTtsResult {
   ttsState: TtsState;
@@ -42,8 +46,7 @@ export interface UsePdfTtsResult {
   resume:      () => void;
   stop:        () => void;
   restart:     () => void;
-  loadAndPlay: (url: string, name?: string, onChunk?: (i: number, t: number) => void) => void;
-  cancelLoad:  () => void;
+  loadAndPlay: (url: string, name?: string) => void;
   isIndexing:  boolean;
   indexingProgress: number;
 }
@@ -57,42 +60,51 @@ export function usePdfTts(): UsePdfTtsResult {
   const [indexingProgress, setIndexingProgress] = useState(0);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice]     = useState<SpeechSynthesisVoice | null>(null);
-  const [rate, _setRate] = useState(1.0);
+  const [rate, _setRate] = useState(0.9); // Slower rate for more natural feel
 
   const chunksRef       = useRef<string[]>([]);
-  const utteranceRef    = useRef<SpeechSynthesisUtterance | null>(null);
-  const cancelledRef    = useRef(false);
-  const isPausedRef     = useRef(false);
   const voiceRef        = useRef<SpeechSynthesisVoice | null>(null);
   const rateRef         = useRef(rate);
-  const onChunkRef      = useRef<((i: number, t: number) => void) | undefined>(undefined);
   const currentIndexRef = useRef(0);
-  const currentPageRef  = useRef(1);
-  const totalPagesRef   = useRef(0);
-  const docHandleRef    = useRef<any>(null);
-  const docTypeRef      = useRef<'pdf' | 'ppt' | null>(null);
-  const nextTextCacheRef = useRef<string | null>(null);
+  const isPausedRef     = useRef(false);
+  const isStoppedRef    = useRef(false);
 
   voiceRef.current = selectedVoice;
   rateRef.current  = rate;
 
-  // ── English voices only ───────────────────────────────────────────────────
+  // ── Voice Selection ───────────────────────────────────────────────────────
   useEffect(() => {
     const load = () => {
       const all = window.speechSynthesis.getVoices();
+      // Natural voices preference: Google, Natural, Online, Female, English
       const eng = all.filter(v => v.lang.startsWith('en-'));
-      const seen = new Set<string>();
+      
+      const sorted = [...eng].sort((a, b) => {
+        const score = (v: SpeechSynthesisVoice) => {
+          let s = 0;
+          const n = v.name.toLowerCase();
+          if (n.includes('natural')) s += 100;
+          if (n.includes('google'))  s += 50;
+          if (n.includes('online'))  s += 30;
+          if (n.includes('female'))  s += 10;
+          return s;
+        };
+        return score(b) - score(a);
+      });
+
       const uniq: SpeechSynthesisVoice[] = [];
-      // Prefer Natural/Online voices if available
-      const sorted = [...eng].sort((a, b) => (b.name.includes('Natural') ? 1 : 0) - (a.name.includes('Natural') ? 1 : 0));
+      const seen = new Set();
       for (const v of sorted) {
-        if (!seen.has(v.name)) { seen.add(v.name); uniq.push(v); }
-        if (uniq.length >= 12) break; // Offer more variety
+        if (!seen.has(v.name)) {
+          seen.add(v.name);
+          uniq.push(v);
+        }
+        if (uniq.length >= 10) break;
       }
+
       setAvailableVoices(uniq);
       if (!selectedVoice && uniq.length) {
-        const preferred = uniq.find(v => v.name.includes('Natural')) || uniq[0];
-        setSelectedVoice(preferred);
+        setSelectedVoice(uniq[0]);
       }
     };
     load();
@@ -100,233 +112,153 @@ export function usePdfTts(): UsePdfTtsResult {
     return () => { window.speechSynthesis.onvoiceschanged = null; };
   }, [selectedVoice]);
 
-  useEffect(() => {
-    return () => { cancelledRef.current = true; window.speechSynthesis.cancel(); };
-  }, []);
-
+  // ── Core Speak Function ──────────────────────────────────────────────────
   const speakAt = useCallback((index: number) => {
-    if (cancelledRef.current || isPausedRef.current) return;
+    if (isStoppedRef.current || isPausedRef.current) return;
     if (index >= chunksRef.current.length) {
       setTtsState('done');
       setCurrentChunk(chunksRef.current.length);
-      setCurrentChunkText('');
-      onChunkRef.current?.(chunksRef.current.length, chunksRef.current.length);
       return;
     }
 
     currentIndexRef.current = index;
-    window.speechSynthesis.cancel();
-
     const text = chunksRef.current[index];
     const utterance = new SpeechSynthesisUtterance(text);
-    utteranceRef.current = utterance;
+    
     utterance.rate  = rateRef.current;
     utterance.pitch = 1.0;
     if (voiceRef.current) utterance.voice = voiceRef.current;
 
     utterance.onstart = () => {
-      if (cancelledRef.current) return;
+      if (isStoppedRef.current) return;
       setTtsState('playing');
       setCurrentChunk(index + 1);
       setCurrentChunkText(text);
-      onChunkRef.current?.(index + 1, chunksRef.current.length);
     };
 
     utterance.onend = () => {
-      if (cancelledRef.current || isPausedRef.current || ttsState === 'switching') return;
+      if (isStoppedRef.current || isPausedRef.current) return;
       speakAt(index + 1);
     };
 
     utterance.onerror = (e) => {
       if (e.error === 'interrupted' || e.error === 'canceled') return;
-      if (!cancelledRef.current) {
-        setTtsState('error');
-        setTtsError(`Speech error: ${e.error}`);
-      }
+      setTtsState('error');
+      setTtsError(`Speech error: ${e.error}`);
     };
 
-    setTimeout(() => {
-      if (!cancelledRef.current && !isPausedRef.current) {
-        window.speechSynthesis.speak(utterance);
-      }
-    }, 50);
+    window.speechSynthesis.speak(utterance);
+  }, []);
 
-    return new Promise<void>((resolve) => {
-       utterance.onend = () => {
-         if (cancelledRef.current || isPausedRef.current || ttsState === 'switching') return;
-         resolve();
-       };
-    });
-  }, [ttsState]);
-
-  const speakTextInChunks = useCallback(async (text: string) => {
-      const pageChunks = splitIntoChunks(text, 180); // Small safe chunks
-      setTotalChunks(pageChunks.length);
-      chunksRef.current = pageChunks;
-      
-      for (let i = 0; i < pageChunks.length; i++) {
-          if (cancelledRef.current || isPausedRef.current) break;
-          await speakAt(i);
-      }
-  }, [speakAt]);
-
-  const readSequentially = useCallback(async (startPage: number) => {
-      if (!docHandleRef.current) return;
-      
-      const total = totalPagesRef.current;
-      for (let p = startPage; p <= total; p++) {
-          if (cancelledRef.current || isPausedRef.current) {
-              currentPageRef.current = p;
-              break;
-          }
-
-          setTtsState('playing');
-          currentPageRef.current = p;
-          onChunkRef.current?.(p, total); // Use callback to sync scroll
-          
-          let text = nextTextCacheRef.current;
-          if (!text) {
-              text = docTypeRef.current === 'pdf' 
-                ? await extractPdfPageText(docHandleRef.current, p)
-                : await extractPptxSlideText(docHandleRef.current, p - 1);
-          }
-          nextTextCacheRef.current = null;
-
-          // Preload next page while speaking
-          if (p < total) {
-              (async () => {
-                 nextTextCacheRef.current = docTypeRef.current === 'pdf'
-                    ? await extractPdfPageText(docHandleRef.current, p + 1)
-                    : await extractPptxSlideText(docHandleRef.current, p);
-              })();
-          }
-
-          await speakTextInChunks(text);
-          
-          if (p === total) setTtsState('done');
-      }
-  }, [speakTextInChunks]);
-
-  const setVoice = useCallback((v: SpeechSynthesisVoice) => {
-    setSelectedVoice(v);
-    voiceRef.current = v;
-    if (ttsState === 'playing') {
-       window.speechSynthesis.cancel();
-       readSequentially(currentPageRef.current);
-    }
-  }, [ttsState, readSequentially]);
-
-  const setRate = useCallback((r: number) => {
-    _setRate(r);
-    rateRef.current = r;
-    if (ttsState === 'playing') {
-       window.speechSynthesis.cancel();
-       readSequentially(currentPageRef.current);
-    }
-  }, [ttsState, readSequentially]);
-
-  const loadAndPlay = useCallback(async (
-    fileUrl: string,
-    fileName?: string,
-    onChunk?: (i: number, t: number) => void,
-  ) => {
+  const loadAndPlay = useCallback(async (fileUrl: string, fileName?: string) => {
     if (!('speechSynthesis' in window)) {
       setTtsState('error');
-      setTtsError('Browser not supported.');
+      setTtsError('TTS not supported');
       return;
     }
-    cancelledRef.current = true;
-    isPausedRef.current  = false;
+
+    // Reset state
     window.speechSynthesis.cancel();
-    onChunkRef.current = onChunk;
+    isStoppedRef.current = false;
+    isPausedRef.current  = false;
+    currentIndexRef.current = 0;
+    setTtsState('extracting');
+    setTtsError('');
+    setCurrentChunk(0);
+    setIndexingProgress(0);
 
     const check = isNarratableUrl(fileUrl, fileName);
     if (!check.any) {
       setTtsState('error');
-      setTtsError('Format not supported for narration.');
+      setTtsError('Format not supported');
       return;
     }
 
-    setTtsState('extracting');
-    setTtsError('');
-    setCurrentChunk(0);
-    setTotalChunks(0);
-    setCurrentChunkText('');
-    chunksRef.current = [];
-
     try {
-      setTtsState('extracting');
-      setIndexingProgress(1);
-
+      let fullText = '';
       if (check.isPdf) {
-         const pdf = await loadPdf(fileUrl);
-         docHandleRef.current = pdf;
-         docTypeRef.current = 'pdf';
-         totalPagesRef.current = pdf.numPages;
+        const pdf = await loadPdf(fileUrl);
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const pageText = await extractPdfPageText(pdf, i);
+          fullText += pageText + ' ';
+          setIndexingProgress(Math.round((i / pdf.numPages) * 100));
+        }
       } else {
-         const ppt = await loadPptx(fileUrl);
-         docHandleRef.current = ppt;
-         docTypeRef.current = 'ppt';
-         totalPagesRef.current = ppt.slideFiles.length;
+        const ppt = await loadPptx(fileUrl);
+        const slideCount = ppt.slideFiles.length;
+        for (let i = 0; i < slideCount; i++) {
+          const slideText = await extractPptxSlideText(ppt, i);
+          fullText += slideText + ' ';
+          setIndexingProgress(Math.round(((i + 1) / slideCount) * 100));
+        }
       }
 
-      setTotalChunks(totalPagesRef.current);
-      setIndexingProgress(100);
-      cancelledRef.current = false;
-      readSequentially(1);
+      const chunks = splitIntoChunks(fullText, 220);
+      chunksRef.current = chunks;
+      setTotalChunks(chunks.length);
+      setTtsState('playing');
+      speakAt(0);
     } catch (err: any) {
       setTtsState('error');
-      setTtsError('Failed to load document.');
+      setTtsError('Parsing failed');
     }
-  }, [readSequentially]);
+  }, [speakAt]);
 
   const pause = useCallback(() => {
-    if (ttsState !== 'playing') return;
     isPausedRef.current = true;
     window.speechSynthesis.pause();
     setTtsState('paused');
-  }, [ttsState]);
+  }, []);
 
   const resume = useCallback(() => {
     if (ttsState !== 'paused') return;
     isPausedRef.current = false;
-    window.speechSynthesis.resume();
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    } else {
+      speakAt(currentIndexRef.current);
+    }
     setTtsState('playing');
-  }, [ttsState]);
+  }, [ttsState, speakAt]);
 
   const stop = useCallback(() => {
-    cancelledRef.current = true;
-    isPausedRef.current  = false;
+    isStoppedRef.current = true;
     window.speechSynthesis.cancel();
-    setTtsState(chunksRef.current.length ? 'done' : 'idle');
+    setTtsState('idle');
+    setCurrentChunk(0);
     setCurrentChunkText('');
   }, []);
 
   const restart = useCallback(() => {
-    cancelledRef.current = false;
-    isPausedRef.current = false;
     window.speechSynthesis.cancel();
-    nextTextCacheRef.current = null;
-    readSequentially(1);
-  }, [readSequentially]);
+    isStoppedRef.current = false;
+    isPausedRef.current = false;
+    speakAt(0);
+  }, [speakAt]);
 
   const play = useCallback(() => {
-    cancelledRef.current = false;
-    isPausedRef.current = false;
-    window.speechSynthesis.cancel();
-    readSequentially(currentPageRef.current || 1);
-  }, [readSequentially]);
+    if (ttsState === 'paused') {
+      resume();
+    } else if (ttsState === 'idle' || ttsState === 'done') {
+      restart();
+    }
+  }, [ttsState, resume, restart]);
 
-  const cancelLoad = useCallback(() => {
-    cancelledRef.current = true;
-    isPausedRef.current = false;
-    window.speechSynthesis.cancel();
-    setTtsState('idle');
-    setCurrentChunk(0);
-    setTotalChunks(0);
-    setCurrentChunkText('');
-    chunksRef.current = [];
-  }, []);
+  const setVoice = (v: SpeechSynthesisVoice) => {
+    setSelectedVoice(v);
+    if (ttsState === 'playing') {
+      window.speechSynthesis.cancel();
+      setTimeout(() => speakAt(currentIndexRef.current), 100);
+    }
+  };
+
+  const setRate = (r: number) => {
+    _setRate(r);
+    if (ttsState === 'playing') {
+      window.speechSynthesis.cancel();
+      setTimeout(() => speakAt(currentIndexRef.current), 100);
+    }
+  };
 
   const progressPct = totalChunks > 0 ? Math.round((currentChunk / totalChunks) * 100) : 0;
 
@@ -334,7 +266,7 @@ export function usePdfTts(): UsePdfTtsResult {
     ttsState, ttsError, currentChunk, totalChunks, progressPct, currentChunkText,
     availableVoices, selectedVoice, setVoice,
     rate, setRate,
-    play, pause, resume, stop, restart, loadAndPlay, cancelLoad,
+    play, pause, resume, stop, restart, loadAndPlay,
     isIndexing: ttsState === 'extracting', indexingProgress
   };
 }

@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle } from 'lucide-react';
-import { usePdfTts, cleanVoiceName } from '../../../utils/usePdfTts';
+import { usePdfTts } from '../../../utils/usePdfTts';
 
 const LessonView = () => {
     const { courseId, lessonId } = useParams();
@@ -27,34 +27,6 @@ const LessonView = () => {
 
     // TTS hook — full Read Aloud system
     const tts = usePdfTts();
-
-    // Ref to the PDF container div (used for auto-scroll sync)
-    const pdfContainerRef = useRef<HTMLDivElement>(null);
-
-    // Auto-scroll: proportional scroll synced to reading progress.
-    // Strategy: try the PDF container first (works in fullscreen),
-    // then fall back to window scroll (works in normal embedded view).
-    const handleChunkChange = (idx: number, total: number) => {
-        if (total === 0) return;
-        const progress = idx / total;
-
-        const container = pdfContainerRef.current;
-        if (container && container.scrollHeight > container.clientHeight) {
-            // Container has scrollable content (fullscreen mode)
-            container.scrollTo({
-                top: container.scrollHeight * progress,
-                behavior: 'smooth',
-            });
-        } else {
-            // Normal mode: scroll the page to show the PDF section
-            const el = container ?? document.getElementById('pdf-lesson-viewer');
-            if (!el) return;
-            const rect = el.getBoundingClientRect();
-            const absoluteTop = rect.top + window.scrollY;
-            const scrollTarget = absoluteTop + el.clientHeight * progress - window.innerHeight * 0.3;
-            window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
-        }
-    };
 
     // @ts-ignore
     const API_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -136,7 +108,7 @@ const LessonView = () => {
         };
 
         fetchLessonData();
-        return () => { tts.cancelLoad(); };
+        return () => { tts.stop(); };
     }, [courseId, lessonId, cohortId, API_URL]);
 
     useEffect(() => {
@@ -150,8 +122,7 @@ const LessonView = () => {
     }, [lesson]);
 
     // Stop TTS whenever the lesson changes
-    useEffect(() => { tts.cancelLoad(); }, [lessonId]);
-
+    useEffect(() => { tts.stop(); }, [lessonId]);
 
 
 
@@ -162,12 +133,9 @@ const LessonView = () => {
         if (['playing', 'paused'].includes(tts.ttsState)) {
             tts.stop();
         } else {
-            tts.loadAndPlay(lesson.file_url, lesson.file_name, handleChunkChange);
+            tts.loadAndPlay(lesson.file_url, lesson.file_name);
         }
     };
-
-
-
     if (loading) {
         return (
             <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
@@ -947,39 +915,6 @@ const LessonView = () => {
                 )
             }
 
-            {/* ── Text Highlight Overlay: shows currently spoken chunk ── */}
-            {['playing', 'paused'].includes(tts.ttsState) && tts.currentChunkText && (
-                <div style={{
-                    position: 'fixed', bottom: '10rem', left: '50%', transform: 'translateX(-50%)',
-                    zIndex: 9998, maxWidth: '680px', width: '92vw',
-                    background: 'rgba(255, 251, 200, 0.97)',
-                    border: '1.5px solid rgba(234, 179, 8, 0.35)',
-                    backdropFilter: 'blur(12px)',
-                    borderRadius: '16px', padding: '0.875rem 1.25rem',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                    animation: 'tts-fadein 0.25s ease',
-                }}>
-                    <style>{`
-                        @keyframes tts-fadein {
-                            from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-                            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-                        }
-                        @keyframes tts-pulse {
-                            0%,100% { opacity: 1; } 50% { opacity: 0.3; }
-                        }
-                    `}</style>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                        <div style={{
-                            width: 8, height: 8, borderRadius: '50%', background: '#eab308',
-                            flexShrink: 0, marginTop: 6,
-                            animation: tts.ttsState === 'playing' ? 'tts-pulse 1.2s ease infinite' : 'none',
-                        }} />
-                        <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.65, color: '#713f12', fontWeight: 500 }}>
-                            {tts.currentChunkText.slice(0, 300)}{tts.currentChunkText.length > 300 ? '…' : ''}
-                        </p>
-                    </div>
-                </div>
-            )}
 
             {/* Premium Review Modal */}
             {showReview && (
@@ -1072,172 +1007,67 @@ const LessonView = () => {
                 </div>
             )}
 
-            {/* ── Text Highlight Overlay ── */}
-            {['playing', 'paused', 'switching'].includes(tts.ttsState) && tts.currentChunkText && (
-                <div className="tts-highlight" style={{
-                    position: 'fixed', bottom: '180px', left: '2rem', right: '2rem',
-                    zIndex: 9998, background: 'rgba(255, 246, 143, 0.15)', backdropFilter: 'blur(16px)',
-                    padding: '1.25rem 2rem', borderRadius: '24px',
-                    border: '2px solid rgba(255, 246, 143, 0.4)',
-                    boxShadow: '0 20px 50px -10px rgba(0,0,0,0.5)',
-                    animation: 'tts-pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                    textAlign: 'center'
-                }}>
-                    <style>{`
-                        @keyframes tts-pop-in {
-                            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-                            to   { opacity: 1; transform: translateY(0) scale(1); }
-                        }
-                    `}</style>
-                    <p style={{ margin: 0, fontSize: '1.1rem', lineHeight: 1.6, color: '#ffeb3b', fontWeight: 700, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                        {tts.currentChunkText}
-                    </p>
-                </div>
-            )}
-
-            {/* ── Premium Floating TTS Control Bar ── */}
+            {/* ── TTS Mini Player ── */}
             {tts.ttsState !== 'idle' && (
-                <div id="tts-player" style={{
-                    position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
-                    zIndex: 9999, background: 'rgba(15, 23, 42, 0.98)', borderRadius: '32px',
-                    padding: '1.25rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem',
-                    boxShadow: '0 30px 100px -20px rgba(0,0,0,0.8)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(30px)', width: 'auto', minWidth: '580px', maxWidth: '95vw'
-                }}>
+                <div 
+                    className="tts-mini-player" 
+                    style={{
+                        position: 'fixed', bottom: '2rem', right: '2rem',
+                        zIndex: 9999, background: 'rgba(255, 255, 255, 0.98)', 
+                        padding: '8px 14px', borderRadius: '40px',
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                        boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
+                        border: '1.5px solid #f1f5f9',
+                        backdropFilter: 'blur(10px)',
+                        animation: 'tts-slide-up 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                    }}
+                >
                     <style>{`
-                        #tts-player select:focus { outline: none; border-color: #10b981 !important; }
-                        #tts-player input[type=range] { -webkit-appearance: none; background: transparent; }
-                        #tts-player input[type=range]::-webkit-slider-runnable-track { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; }
-                        #tts-player input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: #10b981; cursor: pointer; margin-top: -5px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+                        @keyframes tts-slide-up {
+                            from { transform: translateY(100%) scale(0.8); opacity: 0; }
+                            to   { transform: translateY(0) scale(1); opacity: 1; }
+                        }
+                        .tts-mini-btn {
+                            height: 34px; padding: 0 16px; border-radius: 10px;
+                            display: flex; align-items: center; justify-content: center;
+                            cursor: pointer; transition: all 0.2s; border: none;
+                            font-size: 0.72rem; font-weight: 900; letter-spacing: 0.05em;
+                            text-transform: uppercase; line-height: 1; text-align: center;
+                        }
+                        .tts-mini-btn:hover { transform: scale(1.1); }
                     `}</style>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                        {/* 1. Status Section */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '180px' }}>
-                            <div style={{ width: 44, height: 44, background: 'rgba(16,185,129,0.15)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {['extracting', 'switching'].includes(tts.ttsState)
-                                    ? <div className="animate-spin" style={{ width: 20, height: 20, border: '3px solid #10b981', borderTopColor: 'transparent', borderRadius: '50%' }} />
-                                    : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-                                }
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '2px', display: 'flex', alignItems: 'center' }}>
-                                    {tts.ttsError ? 'Narrator Fault' : 'Intelligent Reader'}
-                                    {tts.isIndexing && <span style={{ marginLeft: '8px', color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '1px 6px', borderRadius: '4px', fontSize: '0.6rem' }}>Indexing {tts.indexingProgress}%</span>}
-                                </div>
-                                <div style={{ fontSize: '0.88rem', color: '#f8fafc', fontWeight: 700 }}>
-                                    {tts.ttsState === 'extracting' && 'Decrypting PDF...'}
-                                    {tts.ttsState === 'switching'  && 'Voice Syncing...'}
-                                    {tts.ttsState === 'playing'    && `Passage ${tts.currentChunk} / ${tts.totalChunks}`}
-                                    {tts.ttsState === 'paused'     && 'Narrator Halted'}
-                                    {tts.ttsState === 'done'       && 'Goal Reached ✓'}
-                                    {tts.ttsState === 'error'      && 'Extraction Failed'}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 2. Main Progress Bar */}
-                        <div style={{ flex: 1, position: 'relative', paddingTop: '4px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>Session Progress</span>
-                                <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 900 }}>{tts.progressPct}%</span>
-                            </div>
-                            <div style={{ height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${tts.progressPct}%`, background: 'linear-gradient(90deg, #10b981, #34d399, #10b981)', borderRadius: '10px', transition: 'width 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1)' }} />
-                            </div>
-                        </div>
-
-                        {/* 3. Controls Section */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            {/* Play/Pause Toggle */}
-                            <button
-                                onClick={tts.ttsState === 'paused' ? tts.resume : tts.pause}
-                                style={{
-                                    height: 50, padding: '0 1.5rem', borderRadius: '14px', border: 'none',
-                                    background: '#10b981', color: 'white',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                                    cursor: 'pointer', transition: 'all 0.2s',
-                                    fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.05em',
-                                    boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)'
-                                }}
-                            >
-                                {tts.ttsState === 'paused' ? (
-                                    <><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> PLAY</>
-                                ) : (
-                                    <><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> PAUSE</>
-                                )}
-                            </button>
-
-                            {/* Restart */}
-                            <button 
-                                onClick={tts.restart} 
-                                style={{ 
-                                    height: 50, padding: '0 1.25rem', borderRadius: '14px', 
-                                    background: 'rgba(255,255,255,0.08)', border: '1.5px solid rgba(255,255,255,0.1)',
-                                    color: 'white', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                                }}
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                                RESTART
-                            </button>
-
-                            {/* Stop */}
-                            <button 
-                                onClick={tts.stop} 
-                                style={{ 
-                                    height: 50, padding: '0 1.25rem', borderRadius: '14px', 
-                                    background: 'rgba(239, 68, 68, 0.15)', border: '1.5px solid rgba(239, 68, 68, 0.2)',
-                                    color: '#ef4444', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                                }}
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-                                STOP
-                            </button>
-                        </div>
+                    <div style={{ padding: '0 8px', borderRight: '1.5px solid #f1f5f9', marginRight: '4px' }}>
+                        {tts.ttsState === 'extracting' ? (
+                            <div className="animate-spin" style={{ width: 18, height: 18, border: '2.5px solid #10b981', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                        ) : (
+                            <div style={{ color: '#10b981', fontWeight: 900, fontSize: '0.75rem' }}>{tts.progressPct}%</div>
+                        )}
                     </div>
 
-                    {/* Bottom Utility Bar */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '1rem', background: 'rgba(0,0,0,0.25)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        {/* Voice Selector */}
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '14px' }}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-                            <select
-                                value={tts.selectedVoice?.name ?? ''}
-                                onChange={e => {
-                                    const v = tts.availableVoices.find(v => v.name === e.target.value);
-                                    if (v) tts.setVoice(v);
-                                }}
-                                style={{
-                                    flex: 1, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
-                                    borderRadius: '14px', color: '#f8fafc', fontSize: '0.82rem', fontWeight: 700,
-                                    padding: '10px 14px', cursor: 'pointer', appearance: 'none',
-                                }}
-                            >
-                                {tts.availableVoices.map(v => (
-                                    <option key={v.name} value={v.name} style={{ background: '#0f172a' }}>
-                                        {cleanVoiceName(v.name)}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                    <button 
+                        onClick={tts.ttsState === 'paused' ? tts.resume : tts.pause}
+                        className="tts-mini-btn"
+                        style={{ background: '#10b981', color: 'white' }}
+                    >
+                        {tts.ttsState === 'paused' ? 'PLAY' : 'PAUSE'}
+                    </button>
 
-                        {/* Horizontal Speed Control */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '18px', minWidth: '180px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pace</span>
-                                <span style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: 900, width: '40px' }}>{tts.rate}x</span>
-                            </div>
-                            <input
-                                type="range" min="0.5" max="2" step="0.1"
-                                value={tts.rate}
-                                onChange={e => tts.setRate(parseFloat(e.target.value))}
-                                style={{ flex: 1 }}
-                            />
-                        </div>
-                    </div>
+                    <button 
+                        onClick={tts.restart}
+                        className="tts-mini-btn"
+                        style={{ background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' }}
+                    >
+                        RESET
+                    </button>
+
+                    <button 
+                        onClick={tts.stop}
+                        className="tts-mini-btn"
+                        style={{ background: '#fff1f2', color: '#ef4444', border: '1px solid #fee2e2' }}
+                    >
+                        STOP
+                    </button>
                 </div>
             )}
         </div>
