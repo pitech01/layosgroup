@@ -10,10 +10,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet">
   <title>Layos Group | LMS</title>
+  <style>
+    /* Silent AI Engine: Aggressive Blackout for Puter Popups/Prompts */
+    [id*="puter-"], 
+    [class*="puter-"],
+    [class*="puter-banner"],
+    [class*="puter-modal"],
+    [id*="puter-modal"],
+    iframe[src*="puter.com"],
+    .puter-attribution,
+    #puter-attribution {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      position: absolute !important;
+      left: -9999px !important;
+      height: 0 !important;
+      width: 0 !important;
+      z-index: -9999 !important;
+    }
+  </style>
 </head>
 
 <body>
   <div id="root"></div>
+  <script src="https://js.puter.com/v2/"></script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

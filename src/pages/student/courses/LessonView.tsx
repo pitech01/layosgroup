@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle } from 'lucide-react';
 import { usePdfTts } from '../../../utils/usePdfTts';
+import ReadAloudControls from '../../../components/student/ReadAloudControls';
 
 const LessonView = () => {
     const { courseId, lessonId } = useParams();
@@ -632,58 +633,139 @@ const LessonView = () => {
                                                 style={{
                                                     width: '100%', height: '100%', display: 'flex',
                                                     flexDirection: 'column', alignItems: 'center',
-                                                    justifyContent: 'center', background: '#f8fafc',
-                                                    borderRadius: '32px', border: '1.5px solid #f1f5f9',
-                                                    padding: '4rem', textAlign: 'center', minHeight: '600px'
+                                                    justifyContent: 'center', background: tts.ttsState === 'playing' ? '#0f172a' : '#f8fafc',
+                                                    borderRadius: isMaximized ? '0' : '32px', border: '1.5px solid #f1f5f9',
+                                                    padding: '4rem', textAlign: 'center', minHeight: '600px',
+                                                    transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                                                    position: 'relative'
                                                 }}
                                             >
-                                                <div style={{
-                                                    width: '100px', height: '100px', background: '#f0fdf4',
-                                                    borderRadius: '32px', display: 'flex', alignItems: 'center',
-                                                    justifyContent: 'center', marginBottom: '2rem',
-                                                    boxShadow: '0 20px 40px rgba(26, 77, 62, 0.08)'
-                                                }}>
-                                                    <FileText size={48} color="#1a4d3e" />
-                                                </div>
-                                                <h3 style={{ margin: '0 0 12px 0', fontSize: '1.85rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>
-                                                    Interactive Resource Ready
-                                                </h3>
-                                                <p style={{ margin: '0 0 2.5rem 0', color: '#64748b', fontSize: '1.15rem', fontWeight: 600, maxWidth: '480px', lineHeight: 1.6 }}>
-                                                    This {lesson.file_url.match(/\.pdf/i) ? 'document' : 'presentation'} has been prepared for your session. Use the high-fidelity narrator below or access the visual assets for deep review.
-                                                </p>
-                                                <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center' }}>
-                                                    <button
-                                                        onClick={toggleReadAloud}
-                                                        className="btn-primary-forest"
-                                                        style={{ padding: '0 2.5rem', height: '56px', fontSize: '1rem', boxShadow: '0 15px 30px rgba(26, 77, 62, 0.2)' }}
-                                                    >
-                                                        <PlayCircle size={20} /> Listen to Lesson
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            const assetsSection = document.getElementById('lesson-assets-sidebar');
-                                                            if (assetsSection) {
-                                                                assetsSection.scrollIntoView({ behavior: 'smooth' });
-                                                                assetsSection.style.borderColor = '#1a4d3e';
-                                                                assetsSection.style.boxShadow = '0 0 0 4px rgba(26, 77, 62, 0.1)';
-                                                                setTimeout(() => {
-                                                                    assetsSection.style.borderColor = '#e2e8f0';
-                                                                    assetsSection.style.boxShadow = 'none';
-                                                                }, 2000);
-                                                            }
-                                                        }}
-                                                        style={{
-                                                            padding: '0 2.5rem', height: '56px', fontSize: '1rem',
-                                                            background: 'white', border: '2px solid #e2e8f0', borderRadius: '16px',
-                                                            color: '#64748b', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s',
-                                                            display: 'flex', alignItems: 'center', gap: '10px'
-                                                        }}
-                                                        onMouseEnter={(e: any) => { e.currentTarget.style.borderColor = '#1a4d3e'; e.currentTarget.style.color = '#1a4d3e'; }}
-                                                        onMouseLeave={(e: any) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
-                                                    >
-                                                        <Eye size={20} /> View Assets
-                                                    </button>
-                                                </div>
+                                                {/* Text Overlay for Narration Highlighting */}
+                                                {(tts.ttsState === 'playing' || tts.ttsState === 'paused' || tts.ttsState === 'extracting' || tts.ttsState === 'processing') ? (
+                                                    <div style={{ 
+                                                        maxWidth: '800px', 
+                                                        animation: 'fadeIn 0.5s ease-out',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '2rem'
+                                                    }}>
+                                                        {(tts.ttsState === 'extracting' || tts.ttsState === 'processing') ? (
+                                                            <>
+                                                                <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                                                                    <div style={{ 
+                                                                        width: '100px', 
+                                                                        height: '100px', 
+                                                                        borderRadius: '30px', 
+                                                                        border: '4px solid rgba(16, 185, 129, 0.1)', 
+                                                                        borderTopColor: '#10b981', 
+                                                                        animation: 'spin-lesson 1.5s linear infinite' 
+                                                                    }}></div>
+                                                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                        <span style={{ fontSize: '1rem', fontWeight: 900, color: '#10b981' }}>
+                                                                            {tts.ttsState === 'extracting' ? `${tts.indexingProgress}%` : <PlayCircle size={24} className="animate-pulse" />}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <h3 style={{ color: '#0f172a', fontWeight: 950, fontSize: '1.75rem', margin: 0 }}>
+                                                                    {tts.ttsState === 'extracting' ? 'Extracting Knowledge...' : 'AI Teacher is Preparing...'}
+                                                                </h3>
+                                                                <p style={{ color: '#64748b', fontWeight: 600 }}>
+                                                                    {tts.ttsState === 'extracting' 
+                                                                        ? 'Optimizing document for high-fidelity narration'
+                                                                        : 'Generating your personalized lesson explanation'}
+                                                                </p>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <div style={{ 
+                                                                    padding: '3rem', 
+                                                                    background: 'rgba(255,255,255,0.03)', 
+                                                                    borderRadius: '40px',
+                                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                                    boxShadow: '0 30px 60px -12px rgba(0,0,0,0.5)',
+                                                                    position: 'relative'
+                                                                }}>
+                                                                    <p style={{ 
+                                                                        fontSize: '1.85rem', 
+                                                                        lineHeight: 1.6, 
+                                                                        color: 'white', 
+                                                                        fontWeight: 700, 
+                                                                        margin: 0,
+                                                                        letterSpacing: '-0.01em',
+                                                                        textAlign: 'left'
+                                                                    }}>
+                                                                        {tts.currentChunkText}
+                                                                        <span style={{ 
+                                                                            display: 'inline-block', 
+                                                                            width: '4px', 
+                                                                            height: '1.8rem', 
+                                                                            background: '#10b981', 
+                                                                            marginLeft: '8px',
+                                                                            verticalAlign: 'middle',
+                                                                            animation: 'pulse 1s infinite',
+                                                                            borderRadius: '2px'
+                                                                        }}></span>
+                                                                    </p>
+                                                                </div>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: '#64748b', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: tts.ttsState === 'playing' ? '#10b981' : '#f59e0b' }}></div>
+                                                                    Narrator {tts.ttsState === 'playing' ? 'Active' : 'Paused'} • Section {tts.currentChunk}/{tts.totalChunks}
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <div style={{
+                                                            width: '100px', height: '100px', background: '#f0fdf4',
+                                                            borderRadius: '32px', display: 'flex', alignItems: 'center',
+                                                            justifyContent: 'center', marginBottom: '2rem',
+                                                            boxShadow: '0 20px 40px rgba(26, 77, 62, 0.08)'
+                                                        }}>
+                                                            <FileText size={48} color="#1a4d3e" />
+                                                        </div>
+                                                        <h3 style={{ margin: '0 0 12px 0', fontSize: '1.85rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>
+                                                            Interactive Resource Ready
+                                                        </h3>
+                                                        <p style={{ margin: '0 0 2.5rem 0', color: '#64748b', fontSize: '1.15rem', fontWeight: 600, maxWidth: '480px', lineHeight: 1.6 }}>
+                                                            This {lesson.file_url.match(/\.pdf/i) ? 'document' : 'presentation'} has been prepared for your session. Use the high-fidelity narrator below or access the visual assets for deep review.
+                                                        </p>
+                                                        <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center' }}>
+                                                            <button
+                                                                onClick={toggleReadAloud}
+                                                                className="btn-primary-forest"
+                                                                style={{ padding: '0 2.5rem', height: '56px', fontSize: '1rem', boxShadow: '0 15px 30px rgba(26, 77, 62, 0.2)' }}
+                                                            >
+                                                                <PlayCircle size={20} /> Listen to Lesson
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const assetsSection = document.getElementById('lesson-assets-sidebar');
+                                                                    if (assetsSection) {
+                                                                        assetsSection.scrollIntoView({ behavior: 'smooth' });
+                                                                        assetsSection.style.borderColor = '#1a4d3e';
+                                                                        assetsSection.style.boxShadow = '0 0 0 4px rgba(26, 77, 62, 0.1)';
+                                                                        setTimeout(() => {
+                                                                            assetsSection.style.borderColor = '#e2e8f0';
+                                                                            assetsSection.style.boxShadow = 'none';
+                                                                        }, 2000);
+                                                                    }
+                                                                }}
+                                                                style={{
+                                                                    padding: '0 2.5rem', height: '56px', fontSize: '1rem',
+                                                                    background: 'white', border: '2px solid #e2e8f0', borderRadius: '16px',
+                                                                    color: '#64748b', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s',
+                                                                    display: 'flex', alignItems: 'center', gap: '10px'
+                                                                }}
+                                                                onMouseEnter={(e: any) => { e.currentTarget.style.borderColor = '#1a4d3e'; e.currentTarget.style.color = '#1a4d3e'; }}
+                                                                onMouseLeave={(e: any) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
+                                                            >
+                                                                <Eye size={20} /> View Assets
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         ) : (
                                             <div style={{ textAlign: 'center', padding: '4rem' }}>
@@ -1008,68 +1090,7 @@ const LessonView = () => {
             )}
 
             {/* ── TTS Mini Player ── */}
-            {tts.ttsState !== 'idle' && (
-                <div 
-                    className="tts-mini-player" 
-                    style={{
-                        position: 'fixed', bottom: '2rem', right: '2rem',
-                        zIndex: 9999, background: 'rgba(255, 255, 255, 0.98)', 
-                        padding: '8px 14px', borderRadius: '40px',
-                        display: 'flex', alignItems: 'center', gap: '10px',
-                        boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
-                        border: '1.5px solid #f1f5f9',
-                        backdropFilter: 'blur(10px)',
-                        animation: 'tts-slide-up 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-                    }}
-                >
-                    <style>{`
-                        @keyframes tts-slide-up {
-                            from { transform: translateY(100%) scale(0.8); opacity: 0; }
-                            to   { transform: translateY(0) scale(1); opacity: 1; }
-                        }
-                        .tts-mini-btn {
-                            height: 34px; padding: 0 16px; border-radius: 10px;
-                            display: flex; align-items: center; justify-content: center;
-                            cursor: pointer; transition: all 0.2s; border: none;
-                            font-size: 0.72rem; font-weight: 900; letter-spacing: 0.05em;
-                            text-transform: uppercase; line-height: 1; text-align: center;
-                        }
-                        .tts-mini-btn:hover { transform: scale(1.1); }
-                    `}</style>
-
-                    <div style={{ padding: '0 8px', borderRight: '1.5px solid #f1f5f9', marginRight: '4px' }}>
-                        {tts.ttsState === 'extracting' ? (
-                            <div className="animate-spin" style={{ width: 18, height: 18, border: '2.5px solid #10b981', borderTopColor: 'transparent', borderRadius: '50%' }} />
-                        ) : (
-                            <div style={{ color: '#10b981', fontWeight: 900, fontSize: '0.75rem' }}>{tts.progressPct}%</div>
-                        )}
-                    </div>
-
-                    <button 
-                        onClick={tts.ttsState === 'paused' ? tts.resume : tts.pause}
-                        className="tts-mini-btn"
-                        style={{ background: '#10b981', color: 'white' }}
-                    >
-                        {tts.ttsState === 'paused' ? 'PLAY' : 'PAUSE'}
-                    </button>
-
-                    <button 
-                        onClick={tts.restart}
-                        className="tts-mini-btn"
-                        style={{ background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' }}
-                    >
-                        RESET
-                    </button>
-
-                    <button 
-                        onClick={tts.stop}
-                        className="tts-mini-btn"
-                        style={{ background: '#fff1f2', color: '#ef4444', border: '1px solid #fee2e2' }}
-                    >
-                        STOP
-                    </button>
-                </div>
-            )}
+            <ReadAloudControls tts={tts} onClose={tts.stop} />
         </div>
     );
 };
