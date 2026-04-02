@@ -60,7 +60,8 @@ const LessonView = () => {
                             mod.lessons.forEach((l: any) => {
                                 flattenedLessons.push({
                                     ...l,
-                                    moduleTitle: mod.title
+                                    moduleTitle: mod.title,
+                                    courseImage: enrolledCohort.course.image || enrolledCohort.course.thumbnail
                                 });
                             });
                         });
@@ -633,139 +634,69 @@ const LessonView = () => {
                                                 style={{
                                                     width: '100%', height: '100%', display: 'flex',
                                                     flexDirection: 'column', alignItems: 'center',
-                                                    justifyContent: 'center', background: tts.ttsState === 'playing' ? '#0f172a' : '#f8fafc',
-                                                    borderRadius: isMaximized ? '0' : '32px', border: '1.5px solid #f1f5f9',
-                                                    padding: '4rem', textAlign: 'center', minHeight: '600px',
-                                                    transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                                                    justifyContent: 'center', minHeight: '600px',
+                                                    background: '#f8fafc', borderRadius: '32px',
+                                                    border: '1.5px solid #f1f5f9', padding: '4rem',
                                                     position: 'relative'
                                                 }}
                                             >
-                                                {/* Text Overlay for Narration Highlighting */}
-                                                {(tts.ttsState === 'playing' || tts.ttsState === 'paused' || tts.ttsState === 'extracting' || tts.ttsState === 'processing') ? (
-                                                    <div style={{ 
-                                                        maxWidth: '800px', 
-                                                        animation: 'fadeIn 0.5s ease-out',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        gap: '2rem'
+                                                {/* Instructional Resource Overview (Always visible) */}
+                                                <div style={{
+                                                    width: '100%', height: '100%', display: 'flex',
+                                                    flexDirection: 'column', alignItems: 'center',
+                                                    justifyContent: 'center', textAlign: 'center'
+                                                }}>
+                                                    <div style={{
+                                                        width: '180px', height: '120px', background: '#f8fafc',
+                                                        borderRadius: '24px', display: 'flex', alignItems: 'center',
+                                                        justifyContent: 'center', marginBottom: '2.5rem',
+                                                        boxShadow: '0 25px 50px -12px rgba(26, 77, 62, 0.2)',
+                                                        overflow: 'hidden', border: '3px solid white'
                                                     }}>
-                                                        {(tts.ttsState === 'extracting' || tts.ttsState === 'processing') ? (
-                                                            <>
-                                                                <div style={{ position: 'relative', marginBottom: '1rem' }}>
-                                                                    <div style={{ 
-                                                                        width: '100px', 
-                                                                        height: '100px', 
-                                                                        borderRadius: '30px', 
-                                                                        border: '4px solid rgba(16, 185, 129, 0.1)', 
-                                                                        borderTopColor: '#10b981', 
-                                                                        animation: 'spin-lesson 1.5s linear infinite' 
-                                                                    }}></div>
-                                                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                        <span style={{ fontSize: '1rem', fontWeight: 900, color: '#10b981' }}>
-                                                                            {tts.ttsState === 'extracting' ? `${tts.indexingProgress}%` : <PlayCircle size={24} className="animate-pulse" />}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <h3 style={{ color: '#0f172a', fontWeight: 950, fontSize: '1.75rem', margin: 0 }}>
-                                                                    {tts.ttsState === 'extracting' ? 'Extracting Knowledge...' : 'AI Teacher is Preparing...'}
-                                                                </h3>
-                                                                <p style={{ color: '#64748b', fontWeight: 600 }}>
-                                                                    {tts.ttsState === 'extracting' 
-                                                                        ? 'Optimizing document for high-fidelity narration'
-                                                                        : 'Generating your personalized lesson explanation'}
-                                                                </p>
-                                                            </>
+                                                        {lesson.courseImage ? (
+                                                            <img src={lesson.courseImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Session Preview" />
                                                         ) : (
-                                                            <>
-                                                                <div style={{ 
-                                                                    padding: '3rem', 
-                                                                    background: 'rgba(255,255,255,0.03)', 
-                                                                    borderRadius: '40px',
-                                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                                    boxShadow: '0 30px 60px -12px rgba(0,0,0,0.5)',
-                                                                    position: 'relative'
-                                                                }}>
-                                                                    <p style={{ 
-                                                                        fontSize: '1.85rem', 
-                                                                        lineHeight: 1.6, 
-                                                                        color: 'white', 
-                                                                        fontWeight: 700, 
-                                                                        margin: 0,
-                                                                        letterSpacing: '-0.01em',
-                                                                        textAlign: 'left'
-                                                                    }}>
-                                                                        {tts.currentChunkText}
-                                                                        <span style={{ 
-                                                                            display: 'inline-block', 
-                                                                            width: '4px', 
-                                                                            height: '1.8rem', 
-                                                                            background: '#10b981', 
-                                                                            marginLeft: '8px',
-                                                                            verticalAlign: 'middle',
-                                                                            animation: 'pulse 1s infinite',
-                                                                            borderRadius: '2px'
-                                                                        }}></span>
-                                                                    </p>
-                                                                </div>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: '#64748b', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                                                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: tts.ttsState === 'playing' ? '#10b981' : '#f59e0b' }}></div>
-                                                                    Narrator {tts.ttsState === 'playing' ? 'Active' : 'Paused'} • Section {tts.currentChunk}/{tts.totalChunks}
-                                                                </div>
-                                                            </>
+                                                            <FileText size={48} color="#1a4d3e" opacity={0.6} />
                                                         )}
                                                     </div>
-                                                ) : (
-                                                    <>
-                                                        <div style={{
-                                                            width: '100px', height: '100px', background: '#f0fdf4',
-                                                            borderRadius: '32px', display: 'flex', alignItems: 'center',
-                                                            justifyContent: 'center', marginBottom: '2rem',
-                                                            boxShadow: '0 20px 40px rgba(26, 77, 62, 0.08)'
-                                                        }}>
-                                                            <FileText size={48} color="#1a4d3e" />
-                                                        </div>
-                                                        <h3 style={{ margin: '0 0 12px 0', fontSize: '1.85rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>
-                                                            Interactive Resource Ready
-                                                        </h3>
-                                                        <p style={{ margin: '0 0 2.5rem 0', color: '#64748b', fontSize: '1.15rem', fontWeight: 600, maxWidth: '480px', lineHeight: 1.6 }}>
-                                                            This {lesson.file_url.match(/\.pdf/i) ? 'document' : 'presentation'} has been prepared for your session. Use the high-fidelity narrator below or access the visual assets for deep review.
-                                                        </p>
-                                                        <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center' }}>
-                                                            <button
-                                                                onClick={toggleReadAloud}
-                                                                className="btn-primary-forest"
-                                                                style={{ padding: '0 2.5rem', height: '56px', fontSize: '1rem', boxShadow: '0 15px 30px rgba(26, 77, 62, 0.2)' }}
-                                                            >
-                                                                <PlayCircle size={20} /> Listen to Lesson
-                                                            </button>
-                                                            <button
-                                                                onClick={() => {
-                                                                    const assetsSection = document.getElementById('lesson-assets-sidebar');
-                                                                    if (assetsSection) {
-                                                                        assetsSection.scrollIntoView({ behavior: 'smooth' });
-                                                                        assetsSection.style.borderColor = '#1a4d3e';
-                                                                        assetsSection.style.boxShadow = '0 0 0 4px rgba(26, 77, 62, 0.1)';
-                                                                        setTimeout(() => {
-                                                                            assetsSection.style.borderColor = '#e2e8f0';
-                                                                            assetsSection.style.boxShadow = 'none';
-                                                                        }, 2000);
-                                                                    }
-                                                                }}
-                                                                style={{
-                                                                    padding: '0 2.5rem', height: '56px', fontSize: '1rem',
-                                                                    background: 'white', border: '2px solid #e2e8f0', borderRadius: '16px',
-                                                                    color: '#64748b', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s',
-                                                                    display: 'flex', alignItems: 'center', gap: '10px'
-                                                                }}
-                                                                onMouseEnter={(e: any) => { e.currentTarget.style.borderColor = '#1a4d3e'; e.currentTarget.style.color = '#1a4d3e'; }}
-                                                                onMouseLeave={(e: any) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
-                                                            >
-                                                                <Eye size={20} /> View Assets
-                                                            </button>
-                                                        </div>
-                                                    </>
-                                                )}
+                                                    <h3 style={{ margin: '0 0 12px 0', fontSize: '2rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.03em' }}>
+                                                         Instructional Resource Ready
+                                                    </h3>
+                                                    <p style={{ margin: '0 0 3rem 0', color: '#64748b', fontSize: '1.25rem', fontWeight: 600, maxWidth: '520px', lineHeight: 1.6 }}>
+                                                        Your lesson materials have been architected. Start the neural narrator or explore the visual library below.
+                                                    </p>
+                                                    <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', alignItems: 'center' }}>
+                                                        <button
+                                                            onClick={toggleReadAloud}
+                                                            className="btn-primary-forest"
+                                                            style={{ 
+                                                                padding: '0 3rem', height: '64px', fontSize: '1.1rem', fontWeight: 900,
+                                                                boxShadow: '0 20px 40px -8px rgba(26, 77, 62, 0.3)',
+                                                                borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '12px'
+                                                            }}
+                                                        >
+                                                            <PlayCircle size={24} /> Listen to Lesson
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                const assetsSection = document.getElementById('lesson-assets-sidebar');
+                                                                if (assetsSection) {
+                                                                    assetsSection.scrollIntoView({ behavior: 'smooth' });
+                                                                }
+                                                            }}
+                                                            style={{
+                                                                padding: '0 2.5rem', height: '64px', fontSize: '1.1rem',
+                                                                background: 'rgba(2, 6, 23, 0.03)', border: '1.5px solid #e2e8f0', borderRadius: '20px',
+                                                                color: '#475569', fontWeight: 850, cursor: 'pointer', transition: 'all 0.3s',
+                                                                display: 'flex', alignItems: 'center', gap: '10px'
+                                                            }}
+                                                            onMouseEnter={(e: any) => { e.currentTarget.style.borderColor = '#1a4d3e'; e.currentTarget.style.color = '#1a4d3e'; e.currentTarget.style.background = 'white'; }}
+                                                            onMouseLeave={(e: any) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.background = 'rgba(2, 6, 23, 0.03)'; }}
+                                                        >
+                                                            <Eye size={22} /> View Assets
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         ) : (
                                             <div style={{ textAlign: 'center', padding: '4rem' }}>
@@ -816,8 +747,8 @@ const LessonView = () => {
                                                 background: ['playing','paused'].includes(tts.ttsState) ? 'rgba(26, 77, 62, 0.12)' : '#f8fafc',
                                                 border: '1.5px solid',
                                                 borderColor: ['playing','paused'].includes(tts.ttsState) ? '#1a4d3e' : '#e2e8f0',
-                                                padding: '8px 16px', borderRadius: '100px', color: '#1a4d3e',
-                                                fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px',
+                                                padding: '5px 12px', borderRadius: '100px', color: '#1a4d3e',
+                                                fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px',
                                                 cursor: tts.ttsState === 'extracting' ? 'not-allowed' : 'pointer',
                                                 opacity: tts.ttsState === 'extracting' ? 0.6 : 1,
                                                 transition: 'all 0.3s', boxShadow: ['playing','paused'].includes(tts.ttsState) ? '0 4px 15px rgba(26,77,62,0.2)' : 'none'
@@ -921,10 +852,10 @@ const LessonView = () => {
                                             background: ['playing','paused'].includes(tts.ttsState) ? 'rgba(26, 77, 62, 0.1)' : '#f8fafc', 
                                             border: '1.5px solid', 
                                             borderColor: ['playing','paused'].includes(tts.ttsState) ? '#1a4d3e' : '#e2e8f0',
-                                            padding: '6px 14px',
+                                            padding: '4px 10px',
                                             borderRadius: '100px',
                                             color: '#1a4d3e',
-                                            fontSize: '0.75rem',
+                                            fontSize: '0.7rem',
                                             fontWeight: 800,
                                             display: 'flex',
                                             alignItems: 'center',

@@ -11,21 +11,20 @@
     rel="stylesheet">
   <title>Layos Group | LMS</title>
   <style>
-    /* Silent AI Engine: Aggressive Blackout for Puter Popups/Prompts */
-    [id*="puter-"], 
-    [class*="puter-"],
+    /* Silent AI Engine: Aggressively hide Puter Branding/Banners/attribution */
+    /* DO NOT HIDE MODALS, or students cannot click 'Continue' to enable AI! */
     [class*="puter-banner"],
-    [class*="puter-modal"],
-    [id*="puter-modal"],
-    iframe[src*="puter.com"],
+    [id*="puter-banner"],
     .puter-attribution,
-    #puter-attribution {
+    #puter-attribution,
+    .puter-cloud-menu,
+    #puter-cloud-menu,
+    [id*="puter-cloud-menu"],
+    #puter-attribution-container {
       display: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
       pointer-events: none !important;
-      position: absolute !important;
-      left: -9999px !important;
       height: 0 !important;
       width: 0 !important;
       z-index: -9999 !important;
@@ -35,7 +34,33 @@
 
 <body>
   <div id="root"></div>
-  <script src="https://js.puter.com/v2/"></script>
+  <script>
+    // Skip Puter.js Welcome Banner and Dialogs
+    window.PUTER_NO_SPLASH = true;
+    window.PUTER_NO_BANNER = true;
+    window.puter_config = {
+      no_ask_for_permissions: true,
+      no_dialog: true,
+      silent: true
+    };
+  </script>
+  <script src="https://js.puter.com/v2/" data-no-splash="true" data-no-banner="true"></script>
+  <script>
+    // Proactive UI Hiding: Catch Puter.js as soon as it initializes
+    (function() {
+      const silencePuter = () => {
+        if (window.puter && window.puter.ui) {
+          if (typeof window.puter.ui.setMenuVisible === 'function') window.puter.ui.setMenuVisible(false);
+          if (typeof window.puter.ui.hide === 'function') window.puter.ui.hide();
+          if (typeof window.puter.ui.hideSpinner === 'function') window.puter.ui.hideSpinner();
+        }
+      };
+      silencePuter();
+      setTimeout(silencePuter, 100);
+      setTimeout(silencePuter, 500);
+      setTimeout(silencePuter, 1500);
+    })();
+  </script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

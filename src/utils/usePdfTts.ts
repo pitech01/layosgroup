@@ -128,58 +128,60 @@ export function usePdfTts(): UsePdfTtsResult {
       if (!rawText) return "";
       try {
           const puterObj = (window as any).puter;
-          if (!puterObj) {
-            console.warn('[AI] Puter.js not available in window');
+          if (!puterObj || !puterObj.ai) {
+            console.warn('[AI] Puter.js AI Not Ready');
             return rawText;
           }
           
           const shortText = rawText.slice(0, 1500); 
-          console.log('[AI] Generating Teaching Content for text:', shortText.slice(0, 50) + '...');
+          console.log('[AI] Generating Teaching Content...');
 
-          const response = await puterObj.ai.chat(`
+          // Promise with Timeout to prevent "Infinite Loading"
+          const chatPromise = puterObj.ai.chat(`
             You are a friendly African teacher.
-            Explain this lesson in a simple, engaging and human way.
-            - Break down concepts step-by-step
-            - Use clear English
-            - Make it sound like teaching, not reading
-            - Do NOT repeat the text directly
+            Explain this lesson in a simple, human way.
             Lesson:
             ${shortText}
           `);
 
-          console.log('[AI] Response received:', response);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('AI Request Timeout')), 4000)
+          );
+
+          const response: any = await Promise.race([chatPromise, timeoutPromise]);
           const teachingContent = response?.message?.content || response?.toString() || rawText;
           
-          // Cache check
-          const cacheKey = shortText.slice(0, 50) + shortText.length;
-          puterCacheRef.current[cacheKey] = teachingContent;
-
-          console.log('[AI] Final Teaching Text:', teachingContent.slice(0, 50) + '...');
           return teachingContent;
       } catch (err) {
-          console.error('[Puter AI] Chat Error:', err);
-          return rawText;
+          console.error('[Puter AI] Chat Error/Timeout:', err);
+          return rawText; // SILENT FALLBACK to original text
       }
   };
 
   const speakWithPuter = async (text: string): Promise<boolean> => {
-      if (!text || typeof text !== 'string') {
-        console.warn('[Puter TTS] No valid text provided for narration');
-        return false;
-      }
+      if (!text || typeof text !== 'string') return false;
 
       try {
           const puterObj = (window as any).puter;
-          if (!puterObj) return false;
+          if (!puterObj || !puterObj.ai || !puterObj.ai.txt2speech) {
+              console.warn('[Puter TTS] AI not available on window.puter');
+              return false;
+          }
           
-          console.log('[Puter TTS] Converting to neural speech (Ayanda). Text Length:', text.length);
-          const audio = await puterObj.ai.txt2speech(text, {
+          console.log('[Puter TTS] Converting to neural speech...');
+          
+          // Promise with Timeout to avoid hang on auth popup
+          const ttsPromise = puterObj.ai.txt2speech(text, {
               voice: "Ayanda",
               engine: "neural",
               language: "en-ZA"
           });
 
-          console.log('[Puter TTS] Audio object created:', audio);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('TTS Engine Timeout')), 4000)
+          );
+
+          const audio: any = await Promise.race([ttsPromise, timeoutPromise]);
 
           if (currentAudioRef.current) {
               currentAudioRef.current.pause();
@@ -200,8 +202,8 @@ export function usePdfTts(): UsePdfTtsResult {
           }
           return false;
       } catch (err) {
-          console.error('[Puter TTS] Neural Error:', err);
-          return false;
+          console.error('[Puter TTS] Neural Error/Timeout:', err);
+          return false; // Triggers Native Fallback
       }
   };
 
