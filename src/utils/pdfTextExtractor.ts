@@ -28,7 +28,6 @@ function buildProxyUrl(remoteUrl: string): string {
  */
 export const loadPdf = async (remoteUrl: string) => {
   const proxyUrl = buildProxyUrl(remoteUrl);
-  console.log('[TTS] Loading PDF handle:', proxyUrl);
   const loadingTask = pdfjs.getDocument({ url: proxyUrl, verbosity: 0 });
   return await loadingTask.promise;
 };

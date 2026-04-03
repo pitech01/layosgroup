@@ -92,7 +92,6 @@ export default function EditCohort() {
                 throw new Error(data.message || 'Failed to update cohort.');
             }
 
-            console.log("Cohort Updated:", data);
             navigate(`/instructor/cohorts/${id}`);
         } catch (err: any) {
             console.error('Cohort Update Error:', err);

@@ -115,11 +115,7 @@ const LessonView = () => {
 
     useEffect(() => {
         if (lesson) {
-            console.log('[DEBUG] Lesson Data:', lesson);
-            console.log('[DEBUG] File URL:', lesson.file_url);
-            if (lesson.file_url) {
-                console.log('[DEBUG] Is PDF Match:', /\.pdf([?#]|$)/i.test(lesson.file_url));
-            }
+            // Lesson loaded
         }
     }, [lesson]);
 

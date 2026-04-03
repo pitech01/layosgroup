@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { loadPdf, extractPdfPageText, loadPptx, extractPptxSlideText } from './pdfTextExtractor';
 
-// Declare Puter for the hook to use
-declare const puter: any;
-
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 const getUrlPath = (url: string) => {
@@ -24,10 +21,10 @@ function cleanLessonText(rawText: string) {
       .replace(/LAYOS GROUP LLC/gi, '')
       .replace(/CONFIDENTIAL TRAINING MATERIAL/gi, '')
       .replace(/Page\s\d+\sof\s\d+/gi, '')
-      .replace(/\s\d+\s\|\s\d+\s/g, ' ') // 1 | 10 format with spaces
-      .replace(/\b\d+\s\|\s\d+\b/g, '')  // 1 | 10 format
+      .replace(/\s\d+\s\|\s\d+\s/g, ' ') 
+      .replace(/\b\d+\s\|\s\d+\b/g, '')  
       .replace(/\s+/g, ' ')
-      .replace(/([a-z])([A-Z])/g, "$1. $2") // fix merged sentences
+      .replace(/([a-z])([A-Z])/g, "$1. $2") 
       .trim();
 }
 
@@ -61,7 +58,7 @@ export const cleanVoiceName = (name: string) =>
 // ── types ─────────────────────────────────────────────────────────────────────
 
 export type TtsState = 'idle' | 'extracting' | 'processing' | 'playing' | 'paused' | 'done' | 'error';
-export type TtsEngine = 'native' | 'ai';
+export type TtsEngine = 'native';
 
 export interface UsePdfTtsResult {
   ttsState: TtsState;
@@ -103,10 +100,10 @@ export function usePdfTts(): UsePdfTtsResult {
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice]     = useState<SpeechSynthesisVoice | null>(null);
   const [rate, _setRate] = useState(0.9);
-  const [pitch, _setPitch] = useState(1.1);
-  const [engine, setEngine] = useState<TtsEngine>('ai');
-  const [language, setLanguage] = useState('eng');
-  const [isTeachingMode, setIsTeachingMode] = useState(true); // Always on African Tone Engine
+  const [pitch, _setPitch] = useState(1.0);
+  const [engine, setEngine] = useState<TtsEngine>('native');
+  const [language, setLanguage] = useState('en-ZA');
+  const [isTeachingMode, setIsTeachingMode] = useState(false); 
 
   const chunksRef       = useRef<string[]>([]);
   const voiceRef        = useRef<SpeechSynthesisVoice | null>(null);
@@ -116,281 +113,168 @@ export function usePdfTts(): UsePdfTtsResult {
   const isPausedRef     = useRef(false);
   const isStoppedRef    = useRef(false);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const puterCacheRef   = useRef<Record<string, string>>({});
 
   voiceRef.current = selectedVoice;
   rateRef.current  = rate;
   pitchRef.current = pitch;
 
-  // ── Puter AI "Teaching Mode" Logic ─────────────────────────────────────────
-  
-  const generateTeachingExplanation = async (rawText: string): Promise<string> => {
-      if (!rawText) return "";
-      try {
-          const puterObj = (window as any).puter;
-          if (!puterObj || !puterObj.ai) {
-            console.warn('[AI] Puter.js AI Not Ready');
-            return rawText;
-          }
-          
-          const shortText = rawText.slice(0, 1500); 
-          console.log('[AI] Generating Teaching Content...');
+  // ── Voice Management ──────────────────────────────────────────────────────────
 
-          // Promise with Timeout to prevent "Infinite Loading"
-          const chatPromise = puterObj.ai.chat(`
-            You are a friendly African teacher.
-            Explain this lesson in a simple, human way.
-            Lesson:
-            ${shortText}
-          `);
+  const updateVoices = useCallback(() => {
+    const list = window.speechSynthesis.getVoices();
+    setAvailableVoices(list);
 
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('AI Request Timeout')), 4000)
-          );
+    const sorted = [...list].sort((a, b) => {
+        let scA = 0; let scB = 0;
+        if (a.lang === 'en-ZA') scA += 1000;
+        if (b.lang === 'en-ZA') scB += 1000;
+        if (a.name.includes('Neural') || a.name.includes('Natural')) scA += 500;
+        if (b.name.includes('Neural') || b.name.includes('Natural')) scB += 500;
+        return scB - scA;
+    });
 
-          const response: any = await Promise.race([chatPromise, timeoutPromise]);
-          const teachingContent = response?.message?.content || response?.toString() || rawText;
-          
-          return teachingContent;
-      } catch (err) {
-          console.error('[Puter AI] Chat Error/Timeout:', err);
-          return rawText; // SILENT FALLBACK to original text
-      }
-  };
-
-  const speakWithPuter = async (text: string): Promise<boolean> => {
-      if (!text || typeof text !== 'string') return false;
-
-      try {
-          const puterObj = (window as any).puter;
-          if (!puterObj || !puterObj.ai || !puterObj.ai.txt2speech) {
-              console.warn('[Puter TTS] AI not available on window.puter');
-              return false;
-          }
-          
-          console.log('[Puter TTS] Converting to neural speech...');
-          
-          // Promise with Timeout to avoid hang on auth popup
-          const ttsPromise = puterObj.ai.txt2speech(text, {
-              voice: "Ayanda",
-              engine: "neural",
-              language: "en-ZA"
-          });
-
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('TTS Engine Timeout')), 4000)
-          );
-
-          const audio: any = await Promise.race([ttsPromise, timeoutPromise]);
-
-          if (currentAudioRef.current) {
-              currentAudioRef.current.pause();
-              currentAudioRef.current = null;
-          }
-
-          if (audio && typeof audio.play === 'function') {
-              currentAudioRef.current = audio;
-              audio.onended = () => {
-                  if (!isStoppedRef.current && !isPausedRef.current) {
-                      setTtsState('done');
-                  }
-              };
-              audio.play();
-              setTtsState('playing');
-              setCurrentChunkText(text);
-              return true;
-          }
-          return false;
-      } catch (err) {
-          console.error('[Puter TTS] Neural Error/Timeout:', err);
-          return false; // Triggers Native Fallback
-      }
-  };
-
-  // ── Native Fallback ─────────────────────────────────────────────────────────
-
-  const speakAtNative: (index: number) => Promise<void> = useCallback(async (index: number) => {
-    if (isStoppedRef.current || isPausedRef.current) return;
-    
-    const chunks = chunksRef.current;
-    if (!chunks || index >= chunks.length) {
-      setTtsState('done');
-      return;
+    if (sorted.length > 0 && !voiceRef.current) {
+        setSelectedVoice(sorted[0]);
+        voiceRef.current = sorted[0];
     }
-
-    currentIndexRef.current = index;
-    const rawText = chunks[index];
-    if (!rawText) return;
-    
-    const utterance = new SpeechSynthesisUtterance(rawText);
-    utterance.rate  = rateRef.current;
-    utterance.pitch = pitchRef.current;
-    if (voiceRef.current) utterance.voice = voiceRef.current;
-
-    utterance.onstart = () => {
-      if (isStoppedRef.current) return;
-      setTtsState('playing');
-      setCurrentChunk(index + 1);
-      setCurrentChunkText(rawText);
-    };
-
-    utterance.onend = () => {
-      if (isStoppedRef.current || isPausedRef.current) return;
-      setTimeout(() => speakAtNative(index + 1), 350);
-    };
-
-    window.speechSynthesis.speak(utterance);
   }, []);
 
-  // ── Main Launch Logic ───────────────────────────────────────────────────────
+  useEffect(() => {
+    updateVoices();
+    window.speechSynthesis.onvoiceschanged = updateVoices;
+  }, [updateVoices]);
 
-  const loadAndPlay = useCallback(async (fileUrl: string, fileName?: string) => {
-    if (!fileUrl) return;
-    
+  // ── Native Speech Logic ───────────────────────────────────────────────────────
+
+  const speakWithNative = async (text: string): Promise<boolean> => {
+      if (!text || typeof text !== 'string') return false;
+      if (!window.speechSynthesis) return false;
+
+      window.speechSynthesis.cancel();
+      
+      return new Promise((resolve) => {
+          const utter = new SpeechSynthesisUtterance(text);
+          if (voiceRef.current) utter.voice = voiceRef.current;
+          utter.rate = rateRef.current;
+          utter.pitch = pitchRef.current;
+
+          utter.onstart = () => {
+              setTtsState('playing');
+              setCurrentChunkText(text);
+          };
+
+          utter.onend = () => {
+            if (!isStoppedRef.current && !isPausedRef.current) {
+                setTtsState('done');
+            }
+            resolve(true);
+          };
+
+          utter.onerror = (e) => {
+              console.error('[Native TTS] Error:', e);
+              setTtsState('error');
+              resolve(false);
+          };
+
+          window.speechSynthesis.speak(utter);
+      });
+  };
+
+  // ── Lifecycle Actions ─────────────────────────────────────────────────────────
+
+  const stop = useCallback(() => {
+    isStoppedRef.current = true;
+    isPausedRef.current = false;
     window.speechSynthesis.cancel();
     if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-        currentAudioRef.current = null;
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
     }
-
-    isStoppedRef.current = false;
-    isPausedRef.current  = false;
-    currentIndexRef.current = 0;
-    setTtsState('extracting');
-    setTtsError('');
-    setCurrentChunk(0);
-    setIndexingProgress(0);
-
-    try {
-      const check = isNarratableUrl(fileUrl, fileName);
-      if (!check?.any) {
-        setTtsState('error');
-        setTtsError('Format not supported (Only PDF/PPTX)');
-        return;
-      }
-
-      let fullRawText = '';
-      if (check.isPdf) {
-        const pdf = await loadPdf(fileUrl).catch(e => { throw new Error('PDF failed to load or proxy blocked'); });
-        if (!pdf) throw new Error('Invalid PDF handle');
-        
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const pageText = await extractPdfPageText(pdf, i);
-          fullRawText += pageText + ' ';
-          setIndexingProgress(Math.round((i / pdf.numPages) * 100));
-        }
-      } else {
-        const ppt = await loadPptx(fileUrl).catch(e => { throw new Error('PPTX failed to load'); });
-        const slideCount = ppt?.slideFiles?.length || 0;
-        for (let i = 0; i < slideCount; i++) {
-          const slideText = await extractPptxSlideText(ppt, i);
-          fullRawText += slideText + ' ';
-          setIndexingProgress(Math.round(((i + 1) / slideCount) * 100));
-        }
-      }
-
-      if (!fullRawText.trim()) throw new Error('No readable text found in document');
-
-      const cleaned = cleanLessonText(fullRawText);
-      console.log('[TTS] Cleaned Raw Text:', cleaned.slice(0, 50) + '...');
-      
-      setTtsState('processing'); // Show "Preparing lesson..."
-
-      // STEP 1: Generate AI Teaching Text
-      const teachingText = await generateTeachingExplanation(cleaned);
-
-      // STEP 2: Convert to Speech via Puter (Primary)
-      const success = await speakWithPuter(teachingText).catch((e) => {
-          console.error('[Puter TTS] Promise Error:', e);
-          return false;
-      });
-
-      // STEP 3: Fallback to Native if Puter fails
-      if (!success) {
-          console.warn('[TTS] Puter Neural TTS failed, falling back to Native.');
-          const sentences = splitIntoSentences(teachingText);
-          const chunks = splitIntoChunks(sentences, 200);
-          chunksRef.current = chunks;
-          setTotalChunks(chunks?.length || 0);
-          speakAtNative(0);
-      } else {
-          setTotalChunks(1);
-          setCurrentChunk(1);
-      }
-
-    } catch (err: any) {
-      console.error('[TTS] Preparation Error:', err);
-      setTtsState('error');
-      setTtsError(err.message || 'Preparation failed');
-    }
-  }, [speakAtNative]);
+    setTtsState('idle');
+  }, []);
 
   const pause = useCallback(() => {
     isPausedRef.current = true;
-    if (currentAudioRef.current) currentAudioRef.current.pause();
-    else window.speechSynthesis.pause();
+    window.speechSynthesis.pause();
     setTtsState('paused');
   }, []);
 
   const resume = useCallback(() => {
-    if (ttsState !== 'paused') return;
     isPausedRef.current = false;
-    if (currentAudioRef.current) currentAudioRef.current.play();
-    else if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-    else speakAtNative(currentIndexRef.current);
+    window.speechSynthesis.resume();
     setTtsState('playing');
-  }, [ttsState, speakAtNative]);
-
-  const stop = useCallback(() => {
-    isStoppedRef.current = true;
-    if (currentAudioRef.current) { currentAudioRef.current.pause(); currentAudioRef.current = null; }
-    window.speechSynthesis.cancel();
-    setTtsState('idle');
   }, []);
 
-  const restart = useCallback(() => {
+  const loadAndPlay = useCallback(async (url: string, name?: string) => {
     stop();
-    setTimeout(() => {
-        isStoppedRef.current = false;
-        isPausedRef.current = false;
-        // This is a bit tricky for Puter Audio object, simplifying for now
-        setTtsState('idle'); 
-    }, 100);
+    setTtsState('extracting');
+    setTtsError('');
+    currentIndexRef.current = 0;
+    isStoppedRef.current = false;
+
+    try {
+      const info = isNarratableUrl(url, name);
+      let text = '';
+
+      if (info.isPdf) {
+        const pdf = await loadPdf(url);
+        let extracted = '';
+        const total = pdf.numPages;
+        for (let i = 1; i <= total; i++) {
+          const pageTxt = await extractPdfPageText(pdf, i);
+          extracted += pageTxt + ' ';
+          setIndexingProgress(Math.round((i / total) * 100));
+        }
+        text = extracted;
+      } else if (info.isPpt) {
+        const ppt = await loadPptx(url);
+        text = await extractPptxSlideText(ppt);
+      } else {
+          // Fallback or Image? Maybe just treat it as narratable text if provided?
+          text = name || "";
+      }
+
+      if (!text || text.trim().length < 5) {
+        throw new Error('This resource contains no legible text for narration.');
+      }
+
+      const cleaned = cleanLessonText(text);
+      const sentences = splitIntoSentences(cleaned);
+      chunksRef.current = splitIntoChunks(sentences);
+      setTotalChunks(chunksRef.current.length);
+      
+      setCurrentChunk(1);
+      await speakWithNative(chunksRef.current[0]);
+
+    } catch (err: any) {
+      console.error('[TTS Load Error]:', err);
+      setTtsError(err.message || 'Failed to prepare audio.');
+      setTtsState('error');
+    }
   }, [stop]);
 
-  // Handle voice/rate/pitch state updates (for native fallback)
-  useEffect(() => {
-    const load = () => {
-      const all = window.speechSynthesis.getVoices();
-      const sorted = [...all].sort((a, b) => {
-        const score = (v: SpeechSynthesisVoice) => {
-          let s = 0;
-          const l = v.lang.toLowerCase();
-          if (l.includes('en-za')) s += 1000;
-          if (v.name.toLowerCase().includes('female')) s += 500;
-          if (l.includes('en-gb')) s += 200;
-          return s;
-        };
-        return score(b) - score(a);
-      });
-      setAvailableVoices(sorted.slice(0, 30));
-      if (!selectedVoice && sorted.length) setSelectedVoice(sorted[0]);
-    };
-    load();
-    window.speechSynthesis.onvoiceschanged = load;
-  }, [selectedVoice]);
-
-  const progressPct = totalChunks > 0 ? Math.round((currentChunk / totalChunks) * 100) : 0;
-
+  // Public Result Object
   return {
-    ttsState, ttsError, currentChunk, totalChunks, progressPct, currentChunkText,
-    availableVoices, selectedVoice, setVoice: setSelectedVoice,
-    rate, setRate: _setRate, pitch, setPitch: _setPitch,
-    engine, setEngine, language, setLanguage,
+    ttsState, ttsError, currentChunk, totalChunks,
+    progressPct: totalChunks > 0 ? (currentChunk / totalChunks) * 100 : 0,
+    currentChunkText, availableVoices, selectedVoice,
+    setVoice: (v) => { setSelectedVoice(v); voiceRef.current = v; },
+    rate, setRate: (r) => { _setRate(r); rateRef.current = r; },
+    pitch, setPitch: (p) => { _setPitch(p); pitchRef.current = p; },
+    engine, setEngine: () => {}, 
+    language, setLanguage,
     isTeachingMode, setIsTeachingMode,
-    play: () => ttsState === 'paused' ? resume() : restart(),
-    pause, resume, stop, restart, loadAndPlay,
-    isIndexing: ttsState === 'extracting' || ttsState === 'processing', 
+    play: () => {
+        if (chunksRef.current.length > 0) speakWithNative(chunksRef.current[currentIndexRef.current]);
+    },
+    pause, resume, stop,
+    restart: () => {
+        currentIndexRef.current = 0;
+        setCurrentChunk(1);
+        speakWithNative(chunksRef.current[0]);
+    },
+    loadAndPlay,
+    isIndexing: ttsState === 'extracting',
     indexingProgress
   };
 }

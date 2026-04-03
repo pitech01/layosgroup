@@ -61,7 +61,6 @@ export default function CreateCohort() {
                 throw new Error(data.message || 'Failed to create cohort.');
             }
 
-            console.log("Cohort Created:", data);
             navigate(`/instructor/cohorts/${data.id}`);
         } catch (err: any) {
             console.error('Cohort Creation Error:', err);
