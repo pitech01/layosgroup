@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Download, FileAudio, Eye, X, FileText, Trash2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Download, FileAudio, Eye, X, FileText, Trash2, Bold, Italic, Underline } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -12,6 +12,7 @@ export interface Message {
     content: string;
     attachmentUrl?: string;
     dueDate?: string;
+    isDeleted?: boolean;
     createdAt: string;
 }
 
@@ -29,6 +30,7 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
     const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string } | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(message.content);
+    const editorRef = useRef<HTMLDivElement>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     const isPdf = (url: string) => {
@@ -39,6 +41,27 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
         if (viewerRole === 'student' && isPdf(url)) {
             e.preventDefault();
             setViewingPdf({ url, title: title || 'Resource Archive' });
+        }
+    };
+
+    useEffect(() => {
+        if (isEditing && editorRef.current) {
+            editorRef.current.innerHTML = message.content;
+            // Set cursor to end
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(editorRef.current);
+            range.collapse(false);
+            sel?.removeAllRanges();
+            sel?.addRange(range);
+            editorRef.current.focus();
+        }
+    }, [isEditing, message.content]);
+
+    const handleFormat = (command: string) => {
+        document.execCommand(command, false);
+        if (editorRef.current) {
+            setEditContent(editorRef.current.innerHTML);
         }
     };
 
@@ -265,6 +288,23 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                     color: #ef4444;
                     background: #fef2f2;
                 }
+                
+                .format-tool-btn {
+                    padding: 6px;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    color: #64748b;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                }
+                .format-tool-btn:hover {
+                    background: #f1f5f9;
+                    color: #0f172a;
+                }
             `}</style>
             
             <div className="message-avatar-sidebar">
@@ -289,11 +329,27 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                     </div>
                 )}
 
-                {isEditing ? (
+                {message.isDeleted ? (
+                    <div className="message-body-text deleted" style={{ fontStyle: 'italic', color: '#94a3b8' }}>
+                        This message has been deleted.
+                    </div>
+                ) : isEditing ? (
                     <div style={{ width: '100%', marginTop: '4px' }}>
-                        <textarea
-                            value={editContent}
-                            onChange={(e) => setEditContent(e.target.value)}
+                        <div style={{ display: 'flex', gap: '2px', marginBottom: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
+                            <button onMouseDown={(e) => { e.preventDefault(); handleFormat('bold'); }} className="format-tool-btn" title="Bold">
+                                <Bold size={18} />
+                            </button>
+                            <button onMouseDown={(e) => { e.preventDefault(); handleFormat('italic'); }} className="format-tool-btn" title="Italic">
+                                <Italic size={18} />
+                            </button>
+                            <button onMouseDown={(e) => { e.preventDefault(); handleFormat('underline'); }} className="format-tool-btn" title="Underline">
+                                <Underline size={18} />
+                            </button>
+                        </div>
+                        <div 
+                            ref={editorRef}
+                            contentEditable
+                            onInput={(e) => setEditContent(e.currentTarget.innerHTML)}
                             style={{
                                 width: '100%',
                                 minHeight: '60px',
@@ -303,10 +359,9 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                                 fontSize: '0.95rem',
                                 color: '#1e293b',
                                 outline: 'none',
-                                resize: 'vertical',
-                                fontFamily: 'inherit'
+                                overflowY: 'auto',
+                                background: 'white'
                             }}
-                            autoFocus
                         />
                         <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                             <button 
@@ -326,7 +381,7 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                                     }
                                 }}
                                 style={{ padding: '4px 12px', borderRadius: '4px', border: 'none', background: '#2563eb', color: 'white', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
-                                disabled={isSaving || editContent.trim() === message.content}
+                                disabled={isSaving || (editContent === message.content)}
                             >
                                 {isSaving ? 'Saving...' : 'Save Changes'}
                             </button>
@@ -340,7 +395,7 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                     </div>
                 )}
 
-                {message.attachmentUrl && (message.type === 'message' || message.type === 'announcement') && (
+                {message.attachmentUrl && !message.isDeleted && (message.type === 'message' || message.type === 'announcement') && (
                     <div className="message-attachment-container">
                         {/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(message.attachmentUrl.split('?')[0]) ? (
                             <div className="image-attachment-preview" style={{position: 'relative', display: 'inline-block'}}>
@@ -379,26 +434,28 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                 )}
             </div>
             
-            <div className="message-actions-hover">
-                {onEdit && (
-                    <button 
-                        className="action-btn"
-                        onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
-                        title="Edit Message"
-                    >
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    </button>
-                )}
-                {onDelete && (
-                    <button 
-                        className="action-btn delete"
-                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                        title="Delete Message"
-                    >
-                        <Trash2 size={16} />
-                    </button>
-                )}
-            </div>
+            {!message.isDeleted && (
+                <div className="message-actions-hover">
+                    {onEdit && (
+                        <button 
+                            className="action-btn"
+                            onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+                            title="Edit Message"
+                        >
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button 
+                            className="action-btn delete"
+                            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                            title="Delete Message"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Secure PDF Viewer Modal for Messaging */}
             {viewingPdf && (

@@ -1087,6 +1087,7 @@ const StudentChannelsPage = () => {
                                                     type: msg.isAnnouncement ? 'announcement' : 'message',
                                                     content: msg.content,
                                                     attachmentUrl: msg.file?.url,
+                                                    isDeleted: msg.isDeleted,
                                                     createdAt: formatTime(msg.timestamp)
                                                 };
 
