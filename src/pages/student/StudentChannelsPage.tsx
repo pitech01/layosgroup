@@ -791,16 +791,25 @@ const StudentChannelsPage = () => {
                 }
 
                 /* Enhanced Context Header */
-                .context-header {
-                    padding: 1rem 1.5rem;
+                    padding: 1rem;
                     border-bottom: 1px solid #e2e8f0;
                     background: white;
                     display: flex;
-                    justify-content: space-between;
-                    align-items: center;
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+                
+                @media (min-width: 640px) {
+                    .context-header {
+                        flex-direction: row;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 1rem 1.5rem;
+                    }
                 }
                 
                 .tabs-container {
+
                     display: flex;
                     gap: 2rem;
                     padding: 0 1.5rem;
@@ -989,9 +998,10 @@ const StudentChannelsPage = () => {
                     <div className="chat-area">
                         {/* Enhanced Context Header */}
                         <div className="context-header">
-                            <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <h2 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', gap: '12px' }}>
+                                    <h2 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', wordBreak: 'break-word' }}>
+
                                         {activeChannel.type === 'channel' ? <Hash size={22} color="#64748b" /> : <StatusDot status={activeChannel.status} />}
                                         {activeChannel.title}
                                     </h2>
@@ -1002,10 +1012,11 @@ const StudentChannelsPage = () => {
                                     )}
                                 </div>
                                 {activeChannel.description && (
-                                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>{activeChannel.description}</p>
+                                    <p style={{ margin: '0', fontSize: '0.85rem', color: '#64748b', wordBreak: 'break-word' }}>{activeChannel.description}</p>
                                 )}
                             </div>
-                            <div style={{ display: 'flex', gap: '16px', color: '#64748b' }}>
+                            <div style={{ display: 'flex', gap: '16px', color: '#64748b', flexShrink: 0 }}>
+
                                 <div 
                                     onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
                                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', background: isRightSidebarOpen ? '#f1f5f9' : 'transparent', padding: '6px 12px', borderRadius: '8px', transition: 'all 0.2s' }}

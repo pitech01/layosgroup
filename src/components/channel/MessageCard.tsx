@@ -87,6 +87,20 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                     justify-content: center;
                     position: relative;
                 }
+                
+                @media (max-width: 640px) {
+                    .slack-message-row {
+                        padding: ${compact ? '4px 12px' : '8px 12px'};
+                    }
+                    .message-avatar-sidebar {
+                        width: 36px;
+                    }
+                    .avatar-img-circle {
+                        width: 36px;
+                        height: 36px;
+                    }
+                }
+
                 .avatar-img-circle {
                     width: 42px;
                     height: 42px;
@@ -128,7 +142,9 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                     align-items: baseline;
                     gap: 8px;
                     margin-bottom: 2px;
+                    flex-wrap: wrap;
                 }
+
                 .sender-displayName {
                     font-weight: 900;
                     color: #1e293b;
@@ -142,7 +158,9 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                     border-radius: 4px;
                     font-weight: 800;
                     text-transform: uppercase;
+                    flex-shrink: 0;
                 }
+
                 .timestamp-minimal {
                     font-size: 0.75rem;
                     color: #64748b;
@@ -245,9 +263,13 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                     border-radius: 8px;
                     text-decoration: none;
                     color: #0f172a;
-                    max-width: 350px;
+                    max-width: 100%;
+                    width: 100%;
                     transition: all 0.2s;
+                    box-sizing: border-box;
+                    overflow: hidden;
                 }
+
                 .generic-file-attachment:hover {
                     background: #f1f5f9;
                     border-color: #cbd5e1;

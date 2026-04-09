@@ -192,9 +192,10 @@ export default function CourseLibrary() {
 
                 .template-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
+                    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
                     gap: 2rem;
                 }
+
 
                 @media (max-width: 640px) {
                     .template-grid {
@@ -352,16 +353,18 @@ export default function CourseLibrary() {
                 @media (max-width: 480px) {
                     .template-meta-strip {
                         flex-direction: column;
-                        gap: 1rem;
+                        gap: 1.25rem;
                     }
-                    .template-meta-strip div {
+                    .action-buttons-group {
                         flex-direction: column;
                         width: 100%;
                     }
                     .action-fab-library {
-                        width: 100%;
+                        width: 100% !important;
+                        justify-content: center;
                     }
                 }
+
             `}</style>
 
             <div className="library-header-premium">
@@ -446,17 +449,16 @@ export default function CourseLibrary() {
                             </div>
 
                             <div className="template-meta-strip">
-
-                                <div style={{ display: 'flex', gap: '0.75rem', width: '100%', justifyContent: 'flex-end' }}>
-                                    <Link to={`/instructor/courses/${course.id}/edit`} className="action-fab-library edit-btn shadow-sm" title="Edit Course" style={{ textDecoration: 'none', flex: 1, gap: '8px', minWidth: '100px' }}>
-                                        <Edit2 size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Edit Course</span>
+                                <div className="action-buttons-group" style={{ display: 'flex', gap: '0.75rem', width: '100%', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                    <Link to={`/instructor/courses/${course.id}/edit`} className="action-fab-library edit-btn shadow-sm" title="Edit Course" style={{ textDecoration: 'none', flex: '1 1 auto', gap: '8px', minWidth: '100px' }}>
+                                        <Edit2 size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Edit</span>
                                     </Link>
-                                    <Link to={`/instructor/courses/${course.id}/certificate-design`} className="action-fab-library shadow-sm" title="Certificate" style={{ textDecoration: 'none', flex: 1, gap: '8px', minWidth: '100px', background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd' }}>
-                                        <UserCheck size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Certificate</span>
+                                    <Link to={`/instructor/courses/${course.id}/certificate-design`} className="action-fab-library shadow-sm" title="Certificate" style={{ textDecoration: 'none', flex: '1 1 auto', gap: '8px', minWidth: '100px', background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd' }}>
+                                        <UserCheck size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Cert</span>
                                     </Link>
                                     <button
                                         className="action-fab-library delete-btn shadow-sm"
-                                        style={{ flex: 1, gap: '8px', minWidth: '100px' }}
+                                        style={{ flex: '1 1 auto', gap: '8px', minWidth: '100px' }}
                                         title="Delete Course"
                                         onClick={() => handleDelete(course.id)}
                                     >
@@ -464,6 +466,7 @@ export default function CourseLibrary() {
                                     </button>
                                 </div>
                             </div>
+
                         </div>
                     )) : (
                         <div style={{ gridColumn: '1 / -1', padding: '5rem', background: '#f8fafc', borderRadius: '32px', textAlign: 'center', border: '2px dashed #e2e8f0' }}>

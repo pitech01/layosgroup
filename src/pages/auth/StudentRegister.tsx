@@ -111,7 +111,7 @@ export default function StudentRegister() {
                                     Everything you need for project management with intense support. No matter your background or experience, this course is designed for you.
                                 </p>
 
-                                <div className="responsive-two-col" style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: '2rem', alignItems: 'center' }}>
+                                <div className="student-reg-hero-grid">
                                     {[
                                         { title: 'Primavera P6 (Hands-On)', icon: '📊', color: '#eff6ff' },
                                         { title: 'Microsoft Project (MSP)', icon: '💻', color: '#f0fdf4' },
@@ -126,6 +126,7 @@ export default function StudentRegister() {
                                         </div>
                                     ))}
                                 </div>
+
 
                                 <button
                                     onClick={nextStep}
@@ -188,7 +189,7 @@ export default function StudentRegister() {
                             )}
 
                             <form onSubmit={handleRegister}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div className="form-responsive-grid">
                                     <div className="login-form-group">
                                         <label className="login-label">First Name *</label>
                                         <input
@@ -214,6 +215,7 @@ export default function StudentRegister() {
                                         />
                                     </div>
                                 </div>
+
 
                                 <div className="login-form-group">
                                     <label className="login-label">Phone Number *</label>
@@ -283,7 +285,7 @@ export default function StudentRegister() {
                                     />
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div className="form-responsive-grid">
                                     <div className="login-form-group">
                                         <label className="login-label">City *</label>
                                         <input
@@ -310,7 +312,8 @@ export default function StudentRegister() {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+
+                                <div className="form-responsive-grid">
                                     <div className="login-form-group">
                                         <label className="login-label">Zip Code *</label>
                                         <input
@@ -339,6 +342,7 @@ export default function StudentRegister() {
                                         </select>
                                     </div>
                                 </div>
+
 
                                 <div className="login-form-group">
                                     <label className="login-label">Level of Education *</label>
@@ -390,7 +394,7 @@ export default function StudentRegister() {
                                     </label>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
+                                <div className="form-responsive-grid" style={{ marginTop: '1.5rem' }}>
                                     <div className="login-form-group">
                                         <label className="login-label">Password *</label>
                                         <div style={{ position: 'relative' }}>
@@ -463,6 +467,7 @@ export default function StudentRegister() {
                                     </div>
                                 </div>
 
+
                                 <button type="submit" className="login-btn-primary" style={{ marginTop: '1.5rem' }} disabled={loading}>
                                     {loading ? (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
@@ -474,6 +479,27 @@ export default function StudentRegister() {
                                     )}
                                 </button>
                                 <style>{`
+                                    .student-reg-hero-grid {
+                                        max-width: 1100px;
+                                        margin: 0 auto 2.5rem auto;
+                                        display: grid;
+                                        grid-template-columns: 1.2fr 1fr;
+                                        gap: 2rem;
+                                        align-items: center;
+                                    }
+                                    .form-responsive-grid {
+                                        display: grid;
+                                        grid-template-columns: 1fr 1fr;
+                                        gap: 1rem;
+                                    }
+                                    @media (max-width: 768px) {
+                                        .student-reg-hero-grid, .form-responsive-grid {
+                                            grid-template-columns: 1fr;
+                                        }
+                                        .student-reg-hero-grid {
+                                            gap: 1rem;
+                                        }
+                                    }
                                     @keyframes spin {
                                         to { transform: rotate(360deg); }
                                     }

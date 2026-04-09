@@ -14,16 +14,9 @@ const SecurityGuard = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const performSecurityChecks = async () => {
-            // 1. 💻 Desktop Only Rule (Checks UA and Width)
-            const ua = navigator.userAgent;
-            const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-            const isTabletUA = /(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua);
-            const isSmallScreen = window.innerWidth <= 1024; 
+            // 1. 💻 Desktop Only Rule (Checks UA and Width) - REMOVED
+            // Access is now allowed on mobile and tablet devices.
 
-            if (isMobileUA || isTabletUA || isSmallScreen) {
-                setSecurity({ isChecking: false, error: 'mobile' });
-                return;
-            }
 
             // 2. 🚫 VPN / Proxy Shield (Frontend Detection Layer)
             try {

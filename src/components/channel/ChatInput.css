@@ -241,11 +241,31 @@
     .mp-toolbar-top {
         overflow-x: auto;
         padding: 4px 8px;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    .mp-tool-icon {
+        flex-shrink: 0;
     }
     .mp-send-btn span {
         display: none;
     }
     .mp-send-btn {
         padding: 0 12px;
+    }
+    .mp-file-chip {
+        margin: 10px 12px 0;
+        max-width: 90%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .mp-action-btn {
+        width: 32px;
+        height: 32px;
+    }
+    .mp-plus-btn {
+        width: 24px;
+        height: 24px;
     }
 }

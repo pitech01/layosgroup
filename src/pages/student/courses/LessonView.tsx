@@ -194,7 +194,8 @@ const LessonView = () => {
     return (
         <div style={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
             <div style={{ flex: 1, overflowY: 'auto' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }} className="lesson-view-content">
+
                     <style>{`
                         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
                         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -280,6 +281,23 @@ const LessonView = () => {
                             transform: translateY(-4px) scale(1.02);
                             box-shadow: 0 20px 35px -8px rgba(16, 185, 129, 0.5);
                         }
+
+                        @media (max-width: 1024px) {
+                            .lesson-view-main-grid {
+                                grid-template-columns: 1fr !important;
+                                gap: 2.5rem !important;
+                            }
+                            .lesson-title-container h1 {
+                                font-size: 1.75rem !important;
+                                flex-direction: column;
+                                align-items: flex-start !important;
+                                gap: 1rem !important;
+                            }
+                            .lesson-view-content {
+                                padding: 1.5rem !important;
+                            }
+                        }
+
                     `}</style>
 
                     {/* Navigation Header */}
@@ -726,14 +744,16 @@ const LessonView = () => {
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3.5rem' }} className="lesson-view-main-grid">
+
                         <div>
                             <div style={{ marginBottom: '2rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#1a4d3e', marginBottom: '0.75rem' }}>
                                     <PlayCircle size={18} />
                                     <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lesson.moduleTitle}</span>
                                 </div>
-                                <h1 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <h1 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} className="lesson-title-container">
+
                                     {lesson.title}
                                     {lesson.file_url && (
                                         <button

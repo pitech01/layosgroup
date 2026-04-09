@@ -150,31 +150,68 @@ const Courses = () => {
                         letter-spacing: 0.05em;
                     }
 
+                    .section-header-courses h1 {
+                        font-size: clamp(2rem, 5vw, 3rem);
+                        font-weight: 950;
+                        color: #0f172a;
+                        letter-spacing: -0.06em;
+                        margin: 0;
+                        line-height: 1.1;
+                    }
+
+                    .section-header-courses p {
+                        color: #64748b;
+                        font-size: clamp(1rem, 2vw, 1.25rem);
+                        font-weight: 600;
+                        marginTop: 1rem;
+                        max-width: 600px;
+                        line-height: 1.6;
+                    }
+
+                    .course-list-title {
+                        font-size: clamp(1.8rem, 5vw, 3rem);
+                        font-weight: 950;
+                        color: #0f172a;
+                        letter-spacing: -0.05em;
+                        margin: 0;
+                        line-height: 1.1;
+                    }
+
                     @media (max-width: 1024px) {
-                        .cohort-selection-grid {
+                        .cohort-selection-grid, .course-grid {
                             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                            gap: 2rem;
+                            gap: 1.5rem;
                         }
                     }
 
-                    @media (max-width: 768px) {
-                        .section-header-courses h1 {
-                            font-size: 2rem !important;
-                        }
-                        .cohort-selection-grid {
+                    @media (max-width: 640px) {
+                        .cohort-selection-grid, .course-grid {
                             grid-template-columns: 1fr;
+                            gap: 2rem;
+                        }
+
+                        .cohort-select-card, .course-card {
+                            padding: 1.25rem;
+                        }
+                        .course-card {
+                            padding: 0;
+                        }
+                        .section-header-courses {
+                            margin-bottom: 1.5rem !important;
                         }
                     }
+
                 `}</style>
 
                 <div className="section-header-courses" style={{ marginBottom: '2.5rem' }}>
-                    <h1 style={{ fontSize: '3rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.06em', margin: 0 }}>
+                    <h1>
                         My Learning Journey
                     </h1>
-                    <p style={{ color: '#64748b', fontSize: '1.25rem', fontWeight: 600, marginTop: '1rem', maxWidth: '600px', lineHeight: 1.6 }}>
+                    <p>
                         Track your progress, access modules, and master your professional path through our curated curriculum.
                     </p>
                 </div>
+
 
                 <div className="cohort-selection-grid">
                     {cohorts.length > 0 ? (
@@ -264,8 +301,8 @@ const Courses = () => {
                 <span>Back to Cohorts</span>
             </div>
 
-            <div style={{ marginBottom: '3.5rem', paddingBottom: '2rem', borderBottom: '2px solid #f1f5f9' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '0.75rem' }}>
+            <div style={{ marginBottom: 'clamp(1.5rem, 5vw, 3.5rem)', paddingBottom: '2rem', borderBottom: '2px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
                     <div style={{ 
                         fontSize: '0.75rem', 
                         fontWeight: 950, 
@@ -276,20 +313,17 @@ const Courses = () => {
                         padding: '4px 12px', 
                         borderRadius: '8px' 
                     }}>Cohort #{selectedCohort.id}</div>
-                    <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#cbd5e1' }}></div>
+                    <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#cbd5e1' }} className="hidden sm:block"></div>
                     <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 700 }}>Program Overview</div>
                 </div>
-                <h1 style={{ fontSize: '3rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.05em', margin: 0, lineHeight: 1 }}>{selectedCohort.name}</h1>
+                <h1 className="course-list-title">{selectedCohort.name}</h1>
             </div>
 
-            <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', 
-                gap: '1.5rem', 
-                marginTop: '2rem' 
-            }}>
+
+            <div className="course-grid">
+
                 {selectedCohort.courses.map((course: any) => (
-                    <div key={course.id} className="shadow-premium" style={{
+                    <div key={course.id} className="course-card shadow-premium" style={{
                         background: 'rgba(255, 255, 255, 0.8)',
                         backdropFilter: 'blur(12px)',
                         border: '1px solid rgba(241, 245, 249, 0.8)',
@@ -302,6 +336,7 @@ const Courses = () => {
                         position: 'relative',
                         overflow: 'hidden'
                     }}>
+
                         <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden' }}>
                             <img
                                 src={course.thumbnail}

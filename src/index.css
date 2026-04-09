@@ -266,6 +266,13 @@ h3 {
   overflow: hidden;
 }
 
+@media (max-width: 768px) {
+  .login-left-panel {
+    padding: 2rem 1.5rem;
+  }
+}
+
+
 .login-left-panel::before {
   content: "";
   position: absolute;

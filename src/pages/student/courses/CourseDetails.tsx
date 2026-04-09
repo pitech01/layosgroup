@@ -160,6 +160,24 @@ const CourseDetails = () => {
                     border-color: #1a4d3e;
                     transform: translateX(4px);
                 }
+
+                @media (max-width: 1024px) {
+                    .course-details-main-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 2rem !important;
+                    }
+                    .course-details-header {
+                        flex-direction: column;
+                        align-items: stretch !important;
+                    }
+                    .course-progress-card {
+                        min-width: 100% !important;
+                    }
+                    .course-title-main {
+                        font-size: 2rem !important;
+                    }
+                }
+
             `}</style>
 
             <div style={{ marginBottom: '3rem' }}>
@@ -167,17 +185,20 @@ const CourseDetails = () => {
                     <ChevronLeft size={18} /> Back to Courses
                 </Link>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }} className="course-details-header">
+
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#1a4d3e', marginBottom: '0.75rem' }}>
                             <ShieldCheck size={20} />
                             <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{course.cohortName}</span>
                         </div>
-                        <h1 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', margin: 0 }}>{course.title}</h1>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', margin: 0 }} className="course-title-main">{course.title}</h1>
+
                         <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.75rem' }}>Instruction by <span style={{ color: '#0f172a' }}>{course.instructor}</span></p>
                     </div>
 
-                    <div style={{ background: 'white', padding: '1.25rem 2rem', borderRadius: '24px', border: '1.5px solid #f1f5f9', minWidth: '240px' }} className="shadow-sm">
+                    <div style={{ background: 'white', padding: '1.25rem 2rem', borderRadius: '24px', border: '1.5px solid #f1f5f9', minWidth: '240px' }} className="shadow-sm course-progress-card">
+
                         <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 700, marginBottom: '0.75rem' }}>Learning Progress</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                             <div style={{ flex: 1, background: '#f1f5f9', height: '10px', borderRadius: '5px' }}>
@@ -189,7 +210,8 @@ const CourseDetails = () => {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '3rem' }} className="course-details-main-grid">
+
                 <div>
                     <div style={{ marginBottom: '2rem' }}>
                         <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', marginBottom: '1rem' }}>Curriculum</h3>
