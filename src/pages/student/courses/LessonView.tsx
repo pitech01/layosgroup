@@ -37,6 +37,7 @@ const LessonView = () => {
     useEffect(() => {
         const fetchLessonData = async () => {
             setLoading(true);
+            setIsCompleted(false);
             setQuizStarted(false);
             setCurrentQuestionIndex(0);
             setQuizResult(null);
@@ -480,9 +481,21 @@ const LessonView = () => {
                                                     {quizResult.passed ? (
                                                         <button
                                                             onClick={() => handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers })}
-                                                            style={{ background: '#10b981', color: 'white', border: 'none', padding: '1rem 3rem', borderRadius: '16px', fontWeight: 850, cursor: 'pointer', boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.4)' }}
+                                                            style={{ 
+                                                                background: isCompleted ? '#f0fdf4' : '#10b981', 
+                                                                color: isCompleted ? '#166534' : 'white', 
+                                                                border: isCompleted ? '2px solid #10b981' : 'none', 
+                                                                padding: '1rem 3rem', 
+                                                                borderRadius: '16px', 
+                                                                fontWeight: 850, 
+                                                                cursor: 'pointer', 
+                                                                display: 'flex', 
+                                                                alignItems: 'center', 
+                                                                gap: '10px',
+                                                                boxShadow: isCompleted ? 'none' : '0 10px 25px -5px rgba(16, 185, 129, 0.4)' 
+                                                            }}
                                                         >
-                                                            {isCompleted ? 'SYNC UPDATES' : 'FINALIZE & ADVANCE'}
+                                                            {isCompleted ? <><CheckCircle2 size={20} /> SYNCED</> : 'MARK AS COMPLETED'}
                                                         </button>
                                                     ) : (
                                                         <button
@@ -634,7 +647,7 @@ const LessonView = () => {
                                                 style={{ maxWidth: '100%', maxHeight: '100%', userSelect: 'none', pointerEvents: 'none', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
                                                 onContextMenu={(e: any) => e.preventDefault()}
                                             />
-                                        ) : lesson.file_url.match(/\.(mp4|webm|ogg|ogv)([?#]|$)/i) ? (
+                                        ) : lesson.file_url.match(/\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i) ? (
                                             <video
                                                 controls
                                                 src={lesson.file_url}
@@ -787,18 +800,32 @@ const LessonView = () => {
                                 <button
                                     onClick={() => {
                                         const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
-                                        if (quizData && quizData.questions && quizData.questions.length > 0) {
+                                        // Only start quiz if not already completed, otherwise allow toggling completion
+                                        if (quizData && quizData.questions && quizData.questions.length > 0 && !isCompleted) {
                                             setQuizStarted(true);
                                             window.scrollTo({ top: 0, behavior: 'smooth' });
                                         } else {
                                             handleCompleteLesson();
                                         }
                                     }}
-                                    disabled={isCompleted || isCompleting}
-                                    className="btn-primary-forest"
-                                    style={{ padding: '1rem 3rem', height: '60px', fontSize: '1.1rem', background: isCompleted ? '#f1f5f9' : '#1a4d3e', color: isCompleted ? '#94a3b8' : 'white' }}
+                                    disabled={isCompleting}
+                                    className={isCompleted ? "btn-standard" : "btn-primary-forest"}
+                                    style={{ 
+                                        padding: '1rem 3rem', 
+                                        height: '60px', 
+                                        fontSize: '1.1rem', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '12px',
+                                        background: isCompleted ? '#f0fdf4' : '#1a4d3e',
+                                        color: isCompleted ? '#166534' : 'white',
+                                        border: isCompleted ? '2px solid #10b981' : 'none',
+                                        boxShadow: isCompleted ? 'none' : '0 10px 25px -5px rgba(26, 77, 62, 0.3)'
+                                    }}
                                 >
-                                    {isCompleting ? <Loader2 className="animate-spin" /> : isCompleted ? 'Session Validated' : (lesson.quiz_data ? 'Initialize Validation Quiz' : 'Finalize Lesson')}
+                                    {isCompleting ? <Loader2 className="animate-spin" /> : 
+                                     isCompleted ? <><CheckCircle2 size={24} /> Lesson Completed</> : 
+                                     (lesson.quiz_data ? 'Start Validation Quiz' : 'Mark Lesson Complete')}
                                 </button>
                             </div>
                         </div>
@@ -824,7 +851,7 @@ const LessonView = () => {
                                                     const url = lesson.file_url || '';
                                                     const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
                                                     const isPpt = /\.(pptx?)([?#]|$)/i.test(url);
-                                                    const isVideo = /\.(mp4|webm|ogg|ogv)([?#]|$)/i.test(url);
+                                                    const isVideo = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i.test(url);
                                                     setIframeLoading(true);
                                                     setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
                                                 }}

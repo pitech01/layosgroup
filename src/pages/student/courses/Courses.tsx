@@ -24,20 +24,32 @@ const Courses = () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    const mappedEnrolled = data.cohorts.map((c: any) => ({
-                        id: c.id,
-                        name: c.name,
-                        isEnrolled: true,
-                        courses: c.course ? [{
-                            id: c.course.id,
-                            title: c.course.title,
-                            instructor: c.instructor?.name || 'Assigned Instructor',
-                            thumbnail: c.course.thumbnail || 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-                            progress: c.pivot.progress || 0,
-                            totalLessons: c.course.modules?.reduce((acc: number, m: any) => acc + (m.lessons?.length || 0), 0) || 0,
-                            completedLessons: 0,
-                        }] : []
-                    }));
+                    const mappedEnrolled = data.cohorts.map((c: any) => {
+                        const allCourseLessons = c.course.modules?.flatMap((m: any) => m.lessons) || [];
+                        const docLessons = allCourseLessons.filter((l: any) => l.file_url);
+                        
+                        // Use document-based lessons if they exist, otherwise use all lessons
+                        const effectiveLessons = docLessons.length > 0 ? docLessons : allCourseLessons;
+                        
+                        const completedLessonsInCourseCount = data.completed_lessons?.filter((cl: any) => 
+                            effectiveLessons.some((el: any) => el.id === cl.id)
+                        ).length || 0;
+
+                        return {
+                            id: c.id,
+                            name: c.name,
+                            isEnrolled: true,
+                            courses: c.course ? [{
+                                id: c.course.id,
+                                title: c.course.title,
+                                instructor: c.instructor?.name || 'Assigned Instructor',
+                                thumbnail: c.course.thumbnail || 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                                progress: c.pivot.progress || 0,
+                                totalLessons: effectiveLessons.length,
+                                completedLessons: completedLessonsInCourseCount,
+                            }] : []
+                        };
+                    });
                     setCohorts(mappedEnrolled);
                 }
             } catch (err) {
