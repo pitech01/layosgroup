@@ -8,7 +8,6 @@ import {
     Play,
     X,
     LayoutDashboard,
-    Download,
     Eye
 } from 'lucide-react';
 
@@ -282,26 +281,23 @@ export default function StudentInterviews() {
 
             {previewAsset && (
                 <div className="modal-overlay" onClick={() => setPreviewAsset(null)}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}>
                         <div className="modal-header">
                             <div>
                                 <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.25rem' }}>{previewAsset.title}</h3>
                                 <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure Learning Asset • {previewAsset.title}</p>
                             </div>
                             <div style={{ display: 'flex', gap: '12px' }}>
-                                <a href={previewAsset.url} download target="_blank" rel="noreferrer" style={{ width: '44px', height: '44px', borderRadius: '14px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a4d3e', border: '1px solid #e2e8f0' }}>
-                                    <Download size={20} />
-                                </a>
                                 <button onClick={() => setPreviewAsset(null)} style={{ width: '44px', height: '44px', borderRadius: '14px', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', border: 'none', cursor: 'pointer' }}>
                                     <X size={24} />
                                 </button>
                             </div>
                         </div>
-                        <div style={{ flex: 1, background: '#f1f5f9' }}>
+                        <div style={{ flex: 1, background: '#f1f5f9' }} onContextMenu={e => e.preventDefault()}>
                             {previewAsset.type === 'pdf' ? (
                                 <iframe src={`${previewAsset.url}#toolbar=0`} style={{ width: '100%', height: '100%', border: 'none' }} title="Material View" />
                             ) : (
-                                <video src={previewAsset.url} controls autoPlay style={{ width: '100%', height: '100%', display: 'block', background: 'black' }} />
+                                <video src={previewAsset.url} controls controlsList="nodownload" autoPlay style={{ width: '100%', height: '100%', display: 'block', background: 'black' }} onContextMenu={e => e.preventDefault()} />
                             )}
                         </div>
                     </div>
