@@ -162,11 +162,11 @@ const LessonView = () => {
         navigate(`/student/courses/${courseId}/lesson/${id}?cohortId=${cohortId}`);
     };
 
-    const handleCompleteLesson = async (extraData?: { score?: number; answers?: any }) => {
+    const handleCompleteLesson = async (extraData?: { score?: number; answers?: any; forceComplete?: boolean }) => {
         setIsCompleting(true);
         try {
             const token = localStorage.getItem('token');
-            const newStatus = !isCompleted;
+            const newStatus = extraData?.forceComplete !== undefined ? extraData.forceComplete : !isCompleted;
 
             const response = await fetch(`${API_URL}/lessons/${lessonId}/complete`, {
                 method: 'POST',
@@ -184,6 +184,11 @@ const LessonView = () => {
             if (response.ok) {
                 const data = await response.json();
                 setIsCompleted(data.completed);
+                if (data.completed && data.progress >= 100) {
+                    setTimeout(() => {
+                        navigate(`/student/courses/${courseId}?cohortId=${cohortId}`);
+                    }, 1500);
+                }
             }
         } catch (error) {
             console.error("Failed to mark lesson complete", error);
@@ -480,7 +485,7 @@ const LessonView = () => {
                                                     
                                                     {quizResult.passed ? (
                                                         <button
-                                                            onClick={() => handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers })}
+                                                            onClick={() => handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers, forceComplete: true })}
                                                             style={{ 
                                                                 background: isCompleted ? '#f0fdf4' : '#10b981', 
                                                                 color: isCompleted ? '#166534' : 'white', 

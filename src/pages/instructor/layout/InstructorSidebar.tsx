@@ -10,7 +10,8 @@ import {
     Settings,
     Video,
     MessageCircle,
-    ClipboardList
+    ClipboardList,
+    Activity
 } from 'lucide-react';
 
 interface InstructorSidebarProps {
@@ -44,6 +45,7 @@ const InstructorSidebar = ({ collapsed, mobileOpen }: InstructorSidebarProps) =>
         { path: '/instructor/interview', label: 'Interview', icon: Mic2 },
         { path: '/instructor/live', label: 'Live Classes', icon: Video },
         { path: '/instructor/channels', label: 'Channels', icon: MessageCircle },
+        { path: '/instructor/activity-logs', label: 'Activity Logs', icon: Activity },
         { path: '/instructor/settings', label: 'Settings', icon: Settings },
     ];
 

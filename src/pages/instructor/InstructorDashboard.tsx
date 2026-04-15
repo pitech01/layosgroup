@@ -19,16 +19,24 @@ export default function InstructorDashboard() {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const response = await fetch(`${API_URL}/instructor/dashboard-stats`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                const data = await response.json();
-                if (response.ok) {
+                const headers = {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                };
+                
+                const [statsRes, activitiesRes] = await Promise.all([
+                    fetch(`${API_URL}/instructor/dashboard-stats`, { headers }),
+                    fetch(`${API_URL}/instructor/activity-logs`, { headers })
+                ]);
+                
+                if (statsRes.ok) {
+                    const data = await statsRes.json();
                     setStats(data.stats);
-                    setActivities(data.recent_activities);
+                }
+                
+                if (activitiesRes.ok) {
+                    const logs = await activitiesRes.json();
+                    setActivities(logs);
                 }
             } catch (err) {
                 console.error("Fetch Dashboard Stats Error:", err);
@@ -272,22 +280,26 @@ export default function InstructorDashboard() {
                 <div className="glass-panel-premium">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                         <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 950, color: '#0f172a' }}>Recent Activity</h3>
-                        <Link to="/instructor/students" style={{ color: '#1a4d3e', fontWeight: 850, fontSize: '0.9rem', textDecoration: 'none' }}>All Students</Link>
+                        <Link to="/instructor/activity-logs" style={{ color: '#1a4d3e', fontWeight: 850, fontSize: '0.9rem', textDecoration: 'none' }}>View All Logs</Link>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {activities.length > 0 ? activities.map((activity, idx) => (
-                            <div key={idx} className="activity-item">
-                                <div className="user-avatar-mini">{activity.user_name.charAt(0)}</div>
-                                <div style={{ flex: 1 }}>
-                                    <p style={{ margin: 0, fontSize: '0.95rem', color: '#1e293b', fontWeight: 600, lineHeight: 1.5 }}>
-                                        <span style={{ fontWeight: 950, color: '#0f172a' }}>{activity.user_name}</span> joined the <span style={{ fontWeight: 950, color: '#1a4d3e' }}>{activity.cohort_name}</span> session.
-                                    </p>
-                                    <span style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontWeight: 700 }}>
-                                        <Clock size={12} /> {new Date(activity.time).toLocaleDateString()}
-                                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '500px', overflowY: 'auto', paddingRight: '12px' }}>
+                        {activities.length > 0 ? activities.map((activity, idx) => {
+                            const name = activity.user?.name || 'A student';
+                            const initial = name.charAt(0);
+                            return (
+                                <div key={idx} className="activity-item">
+                                    <div className="user-avatar-mini">{initial}</div>
+                                    <div style={{ flex: 1 }}>
+                                        <p style={{ margin: 0, fontSize: '0.95rem', color: '#1e293b', fontWeight: 600, lineHeight: 1.5 }}>
+                                            {activity.description}
+                                        </p>
+                                        <span style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontWeight: 700 }}>
+                                            <Clock size={12} /> {new Date(activity.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        )) : (
+                            );
+                        }) : (
                             <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', fontWeight: 600 }}>
                                 No recent activity recorded.
                             </div>
