@@ -47,4 +47,8 @@ const pdfProxyPlugin = () => ({
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), pdfProxyPlugin()],
+  build: {
+    sourcemap: false, // Prevents original source code from being exposed in browser devtools
+    chunkSizeWarningLimit: 1000,
+  }
 })
