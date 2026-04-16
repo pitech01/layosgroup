@@ -22,9 +22,8 @@ export default function SubmitAssignment() {
 
     const [answerText, setAnswerText] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [viewingPdf, setViewingPdf] = useState<{ id: string; url: string | null; title: string } | null>(null);
+    const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string; type: 'pdf' | 'office' } | null>(null);
     const [iframeLoading, setIframeLoading] = useState(true);
-    const [fetchingResource, setFetchingResource] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -74,8 +73,8 @@ export default function SubmitAssignment() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!selectedFile && !assignment.my_submission) {
-            toast.error("Please upload your assignment file.");
+        if (!selectedFile && !assignment.my_submission && !answerText.trim()) {
+            toast.error("Please upload your assignment file or write a response.");
             return;
         }
 
@@ -111,42 +110,23 @@ export default function SubmitAssignment() {
     };
 
 
-    const handleViewResource = (e: React.MouseEvent, id: string, title: string) => {
+    const handleViewResource = (e: React.MouseEvent) => {
         e.preventDefault();
-        setViewingPdf({ id, url: null, title });
-        setIframeLoading(true);
-        fetchResource(id);
-    };
-
-    const fetchResource = async (id: string) => {
-        setFetchingResource(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/assignments/${id}/download`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Access failed');
-                }
-                throw new Error(`Server Error (${response.status}): The resource could not be loaded.`);
-            }
-
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            setViewingPdf(prev => prev ? { ...prev, url: blobUrl } : null);
-        } catch (error: any) {
-            console.error('Resource access error:', error);
-            toast.error(error.message || "Failed to load resource. Please try again.");
-            setViewingPdf(null);
-        } finally {
-            setFetchingResource(false);
+        
+        if (!assignment.assignment_file || !assignment.assignment_file_url) {
+            toast.error("Instruction file is not available.");
+            return;
         }
+
+        let type: 'pdf' | 'office' = 'pdf';
+        const filename = assignment.assignment_file.toLowerCase();
+        
+        if (filename.endsWith('.pptx') || filename.endsWith('.ppt') || filename.endsWith('.doc') || filename.endsWith('.docx') || filename.endsWith('.xls') || filename.endsWith('.xlsx')) {
+            type = 'office';
+        }
+        
+        setViewingPdf({ url: assignment.assignment_file_url, title: assignment.title, type });
+        setIframeLoading(true);
     };
 
     if (loading) {
@@ -155,6 +135,10 @@ export default function SubmitAssignment() {
                 <Loader2 className="animate-spin" size={48} color="#1a4d3e" />
             </div>
         );
+    }
+
+    if (!assignment) {
+        return null;
     }
 
     return (
@@ -417,7 +401,7 @@ export default function SubmitAssignment() {
                 {assignment.assignment_file && (
                     <button
                         type="button"
-                        onClick={(e) => handleViewResource(e, assignment.id, assignment.title)}
+                        onClick={handleViewResource}
                         className="resource-download-btn"
                         style={{ border: '1.5px solid rgba(255,255,255,0.2)', cursor: 'pointer' }}
                     >
@@ -475,12 +459,28 @@ export default function SubmitAssignment() {
                     )}
 
                     {assignment.my_submission && !selectedFile && (
-                        <div className="hint-box" style={{ background: '#f0fdf4', border: '1px solid #dcfce7' }}>
-                            <CheckCircle size={24} color="#166534" style={{ flexShrink: 0 }} />
-                            <p style={{ color: '#166534' }}>
-                                You have already submitted a file: <strong>{assignment.my_submission.submission_file.split('/').pop()}</strong>.
-                                Uploading a new file will replace your previous submission.
-                            </p>
+                        <div className="hint-box" style={{ background: '#f0fdf4', border: '1px solid #dcfce7', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', gap: '16px' }}>
+                                <CheckCircle size={24} color="#166534" style={{ flexShrink: 0 }} />
+                                <p style={{ color: '#166534' }}>
+                                    {assignment.my_submission.submission_file ? (
+                                        <>You have already submitted a file: <strong>{assignment.my_submission.submission_file.split('/').pop()}</strong>.</>
+                                    ) : (
+                                        <>You have already submitted a text response.</>
+                                    )}
+                                    <br />Uploading a new file or saving will update your previous submission.
+                                </p>
+                            </div>
+                            {assignment.my_submission.submission_file_url && (
+                                <a 
+                                    href={assignment.my_submission.submission_file_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{ padding: '0.75rem 1.5rem', background: '#166534', color: 'white', borderRadius: '12px', textDecoration: 'none', fontWeight: 800, fontSize: '0.85rem', flexShrink: 0, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                >
+                                    <Eye size={16} /> View Upload
+                                </a>
+                            )}
                         </div>
                     )}
 
@@ -531,18 +531,22 @@ export default function SubmitAssignment() {
                             justifyContent: 'space-between',
                             background: '#fcfdfe'
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                 <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
                                     <FileText size={22} color="#1a4d3e" />
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>{viewingPdf.title}</h3>
-                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure PDF Viewer • Download Disabled</p>
+                                    <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        {viewingPdf.title}
+                                        {viewingPdf.type === 'office' && (
+                                            <span style={{ fontSize: '0.7rem', background: '#1a4d3e', color: 'white', padding: '2px 8px', borderRadius: '8px', fontWeight: 800 }}>Use Keyboard Arrows to skip slides </span>
+                                        )}
+                                    </h3>
+                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure {viewingPdf.type === 'office' ? 'Document' : 'PDF'} Viewer • Click anywhere on the slide to advance</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => {
-                                    if (viewingPdf.url) window.URL.revokeObjectURL(viewingPdf.url);
                                     setViewingPdf(null);
                                     setIframeLoading(true);
                                 }}
@@ -556,7 +560,7 @@ export default function SubmitAssignment() {
                             style={{ flex: 1, background: '#f8fafc', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             onContextMenu={(e) => e.preventDefault()}
                         >
-                            {(fetchingResource || iframeLoading) && (
+                            {(iframeLoading) && (
                                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 10 }}>
                                     <div style={{ position: 'relative', marginBottom: '2rem' }}>
                                         <div style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid #f1f5f9', borderTopColor: '#1a4d3e', animation: 'spin-submit 1s linear infinite' }}></div>
@@ -565,10 +569,10 @@ export default function SubmitAssignment() {
                                         </div>
                                     </div>
                                     <h4 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>
-                                        {fetchingResource ? 'Acquiring Secure Document...' : 'Architecting Secure View...'}
+                                        Architecting Secure View...
                                     </h4>
                                     <p style={{ marginTop: '0.75rem', fontWeight: 600, color: '#64748b', fontSize: '0.9rem' }}>
-                                        {fetchingResource ? 'Verifying credentials and establishing encrypted stream' : 'Preparing high-fidelity instructional workspace'}
+                                        Preparing high-fidelity instructional workspace
                                     </p>
                                     <style>{`
                                         @keyframes spin-submit { to { transform: rotate(360deg); } }
@@ -577,10 +581,13 @@ export default function SubmitAssignment() {
                             )}
                             {viewingPdf.url && (
                                 <iframe
-                                    src={`${viewingPdf.url}#toolbar=0&navpanes=0`}
+                                    src={viewingPdf.type === 'office' 
+                                        ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(viewingPdf.url)}` 
+                                        : `${viewingPdf.url}#toolbar=0&navpanes=0`}
                                     style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
-                                    title="Secure PDF Viewer"
+                                    title="Secure Document Viewer"
                                     onLoad={() => setIframeLoading(false)}
+                                    allow="fullscreen"
                                 />
                             )}
                             {/* Overlay to catch clicks on any remaining toolbar elements if browser injects them */}

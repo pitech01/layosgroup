@@ -18,9 +18,8 @@ export default function StudentAssignments() {
     const [assignments, setAssignments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [viewingPdf, setViewingPdf] = useState<{ id: string; url: string | null; title: string } | null>(null);
+    const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string, type: 'pdf' | 'office' } | null>(null);
     const [iframeLoading, setIframeLoading] = useState(true);
-    const [fetchingResource, setFetchingResource] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -54,42 +53,22 @@ export default function StudentAssignments() {
     };
 
 
-    const handleViewResource = (e: React.MouseEvent, id: string, title: string) => {
+    const handleViewResource = (e: React.MouseEvent, id: string, title: string, fileUrl?: string, rawFileName?: string) => {
         e.preventDefault();
-        setViewingPdf({ id, url: null, title });
-        setIframeLoading(true);
-        fetchResource(id);
-    };
-
-    const fetchResource = async (id: string) => {
-        setFetchingResource(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/assignments/${id}/download`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Access failed');
-                }
-                throw new Error(`Server Error (${response.status}): The resource could not be loaded.`);
-            }
-
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            setViewingPdf(prev => prev ? { ...prev, url: blobUrl } : null);
-        } catch (error: any) {
-            console.error('Resource access error:', error);
-            toast.error(error.message || "Failed to load resource. Please try again.");
-            setViewingPdf(null);
-        } finally {
-            setFetchingResource(false);
+        if (!fileUrl || !rawFileName) {
+            toast.error("Instruction file is not available.");
+            return;
         }
+
+        let type: 'pdf' | 'office' = 'pdf';
+        const filename = rawFileName.toLowerCase();
+        
+        if (filename.endsWith('.pptx') || filename.endsWith('.ppt') || filename.endsWith('.doc') || filename.endsWith('.docx') || filename.endsWith('.xls') || filename.endsWith('.xlsx')) {
+            type = 'office';
+        }
+
+        setViewingPdf({ url: fileUrl, title, type });
+        setIframeLoading(true);
     };
 
     return (
@@ -328,7 +307,7 @@ export default function StudentAssignments() {
                                     {a.assignment_file && (
                                         <button
                                             type="button"
-                                            onClick={(e) => handleViewResource(e, a.id, a.title)}
+                                            onClick={(e) => handleViewResource(e, a.id, a.title, a.assignment_file_url, a.assignment_file)}
                                             className="download-resource"
                                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                                         >
@@ -381,18 +360,22 @@ export default function StudentAssignments() {
                             justifyContent: 'space-between',
                             background: '#fcfdfe'
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                 <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
                                     <FileText size={22} color="#1a4d3e" />
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>{viewingPdf.title}</h3>
-                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure PDF Viewer • Download Disabled</p>
+                                    <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        {viewingPdf.title}
+                                        {viewingPdf.type === 'office' && (
+                                            <span style={{ fontSize: '0.7rem', background: '#1a4d3e', color: 'white', padding: '2px 8px', borderRadius: '8px', fontWeight: 800 }}>Use Keyboard Arrows to skip slides </span>
+                                        )}
+                                    </h3>
+                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure {viewingPdf.type === 'office' ? 'Document' : 'PDF'} Viewer • Click anywhere on the slide to advance</p>
                                 </div>
                             </div>
                              <button
                                 onClick={() => {
-                                    if (viewingPdf.url) window.URL.revokeObjectURL(viewingPdf.url);
                                     setViewingPdf(null);
                                     setIframeLoading(true);
                                 }}
@@ -405,7 +388,7 @@ export default function StudentAssignments() {
                             style={{ flex: 1, background: '#f8fafc', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             onContextMenu={(e) => e.preventDefault()}
                         >
-                            {(fetchingResource || iframeLoading) && (
+                            {(iframeLoading) && (
                                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 10 }}>
                                     <div style={{ position: 'relative', marginBottom: '2rem' }}>
                                         <div style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid #f1f5f9', borderTopColor: '#1a4d3e', animation: 'spin 1s linear infinite' }}></div>
@@ -414,10 +397,10 @@ export default function StudentAssignments() {
                                         </div>
                                     </div>
                                     <h4 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>
-                                        {fetchingResource ? 'Acquiring Secure Document...' : 'Architecting Secure View...'}
+                                        Architecting Secure View...
                                     </h4>
                                     <p style={{ marginTop: '0.75rem', fontWeight: 600, color: '#64748b', fontSize: '0.9rem' }}>
-                                        {fetchingResource ? 'Verifying credentials and establishing encrypted stream' : 'Preparing high-fidelity instructional workspace'}
+                                        Preparing high-fidelity instructional workspace
                                     </p>
                                     <style>{`
                                         @keyframes spin { to { transform: rotate(360deg); } }
@@ -426,10 +409,11 @@ export default function StudentAssignments() {
                             )}
                             {viewingPdf.url && (
                                 <iframe
-                                    src={`${viewingPdf.url}#toolbar=0&navpanes=0`}
+                                    src={viewingPdf.type === 'office' ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(viewingPdf.url)}` : `${viewingPdf.url}#toolbar=0&navpanes=0`}
                                     style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
-                                    title="Secure PDF Viewer"
+                                    title="Secure Document Viewer"
                                     onLoad={() => setIframeLoading(false)}
+                                    allow="fullscreen"
                                 />
                             )}
                             {/* Overlay to catch clicks on any remaining toolbar elements if browser injects them */}

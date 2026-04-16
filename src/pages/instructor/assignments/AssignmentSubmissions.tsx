@@ -54,7 +54,8 @@ export default function AssignmentSubmissions() {
         s.student?.email.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
 
-    const getFileUrl = (path: string) => {
+    const getFileUrl = (path: string, url_override?: string) => {
+        if (url_override) return url_override;
         if (!path) return '';
         if (path.startsWith('http')) return path;
         return `${BASE_URL}/storage/${path}`;
@@ -428,7 +429,7 @@ export default function AssignmentSubmissions() {
                                         <div className="action-cell">
                                             {submission.submission_file ? (
                                                 <a
-                                                    href={getFileUrl(submission.submission_file)}
+                                                    href={getFileUrl(submission.submission_file, submission.submission_file_url)}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="download-btn-premium"
