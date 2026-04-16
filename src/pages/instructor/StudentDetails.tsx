@@ -109,6 +109,17 @@ export default function StudentDetails() {
         fetchStudentData();
     }, [id]);
 
+    // Derived Metrics
+    const validCohorts = student?.cohorts || [];
+    const avgCompletion = validCohorts.length > 0
+        ? Math.round(validCohorts.reduce((acc: number, c: any) => acc + Number(c.pivot?.progress || 0), 0) / validCohorts.length)
+        : 0;
+
+    const scoredLessons = student?.completed_lessons?.filter((l: any) => l.pivot?.score != null) || [];
+    const avgQuizScore = scoredLessons.length > 0 
+        ? Math.round(scoredLessons.reduce((acc: number, l: any) => acc + Number(l.pivot?.score), 0) / scoredLessons.length) 
+        : 'N/A';
+
     return (
         <div className="student-details-container">
             <style>{`
@@ -607,9 +618,7 @@ export default function StudentDetails() {
                                         <TrendingUp size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
                                         <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Completion</div>
                                         <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>
-                                            {student.cohorts?.length > 0 ?
-                                                Math.round(student.cohorts.reduce((acc: number, c: any) => acc + (c.pivot?.progress || 0), 0) / student.cohorts.length)
-                                                : 0}%
+                                            {avgCompletion}%
                                         </div>
                                     </div>
                                     <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', textAlign: 'center' }}>
@@ -621,9 +630,7 @@ export default function StudentDetails() {
                                         <Activity size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
                                         <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Quiz Score</div>
                                         <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>
-                                            {student.completed_lessons?.length > 0 ? 
-                                                Math.round(student.completed_lessons.reduce((acc: number, l: any) => acc + (l.pivot?.score || 0), 0) / student.completed_lessons.length)
-                                                : 'N/A'}
+                                            {avgQuizScore}{avgQuizScore !== 'N/A' ? '%' : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -634,9 +641,9 @@ export default function StudentDetails() {
                                     <h3><HelpCircle size={20} color="#1a4d3e" /> Quiz Submissions</h3>
                                 </div>
 
-                                 {student.completed_lessons && student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.type === 'material' && (l.pivot?.score !== undefined || l.quiz_data))).length > 0 ? (
+                                 {student.completed_lessons && student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.quiz_data && l.quiz_data !== 'null' && l.quiz_data !== '{}') || l.pivot?.score != null).length > 0 ? (
                                     <div style={{ display: 'grid', gap: '1rem' }}>
-                                        {student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.type === 'material' && (l.pivot?.score !== undefined || l.quiz_data))).map((lesson: any) => (
+                                        {student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.quiz_data && l.quiz_data !== 'null' && l.quiz_data !== '{}') || l.pivot?.score != null).map((lesson: any) => (
                                             <div key={lesson.id} className="enrollment-row" style={{ marginBottom: 0 }}>
                                                 <div className="progress-ring-mini" style={{ background: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#f0fdf4' : '#fef2f2', color: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#1a4d3e' : '#ef4444' }}>
                                                     {lesson.pivot?.score || 0}%
