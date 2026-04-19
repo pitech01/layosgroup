@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle } from 'lucide-react';
-import { usePdfTts } from '../../../utils/usePdfTts';
-import ReadAloudControls from '../../../components/student/ReadAloudControls';
+import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles } from 'lucide-react';
+import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
+import { buildProxyUrl } from '../../../utils/pdfTextExtractor';
 
 const LessonView = () => {
     const { courseId, lessonId } = useParams();
@@ -25,9 +25,7 @@ const LessonView = () => {
     const [isMaximized, setIsMaximized] = useState(false);
     const [quizResult, setQuizResult] = useState<{ score: number, passed: boolean } | null>(null);
     const [showReview, setShowReview] = useState(false);
-
-    // TTS hook — full Read Aloud system
-    const tts = usePdfTts();
+    const [showAiInteraction, setShowAiInteraction] = useState(false);
 
     // @ts-ignore
     const API_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -111,7 +109,6 @@ const LessonView = () => {
         };
 
         fetchLessonData();
-        return () => { tts.stop(); };
     }, [courseId, lessonId, cohortId, API_URL]);
 
     useEffect(() => {
@@ -120,21 +117,14 @@ const LessonView = () => {
         }
     }, [lesson]);
 
-    // Stop TTS whenever the lesson changes
-    useEffect(() => { tts.stop(); }, [lessonId]);
+    // Lesson changed hook
+    useEffect(() => { }, [lessonId]);
 
 
 
 
 
-    const toggleReadAloud = () => {
-        if (!lesson?.file_url) return;
-        if (['playing', 'paused'].includes(tts.ttsState)) {
-            tts.stop();
-        } else {
-            tts.loadAndPlay(lesson.file_url, lesson.file_name);
-        }
-    };
+    
     if (loading) {
         return (
             <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
@@ -699,33 +689,22 @@ const LessonView = () => {
                                                     </p>
                                                     <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', alignItems: 'center' }}>
                                                         <button
-                                                            onClick={toggleReadAloud}
+                                                            onClick={() => {
+                                                                const url = lesson.file_url || '';
+                                                                const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
+                                                                const isPpt = /\.(pptx?)([?#]|$)/i.test(url);
+                                                                const isVideo = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i.test(url);
+                                                                setIframeLoading(true);
+                                                                setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
+                                                            }}
                                                             className="btn-primary-forest"
                                                             style={{ 
-                                                                padding: '0 3rem', height: '64px', fontSize: '1.1rem', fontWeight: 900,
-                                                                boxShadow: '0 20px 40px -8px rgba(26, 77, 62, 0.3)',
-                                                                borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '12px'
+                                                                padding: '0 4rem', height: '70px', fontSize: '1.25rem', fontWeight: 950,
+                                                                boxShadow: '0 20px 40px -8px rgba(26, 77, 62, 0.4)',
+                                                                borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '14px'
                                                             }}
                                                         >
-                                                            <PlayCircle size={24} /> Listen to Lesson
-                                                        </button>
-                                                        <button
-                                                            onClick={() => {
-                                                                const assetsSection = document.getElementById('lesson-assets-sidebar');
-                                                                if (assetsSection) {
-                                                                    assetsSection.scrollIntoView({ behavior: 'smooth' });
-                                                                }
-                                                            }}
-                                                            style={{
-                                                                padding: '0 2.5rem', height: '64px', fontSize: '1.1rem',
-                                                                background: 'rgba(2, 6, 23, 0.03)', border: '1.5px solid #e2e8f0', borderRadius: '20px',
-                                                                color: '#475569', fontWeight: 850, cursor: 'pointer', transition: 'all 0.3s',
-                                                                display: 'flex', alignItems: 'center', gap: '10px'
-                                                            }}
-                                                            onMouseEnter={(e: any) => { e.currentTarget.style.borderColor = '#1a4d3e'; e.currentTarget.style.color = '#1a4d3e'; e.currentTarget.style.background = 'white'; }}
-                                                            onMouseLeave={(e: any) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.background = 'rgba(2, 6, 23, 0.03)'; }}
-                                                        >
-                                                            <Eye size={22} /> View Assets
+                                                            <Eye size={28} /> Preview Lesson Content
                                                         </button>
                                                     </div>
                                                 </div>
@@ -739,12 +718,16 @@ const LessonView = () => {
                                                 <p style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>{lesson.file_name || 'Attached File'}</p>
                                                 <div
                                                     onClick={() => {
-                                                        const assetsSection = document.getElementById('lesson-assets-sidebar');
-                                                        if (assetsSection) assetsSection.scrollIntoView({ behavior: 'smooth' });
+                                                        const url = lesson.file_url || '';
+                                                        const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
+                                                        const isPpt = /\.(pptx?)([?#]|$)/i.test(url);
+                                                        const isVideo = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i.test(url);
+                                                        setIframeLoading(true);
+                                                        setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
                                                     }}
-                                                    style={{ marginTop: '2rem', background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#1a4d3e', padding: '0.85rem 2rem', borderRadius: '14px', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                                                    style={{ marginTop: '2rem', background: '#1a4d3e', color: 'white', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 20px rgba(26, 77, 62, 0.2)' }}
                                                 >
-                                                    <Eye size={18} /> Review Lesson Assets
+                                                    <Eye size={18} /> Open Instructional Workspace
                                                 </div>
                                             </div>
 
@@ -762,7 +745,7 @@ const LessonView = () => {
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3.5rem' }} className="lesson-view-main-grid">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '3.5rem' }} className="lesson-view-main-grid">
 
                         <div>
                             <div style={{ marginBottom: '2rem' }}>
@@ -773,104 +756,44 @@ const LessonView = () => {
                                 <h1 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} className="lesson-title-container">
 
                                     {lesson.title}
-                                    {lesson.file_url && (
-                                        <button
-                                            onClick={toggleReadAloud}
-                                            disabled={tts.ttsState === 'extracting'}
-                                            style={{
-                                                background: ['playing','paused'].includes(tts.ttsState) ? 'rgba(26, 77, 62, 0.12)' : '#f8fafc',
-                                                border: '1.5px solid',
-                                                borderColor: ['playing','paused'].includes(tts.ttsState) ? '#1a4d3e' : '#e2e8f0',
-                                                padding: '5px 12px', borderRadius: '100px', color: '#1a4d3e',
-                                                fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px',
-                                                cursor: tts.ttsState === 'extracting' ? 'not-allowed' : 'pointer',
-                                                opacity: tts.ttsState === 'extracting' ? 0.6 : 1,
-                                                transition: 'all 0.3s', boxShadow: ['playing','paused'].includes(tts.ttsState) ? '0 4px 15px rgba(26,77,62,0.2)' : 'none'
-                                            }}
-                                        >
-                                            {tts.ttsState === 'extracting' ? <><div className="animate-spin" style={{ width: 14, height: 14, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%' }} /> Extracting...</>
-                                            : ['playing','paused','switching'].includes(tts.ttsState) ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> Stop Narrator</>
-                                            : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> Read Aloud</>}
-                                        </button>
-                                    )}
                                 </h1>
 
                             </div>
 
-                            <div style={{ color: '#475569', fontSize: '1.1rem', lineHeight: 1.8, marginBottom: '3rem', fontWeight: 500 }}>
-                                <p>{lesson.description || 'No description available for this lesson.'}</p>
-                            </div>
-
-                            <div style={{ paddingTop: '2rem', borderTop: '1.5px solid #f1f5f9' }}>
-                                <button
-                                    onClick={() => {
-                                        const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
-                                        // Only start quiz if not already completed, otherwise allow toggling completion
-                                        if (quizData && quizData.questions && quizData.questions.length > 0 && !isCompleted) {
-                                            setQuizStarted(true);
-                                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                                        } else {
-                                            handleCompleteLesson();
-                                        }
-                                    }}
-                                    disabled={isCompleting}
-                                    className={isCompleted ? "btn-standard" : "btn-primary-forest"}
-                                    style={{ 
-                                        padding: '1rem 3rem', 
-                                        height: '60px', 
-                                        fontSize: '1.1rem', 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        gap: '12px',
-                                        background: isCompleted ? '#f0fdf4' : '#1a4d3e',
-                                        color: isCompleted ? '#166534' : 'white',
-                                        border: isCompleted ? '2px solid #10b981' : 'none',
-                                        boxShadow: isCompleted ? 'none' : '0 10px 25px -5px rgba(26, 77, 62, 0.3)'
-                                    }}
-                                >
-                                    {isCompleting ? <Loader2 className="animate-spin" /> : 
-                                     isCompleted ? <><CheckCircle2 size={24} /> Lesson Completed</> : 
-                                     (lesson.quiz_data ? 'Start Validation Quiz' : 'Mark Lesson Complete')}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Sidebar */}
-                        <div>
-                            <div id="lesson-assets-sidebar" style={{ padding: '2rem', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '24px', transition: 'all 0.4s ease' }}>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <Eye size={20} color="#1a4d3e" /> Lesson Assets
-                                </h3>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {lesson.file_url ? (
-                                        <div style={{ padding: '1rem', background: 'white', borderRadius: '14px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <div style={{ background: '#f1f5f9', width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <FileText size={18} color="#1a4d3e" />
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b' }}>{lesson.file_name || 'Resource Material'}</div>
-                                                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Available for Review</div>
-                                            </div>
-                                            <button
-                                                onClick={() => {
-                                                    const url = lesson.file_url || '';
-                                                    const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
-                                                    const isPpt = /\.(pptx?)([?#]|$)/i.test(url);
-                                                    const isVideo = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i.test(url);
-                                                    setIframeLoading(true);
-                                                    setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
-                                                }}
-                                                style={{ padding: '8px 12px', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '10px', color: '#1a4d3e', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}
-                                            >
-                                                <Eye size={14} /> Preview
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div style={{ padding: '1rem', border: '1.5px dashed #e2e8f0', borderRadius: '14px', textAlign: 'center' }}>
-                                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>No additional assets for this unit.</p>
-                                        </div>
-                                    )}
+                            <div style={{ color: '#475569', fontSize: '1.1rem', lineHeight: 1.8, marginBottom: '3rem', fontWeight: 500 }}>                                <p>{lesson.description || 'No description available for this lesson.'}</p>
                                 </div>
+
+                                <div style={{ paddingTop: '2rem', borderTop: '1.5px solid #f1f5f9' }}>
+                                    <button
+                                        onClick={() => {
+                                            const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
+                                            // Only start quiz if not already completed, otherwise allow toggling completion
+                                            if (quizData && quizData.questions && quizData.questions.length > 0 && !isCompleted) {
+                                                setQuizStarted(true);
+                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            } else {
+                                                handleCompleteLesson();
+                                            }
+                                        }}
+                                        disabled={isCompleting}
+                                        className={isCompleted ? "btn-standard" : "btn-primary-forest"}
+                                        style={{ 
+                                            padding: '1rem 3rem', 
+                                            height: '60px', 
+                                            fontSize: '1.1rem', 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            gap: '12px',
+                                            background: isCompleted ? '#f0fdf4' : '#1a4d3e',
+                                            color: isCompleted ? '#166534' : 'white',
+                                            border: isCompleted ? '2px solid #10b981' : 'none',
+                                            boxShadow: isCompleted ? 'none' : '0 10px 25px -5px rgba(26, 77, 62, 0.3)'
+                                        }}
+                                    >
+                                        {isCompleting ? <Loader2 className="animate-spin" /> : 
+                                         isCompleted ? <><CheckCircle2 size={24} /> Lesson Completed</> : 
+                                         (lesson.quiz_data ? 'Start Validation Quiz' : 'Mark Lesson Complete')}
+                                    </button>
                             </div>
                         </div>
                     </div>
@@ -888,21 +811,19 @@ const LessonView = () => {
                                         {previewAsset.type === 'pdf' || previewAsset.type === 'ppt' ? <FileText size={22} color="#1a4d3e" /> : <Eye size={22} color="#1a4d3e" />}
                                     </div>
                                     <div>
-                                        <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>Unit Resource Review</h3>
-                                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure Curriculum Stream • Unauthorized distribution is prohibited</p>
+                                        <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>Cognitive Resource Hub</h3>
+                                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secured by Layos Virtual Tutor Framework</p>
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     <button 
-                                        onClick={toggleReadAloud}
-                                        disabled={tts.ttsState === 'extracting'}
+                                        onClick={() => setShowAiInteraction(true)}
                                         style={{ 
-                                            background: ['playing','paused'].includes(tts.ttsState) ? 'rgba(26, 77, 62, 0.1)' : '#f8fafc', 
-                                            border: '1.5px solid', 
-                                            borderColor: ['playing','paused'].includes(tts.ttsState) ? '#1a4d3e' : '#e2e8f0',
-                                            padding: '4px 10px',
+                                            background: 'rgba(139, 92, 246, 0.1)', 
+                                            border: '1.5px solid #8b5cf6',
+                                            padding: '4px 12px',
                                             borderRadius: '100px',
-                                            color: '#1a4d3e',
+                                            color: '#8b5cf6',
                                             fontSize: '0.7rem',
                                             fontWeight: 800,
                                             display: 'flex',
@@ -910,11 +831,9 @@ const LessonView = () => {
                                             gap: '6px',
                                             cursor: 'pointer',
                                             transition: 'all 0.2s',
-                                            opacity: tts.ttsState === 'extracting' ? 0.6 : 1
                                         }}
                                     >
-                                        {tts.ttsState === 'extracting' ? <div className="animate-spin" style={{ width: 14, height: 14, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%' }} /> : ['playing','paused'].includes(tts.ttsState) ? <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>}
-                                        {tts.ttsState === 'extracting' ? 'Extracting...' : ['playing','paused'].includes(tts.ttsState) ? 'Stop' : 'Read Aloud'}
+                                        <Sparkles size={14} /> Virtual Tutor
                                     </button>
                                     <button
                                         onClick={() => setPreviewAsset(null)}
@@ -941,11 +860,17 @@ const LessonView = () => {
                                         `}</style>
                                     </div>
                                 )}
-                                {(previewAsset.type === 'pdf' || previewAsset.type === 'ppt') ? (
+                                {previewAsset.type === 'pdf' ? (
                                     <iframe
-                                        src={previewAsset.type === 'ppt' 
-                                            ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewAsset.url)}`
-                                            : `${previewAsset.url}#toolbar=0&navpanes=0`}
+                                        src={`${buildProxyUrl(previewAsset.url)}#toolbar=0&navpanes=0`}
+                                        style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
+                                        title="Asset Review"
+                                        onLoad={() => setIframeLoading(false)}
+                                        onContextMenu={(e: any) => e.preventDefault()}
+                                    />
+                                ) : previewAsset.type === 'ppt' ? (
+                                    <iframe
+                                        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewAsset.url)}`}
                                         style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
                                         title="Asset Review"
                                         onLoad={() => setIframeLoading(false)}
@@ -969,7 +894,7 @@ const LessonView = () => {
                                 )}
                             </div>
                             <div style={{ padding: '0.75rem 2rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
-                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Protected by Global Security Protocol</p>
+                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Powered by Layos Virtual Tutor • Unified Learning Protocol</p>
                             </div>
                         </div>
                     </div>
@@ -1068,8 +993,14 @@ const LessonView = () => {
                 </div>
             )}
 
-            {/* ── TTS Mini Player ── */}
-            <ReadAloudControls tts={tts} onClose={tts.stop} />
+            {showAiInteraction && previewAsset && (
+                <AIPDFInteraction 
+                    pdfUrl={previewAsset.url} 
+                    onClose={() => setShowAiInteraction(false)} 
+                />
+            )}
+
+            {/* Footer space */}
         </div>
     );
 };

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ChevronLeft,
@@ -70,7 +71,9 @@ export default function EditCourse() {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [, setLoadingText] = useState('');
+    const API_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const BASE_URL = API_URL.replace('/api', '');
+
     const [courseData, setCourseData] = useState({
         title: '',
         description: '',
@@ -98,6 +101,49 @@ export default function EditCourse() {
     const [existingVideos, setExistingVideos] = useState<any[]>([]);
     const [isBrowsingVideos, setIsBrowsingVideos] = useState(false);
     const [browsingLessonContext, setBrowsingLessonContext] = useState<{ moduleId: string; lessonId: string } | null>(null);
+    const [draggedModuleIndex, setDraggedModuleIndex] = useState<number | null>(null);
+    const [draggedLessonInfo, setDraggedLessonInfo] = useState<{ moduleId: string, lessonIndex: number } | null>(null);
+
+    const handleModuleDragStart = (index: number) => {
+        setDraggedModuleIndex(index);
+    };
+
+    const handleModuleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        if (draggedModuleIndex === null || draggedModuleIndex === index) return;
+
+        const newModules = [...modules];
+        const draggedItem = newModules[draggedModuleIndex];
+        newModules.splice(draggedModuleIndex, 1);
+        newModules.splice(index, 0, draggedItem);
+        setDraggedModuleIndex(index);
+        setModules(newModules);
+    };
+
+    const handleLessonDragStart = (moduleId: string, lessonIndex: number) => {
+        setDraggedLessonInfo({ moduleId, lessonIndex });
+    };
+
+    const handleLessonDragOver = (e: React.DragEvent, targetModuleId: string, targetLessonIndex: number) => {
+        e.preventDefault();
+        if (!draggedLessonInfo) return;
+
+        const { moduleId: sourceModuleId, lessonIndex: sourceLessonIndex } = draggedLessonInfo;
+
+        if (sourceModuleId === targetModuleId && sourceLessonIndex === targetLessonIndex) return;
+
+        const newModules = [...modules];
+        const sourceModule = newModules.find(m => m.id === sourceModuleId);
+        const targetModule = newModules.find(m => m.id === targetModuleId);
+
+        if (!sourceModule || !targetModule) return;
+
+        const [draggedLesson] = sourceModule.lessons.splice(sourceLessonIndex, 1);
+        targetModule.lessons.splice(targetLessonIndex, 0, draggedLesson);
+
+        setDraggedLessonInfo({ moduleId: targetModuleId, lessonIndex: targetLessonIndex });
+        setModules(newModules);
+    };
 
     const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
         setNotification({ show: true, message, type });
@@ -107,7 +153,6 @@ export default function EditCourse() {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            const API_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
             const token = localStorage.getItem('token');
             try {
                 // Fetch Course
@@ -116,7 +161,7 @@ export default function EditCourse() {
                 });
                 if (courseRes.ok) {
                     const data = await courseRes.json();
-                    const BASE_URL = API_URL.replace('/api', '');
+
                     setCourseData({
                         title: data.title,
                         description: data.description || '',
@@ -140,13 +185,21 @@ export default function EditCourse() {
                                 description: l.description,
                                 isLocked: !!l.is_locked,
                                 isPreview: !!l.is_preview,
-                                videoUrl: l.video_url ? (l.video_url.startsWith('http') ? l.video_url : `${BASE_URL}${l.video_url}`) : '',
+                                videoUrl: l.video_url ? (
+                                    l.video_url.startsWith('http') 
+                                        ? l.video_url 
+                                        : `${BASE_URL}/storage/${l.video_url.replace(/^(storage\/|storage\/app\/public\/|public\/storage\/|\/)/, '')}`
+                                ) : '',
                                 videoSource: l.video_source,
                                 liveDate: l.live_date,
                                 liveTime: l.live_time,
                                 livePlatform: l.live_platform,
                                 liveLink: l.live_link,
-                                fileUrl: l.file_url ? (l.file_url.startsWith('http') ? l.file_url : `${BASE_URL}${l.file_url}`) : '',
+                                fileUrl: l.file_url ? (
+                                    l.file_url.startsWith('http') 
+                                        ? l.file_url 
+                                        : `${BASE_URL}/storage/${l.file_url.replace(/^(storage\/|storage\/app\/public\/|public\/storage\/|\/)/, '')}`
+                                ) : '',
                                 fileName: l.file_name,
                                 quizData: typeof l.quiz_data === 'string' ? JSON.parse(l.quiz_data) : l.quiz_data
                             }))
@@ -202,8 +255,8 @@ export default function EditCourse() {
     };
 
     const handleFileUpload = async (moduleId: string, lessonId: string, file: File) => {
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
         const token = localStorage.getItem('token');
+
 
         setUploadingVideos((prev: any) => ({ ...prev, [lessonId]: true }));
         setUploadProgress((prev: any) => ({ ...prev, [lessonId]: 0 }));
@@ -253,37 +306,60 @@ export default function EditCourse() {
         }
     };
 
-    const handleDeleteVideo = async (moduleId: string, lessonId: string, videoUrl: string) => {
+    const handleDeleteVideo = async (moduleId: string, lessonId: string, videoUrl: string, type: 'video' | 'file' = 'video') => {
         if (!window.confirm('Delete this file permanently from storage?')) return;
 
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
         const token = localStorage.getItem('token');
 
         try {
-            const response = await fetch(`${API_URL}/delete-video`, {
-                method: 'POST',
+            // Extract the relative path
+            let extractedPath = videoUrl;
+            try {
+                const urlObj = new URL(videoUrl);
+                extractedPath = urlObj.pathname;
+            } catch (e) {
+                // Ignore if it's not a full URL
+            }
+            
+            // Normalize path: decode and remove '/storage/' or leading slashes
+            extractedPath = decodeURIComponent(extractedPath);
+            extractedPath = extractedPath.replace(/^\/backend\/storage\//, '')
+                                         .replace(/^\/?storage\//, '')
+                                         .replace(/^\//, ''); // remove remaining leading slash
+
+            console.log("Deleting:", extractedPath);
+            
+            const response = await axios.post(`${API_URL}/remove-media-item`, {
+                path: extractedPath
+            }, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ video_url: videoUrl })
+                }
             });
 
-            if (response.ok) {
-                updateLesson(moduleId, lessonId, { videoUrl: '', fileUrl: '', fileName: '' });
+            if (response.status === 200) {
+                console.log("File successfully deleted.");
+                if (type === 'video') {
+                    updateLesson(moduleId, lessonId, { videoUrl: '' });
+                } else {
+                    updateLesson(moduleId, lessonId, { fileUrl: '', fileName: '' });
+                }
                 showNotification('File deleted successfully', 'success');
             } else {
                 throw new Error('Failed to delete file');
             }
         } catch (err: any) {
-            setError(err.message || 'Deletion failed');
-            showNotification(err.message || 'Deletion failed', 'error');
+            console.error("Delete asset error:", err);
+            const errorMsg = err.response?.data?.message || err.response?.data?.error || err.message || 'Deletion failed';
+            setError(errorMsg);
+            showNotification(errorMsg, 'error');
         }
     };
 
     const fetchExistingVideos = async (moduleId: string, lessonId: string) => {
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
         const token = localStorage.getItem('token');
+
         try {
             const response = await fetch(`${API_URL}/course-videos`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -329,16 +405,16 @@ export default function EditCourse() {
 
         setLoading(true);
         setError(null);
-        setLoadingText(isProgress ? 'Saving progress...' : 'Initiating update...');
 
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
         const token = localStorage.getItem('token');
+
 
         try {
             // Pending file uploads are now handled immediately upon selection
             const updatedModules = [...modules];
             setModules(updatedModules);
-            setLoadingText(isProgress ? 'Synchronizing data...' : 'Saving blueprint updates...');
+
 
             // API CALL
             const payload: any = {
@@ -1241,9 +1317,17 @@ export default function EditCourse() {
 
                     <div className="curriculum-container">
                         {modules.map((mod, modIdx) => (
-                            <div key={mod.id} className="curriculum-module">
+                            <div 
+                                key={mod.id} 
+                                className={`curriculum-module ${draggedModuleIndex === modIdx ? 'dragging' : ''}`}
+                                draggable={true}
+                                onDragStart={() => handleModuleDragStart(modIdx)}
+                                onDragOver={(e) => handleModuleDragOver(e, modIdx)}
+                                onDragEnd={() => setDraggedModuleIndex(null)}
+                            >
                                 <div className="module-header" onClick={() => toggleModule(mod.id)}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flex: 1 }}>
+                                        <GripVertical size={20} color="#cbd5e1" style={{ cursor: 'grab' }} />
                                         <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
                                             {modIdx + 1}
                                         </div>
@@ -1282,8 +1366,22 @@ export default function EditCourse() {
                                 </div>
                                 {mod.isOpen && (
                                     <div className="module-content" style={{ paddingBottom: '1.5rem' }}>
-                                        {mod.lessons.map((lesson) => (
-                                            <div key={lesson.id} style={{ marginBottom: '0.25rem' }}>
+                                        {mod.lessons.map((lesson, lessonIdx) => (
+                                            <div 
+                                                key={lesson.id} 
+                                                style={{ marginBottom: '0.25rem' }}
+                                                className={`lesson-drag-container ${draggedLessonInfo?.moduleId === mod.id && draggedLessonInfo?.lessonIndex === lessonIdx ? 'dragging' : ''}`}
+                                                draggable={true}
+                                                onDragStart={(e) => {
+                                                    e.stopPropagation();
+                                                    handleLessonDragStart(mod.id, lessonIdx);
+                                                }}
+                                                onDragOver={(e) => {
+                                                    e.stopPropagation();
+                                                    handleLessonDragOver(e, mod.id, lessonIdx);
+                                                }}
+                                                onDragEnd={() => setDraggedLessonInfo(null)}
+                                            >
                                                 <div className="lesson-card">
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                                                         <GripVertical size={20} color="#cbd5e1" style={{ cursor: 'grab' }} />
@@ -1530,7 +1628,7 @@ export default function EditCourse() {
                                                                                     style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
                                                                                 />
                                                                                 <button
-                                                                                    onClick={() => updateLesson(mod.id, lesson.id, { videoUrl: '' })}
+                                                                                    onClick={() => handleDeleteVideo(mod.id, lesson.id, lesson.videoUrl || '', 'video')}
                                                                                     style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', zIndex: 10 }}
                                                                                 >
                                                                                     Delete Recording
@@ -1564,7 +1662,7 @@ export default function EditCourse() {
                                                                                     onChange={(e: any) => {
                                                                                         if (e.target.files && e.target.files[0]) {
                                                                                             if (lesson.videoUrl) {
-                                                                                                handleDeleteVideo(mod.id, lesson.id, lesson.videoUrl);
+                                                                                                handleDeleteVideo(mod.id, lesson.id, lesson.videoUrl, 'video');
                                                                                             }
                                                                                             handleFileUpload(mod.id, lesson.id, e.target.files[0]);
                                                                                         }
@@ -1652,7 +1750,7 @@ export default function EditCourse() {
                                                                                     </button>
                                                                                     <button
                                                                                         onClick={(e: any) => {
-                                                                                            e.stopPropagation(); handleDeleteVideo(mod.id, lesson.id, lesson.fileUrl || '');
+                                                                                            e.stopPropagation(); handleDeleteVideo(mod.id, lesson.id, lesson.fileUrl || '', 'file');
                                                                                         }}
                                                                                         style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                     >
@@ -2038,7 +2136,7 @@ export default function EditCourse() {
                                                     }
                                                     if (fileName.match(/\.pdf$/i)) {
                                                         return <iframe
-                                                            src={`${url}#toolbar=0`}
+                                                            src={viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : `${API_URL}/pdf-proxy?url=${encodeURIComponent(url || '')}#toolbar=0`}
                                                             style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
                                                             onLoad={() => setIframeLoading(false)}
                                                         />;
@@ -2142,6 +2240,26 @@ export default function EditCourse() {
                     z-index: 2000 !important;
                     margin: 0 !important;
                     border-radius: 0 !important;
+                }
+                .curriculum-module.dragging {
+                    opacity: 0.4;
+                    transform: scale(0.98);
+                    border: 2px dashed #020617;
+                    background: #f8fafc;
+                }
+                .lesson-drag-container.dragging {
+                    opacity: 0.4;
+                    transform: scale(0.98);
+                    border: 2px dashed #cbd5e1;
+                    background: #fcfdfe;
+                    border-radius: 12px;
+                }
+                .curriculum-module, .lesson-drag-container {
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    cursor: default;
+                }
+                .module-header, .lesson-card {
+                    user-select: none;
                 }
             `}</style>
 
@@ -2645,7 +2763,8 @@ export default function EditCourse() {
                                 >
                                     <Plus size={20} /> Add New Question
                                 </button>
-                            </div>                             <div style={{ padding: '2rem 3rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem' }}>
+                            </div>
+                            <div style={{ padding: '2rem 3rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem' }}>
                                 <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     <button
                                         onClick={() => {
@@ -2800,6 +2919,35 @@ export default function EditCourse() {
 
                         <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
                             <button onClick={() => setIsBrowsingVideos(false)} className="btn-standard" style={{ background: 'white', color: '#64748b', border: '1.5px solid #e2e8f0', padding: '0 2rem' }}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {previewAsset && (
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', zIndex: 1300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                    <div style={{ background: 'white', width: '100%', maxWidth: previewAsset.type === 'pdf' ? '1000px' : 'auto', maxHeight: '90vh', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+                        <div style={{ padding: '1rem 2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                            <h3 style={{ margin: 0, fontWeight: 800, fontSize: '1.2rem', color: '#0f172a' }}>
+                                {previewAsset.type === 'pdf' ? 'Document Viewer' : 'Image Preview'}
+                            </h3>
+                            <button
+                                onClick={() => setPreviewAsset(null)}
+                                className="btn-standard"
+                                style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '36px', height: '36px', padding: 0, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div style={{ flex: 1, overflow: 'auto', background: '#e2e8f0', padding: previewAsset.type === 'pdf' ? 0 : '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            {previewAsset.type === 'pdf' ? (
+                                <iframe
+                                    src={previewAsset.url}
+                                    style={{ width: '100%', height: 'calc(90vh - 70px)', border: 'none' }}
+                                    title="PDF Document"
+                                />
+                            ) : (
+                                <img src={previewAsset.url} alt="Preview" style={{ maxWidth: '100%', maxHeight: 'calc(90vh - 120px)', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }} />
+                            )}
                         </div>
                     </div>
                 </div>

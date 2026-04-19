@@ -1,8 +1,10 @@
 import * as pdfjs from 'pdfjs-dist';
 import JSZip from 'jszip';
 
-// Configure the pdf.js worker via jsDelivr CDN
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Configure the pdf.js worker using Vite's local loader
+// @ts-ignore
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 // @ts-ignore
 const API_BASE = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -14,13 +16,25 @@ const IS_DEV = (import.meta as any).env.DEV;
  * - In dev: uses the Vite dev-server proxy (no backend required, instant CORS bypass)
  * - In production: uses the Laravel /api/pdf-proxy backend route
  */
-function buildProxyUrl(remoteUrl: string): string {
-  if (IS_DEV) {
-    // Vite dev-server forwards /dev-pdf-proxy?url=... to S3 server-side
-    return `/dev-pdf-proxy?url=${encodeURIComponent(remoteUrl)}`;
+export function buildProxyUrl(remoteUrl: string): string {
+  if (!remoteUrl) return '';
+  
+  let finalUrl = remoteUrl;
+  
+  // Normalize internal backend paths often found in database records
+  if (finalUrl.includes('backend/storage/app/public/')) {
+      finalUrl = finalUrl.replace('backend/storage/app/public/', 'storage/');
+  } else if (finalUrl.includes('storage/app/public/')) {
+      finalUrl = finalUrl.replace('storage/app/public/', 'storage/');
   }
-  // Production: Laravel backend proxy route
-  return `${API_BASE}/pdf-proxy?url=${encodeURIComponent(remoteUrl)}`;
+
+  // If the URL is relative (e.g. storage/...) prepend the production backend URL
+  if (!finalUrl.startsWith('http')) {
+      const base = API_BASE.replace('/api', '');
+      finalUrl = `${base}/${finalUrl.startsWith('/') ? finalUrl.substring(1) : finalUrl}`;
+  }
+
+  return `${API_BASE}/pdf-proxy?url=${encodeURIComponent(finalUrl)}`;
 }
 
 /**

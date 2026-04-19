@@ -9,9 +9,11 @@ import {
     Info,
     Eye,
     X,
-    FolderSync
+    FolderSync,
+    Sparkles
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 
 export default function SubmitAssignment() {
     const { id } = useParams();
@@ -24,6 +26,7 @@ export default function SubmitAssignment() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string; type: 'pdf' | 'office' } | null>(null);
     const [iframeLoading, setIframeLoading] = useState(true);
+    const [showAiInteraction, setShowAiInteraction] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -545,15 +548,37 @@ export default function SubmitAssignment() {
                                     <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure {viewingPdf.type === 'office' ? 'Document' : 'PDF'} Viewer • Click anywhere on the slide to advance</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => {
-                                    setViewingPdf(null);
-                                    setIframeLoading(true);
-                                }}
-                                style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer' }}
-                            >
-                                <X size={22} />
-                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                {viewingPdf.type === 'pdf' && (
+                                    <button 
+                                        onClick={() => setShowAiInteraction(true)}
+                                        style={{ 
+                                            background: 'rgba(139, 92, 246, 0.1)', 
+                                            border: '1.5px solid #8b5cf6',
+                                            padding: '4px 12px',
+                                            borderRadius: '100px',
+                                            color: '#8b5cf6',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 800,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        <Sparkles size={14} /> Layos Virtual Tutor
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => {
+                                        setViewingPdf(null);
+                                        setIframeLoading(true);
+                                    }}
+                                    style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                                >
+                                    <X size={22} />
+                                </button>
+                            </div>
                         </div>
 
                         <div
@@ -599,6 +624,13 @@ export default function SubmitAssignment() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showAiInteraction && viewingPdf && (
+                <AIPDFInteraction 
+                    pdfUrl={viewingPdf.url} 
+                    onClose={() => setShowAiInteraction(false)} 
+                />
             )}
         </div>
     );

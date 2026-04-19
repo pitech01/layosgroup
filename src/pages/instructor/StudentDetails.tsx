@@ -105,6 +105,34 @@ export default function StudentDetails() {
         }
     };
 
+    const [expandedCohortMap, setExpandedCohortMap] = useState<Record<string, boolean>>({});
+
+    const toggleLessonCompletion = async (lessonId: string, currentCompleted: boolean) => {
+        try {
+            const response = await fetch(`${API_URL}/lessons/${lessonId}/complete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    student_id: student.id,
+                    completed: !currentCompleted
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({ type: 'success', message: 'Lesson progress updated successfully.' });
+                fetchStudentData(); 
+            } else {
+                setNotification({ type: 'error', message: data.message || 'Failed to update lesson progress.' });
+            }
+        } catch (err) {
+            setNotification({ type: 'error', message: 'Network error updating progress.' });
+        }
+    };
+
     useEffect(() => {
         fetchStudentData();
     }, [id]);
@@ -571,35 +599,78 @@ export default function StudentDetails() {
                                 </div>
 
                                 {student.cohorts && student.cohorts.length > 0 ? student.cohorts.map((cohort: any) => (
-                                    <div key={cohort.id} className="enrollment-row">
-                                        <div className="progress-ring-mini">{Math.round(cohort.pivot?.progress || 0)}%</div>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontWeight: 950, color: '#0f172a', fontSize: '1.1rem' }}>{cohort.name}</div>
-                                            <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
-                                                {cohort.course?.title || 'General Curriculum'} • Joined {new Date(cohort.pivot?.created_at).toLocaleDateString()}
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                                                <div style={{
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: 850,
-                                                    color: cohort.pivot?.status === 'inactive' ? '#ef4444' : '#10b981',
-                                                    background: cohort.pivot?.status === 'inactive' ? '#fef2f2' : '#f0fdf4',
-                                                    padding: '2px 8px',
-                                                    borderRadius: '4px'
-                                                }}>
-                                                    {cohort.pivot?.status?.toUpperCase() || 'ENROLLED'}
+                                    <div key={cohort.id} style={{ marginBottom: '1rem' }}>
+                                        <div className="enrollment-row" style={{ marginBottom: 0, borderRadius: expandedCohortMap[cohort.id] ? '20px 20px 0 0' : '20px' }}>
+                                            <div className="progress-ring-mini">{Math.round(cohort.pivot?.progress || 0)}%</div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: 950, color: '#0f172a', fontSize: '1.1rem' }}>{cohort.name}</div>
+                                                <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
+                                                    {cohort.course?.title || 'General Curriculum'} • Joined {new Date(cohort.pivot?.created_at).toLocaleDateString()}
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                                                    <div style={{
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 850,
+                                                        color: cohort.pivot?.status === 'inactive' ? '#ef4444' : '#10b981',
+                                                        background: cohort.pivot?.status === 'inactive' ? '#fef2f2' : '#f0fdf4',
+                                                        padding: '2px 8px',
+                                                        borderRadius: '4px'
+                                                    }}>
+                                                        {cohort.pivot?.status?.toUpperCase() || 'ENROLLED'}
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                <button className="btn-secondary-outline" onClick={() => setExpandedCohortMap(p => ({ ...p, [cohort.id]: !p[cohort.id] }))}>
+                                                    {expandedCohortMap[cohort.id] ? 'Hide Progress' : 'Manage Progress'}
+                                                </button>
+                                                <button
+                                                    className={cohort.pivot?.status === 'inactive' ? "btn-toggle-active" : "btn-toggle-inactive"}
+                                                    onClick={() => toggleActivation(cohort.id, cohort.pivot?.status)}
+                                                >
+                                                    {cohort.pivot?.status === 'inactive' ? 'Activate' : 'Deactivate'}
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <button
-                                                className={cohort.pivot?.status === 'inactive' ? "btn-toggle-active" : "btn-toggle-inactive"}
-                                                onClick={() => toggleActivation(cohort.id, cohort.pivot?.status)}
-                                            >
-                                                {cohort.pivot?.status === 'inactive' ? 'Activate Access' : 'Deactivate Access'}
-                                            </button>
-                                            <button className="btn-secondary-outline" onClick={() => navigate(`/instructor/cohorts/${cohort.id}`)}>View cohort</button>
-                                        </div>
+                                        {expandedCohortMap[cohort.id] && (
+                                            <div className="animate-fade-in-up" style={{ padding: '2.5rem', background: '#fcfdfe', border: '1.5px solid #f1f5f9', borderTop: 'none', borderRadius: '0 0 20px 20px', boxShadow: 'inset 0 4px 6px -4px rgba(0,0,0,0.02)' }}>
+                                                <h4 style={{ margin: '0 0 1.5rem 0', color: '#0f172a', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <CheckCircle2 size={18} color="#1a4d3e" /> Curriculum Override Access
+                                                </h4>
+                                                <p style={{ margin: '0 0 2rem 0', color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>Toggle the checkboxes below to manually apply or revoke completion status for a specific resource. This persists immediately to the backend and adjusts percentages automatically.</p>
+                                                
+                                                {cohort.course?.modules?.map((mod: any) => (
+                                                    <div key={mod.id} style={{ marginBottom: '1.5rem', background: 'white', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
+                                                        <div style={{ fontWeight: 800, color: '#1a4d3e', padding: '1rem 1.5rem', background: '#f8fafc', fontSize: '0.95rem', borderBottom: '1px solid #e2e8f0' }}>{mod.title}</div>
+                                                        <div style={{ display: 'grid', padding: '1rem' }}>
+                                                            {mod.lessons?.map((lesson: any) => {
+                                                                const isCompleted = student?.completed_lessons?.some((cl: any) => cl.id === lesson.id);
+                                                                return (
+                                                                    <div key={lesson.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f1f5f9' }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                                                            <button 
+                                                                                onClick={() => toggleLessonCompletion(lesson.id, !!isCompleted)}
+                                                                                style={{ width: '26px', height: '26px', borderRadius: '8px', border: `2px solid ${isCompleted ? '#10b981' : '#cbd5e1'}`, background: isCompleted ? '#10b981' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, transition: 'all 0.2s' }}
+                                                                            >
+                                                                                {isCompleted && <CheckCircle2 size={16} color="white" />}
+                                                                            </button>
+                                                                            <span style={{ fontWeight: 700, color: isCompleted ? '#94a3b8' : '#334155', fontSize: '0.9rem', textDecoration: isCompleted ? 'line-through' : 'none', transition: 'all 0.2s' }}>{lesson.title}</span>
+                                                                        </div>
+                                                                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px' }}>{lesson.type}</span>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                            {(!mod.lessons || mod.lessons.length === 0) && (
+                                                                <p style={{ margin: '0.5rem 1rem', color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic', fontWeight: 600 }}>No lessons active in module...</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {(!cohort.course?.modules || cohort.course.modules.length === 0) && (
+                                                    <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>No curriculum data bound to this record.</p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )) : (
                                     <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>

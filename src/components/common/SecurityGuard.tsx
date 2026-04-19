@@ -18,21 +18,20 @@ const SecurityGuard = ({ children }: { children: React.ReactNode }) => {
             // Access is now allowed on mobile and tablet devices.
 
 
-            // 2. 🚫 VPN / Proxy Shield (Frontend Detection Layer)
+            // 2. 🚫 VPN / Proxy Shield (Frontend Detection Layer - Disabled to avoid CORS errors)
+            /*
             try {
-                // proxycheck.io public lookup (free tier, JSONP/CORS compatible)
                 const res = await fetch('https://proxycheck.io/v2/?vpn=1&asn=1&time=1');
                 const data = await res.json();
                 
-                // If current visitor IP results in proxy === 'yes', it's a VPN, Proxy, or Tor
                 if (data && data.proxy === 'yes') {
                     setSecurity({ isChecking: false, error: 'vpn' });
                     return;
                 }
             } catch (err) {
-                // Note: If blocked by browser (adblockers), the Laravel backend middleware 
-                // will finalize the enforcement on the first sensitive API call.
+                // Backend will handle this via CheckVpn middleware
             }
+            */
 
             setSecurity({ isChecking: false, error: null });
         };

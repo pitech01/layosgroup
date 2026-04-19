@@ -106,9 +106,29 @@ export default function ActivityLogsDetailed() {
                                         </span>
                                     </td>
                                     <td style={{ padding: '1.25rem 2rem' }}>
-                                        <div style={{ fontWeight: 600, color: '#334155', fontSize: '0.95rem', maxWidth: '350px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={activity.description}>
+                                        <div style={{ fontWeight: 600, color: '#334155', fontSize: '0.95rem', lineHeight: 1.5 }}>
                                             {activity.description}
                                         </div>
+                                        {(() => {
+                                            if (!activity.metadata) return null;
+                                            let parsed = {};
+                                            try {
+                                                parsed = typeof activity.metadata === 'string' ? JSON.parse(activity.metadata) : activity.metadata;
+                                            } catch (e) {
+                                                return null;
+                                            }
+                                            if (Object.keys(parsed).length === 0) return null;
+                                            return (
+                                                <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                    {Object.entries(parsed).map(([key, value]) => (
+                                                        <div key={key} style={{ display: 'flex' }}>
+                                                            <span style={{ fontWeight: 800, minWidth: '80px', textTransform: 'capitalize' }}>{key.replace('_', ' ')}:</span>
+                                                            <span style={{ fontFamily: 'monospace', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#0f172a' }}>{String(value)}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })()}
                                     </td>
                                     <td style={{ padding: '1.25rem 2rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>

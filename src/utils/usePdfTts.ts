@@ -226,9 +226,16 @@ export function usePdfTts(): UsePdfTtsResult {
           setIndexingProgress(Math.round((i / total) * 100));
         }
         text = extracted;
-      } else if (info.isPpt) {
+    } else if (info.isPpt) {
         const ppt = await loadPptx(url);
-        text = await extractPptxSlideText(ppt);
+        let extracted = '';
+        const total = ppt.slideFiles.length;
+        for (let i = 0; i < total; i++) {
+          const slideTxt = await extractPptxSlideText(ppt, i);
+          extracted += slideTxt + ' ';
+          setIndexingProgress(Math.round(((i + 1) / total) * 100));
+        }
+        text = extracted;
       } else {
           // Fallback or Image? Maybe just treat it as narratable text if provided?
           text = name || "";
@@ -261,7 +268,7 @@ export function usePdfTts(): UsePdfTtsResult {
     setVoice: (v) => { setSelectedVoice(v); voiceRef.current = v; },
     rate, setRate: (r) => { _setRate(r); rateRef.current = r; },
     pitch, setPitch: (p) => { _setPitch(p); pitchRef.current = p; },
-    engine, setEngine: () => {}, 
+    engine, setEngine, 
     language, setLanguage,
     isTeachingMode, setIsTeachingMode,
     play: () => {
