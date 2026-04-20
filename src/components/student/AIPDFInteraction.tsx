@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useAIPutter } from '../../utils/useAIPutter';
-import { buildProxyUrl } from '../../utils/pdfTextExtractor';
+import AutoScrollPDFViewer from './AutoScrollPDFViewer';
 
 interface AIPDFInteractionProps {
     pdfUrl: string;
@@ -15,6 +15,22 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
     const [chat, setChat] = useState<{role: 'user' | 'ai', content: string}[]>([]);
     const [isAsking, setIsAsking] = useState(false);
     const [showChat, setShowChat] = useState(false);
+    
+    // Auto-scroll & Auto-focus refs
+    const chatScrollRef = React.useRef<HTMLDivElement>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    React.useEffect(() => {
+        if (chatScrollRef.current) {
+            chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+        }
+    }, [chat, isAsking]);
+
+    React.useEffect(() => {
+        if (showChat && !isAsking && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [showChat, isAsking]);
 
     const handleStart = () => {
         ai.startAIIntelligence(pdfUrl);
@@ -130,6 +146,15 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                         >
                             INITIALIZE VIRTUAL TUTOR
                         </button>
+                    ) : (ai.state === 'ready') ? (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                                onClick={ai.startSpeaking}
+                                style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '0.6rem 1.5rem', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', fontSize: '0.8rem', letterSpacing: '0.05em', boxShadow: '0 10px 20px -5px rgba(16, 185, 129, 0.4)' }}
+                            >
+                                START READING NOW
+                            </button>
+                        </div>
                     ) : (ai.state !== 'extracting' && ai.state !== 'summarizing' && (
                         <>
                             <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -182,13 +207,10 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
             <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#020617' }}>
                 
                 {/* Background Layer: The Smart PDF Document with Auto-Scroll Tracking */}
-                <div style={{ width: '100%', height: '100%', zIndex: 1, background: 'white', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-                    <iframe 
-                        key={`${ai.currentExplanationIndex}-${ai.explanations[ai.currentExplanationIndex]?.page || 1}`}
-                        src={`${buildProxyUrl(pdfUrl)}#toolbar=0&navpanes=0&scrollbar=0&page=${ai.explanations[ai.currentExplanationIndex]?.page || 1}&view=FitH`} 
-                        style={{ width: '100%', height: '100%', border: 'none', background: 'white' }}
-                        title="Lesson Content"
-                        loading="eager"
+                <div style={{ width: '100%', height: '100%', zIndex: 1, background: '#020617', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                    <AutoScrollPDFViewer 
+                        url={pdfUrl} 
+                        currentPage={ai.explanations[ai.currentExplanationIndex]?.page || 1}
                     />
                 </div>
 
@@ -279,7 +301,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                             </div>
                         </div>
                         
-                        <div className="chat-scroll" style={{ flex: 1, overflowY: 'auto', padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                        <div ref={chatScrollRef} className="chat-scroll" style={{ flex: 1, overflowY: 'auto', padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                             {chat.length === 0 && (
                                 <div style={{ textAlign: 'center', color: '#64748b', marginTop: '6rem' }}>
                                     <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(139, 92, 246, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontWeight: 900, fontSize: '2rem', color: '#49BABA' }}>
@@ -312,6 +334,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                         <div style={{ padding: '1.5rem', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                             <form onSubmit={handleAsk} style={{ position: 'relative', display: 'flex', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', padding: '6px' }}>
                                 <input 
+                                    ref={inputRef}
                                     style={{ flex: 1, background: 'none', border: 'none', color: 'white', padding: '0.8rem 1rem', fontSize: '1rem', outline: 'none' }}
                                     placeholder="Query the Tutor..."
                                     value={question}

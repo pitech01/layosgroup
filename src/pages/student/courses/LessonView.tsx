@@ -997,6 +997,7 @@ const LessonView = () => {
                 <AIPDFInteraction 
                     pdfUrl={previewAsset.url} 
                     onClose={() => setShowAiInteraction(false)} 
+                    iframeLoading={iframeLoading}
                 />
             )}
 

@@ -5,7 +5,7 @@ const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
 const GITHUB_ENDPOINT = "https://models.inference.ai.azure.com/chat/completions";
 const MODEL_NAME = "gpt-4o-mini";
 
-export type AIState = 'idle' | 'extracting' | 'summarizing' | 'speaking' | 'paused' | 'error';
+export type AIState = 'idle' | 'extracting' | 'summarizing' | 'ready' | 'speaking' | 'paused' | 'error';
 
 interface AIExplanation {
     title: string;
@@ -151,11 +151,11 @@ export const useAIPutter = () => {
             You are a Professional Document Mentor. Your task is to teach the content of the provided document.
             
             UNBREAKABLE NARRATION RULES:
-            1. IGNORE HEADERS/FOOTERS: Strictly ignore repetitive text like "Layos group training - confidential training material" or "Page X of Y".
-            2. NO TECHNICAL LABELS: Never say phrases like "Unbreakable Sync", "Section Title", or "Page X".
-            3. Stay 100% focused on narrating the actual document content.
-            4. FORMAT YOUR OUTPUT AS: 
-               SECTION TITLE: [Title] | PAGE: [Page Number] | CONTENT: [Human-like narration only]
+            1. IGNORE HEADERS/FOOTERS: Strictly ignore repetitive text like "Layos group training" or "Page X of Y".
+            2. STAY IN CHARACTER: You are a human tutor reading to a student. Never announce technical labels like "Section Title" or "Page X".
+            3. DO NOT MENTION PAGES VERBALLY: Absolutely never say "On page one", "Moving to page two", etc. Just seamlessly continue teaching the concepts.
+            4. FORMAT YOUR OUTPUT EXACTLY AS: 
+               SECTION TITLE: [Catchy Lesson Subtitle] | PAGE: [Exact integer number] | CONTENT: [Human-like conversational narration only, strictly no page announcements]
             
             Document Content:
             ${textWithPageMarkers.substring(0, 10000)}`;
@@ -191,9 +191,7 @@ export const useAIPutter = () => {
             setExplanations(parsedExplanations);
             explanationsRef.current = parsedExplanations;
             
-            setTimeout(() => {
-                playExplanationAudio(0, 0);
-            }, 800);
+            setState('ready');
 
         } catch (err: any) {
             console.error('Core Intelligence failure:', err);
@@ -273,6 +271,7 @@ export const useAIPutter = () => {
         currentExplanationIndex,
         isSpeaking,
         startAIIntelligence,
+        startSpeaking: () => playExplanationAudio(0, 0),
         stop,
         pause,
         resume,

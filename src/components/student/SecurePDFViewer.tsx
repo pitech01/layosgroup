@@ -12,9 +12,10 @@ interface SecurePDFViewerProps {
     url: string;
     onLoadSuccess?: () => void;
     currentPage?: number;
+    hideToolbar?: boolean;
 }
 
-const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, currentPage }) => {
+const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, currentPage, hideToolbar = false }) => {
     const [numPages, setNumPages] = useState<number | null>(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [scale, setScale] = useState(1.2);
@@ -33,28 +34,7 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
     }, [currentPage]);
 
     useEffect(() => {
-        let active = true;
-        const proxyUrl = buildProxyUrl(url);
-        
-        fetch(proxyUrl)
-            .then(res => {
-                if (!res.ok) throw new Error(`Server returned ${res.status}`);
-                return res.blob();
-            })
-            .then(blob => {
-                if (!active) return;
-                const localUrl = URL.createObjectURL(blob);
-                setBlobUrl(localUrl);
-            })
-            .catch(err => {
-                if (!active) return;
-                setError(`Synchronization Fault: ${err.message}`);
-            });
-
-        return () => {
-            active = false;
-            if (blobUrl) URL.revokeObjectURL(blobUrl);
-        };
+        setBlobUrl(buildProxyUrl(url));
     }, [url]);
 
     function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
@@ -90,6 +70,7 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
         }}>
             
             {/* Control Bar */}
+            {!hideToolbar && (
             <div style={{ 
                 padding: '0.75rem 2rem', 
                 background: 'rgba(15, 23, 42, 0.95)', 
@@ -142,6 +123,7 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
                     <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Virtual Teaching Link</span>
                 </div>
             </div>
+            )}
 
             {/* Content Area with Swipe/Fade Effect */}
             <div style={{ 
