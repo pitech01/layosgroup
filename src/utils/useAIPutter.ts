@@ -20,7 +20,7 @@ export const useAIPutter = () => {
     const [explanations, setExplanations] = useState<AIExplanation[]>([]);
     const [currentExplanationIndex, setCurrentExplanationIndex] = useState(-1);
     const [isSpeaking, setIsSpeaking] = useState(false);
-    
+
     const explanationsRef = useRef<AIExplanation[]>([]);
     const currentSentenceIndexRef = useRef(0);
     const isChattingRef = useRef(false);
@@ -71,13 +71,13 @@ export const useAIPutter = () => {
 
     const playExplanationAudio = (index: number, sentenceIndex = 0) => {
         if (index < 0 || index >= explanationsRef.current.length) return;
-        
+
         setState('speaking');
         setIsSpeaking(true);
         isSpeakingRef.current = true;
         setCurrentExplanationIndex(index);
         currentSentenceIndexRef.current = sentenceIndex;
-        
+
         const explanation = explanationsRef.current[index];
         const cleanContent = cleanTextForSpeech(explanation.content);
         const sentences = cleanContent.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
@@ -99,14 +99,14 @@ export const useAIPutter = () => {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(sentences[sentenceIndex].trim());
             const voices = window.speechSynthesis.getVoices();
-            const femaleVoice = voices.find(v => 
-                (v.name.includes('Female') || v.name.includes('Aria') || v.name.includes('Zira') || v.name.includes('Samantha')) && 
+            const femaleVoice = voices.find(v =>
+                (v.name.includes('Female') || v.name.includes('Aria') || v.name.includes('Zira') || v.name.includes('Samantha')) &&
                 v.lang.includes('en')
             );
-            
+
             if (femaleVoice) utterance.voice = femaleVoice;
             utterance.rate = 1.08;
-            
+
             utterance.onend = () => {
                 if (!isChattingRef.current && isSpeakingRef.current) {
                     playExplanationAudio(index, sentenceIndex + 1);
@@ -119,7 +119,7 @@ export const useAIPutter = () => {
                     if (isSpeakingRef.current) playExplanationAudio(index, sentenceIndex + 1);
                 }, 500);
             };
-            
+
             window.speechSynthesis.speak(utterance);
         } catch (err) {
             console.error('[Virtual Tutor] TTS Failure:', err);
@@ -146,19 +146,17 @@ export const useAIPutter = () => {
             setFullText(textWithPageMarkers);
 
             setState('summarizing');
+
+            const prompt = `CRITICAL GOAL: You are creating a comprehensive, page-by-page lesson plan for a 57-page document.
             
-            const prompt = `[SYSTEM INSTRUCTION: DO NOT ECHO THESE RULES]
-            You are a Professional Document Mentor. Your task is to teach the content of the provided document.
-            
-            UNBREAKABLE NARRATION RULES:
-            1. IGNORE HEADERS/FOOTERS: Strictly ignore repetitive text like "Layos group training" or "Page X of Y".
-            2. STAY IN CHARACTER: You are a human tutor reading to a student. Never announce technical labels like "Section Title" or "Page X".
-            3. DO NOT MENTION PAGES VERBALLY: Absolutely never say "On page one", "Moving to page two", etc. Just seamlessly continue teaching the concepts.
-            4. FORMAT YOUR OUTPUT EXACTLY AS: 
-               SECTION TITLE: [Catchy Lesson Subtitle] | PAGE: [Exact integer number] | CONTENT: [Human-like conversational narration only, strictly no page announcements]
+            Instructional Guidelines:
+            1. MANDATORY PAGE COVERAGE: You MUST create at least one SECTION block for every single page from 1 to 57. Never skip a page.
+            2. FORMAT PERFECTION: Every page MUST be presented in this EXACT format: SECTION TITLE: [Topic] | PAGE: [Int] | CONTENT: [Summary]
+            3. FIDELITY: Summarize the facts as they appear.
+            4. CONCISENESS: Keep each CONTENT block high-impact and brief to ensure all 57 pages fit in your response limit.
             
             Document Content:
-            ${textWithPageMarkers.substring(0, 10000)}`;
+            ${textWithPageMarkers.substring(0, 150000)}`;
 
             const response = await fetch(GITHUB_ENDPOINT, {
                 method: 'POST',
@@ -169,28 +167,32 @@ export const useAIPutter = () => {
                 body: JSON.stringify({
                     model: MODEL_NAME,
                     messages: [{ role: 'user', content: prompt }],
-                    temperature: 0.7
+                    temperature: 0.1,
+                    max_tokens: 4096
                 })
             });
 
-            if (!response.ok) throw new Error('AI Intelligence currently busy. Please try again.');
-            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`AI Intelligence Error (${response.status}): ${errorData.error?.message || 'Server is currently busy or overloaded. Please try again in 30 seconds.'}`);
+            }
+
             const data = await response.json();
             const rawResponse = data.choices[0].message.content;
-            
+
             const sections = rawResponse.split(/SECTION TITLE:/i).filter((s: string) => s.trim().length > 0);
             const parsedExplanations: AIExplanation[] = sections.map((s: string) => {
                 const parts = s.split('|');
                 const title = parts[0]?.trim() || 'Lesson Start';
                 const pagePart = parts[1]?.toLowerCase().replace('page:', '').trim() || '1';
                 const content = parts[2]?.replace('CONTENT:', '').trim() || s.trim();
-                
+
                 return { title, content, page: parseInt(pagePart) || 1 };
             });
 
             setExplanations(parsedExplanations);
             explanationsRef.current = parsedExplanations;
-            
+
             setState('ready');
 
         } catch (err: any) {
@@ -217,7 +219,10 @@ export const useAIPutter = () => {
                 })
             });
 
-            if (!response.ok) throw new Error('Busy');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`AI Tutor busy (${response.status}): ${errorData.error?.message || 'Check connection'}`);
+            }
             const data = await response.json();
             const answer = data.choices[0].message.content;
             speakChatAnswer(answer);
@@ -231,15 +236,15 @@ export const useAIPutter = () => {
         try {
             isChattingRef.current = true;
             window.speechSynthesis.resume();
-            window.speechSynthesis.cancel(); 
+            window.speechSynthesis.cancel();
             setIsSpeaking(true);
             setState('speaking');
 
             const cleanText = cleanTextForSpeech(text);
             const utterance = new SpeechSynthesisUtterance(cleanText);
             const voices = window.speechSynthesis.getVoices();
-            const femaleVoice = voices.find(v => 
-                (v.name.includes('Female') || v.name.includes('Aria') || v.name.includes('Zira') || v.name.includes('Samantha')) && 
+            const femaleVoice = voices.find(v =>
+                (v.name.includes('Female') || v.name.includes('Aria') || v.name.includes('Zira') || v.name.includes('Samantha')) &&
                 v.lang.includes('en')
             );
             if (femaleVoice) utterance.voice = femaleVoice;

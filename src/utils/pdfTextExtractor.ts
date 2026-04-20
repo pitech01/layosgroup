@@ -67,7 +67,7 @@ export const extractPdfPageText = async (pdf: any, pageNum: number): Promise<str
                 if (/^\d+$/.test(item.str.trim()) && item.str.length < 4) return false;
                 // Simple heuristic for headers/footers
                 const y = item.transform?.[5] || 0;
-                if (y < 40 || y > pageHeight - 40) return false;
+                if (y < 20 || y > pageHeight - 20) return false;
                 return true;
             })
             .map((item: any) => item.str);

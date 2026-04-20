@@ -53,9 +53,9 @@ const AutoScrollPDFViewer: React.FC<AutoScrollPDFViewerProps> = ({ url, currentP
                 
                 if (!active || !canvasRef.current) return;
 
-                const viewport = page.getViewport({ scale: 1.5 });
+                const viewport = page.getViewport({ scale: 1.5, rotation: page.rotate });
                 const canvas = canvasRef.current;
-                const context = canvas.getContext('2d');
+                const context = canvas.getContext('2d', { alpha: false });
                 
                 if (context) {
                     canvas.height = viewport.height;
