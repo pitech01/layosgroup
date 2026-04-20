@@ -279,30 +279,61 @@ export default function StudentInterviews() {
                 </div>
             )}
 
-            {previewAsset && (
-                <div className="modal-overlay" onClick={() => setPreviewAsset(null)}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}>
-                        <div className="modal-header">
-                            <div>
-                                <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.25rem' }}>{previewAsset.title}</h3>
-                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure Learning Asset • {previewAsset.title}</p>
-                            </div>
-                            <div style={{ display: 'flex', gap: '12px' }}>
-                                <button onClick={() => setPreviewAsset(null)} style={{ width: '44px', height: '44px', borderRadius: '14px', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', border: 'none', cursor: 'pointer' }}>
-                                    <X size={24} />
-                                </button>
-                            </div>
+            {previewAsset ? (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'white', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ 
+                        padding: '1rem 2rem', 
+                        borderBottom: '1px solid #e2e8f0', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        background: '#f8fafc' 
+                    }}>
+                        <div>
+                            <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.25rem', color: '#0f172a' }}>{previewAsset.title}</h3>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure Learning Asset</p>
                         </div>
-                        <div style={{ flex: 1, background: '#f1f5f9' }} onContextMenu={e => e.preventDefault()}>
-                            {previewAsset.type === 'pdf' ? (
-                                <iframe src={`${previewAsset.url}#toolbar=0`} style={{ width: '100%', height: '100%', border: 'none' }} title="Material View" />
-                            ) : (
-                                <video src={previewAsset.url} controls controlsList="nodownload" autoPlay style={{ width: '100%', height: '100%', display: 'block', background: 'black' }} onContextMenu={e => e.preventDefault()} />
-                            )}
-                        </div>
+                        <button 
+                            onClick={() => setPreviewAsset(null)} 
+                            style={{ 
+                                padding: '0.6rem 1.5rem', 
+                                borderRadius: '12px', 
+                                background: '#1a4d3e', 
+                                color: 'white', 
+                                border: 'none', 
+                                cursor: 'pointer', 
+                                fontWeight: 800,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}
+                        >
+                            <X size={20} />
+                            EXIT PREVIEW
+                        </button>
+                    </div>
+                    <div style={{ flex: 1, background: '#020617' }} onContextMenu={e => e.preventDefault()}>
+                        {previewAsset.type === 'pdf' ? (
+                            <iframe 
+                                src={`${previewAsset.url}#toolbar=0`} 
+                                style={{ width: '100%', height: '100%', border: 'none' }} 
+                                title="Material View" 
+                            />
+                        ) : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <video 
+                                    src={previewAsset.url} 
+                                    controls 
+                                    controlsList="nodownload" 
+                                    autoPlay 
+                                    style={{ maxWidth: '100%', maxHeight: '100%', background: 'black' }} 
+                                    onContextMenu={e => e.preventDefault()} 
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
-            )}
+            ) : null}
         </div>
     );
 }
