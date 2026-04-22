@@ -624,33 +624,82 @@ const LessonView = () => {
                                             </div>
                                         )}
                                     </div>
-                                ) : lesson.video_url ? (
-                                    <video
-                                        controls
-                                        src={lesson.video_url}
-                                                        autoPlay
-                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                        controlsList="nodownload"
-                                        onContextMenu={(e: any) => e.preventDefault()}
-                                    />
-                                ) : lesson.file_url ? (
-                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
-                                        {lesson.file_url.match(/\.(jpg|jpeg|png|gif|webp)([?#]|$)/i) ? (
-                                            <img
-                                                src={lesson.file_url}
-                                                alt={lesson.title}
-                                                style={{ maxWidth: '100%', maxHeight: '100%', userSelect: 'none', pointerEvents: 'none', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
-                                                onContextMenu={(e: any) => e.preventDefault()}
-                                            />
-                                        ) : lesson.file_url.match(/\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i) ? (
+                                ) : (() => {
+                                    const rawUrl = lesson.video_url || lesson.file_url;
+                                    if (!rawUrl) return (
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ width: '90px', height: '90px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)', margin: '0 auto 1.5rem auto', cursor: 'pointer', transition: 'all 0.3s', border: '1.5px solid rgba(255,255,255,0.1)' }}>
+                                                <svg width="44" height="44" viewBox="0 0 24 24" fill="white" style={{ marginLeft: '6px' }}><path d="M8 5v14l11-7z"/></svg>
+                                            </div>
+                                            <p style={{ color: '#94a3b8', fontSize: '1rem', fontWeight: 600 }}>Secure Content Stream Prepared</p>
+                                        </div>
+                                    );
+
+                                    // URL Resolver & Cleaner
+                                    const getCleanUrl = (url: string) => {
+                                        if (url.includes('mediadelivery.net')) return url;
+                                        
+                                        // Handle local storage paths
+                                        if (url.startsWith('/storage')) {
+                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+                                            return `${baseUrl}${url}`;
+                                        }
+
+                                        // Fix legacy localhost/127.0.0.1 URLs for shared hosting
+                                        if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
+                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+                                            return url.replace(/https?:\/\/[^\/]+(?=\/storage)/, baseUrl);
+                                        }
+
+                                        return url;
+                                    };
+
+                                    const cleanUrl = getCleanUrl(rawUrl);
+                                    const isBunny = cleanUrl.includes('mediadelivery.net');
+                                    const isVideo = cleanUrl.match(/\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i) || isBunny;
+                                    const isImage = cleanUrl.match(/\.(jpg|jpeg|png|gif|webp)([?#]|$)/i);
+                                    const isDoc = (cleanUrl.match(/\.pdf([?#]|$)/i) || cleanUrl.match(/\.(pptx?)([?#]|$)/i));
+
+                                    if (isBunny) {
+                                        return (
+                                            <iframe
+                                                src={cleanUrl}
+                                                loading="lazy"
+                                                style={{ border: 'none', width: '100%', height: '100%', borderRadius: '16px' }}
+                                                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                                                allowFullScreen={true}
+                                            ></iframe>
+                                        );
+                                    }
+
+                                    if (isVideo) {
+                                        return (
                                             <video
                                                 controls
-                                                src={lesson.file_url}
+                                                src={cleanUrl}
+                                                autoPlay
                                                 style={{ width: '100%', height: '100%', borderRadius: '16px', objectFit: 'contain' }}
                                                 controlsList="nodownload"
                                                 onContextMenu={(e: any) => e.preventDefault()}
                                             />
-                                        ) : (lesson.file_url.match(/\.pdf([?#]|$)/i) || lesson.file_url.match(/\.(pptx?)([?#]|$)/i)) ? (
+                                        );
+                                    }
+
+                                    if (isImage) {
+                                        return (
+                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+                                                <img
+                                                    src={cleanUrl}
+                                                    alt={lesson.title}
+                                                    style={{ maxWidth: '100%', maxHeight: '100%', userSelect: 'none', pointerEvents: 'none', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+                                                    onContextMenu={(e: any) => e.preventDefault()}
+                                                />
+                                            </div>
+                                        );
+                                    }
+
+                                    if (isDoc) {
+                                        return (
                                             <div
                                                 id="document-lesson-viewer"
                                                 style={{
@@ -662,7 +711,6 @@ const LessonView = () => {
                                                     position: 'relative'
                                                 }}
                                             >
-                                                {/* Instructional Resource Overview (Always visible) */}
                                                 <div style={{
                                                     width: '100%', height: '100%', display: 'flex',
                                                     flexDirection: 'column', alignItems: 'center',
@@ -709,38 +757,33 @@ const LessonView = () => {
                                                     </div>
                                                 </div>
                                             </div>
-                                        ) : (
-                                            <div style={{ textAlign: 'center', padding: '4rem' }}>
-                                                <div style={{ width: '80px', height: '80px', background: '#f1f5f9', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
-                                                    <FileText size={40} color="#1a4d3e" opacity={0.5} />
-                                                </div>
-                                                <p style={{ color: '#1a4d3e', fontWeight: 900, fontSize: '1.25rem', margin: '0 0 8px 0' }}>Material Resource Prepared</p>
-                                                <p style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>{lesson.file_name || 'Attached File'}</p>
-                                                <div
-                                                    onClick={() => {
-                                                        const url = lesson.file_url || '';
-                                                        const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
-                                                        const isPpt = /\.(pptx?)([?#]|$)/i.test(url);
-                                                        const isVideo = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i.test(url);
-                                                        setIframeLoading(true);
-                                                        setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
-                                                    }}
-                                                    style={{ marginTop: '2rem', background: '#1a4d3e', color: 'white', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 20px rgba(26, 77, 62, 0.2)' }}
-                                                >
-                                                    <Eye size={18} /> Open Instructional Workspace
-                                                </div>
-                                            </div>
+                                        );
+                                    }
 
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ width: '90px', height: '90px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)', margin: '0 auto 1.5rem auto', cursor: 'pointer', transition: 'all 0.3s', border: '1.5px solid rgba(255,255,255,0.1)' }}>
-                                            <svg width="44" height="44" viewBox="0 0 24 24" fill="white" style={{ marginLeft: '6px' }}><path d="M8 5v14l11-7z"/></svg>
+                                    // Final Fallback
+                                    return (
+                                        <div style={{ textAlign: 'center', padding: '4rem' }}>
+                                            <div style={{ width: '80px', height: '80px', background: '#f1f5f9', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+                                                <FileText size={40} color="#1a4d3e" opacity={0.5} />
+                                            </div>
+                                            <p style={{ color: '#1a4d3e', fontWeight: 900, fontSize: '1.25rem', margin: '0 0 8px 0' }}>Material Resource Prepared</p>
+                                            <p style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>{lesson.file_name || 'Attached File'}</p>
+                                            <div
+                                                onClick={() => {
+                                                    const url = lesson.file_url || '';
+                                                    const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
+                                                    const isPpt = /\.(pptx?)([?#]|$)/i.test(url);
+                                                    const isVideo = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i.test(url);
+                                                    setIframeLoading(true);
+                                                    setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
+                                                }}
+                                                style={{ marginTop: '2rem', background: '#1a4d3e', color: 'white', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 20px rgba(26, 77, 62, 0.2)' }}
+                                            >
+                                                <Eye size={18} /> Open Instructional Workspace
+                                            </div>
                                         </div>
-                                        <p style={{ color: '#94a3b8', fontSize: '1rem', fontWeight: 600 }}>Secure Content Stream Prepared</p>
-                                    </div>
-                                )}
+                                    );
+                                })()}
                             </div>
                         </div>
                     </div>
@@ -997,7 +1040,6 @@ const LessonView = () => {
                 <AIPDFInteraction 
                     pdfUrl={previewAsset.url} 
                     onClose={() => setShowAiInteraction(false)} 
-                    iframeLoading={iframeLoading}
                 />
             )}
 

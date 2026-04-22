@@ -138,60 +138,73 @@ export const useAIPutter = () => {
 
         try {
             const pdf = await loadPdf(pdfUrl);
-            let textWithPageMarkers = '';
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const pageText = await extractPdfPageText(pdf, i);
-                textWithPageMarkers += `[PAGE ${i} START]\n${pageText}\n[PAGE ${i} END]\n\n`;
-            }
-            setFullText(textWithPageMarkers);
+            const totalPages = pdf.numPages;
+            const chunkSize = 10; // Process in manageable chunks to allow high detail
+            let accumulatedFullText = '';
+            let accumulatedExplanations: AIExplanation[] = [];
 
             setState('summarizing');
 
-            const prompt = `CRITICAL GOAL: You are creating a comprehensive, page-by-page lesson plan for a 57-page document.
-            
-            Instructional Guidelines:
-            1. MANDATORY PAGE COVERAGE: You MUST create at least one SECTION block for every single page from 1 to 57. Never skip a page.
-            2. FORMAT PERFECTION: Every page MUST be presented in this EXACT format: SECTION TITLE: [Topic] | PAGE: [Int] | CONTENT: [Summary]
-            3. FIDELITY: Summarize the facts as they appear.
-            4. CONCISENESS: Keep each CONTENT block high-impact and brief to ensure all 57 pages fit in your response limit.
-            
-            Document Content:
-            ${textWithPageMarkers.substring(0, 150000)}`;
+            for (let startPage = 1; startPage <= totalPages; startPage += chunkSize) {
+                const endPage = Math.min(startPage + chunkSize - 1, totalPages);
+                
+                let chunkText = '';
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageText = await extractPdfPageText(pdf, i);
+                    const safeText = pageText.substring(0, 3000); // More text per page
+                    chunkText += `[PAGE ${i} START]\n${safeText}\n[PAGE ${i} END]\n\n`;
+                }
+                accumulatedFullText += chunkText;
 
-            const response = await fetch(GITHUB_ENDPOINT, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${GITHUB_TOKEN}`
-                },
-                body: JSON.stringify({
-                    model: MODEL_NAME,
-                    messages: [{ role: 'user', content: prompt }],
-                    temperature: 0.1,
-                    max_tokens: 4096
-                })
-            });
+                const prompt = `CRITICAL GOAL: You are a Virtual Tutor creating detailed lesson sections for pages ${startPage} to ${endPage} of a ${totalPages}-page document.
+                
+                Instructional Guidelines:
+                1. DETAIL: Provide a rich, educational summary for EACH page in this chunk.
+                2. FORMAT: Every page MUST use this EXACT format: SECTION TITLE: [Topic] | PAGE: [Int] | CONTENT: [Detailed Explanation]
+                3. FIDELITY: Maintain high factual accuracy.
+                
+                Document Content (Pages ${startPage}-${endPage}):
+                ${chunkText}`;
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`AI Intelligence Error (${response.status}): ${errorData.error?.message || 'Server is currently busy or overloaded. Please try again in 30 seconds.'}`);
+                const response = await fetch(GITHUB_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${GITHUB_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: [{ role: 'user', content: prompt }],
+                        temperature: 0.1,
+                        max_tokens: 4096
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`AI Intelligence Error (${response.status}): ${errorData.error?.message || 'Server busy'}`);
+                }
+
+                const data = await response.json();
+                const rawResponse = data.choices[0].message.content;
+
+                const sections = rawResponse.split(/SECTION TITLE:/i).filter((s: string) => s.trim().length > 0);
+                const chunkExplanations: AIExplanation[] = sections.map((s: string) => {
+                    const parts = s.split('|');
+                    const title = parts[0]?.trim() || 'Concept Summary';
+                    const pagePart = parts[1]?.toLowerCase().replace('page:', '').trim() || '1';
+                    const content = parts[2]?.replace('CONTENT:', '').trim() || s.trim();
+
+                    return { title, content, page: parseInt(pagePart) || startPage };
+                });
+
+                accumulatedExplanations = [...accumulatedExplanations, ...chunkExplanations];
+                
+                // Incremental update so the user sees progress and can start listening
+                setExplanations([...accumulatedExplanations]);
+                explanationsRef.current = [...accumulatedExplanations];
+                setFullText(accumulatedFullText);
             }
-
-            const data = await response.json();
-            const rawResponse = data.choices[0].message.content;
-
-            const sections = rawResponse.split(/SECTION TITLE:/i).filter((s: string) => s.trim().length > 0);
-            const parsedExplanations: AIExplanation[] = sections.map((s: string) => {
-                const parts = s.split('|');
-                const title = parts[0]?.trim() || 'Lesson Start';
-                const pagePart = parts[1]?.toLowerCase().replace('page:', '').trim() || '1';
-                const content = parts[2]?.replace('CONTENT:', '').trim() || s.trim();
-
-                return { title, content, page: parseInt(pagePart) || 1 };
-            });
-
-            setExplanations(parsedExplanations);
-            explanationsRef.current = parsedExplanations;
 
             setState('ready');
 

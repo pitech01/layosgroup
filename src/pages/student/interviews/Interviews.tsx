@@ -321,14 +321,42 @@ export default function StudentInterviews() {
                             />
                         ) : (
                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <video 
-                                    src={previewAsset.url} 
-                                    controls 
-                                    controlsList="nodownload" 
-                                    autoPlay 
-                                    style={{ maxWidth: '100%', maxHeight: '100%', background: 'black' }} 
-                                    onContextMenu={e => e.preventDefault()} 
-                                />
+                                {(() => {
+                                    const getCleanUrl = (url: string) => {
+                                        if (!url) return '';
+                                        if (url.includes('mediadelivery.net')) return url;
+                                        if (url.startsWith('/storage')) {
+                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+                                            return `${baseUrl}${url}`;
+                                        }
+                                        if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
+                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+                                            return url.replace(/https?:\/\/[^\/]+(?=\/storage)/, baseUrl);
+                                        }
+                                        return url;
+                                    };
+                                    
+                                    const cleanUrl = getCleanUrl(previewAsset.url);
+                                    
+                                    return cleanUrl.includes('mediadelivery.net') ? (
+                                        <iframe
+                                            src={cleanUrl}
+                                            loading="lazy"
+                                            style={{ border: 'none', width: '100%', height: '100%' }}
+                                            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                                            allowFullScreen={true}
+                                        ></iframe>
+                                    ) : (
+                                        <video 
+                                            src={cleanUrl} 
+                                            controls 
+                                            controlsList="nodownload" 
+                                            autoPlay 
+                                            style={{ maxWidth: '100%', maxHeight: '100%', background: 'black' }} 
+                                            onContextMenu={e => e.preventDefault()} 
+                                        />
+                                    );
+                                })()}
                             </div>
                         )}
                     </div>

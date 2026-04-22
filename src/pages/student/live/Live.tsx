@@ -361,16 +361,42 @@ const Live = () => {
                             </button>
                         </div>
                         <div className="video-container">
-                            <video
-                                src={previewUrl}
-                                controls
-                                autoPlay
-                                style={{ width: '100%', height: '100%' }}
-                                controlsList="nodownload"
-                                onContextMenu={(e: any) => e.preventDefault()}
-                            >
-                                Your browser does not support the video tag.
-                            </video>
+                            {(() => {
+                                const getCleanUrl = (url: string) => {
+                                    if (!url) return '';
+                                    if (url.includes('mediadelivery.net')) return url;
+                                    if (url.startsWith('/storage')) {
+                                        const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+                                        return `${baseUrl}${url}`;
+                                    }
+                                    if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
+                                        const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+                                        return url.replace(/https?:\/\/[^\/]+(?=\/storage)/, baseUrl);
+                                    }
+                                    return url;
+                                };
+                                
+                                const cleanUrl = getCleanUrl(previewUrl);
+                                
+                                return cleanUrl.includes('mediadelivery.net') ? (
+                                    <iframe
+                                        src={cleanUrl}
+                                        loading="lazy"
+                                        style={{ border: 'none', width: '100%', height: '100%' }}
+                                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                                        allowFullScreen={true}
+                                    ></iframe>
+                                ) : (
+                                    <video
+                                        src={cleanUrl}
+                                        controls
+                                        autoPlay
+                                        style={{ width: '100%', height: '100%' }}
+                                        controlsList="nodownload"
+                                        onContextMenu={(e: any) => e.preventDefault()}
+                                    />
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>

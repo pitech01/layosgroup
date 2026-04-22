@@ -2036,13 +2036,44 @@ export default function CreateCourse() {
                                 {viewingLesson.type === 'video' && (
                                     <div style={{ width: '100%', height: '100%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexDirection: 'column', overflow: 'hidden' }}>
                                         {viewingLesson.videoUrl || viewingLesson.fileToUpload ? (
-                                            <video
-                                                src={viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : viewingLesson.videoUrl}
-                                                controls
-                                                style={{ width: '100%', height: '100%' }}
-                                                controlsList="nodownload"
-                                                onContextMenu={(e: any) => e.preventDefault()}
-                                            />
+                                            <>
+                                                {(() => {
+                                                    const rawUrl = viewingLesson.videoUrl || '';
+                                                    const getCleanUrl = (url: string) => {
+                                                        if (!url) return '';
+                                                        if (url.includes('mediadelivery.net')) return url;
+                                                        if (url.startsWith('/storage')) {
+                                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+                                                            return `${baseUrl}${url}`;
+                                                        }
+                                                        if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
+                                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+                                                            return url.replace(/https?:\/\/[^\/]+(?=\/storage)/, baseUrl);
+                                                        }
+                                                        return url;
+                                                    };
+                                                    
+                                                    const cleanUrl = viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : getCleanUrl(rawUrl);
+                                                    
+                                                    return cleanUrl.includes('mediadelivery.net') ? (
+                                                        <iframe
+                                                            src={cleanUrl}
+                                                            loading="lazy"
+                                                            style={{ border: 'none', width: '100%', height: '100%' }}
+                                                            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                                                            allowFullScreen={true}
+                                                        ></iframe>
+                                                    ) : (
+                                                        <video
+                                                            src={cleanUrl}
+                                                            controls
+                                                            style={{ width: '100%', height: '100%' }}
+                                                            controlsList="nodownload"
+                                                            onContextMenu={(e: any) => e.preventDefault()}
+                                                        />
+                                                    );
+                                                })()}
+                                            </>
                                         ) : (
                                             <>
                                                 <Video size={48} opacity={0.5} style={{ marginBottom: '1.5rem' }} />
@@ -2668,9 +2699,12 @@ export default function CreateCourse() {
                                         <div key={idx} className="video-asset-card" style={{ background: 'white', border: '1.5px solid #f1f5f9', borderRadius: '24px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer', position: 'relative' }}>
                                             <div style={{ aspectRatio: '16/9', background: '#0f172a', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 <Video size={40} color="#334155" style={{ opacity: 0.3 }} />
-                                                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)', display: 'flex', alignItems: 'flex-end', padding: '1.25rem' }}>
+                                                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '1.25rem' }}>
                                                     <span style={{ color: 'white', fontSize: '0.7rem', fontWeight: 900, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)', padding: '4px 8px', borderRadius: '6px' }}>
-                                                        {(video.size / (1024 * 1024)).toFixed(2)} MB
+                                                        {video.size}
+                                                    </span>
+                                                    <span style={{ color: 'white', fontSize: '0.65rem', fontWeight: 900, background: video.source === 'bunny' ? '#3b82f6' : '#10b981', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                                                        {video.source || 'Local'}
                                                     </span>
                                                 </div>
                                             </div>

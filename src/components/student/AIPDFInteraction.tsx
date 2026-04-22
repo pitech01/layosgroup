@@ -146,16 +146,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                         >
                             INITIALIZE VIRTUAL TUTOR
                         </button>
-                    ) : (ai.state === 'ready') ? (
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <button 
-                                onClick={ai.startSpeaking}
-                                style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '0.6rem 1.5rem', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', fontSize: '0.8rem', letterSpacing: '0.05em', boxShadow: '0 10px 20px -5px rgba(16, 185, 129, 0.4)' }}
-                            >
-                                START READING NOW
-                            </button>
-                        </div>
-                    ) : (ai.state !== 'extracting' && ai.state !== 'summarizing' && (
+                    ) : (ai.state === 'speaking' || ai.state === 'paused') ? (
                         <>
                             <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                 <button 
@@ -190,7 +181,21 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                                 ASK LAYOS
                             </button>
                         </>
-                    ))}
+                    ) : (ai.state === 'ready' || ai.explanations.length > 0) ? (
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button 
+                                onClick={ai.startSpeaking}
+                                style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '0.6rem 1.5rem', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', fontSize: '0.8rem', letterSpacing: '0.05em', boxShadow: '0 10px 20px -5px rgba(16, 185, 129, 0.4)' }}
+                            >
+                                {ai.state === 'summarizing' ? 'START READING (STILL ANALYZING...)' : 'START READING NOW'}
+                            </button>
+                            {ai.state === 'summarizing' && (
+                                <span style={{ fontSize: '0.7rem', color: '#49BABA', fontWeight: 900, animation: 'pulse 2s infinite' }}>
+                                    ANALYZING MORE PAGES...
+                                </span>
+                            )}
+                        </div>
+                    ) : null}
                 </div>
 
                 <div style={{ minWidth: '240px', display: 'flex', justifyContent: 'flex-end' }}>
@@ -214,8 +219,8 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                     />
                 </div>
 
-                {/* Layer 2: Thinking/Processing Overlay */}
-                {(ai.state === 'extracting' || ai.state === 'summarizing') && (
+                {/* Layer 2: Thinking/Processing Overlay (Only show if no content yet) */}
+                {(ai.state === 'extracting' || (ai.state === 'summarizing' && ai.explanations.length === 0)) && (
                     <div style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
                         <div style={{ padding: '3rem', maxWidth: '420px' }}>
                             <div className="css-loader" style={{ margin: '0 auto 2rem' }}></div>
