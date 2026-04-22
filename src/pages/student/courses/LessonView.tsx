@@ -279,30 +279,117 @@ const LessonView = () => {
                         }
 
                         @media (max-width: 1024px) {
-                            .lesson-view-main-grid {
-                                grid-template-columns: 1fr !important;
-                                gap: 2.5rem !important;
-                            }
-                            .lesson-title-container h1 {
-                                font-size: 1.75rem !important;
-                                flex-direction: column;
-                                align-items: flex-start !important;
-                                gap: 1rem !important;
-                            }
                             .lesson-view-content {
                                 padding: 1.5rem !important;
                             }
+                            .lesson-nav-header {
+                                margin-bottom: 1.5rem !important;
+                            }
                         }
 
+                        @media (max-width: 768px) {
+                            .lesson-view-content {
+                                padding: 1rem !important;
+                            }
+                            .lesson-nav-header {
+                                flex-direction: column !important;
+                                gap: 1.5rem !important;
+                                align-items: flex-start !important;
+                            }
+                            .lesson-nav-buttons {
+                                width: 100% !important;
+                                justify-content: space-between !important;
+                            }
+                            .lesson-title-container {
+                                font-size: 1.75rem !important;
+                                flex-direction: column !important;
+                                align-items: flex-start !important;
+                                gap: 1rem !important;
+                            }
+                            .evaluation-premium-card {
+                                padding: 2rem 1.5rem !important;
+                            }
+                            .evaluation-premium-card h2 {
+                                font-size: 1.75rem !important;
+                            }
+                            .evaluation-stats-grid {
+                                flex-direction: column !important;
+                                gap: 1rem !important;
+                            }
+                            .evaluation-stats-grid > div {
+                                width: 100% !important;
+                                padding: 1rem !important;
+                            }
+                            #document-lesson-viewer {
+                                padding: 2.5rem 1.5rem !important;
+                                min-height: 450px !important;
+                            }
+                            #document-lesson-viewer h3 {
+                                font-size: 1.5rem !important;
+                            }
+                            .btn-primary-forest {
+                                padding: 0 2rem !important;
+                                height: 60px !important;
+                                font-size: 1rem !important;
+                                width: 100% !important;
+                            }
+                            .options-grid {
+                                grid-template-columns: 1fr !important;
+                                gap: 1rem !important;
+                            }
+                            .quiz-footer {
+                                padding: 1.5rem !important;
+                            }
+                            .quiz-footer > div {
+                                flex-direction: column !important;
+                                gap: 1.5rem !important;
+                            }
+                            .quiz-footer button {
+                                width: 100% !important;
+                                justify-content: center !important;
+                            }
+                            .review-stats-grid {
+                                grid-template-columns: 1fr !important;
+                                gap: 1rem !important;
+                            }
+                            .review-modal-content {
+                                padding: 1.5rem !important;
+                            }
+                            .review-modal-header {
+                                padding: 1.5rem !important;
+                                flex-direction: column !important;
+                                align-items: flex-start !important;
+                                gap: 1.5rem !important;
+                            }
+                            .review-question-card {
+                                padding: 1.5rem !important;
+                                border-radius: 20px !important;
+                            }
+                            .asset-preview-header {
+                                padding: 1rem !important;
+                                flex-direction: column !important;
+                                align-items: flex-start !important;
+                                gap: 1rem !important;
+                            }
+                            .asset-preview-footer {
+                                padding: 0.75rem 1rem !important;
+                            }
+                        }
+
+                        @media (max-height: 700px) {
+                            .option-modern {
+                                padding: 1rem 1.5rem !important;
+                            }
+                        }
                     `}</style>
 
                     {/* Navigation Header */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <div className="lesson-nav-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                         <Link to={`/student/courses/${courseId}?cohortId=${cohortId}`} style={{ display: 'flex', alignItems: 'center', color: '#64748b', fontSize: '0.95rem', fontWeight: 700, textDecoration: 'none' }}>
                             <ChevronLeft size={18} style={{ marginRight: '0.25rem' }} />
                             Back to Course
                         </Link>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div className="lesson-nav-buttons" style={{ display: 'flex', gap: '1rem' }}>
                             <button
                                 onClick={() => prevLesson && handleNavigateLesson(prevLesson.id)}
                                 disabled={!prevLesson}
@@ -418,7 +505,7 @@ const LessonView = () => {
                                                     Complete this diagnostic module to validate your proficiency in the core concepts covered. Minimum <span style={{ color: '#10b981', fontWeight: 900 }}>{lesson.quiz_data?.pass_mark || 80}%</span> required for certification.
                                                 </p>
                                                 
-                                                <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3.5rem' }}>
+                                                <div className="evaluation-stats-grid" style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3.5rem' }}>
                                                     <div style={{ textAlign: 'left', padding: '1rem 2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                         <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>Question Payload</div>
                                                         <div style={{ color: 'white', fontWeight: 900, fontSize: '1.25rem' }}>{lesson.quiz_data?.questions?.length || 0} Critical Blocks</div>
@@ -537,14 +624,6 @@ const LessonView = () => {
                                                         </div>
                                                         
                                                         <div className="options-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                                                            <style>{`
-                                                                @media (max-width: 900px) {
-                                                                    .options-grid { grid-template-columns: 1fr !important; }
-                                                                }
-                                                                @media (max-height: 800px) {
-                                                                    .option-modern { padding: 1rem 1.5rem !important; }
-                                                                }
-                                                            `}</style>
                                                             {lesson.quiz_data.questions[currentQuestionIndex].options.map((opt: string, idx: number) => {
                                                                 const isSelected = selectedAnswers[currentQuestionIndex] === idx;
                                                                 return (
@@ -576,7 +655,7 @@ const LessonView = () => {
                                                 </div>
                                                 
                                                 {/* Pinned Footer */}
-                                                <div style={{ padding: '2rem 3rem', background: 'rgba(2, 6, 23, 0.5)', backdropFilter: 'blur(10px)', borderTop: '1.5px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+                                                <div className="quiz-footer" style={{ padding: '2rem 3rem', background: 'rgba(2, 6, 23, 0.5)', backdropFilter: 'blur(10px)', borderTop: '1.5px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '900px', margin: '0 auto' }}>
                                                         <button
                                                             onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
@@ -848,7 +927,7 @@ const LessonView = () => {
                 previewAsset && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, background: 'white' }}>
                         <div style={{ background: 'white', overflow: 'hidden', width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ padding: '1.25rem 2rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfe' }}>
+                            <div className="asset-preview-header" style={{ padding: '1.25rem 2rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfe' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                     <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
                                         {previewAsset.type === 'pdf' || previewAsset.type === 'ppt' ? <FileText size={22} color="#1a4d3e" /> : <Eye size={22} color="#1a4d3e" />}
@@ -936,7 +1015,7 @@ const LessonView = () => {
                                     />
                                 )}
                             </div>
-                            <div style={{ padding: '0.75rem 2rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
+                            <div className="asset-preview-footer" style={{ padding: '0.75rem 2rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
                                 <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Powered by Layos Virtual Tutor • Unified Learning Protocol</p>
                             </div>
                         </div>
@@ -949,7 +1028,7 @@ const LessonView = () => {
             {showReview && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(2, 6, 23, 0.9)', backdropFilter: 'blur(16px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
                     <div style={{ background: '#0f172a', width: '100%', maxWidth: '900px', maxHeight: '90vh', borderRadius: '40px', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.1)', boxShadow: '0 50px 100px -20px rgba(0,0,0,0.5)' }}>
-                        <div style={{ padding: '2.5rem 3.5rem', borderBottom: '1.5px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+                        <div className="review-modal-header" style={{ padding: '2.5rem 3.5rem', borderBottom: '1.5px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
                             <div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#10b981', marginBottom: '8px' }}>
                                     <ShieldCheck size={20} />
@@ -962,8 +1041,8 @@ const LessonView = () => {
                             </button>
                         </div>
                         
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '3.5rem' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '4rem' }}>
+                        <div className="review-modal-content" style={{ flex: 1, overflowY: 'auto', padding: '3.5rem' }}>
+                            <div className="review-stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '4rem' }}>
                                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                     <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 800, marginBottom: '0.5rem' }}>SCORE RATIO</div>
                                     <div style={{ color: quizResult?.passed ? '#10b981' : '#ef4444', fontWeight: 950, fontSize: '2rem' }}>{quizResult?.score}%</div>
@@ -985,7 +1064,7 @@ const LessonView = () => {
                                     const isCorrect = studentAnswer === q.correct_answer;
                                     
                                     return (
-                                        <div key={idx} style={{ marginBottom: '3rem', padding: '2.5rem', borderRadius: '32px', border: `1.5px solid ${isCorrect ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`, background: 'rgba(255, 255, 255, 0.02)', position: 'relative', overflow: 'hidden' }}>
+                                        <div key={idx} className="review-question-card" style={{ marginBottom: '3rem', padding: '2.5rem', borderRadius: '32px', border: `1.5px solid ${isCorrect ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`, background: 'rgba(255, 255, 255, 0.02)', position: 'relative', overflow: 'hidden' }}>
                                             <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: isCorrect ? '#10b981' : '#ef4444' }}></div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
                                                 <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.1em' }}>Intelligence Block {idx + 1}</span>

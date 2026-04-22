@@ -76,7 +76,7 @@ const Courses = () => {
                 <style>{`
                     .cohort-selection-grid, .course-grid {
                         display: grid;
-                        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+                        grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
                         gap: 1.5rem;
                         margin-top: 2rem;
                     }
@@ -126,16 +126,17 @@ const Courses = () => {
                     }
 
                     .cohort-icon-box {
-                        width: 64px;
-                        height: 64px;
+                        width: 56px;
+                        height: 56px;
                         background: linear-gradient(135deg, #f0fdf4, #dcfce7);
                         color: #1a4d3e;
-                        border-radius: 20px;
+                        border-radius: 18px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
                         transition: transform 0.3s ease;
+                        flex-shrink: 0;
                     }
 
                     .cohort-select-card:hover .cohort-icon-box {
@@ -143,7 +144,7 @@ const Courses = () => {
                     }
 
                     .cohort-select-card h3 {
-                        font-size: 1.5rem;
+                        font-size: clamp(1.25rem, 4vw, 1.5rem);
                         font-weight: 900;
                         color: #0f172a;
                         margin: 0;
@@ -156,7 +157,7 @@ const Courses = () => {
                         align-items: center;
                         gap: 12px;
                         color: #64748b;
-                        font-size: 0.8rem;
+                        font-size: 0.75rem;
                         font-weight: 800;
                         text-transform: uppercase;
                         letter-spacing: 0.05em;
@@ -173,15 +174,15 @@ const Courses = () => {
 
                     .section-header-courses p {
                         color: #64748b;
-                        font-size: clamp(1rem, 2vw, 1.25rem);
+                        font-size: clamp(0.95rem, 2vw, 1.1rem);
                         font-weight: 600;
-                        marginTop: 1rem;
+                        margin-top: 1rem;
                         max-width: 600px;
                         line-height: 1.6;
                     }
 
                     .course-list-title {
-                        font-size: clamp(1.8rem, 5vw, 3rem);
+                        font-size: clamp(1.5rem, 5vw, 2.5rem);
                         font-weight: 950;
                         color: #0f172a;
                         letter-spacing: -0.05em;
@@ -191,8 +192,8 @@ const Courses = () => {
 
                     @media (max-width: 1024px) {
                         .cohort-selection-grid, .course-grid {
-                            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                            gap: 1.5rem;
+                            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                            gap: 1.25rem;
                         }
                     }
 
@@ -210,6 +211,11 @@ const Courses = () => {
                         }
                         .section-header-courses {
                             margin-bottom: 1.5rem !important;
+                            text-align: center;
+                        }
+                        .section-header-courses p {
+                            margin-left: auto;
+                            margin-right: auto;
                         }
                     }
 
@@ -229,14 +235,14 @@ const Courses = () => {
                     {cohorts.length > 0 ? (
                         cohorts.map(cohort => (
                             <div key={cohort.id} className="cohort-select-card shadow-sm" onClick={() => setSelectedCohort(cohort)}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
                                     <div className="cohort-icon-box">
                                         <Users size={28} />
                                     </div>
                                     <div style={{
                                         padding: '6px 12px',
                                         borderRadius: '10px',
-                                        fontSize: '0.75rem',
+                                        fontSize: '0.7rem',
                                         fontWeight: 900,
                                         background: '#f0fdf4',
                                         color: '#166534',
@@ -316,17 +322,16 @@ const Courses = () => {
             <div style={{ marginBottom: 'clamp(1.5rem, 5vw, 3.5rem)', paddingBottom: '2rem', borderBottom: '2px solid #f1f5f9' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
                     <div style={{ 
-                        fontSize: '0.75rem', 
+                        fontSize: '0.65rem', 
                         fontWeight: 950, 
                         textTransform: 'uppercase', 
                         letterSpacing: '0.1em', 
                         background: '#1a4d3e', 
                         color: 'white', 
-                        padding: '4px 12px', 
-                        borderRadius: '8px' 
+                        padding: '4px 10px', 
+                        borderRadius: '6px' 
                     }}>Cohort #{selectedCohort.id}</div>
-                    <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#cbd5e1' }} className="hidden sm:block"></div>
-                    <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 700 }}>Program Overview</div>
+                    <div style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 700 }}>Program Overview</div>
                 </div>
                 <h1 className="course-list-title">{selectedCohort.name}</h1>
             </div>
@@ -425,10 +430,10 @@ const Courses = () => {
                                     background: '#0f172a',
                                     color: 'white',
                                     textDecoration: 'none',
-                                    padding: '1.25rem',
+                                    padding: 'clamp(1rem, 3vw, 1.25rem)',
                                     borderRadius: '20px',
                                     fontWeight: 900,
-                                    fontSize: '1rem',
+                                    fontSize: 'clamp(0.9rem, 2vw, 1rem)',
                                     gap: '12px',
                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                     marginTop: 'auto',
@@ -445,7 +450,7 @@ const Courses = () => {
                                     e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(15, 23, 42, 0.2)';
                                 }}
                             >
-                                {course.progress > 0 ? 'Continue Learning' : 'Start Course'}
+                                {course.progress > 0 ? 'Continue' : 'Start'}
                                 <ChevronRight size={16} />
                             </Link>
                         </div>

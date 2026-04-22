@@ -98,14 +98,14 @@ export default function StudentDashboard() {
         const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
         const token = localStorage.getItem('token');
         setClaiming(courseId);
-        
+
         try {
             const res = await fetch(`${API_URL}/certificates/claim/${courseId}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
-            
+
             if (res.ok) {
                 toast.success('Certificate generated successfully!');
                 const certsRes = await fetch(`${API_URL}/certificates`, {
@@ -166,7 +166,7 @@ export default function StudentDashboard() {
             {/* Welcome Card */}
             <div className="welcome-card-dark">
                 <div className="welcome-content-left">
-                    <h2>Welcome back, {firstName} 👋</h2>
+                    <h2>Welcome back, {firstName}</h2>
                     <p style={{ lineHeight: '1.6' }}>Your progress this week is awesome!<br />Keep it up and reach your learning goals faster than ever.</p>
                     <Link to="/student/courses" className="btn-cta-white" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
                         <span>Continue Learning</span>
@@ -266,6 +266,9 @@ export default function StudentDashboard() {
                     }
 
                     @media (max-width: 640px) {
+                        .welcome-card-dark {
+                            padding: 1.5rem !important;
+                        }
                         .welcome-card-dark h2 {
                             font-size: 1.5rem;
                         }
@@ -277,6 +280,7 @@ export default function StudentDashboard() {
                         }
                         .progress-item-modern {
                             gap: 1rem;
+                            padding: 1.5rem 0 !important;
                         }
                         .course-icon-round {
                             width: 40px;
@@ -322,8 +326,8 @@ export default function StudentDashboard() {
                                                     );
                                                 }
                                                 return (
-                                                    <button 
-                                                        onClick={() => handleClaimCertificate(cohort.course?.id)} 
+                                                    <button
+                                                        onClick={() => handleClaimCertificate(cohort.course?.id)}
                                                         disabled={claiming === cohort.course?.id}
                                                         className="btn-claim"
                                                     >
