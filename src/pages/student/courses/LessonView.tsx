@@ -40,6 +40,9 @@ const LessonView = () => {
             setCurrentQuestionIndex(0);
             setQuizResult(null);
             setShowReview(false);
+            setPreviewAsset(null);
+            setIframeLoading(true);
+            setShowAiInteraction(false);
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`${API_URL}/my-enrollments`, {
@@ -124,7 +127,7 @@ const LessonView = () => {
 
 
 
-    
+
     if (loading) {
         return (
             <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
@@ -495,16 +498,16 @@ const LessonView = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '6px 14px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '0.05em', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                                                     <ShieldCheck size={14} /> Knowledge Validation Unit
                                                 </div>
-                                                
+
                                                 <h2 style={{ color: 'white', fontWeight: 900, fontSize: '2.5rem', marginBottom: '1rem', letterSpacing: '-0.04em' }}>Evaluation Intelligence</h2>
                                                 <p style={{ color: '#94a3b8', fontSize: '1.15rem', lineHeight: 1.6, marginBottom: '3rem', fontWeight: 500 }}>
                                                     Complete this diagnostic module to validate your proficiency in the core concepts covered. Minimum <span style={{ color: '#10b981', fontWeight: 900 }}>{lesson.quiz_data?.pass_mark || 80}%</span> required for certification.
                                                 </p>
-                                                
+
                                                 <div className="evaluation-stats-grid" style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3.5rem' }}>
                                                     <div style={{ textAlign: 'left', padding: '1rem 2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                         <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>Question Payload</div>
@@ -515,7 +518,7 @@ const LessonView = () => {
                                                         <div style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem' }}>{lesson.quiz_data?.pass_mark || 80}% Proficiency</div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <button onClick={() => setQuizStarted(true)} className="btn-evaluation-start">
                                                     INITIALIZE ASSESSMENT
                                                 </button>
@@ -523,35 +526,35 @@ const LessonView = () => {
                                         ) : quizResult ? (
                                             <div style={{ margin: 'auto', textAlign: 'center', maxWidth: '750px', padding: '4rem' }} className="evaluation-premium-card">
                                                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.5rem' }}>
-                                                    <div style={{ 
-                                                        width: '140px', 
-                                                        height: '140px', 
-                                                        background: quizResult.passed ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
-                                                        borderRadius: '50%', 
-                                                        display: 'flex', 
-                                                        alignItems: 'center', 
-                                                        justifyContent: 'center', 
+                                                    <div style={{
+                                                        width: '140px',
+                                                        height: '140px',
+                                                        background: quizResult.passed ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                        borderRadius: '50%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
                                                         border: `2px solid ${quizResult.passed ? '#10b981' : '#ef4444'}`,
                                                         animation: 'pulseGlow 2s infinite'
                                                     }}>
                                                         {quizResult.passed ? <CheckCircle size={64} color="#10b981" /> : <X size={64} color="#ef4444" />}
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div style={{ color: quizResult.passed ? '#10b981' : '#ef4444', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.85rem', letterSpacing: '0.15em', marginBottom: '1rem' }}>
                                                     {quizResult.passed ? 'Criteria Validated' : 'Deficiency Identified'}
                                                 </div>
-                                                
+
                                                 <h2 style={{ color: 'white', fontWeight: 950, fontSize: '3.5rem', marginBottom: '1rem', letterSpacing: '-0.05em' }}>
                                                     {quizResult.score}<span style={{ fontSize: '1.5rem', verticalAlign: 'middle', marginLeft: '4px', opacity: 0.6 }}>%</span>
                                                 </h2>
-                                                
+
                                                 <p style={{ color: '#94a3b8', fontSize: '1.25rem', marginBottom: '3.5rem', maxWidth: '600px', margin: '0 auto 3.5rem', fontWeight: 500 }}>
-                                                    {quizResult.passed 
-                                                        ? `Exceptional work! You have mastered this cognitive module with a score of ${quizResult.score}%.` 
+                                                    {quizResult.passed
+                                                        ? `Exceptional work! You have mastered this cognitive module with a score of ${quizResult.score}%.`
                                                         : `You achieved a proficiency level of ${quizResult.score}%, which is below the mandatory ${lesson.quiz_data.pass_mark}% threshold for this curriculum unit.`}
                                                 </p>
-                                                
+
                                                 <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
                                                     <button
                                                         onClick={() => setShowReview(true)}
@@ -559,22 +562,22 @@ const LessonView = () => {
                                                     >
                                                         <Eye size={18} /> Analysis Review
                                                     </button>
-                                                    
+
                                                     {quizResult.passed ? (
                                                         <button
                                                             onClick={() => handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers, forceComplete: true })}
-                                                            style={{ 
-                                                                background: isCompleted ? '#f0fdf4' : '#10b981', 
-                                                                color: isCompleted ? '#166534' : 'white', 
-                                                                border: isCompleted ? '2px solid #10b981' : 'none', 
-                                                                padding: '1rem 3rem', 
-                                                                borderRadius: '16px', 
-                                                                fontWeight: 850, 
-                                                                cursor: 'pointer', 
-                                                                display: 'flex', 
-                                                                alignItems: 'center', 
+                                                            style={{
+                                                                background: isCompleted ? '#f0fdf4' : '#10b981',
+                                                                color: isCompleted ? '#166534' : 'white',
+                                                                border: isCompleted ? '2px solid #10b981' : 'none',
+                                                                padding: '1rem 3rem',
+                                                                borderRadius: '16px',
+                                                                fontWeight: 850,
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
                                                                 gap: '10px',
-                                                                boxShadow: isCompleted ? 'none' : '0 10px 25px -5px rgba(16, 185, 129, 0.4)' 
+                                                                boxShadow: isCompleted ? 'none' : '0 10px 25px -5px rgba(16, 185, 129, 0.4)'
                                                             }}
                                                         >
                                                             {isCompleted ? <><CheckCircle2 size={20} /> SYNCED</> : 'MARK AS COMPLETED'}
@@ -612,7 +615,7 @@ const LessonView = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 {/* Scrollable Content Area */}
                                                 <div style={{ flex: 1, overflowY: 'auto', padding: '0 3rem 2rem' }}>
                                                     <div style={{ maxWidth: '900px', margin: '0 auto', width: '100%' }}>
@@ -622,7 +625,7 @@ const LessonView = () => {
                                                                 {lesson.quiz_data.questions[currentQuestionIndex].question}
                                                             </h3>
                                                         </div>
-                                                        
+
                                                         <div className="options-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                                                             {lesson.quiz_data.questions[currentQuestionIndex].options.map((opt: string, idx: number) => {
                                                                 const isSelected = selectedAnswers[currentQuestionIndex] === idx;
@@ -632,14 +635,14 @@ const LessonView = () => {
                                                                         onClick={() => setSelectedAnswers({ ...selectedAnswers, [currentQuestionIndex]: idx })}
                                                                         className={`option-modern ${isSelected ? 'selected' : ''}`}
                                                                     >
-                                                                        <div style={{ 
-                                                                            width: '28px', 
-                                                                            height: '28px', 
-                                                                            borderRadius: '10px', 
-                                                                            border: '2px solid', 
-                                                                            borderColor: isSelected ? '#10b981' : 'rgba(255,255,255,0.1)', 
-                                                                            display: 'flex', 
-                                                                            alignItems: 'center', 
+                                                                        <div style={{
+                                                                            width: '28px',
+                                                                            height: '28px',
+                                                                            borderRadius: '10px',
+                                                                            border: '2px solid',
+                                                                            borderColor: isSelected ? '#10b981' : 'rgba(255,255,255,0.1)',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
                                                                             justifyContent: 'center',
                                                                             flexShrink: 0,
                                                                             background: isSelected ? 'rgba(16, 185, 129, 0.2)' : 'transparent'
@@ -653,7 +656,7 @@ const LessonView = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 {/* Pinned Footer */}
                                                 <div className="quiz-footer" style={{ padding: '2rem 3rem', background: 'rgba(2, 6, 23, 0.5)', backdropFilter: 'blur(10px)', borderTop: '1.5px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '900px', margin: '0 auto' }}>
@@ -664,7 +667,7 @@ const LessonView = () => {
                                                         >
                                                             <ChevronLeft size={20} /> PREVIOUS LOGIC
                                                         </button>
-                                                        
+
                                                         {currentQuestionIndex < lesson.quiz_data.questions.length - 1 ? (
                                                             <button
                                                                 onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
@@ -688,8 +691,8 @@ const LessonView = () => {
                                                                 }}
                                                                 disabled={selectedAnswers[currentQuestionIndex] === undefined}
                                                                 className="btn-evaluation-start"
-                                                                style={{ 
-                                                                    padding: '1rem 4rem', 
+                                                                style={{
+                                                                    padding: '1rem 4rem',
                                                                     borderRadius: '16px',
                                                                     opacity: selectedAnswers[currentQuestionIndex] === undefined ? 0.3 : 1,
                                                                     cursor: selectedAnswers[currentQuestionIndex] === undefined ? 'not-allowed' : 'pointer'
@@ -708,7 +711,7 @@ const LessonView = () => {
                                     if (!rawUrl) return (
                                         <div style={{ textAlign: 'center' }}>
                                             <div style={{ width: '90px', height: '90px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)', margin: '0 auto 1.5rem auto', cursor: 'pointer', transition: 'all 0.3s', border: '1.5px solid rgba(255,255,255,0.1)' }}>
-                                                <svg width="44" height="44" viewBox="0 0 24 24" fill="white" style={{ marginLeft: '6px' }}><path d="M8 5v14l11-7z"/></svg>
+                                                <svg width="44" height="44" viewBox="0 0 24 24" fill="white" style={{ marginLeft: '6px' }}><path d="M8 5v14l11-7z" /></svg>
                                             </div>
                                             <p style={{ color: '#94a3b8', fontSize: '1rem', fontWeight: 600 }}>Secure Content Stream Prepared</p>
                                         </div>
@@ -718,7 +721,7 @@ const LessonView = () => {
                                     const getCleanUrl = (url: string) => {
                                         if (!url) return '';
                                         if (url.includes('mediadelivery.net')) return url;
-                                        
+
                                         const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
 
                                         let finalUrl = url;
@@ -747,7 +750,7 @@ const LessonView = () => {
 
                                     const cleanUrl = getCleanUrl(rawUrl);
                                     const isBunny = cleanUrl.includes('mediadelivery.net');
-                                    const isVideo = cleanUrl.match(/\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i) || isBunny;
+                                    const isVideo = cleanUrl.match(/\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv|wmv|flv|3gp)([?#]|$)/i) || isBunny;
                                     const isImage = cleanUrl.match(/\.(jpg|jpeg|png|gif|webp)([?#]|$)/i);
                                     const isDoc = (cleanUrl.match(/\.pdf([?#]|$)/i) || cleanUrl.match(/\.(pptx?)([?#]|$)/i));
 
@@ -821,7 +824,7 @@ const LessonView = () => {
                                                         )}
                                                     </div>
                                                     <h3 style={{ margin: '0 0 12px 0', fontSize: '2rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.03em' }}>
-                                                         Instructional Resource Ready
+                                                        Instructional Resource Ready
                                                     </h3>
                                                     <p style={{ margin: '0 0 3rem 0', color: '#64748b', fontSize: '1.25rem', fontWeight: 600, maxWidth: '520px', lineHeight: 1.6 }}>
                                                         Your lesson materials have been architected. Start the neural narrator or explore the visual library below.
@@ -837,7 +840,7 @@ const LessonView = () => {
                                                                 setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
                                                             }}
                                                             className="btn-primary-forest"
-                                                            style={{ 
+                                                            style={{
                                                                 padding: '0 4rem', height: '70px', fontSize: '1.25rem', fontWeight: 950,
                                                                 boxShadow: '0 20px 40px -8px rgba(26, 77, 62, 0.4)',
                                                                 borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '14px'
@@ -895,39 +898,39 @@ const LessonView = () => {
                             </div>
 
                             <div style={{ color: '#475569', fontSize: '1.1rem', lineHeight: 1.8, marginBottom: '3rem', fontWeight: 500 }}>                                <p>{lesson.description || 'No description available for this lesson.'}</p>
-                                </div>
+                            </div>
 
-                                <div style={{ paddingTop: '2rem', borderTop: '1.5px solid #f1f5f9' }}>
-                                    <button
-                                        onClick={() => {
-                                            const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
-                                            // Only start quiz if not already completed, otherwise allow toggling completion
-                                            if (quizData && quizData.questions && quizData.questions.length > 0 && !isCompleted) {
-                                                setQuizStarted(true);
-                                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                                            } else {
-                                                handleCompleteLesson();
-                                            }
-                                        }}
-                                        disabled={isCompleting}
-                                        className={isCompleted ? "btn-standard" : "btn-primary-forest"}
-                                        style={{ 
-                                            padding: '1rem 3rem', 
-                                            height: '60px', 
-                                            fontSize: '1.1rem', 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            gap: '12px',
-                                            background: isCompleted ? '#f0fdf4' : '#1a4d3e',
-                                            color: isCompleted ? '#166534' : 'white',
-                                            border: isCompleted ? '2px solid #10b981' : 'none',
-                                            boxShadow: isCompleted ? 'none' : '0 10px 25px -5px rgba(26, 77, 62, 0.3)'
-                                        }}
-                                    >
-                                        {isCompleting ? <Loader2 className="animate-spin" /> : 
-                                         isCompleted ? <><CheckCircle2 size={24} /> Lesson Completed</> : 
-                                         (lesson.quiz_data ? 'Start Validation Quiz' : 'Mark Lesson Complete')}
-                                    </button>
+                            <div style={{ paddingTop: '2rem', borderTop: '1.5px solid #f1f5f9' }}>
+                                <button
+                                    onClick={() => {
+                                        const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
+                                        // Only start quiz if not already completed, otherwise allow toggling completion
+                                        if (quizData && quizData.questions && quizData.questions.length > 0 && !isCompleted) {
+                                            setQuizStarted(true);
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        } else {
+                                            handleCompleteLesson();
+                                        }
+                                    }}
+                                    disabled={isCompleting}
+                                    className={isCompleted ? "btn-standard" : "btn-primary-forest"}
+                                    style={{
+                                        padding: '1rem 3rem',
+                                        height: '60px',
+                                        fontSize: '1.1rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        background: isCompleted ? '#f0fdf4' : '#1a4d3e',
+                                        color: isCompleted ? '#166534' : 'white',
+                                        border: isCompleted ? '2px solid #10b981' : 'none',
+                                        boxShadow: isCompleted ? 'none' : '0 10px 25px -5px rgba(26, 77, 62, 0.3)'
+                                    }}
+                                >
+                                    {isCompleting ? <Loader2 className="animate-spin" /> :
+                                        isCompleted ? <><CheckCircle2 size={24} /> Lesson Completed</> :
+                                            (lesson.quiz_data ? 'Start Validation Quiz' : 'Mark Lesson Complete')}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -950,10 +953,10 @@ const LessonView = () => {
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <button 
+                                    <button
                                         onClick={() => setShowAiInteraction(true)}
-                                        style={{ 
-                                            background: 'rgba(139, 92, 246, 0.1)', 
+                                        style={{
+                                            background: 'rgba(139, 92, 246, 0.1)',
                                             border: '1.5px solid #8b5cf6',
                                             padding: '4px 12px',
                                             borderRadius: '100px',
@@ -973,7 +976,7 @@ const LessonView = () => {
                                         onClick={() => setPreviewAsset(null)}
                                         style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer', transition: 'all 0.2s' }}
                                     >
-                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                                     </button>
                                 </div>
                             </div>
@@ -984,7 +987,7 @@ const LessonView = () => {
                                         <div style={{ position: 'relative', marginBottom: '2rem' }}>
                                             <div style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid #f1f5f9', borderTopColor: '#1a4d3e', animation: 'spin-lesson 1s linear infinite' }}></div>
                                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a4d3e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.3 }}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a4d3e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.3 }}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>
                                             </div>
                                         </div>
                                         <h4 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>Architecting Secure View...</h4>
@@ -1052,7 +1055,7 @@ const LessonView = () => {
                                 <X size={24} />
                             </button>
                         </div>
-                        
+
                         <div className="review-modal-content" style={{ flex: 1, overflowY: 'auto', padding: '3.5rem' }}>
                             <div className="review-stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '4rem' }}>
                                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -1074,7 +1077,7 @@ const LessonView = () => {
                                 return quizData?.questions?.map((q: any, idx: number) => {
                                     const studentAnswer = selectedAnswers[idx];
                                     const isCorrect = studentAnswer === q.correct_answer;
-                                    
+
                                     return (
                                         <div key={idx} className="review-question-card" style={{ marginBottom: '3rem', padding: '2.5rem', borderRadius: '32px', border: `1.5px solid ${isCorrect ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`, background: 'rgba(255, 255, 255, 0.02)', position: 'relative', overflow: 'hidden' }}>
                                             <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: isCorrect ? '#10b981' : '#ef4444' }}></div>
@@ -1089,13 +1092,13 @@ const LessonView = () => {
                                                 {q.options.map((opt: string, oIdx: number) => {
                                                     const isStudentPick = studentAnswer === oIdx;
                                                     const isRightAnswer = q.correct_answer === oIdx;
-                                                    
+
                                                     return (
-                                                        <div 
-                                                            key={oIdx} 
-                                                            style={{ 
-                                                                padding: '1.25rem 1.5rem', 
-                                                                borderRadius: '16px', 
+                                                        <div
+                                                            key={oIdx}
+                                                            style={{
+                                                                padding: '1.25rem 1.5rem',
+                                                                borderRadius: '16px',
                                                                 background: isRightAnswer ? 'rgba(16, 185, 129, 0.1)' : isStudentPick ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.02)',
                                                                 border: `1.5px solid ${isRightAnswer ? '#10b981' : isStudentPick ? '#ef4444' : 'rgba(255,255,255,0.05)'}`,
                                                                 color: isRightAnswer ? 'white' : isStudentPick ? '#ef4444' : '#94a3b8',
@@ -1128,9 +1131,9 @@ const LessonView = () => {
             )}
 
             {showAiInteraction && previewAsset && (
-                <AIPDFInteraction 
-                    pdfUrl={previewAsset.url} 
-                    onClose={() => setShowAiInteraction(false)} 
+                <AIPDFInteraction
+                    pdfUrl={previewAsset.url}
+                    onClose={() => setShowAiInteraction(false)}
                 />
             )}
 
