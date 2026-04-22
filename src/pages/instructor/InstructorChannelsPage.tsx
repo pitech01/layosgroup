@@ -5,6 +5,8 @@ import {
     Plus, Filter, X, Info, 
     Megaphone, Loader2
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import echo from '../../utils/echo';
 import MessageCard from '../../components/channel/MessageCard';
 import type { Message } from '../../components/channel/MessageCard';
@@ -52,6 +54,10 @@ const InstructorChannelsPage = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     // Announcement Modal State
     const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
@@ -112,55 +118,73 @@ const InstructorChannelsPage = () => {
             
             // 1. Fetch Backend Channels
             const channelsResponse = await fetch(`${API_URL}/course-channels`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
-            let dbChannels: any[] = [];
+
+            if (channelsResponse.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
             if (channelsResponse.ok) {
-                dbChannels = await channelsResponse.json();
+                const dbChannels = await channelsResponse.json();
+                const lastReadMap = JSON.parse(localStorage.getItem('channels_last_read') || '{}');
+
+                // Map DB channels to UI
+                const formattedChannels: Channel[] = dbChannels.map((c: any) => {
+                    const channelIdStr = c.id.toString();
+                    const lastReadId = lastReadMap[channelIdStr];
+                    const isUnread = c.latest_message_id && lastReadId !== c.latest_message_id;
+
+                    return {
+                        id: channelIdStr,
+                        title: c.name,
+                        type: 'channel',
+                        description: c.description || '',
+                        unread: isUnread ? 1 : 0
+                    };
+                });
+
+                setChannels(formattedChannels);
+
+                if (!activeChannel && formattedChannels.length > 0) {
+                    const general = formattedChannels.find(c => c.title === 'general-discussion') || formattedChannels[0];
+                    setActiveChannel(general);
+                }
             }
 
             // 2. Fetch Instructor's Cohorts (to know which courses they can add channels to)
             const cohortsResponse = await fetch(`${API_URL}/cohorts`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
             if (cohortsResponse.ok) {
                 const cohorts = await cohortsResponse.json();
                 setInstructorCourses(cohorts.map((c: any) => c.course).filter(Boolean));
             }
 
-            const lastReadMap = JSON.parse(localStorage.getItem('channels_last_read') || '{}');
-
-            // Map DB channels to UI
-            const formattedChannels: Channel[] = dbChannels.map((c: any) => {
-                const channelIdStr = c.id.toString();
-                const lastReadId = lastReadMap[channelIdStr];
-                const isUnread = c.latest_message_id && lastReadId !== c.latest_message_id;
-
-                return {
-                    id: channelIdStr,
-                    title: c.name,
-                    type: 'channel',
-                    courseId: c.course_id,
-                    unread: isUnread ? 1 : 0
-                };
-            });
-
-            setChannels(formattedChannels);
-
-            if (!activeChannel && formattedChannels.length > 0) {
-                const general = formattedChannels.find(c => c.title === 'general-discussion') || formattedChannels[0];
-                setActiveChannel(general);
-            }
-
-            // 3. Fetch DM Contacts
             const dmsResponse = await fetch(`${API_URL}/direct-messages/contacts`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
             if (dmsResponse.ok) {
                 setDms(await dmsResponse.json());
             }
         } catch (error) {
             console.error("Failed to fetch channels", error);
+            if (error instanceof Error && (error.message.includes('fetch') || error.message.includes('Network'))) {
+                toast.error("Connection lost. Redirecting to login...");
+                logout();
+                setTimeout(() => navigate('/instructor-login'), 2000);
+            }
         }
     };
 
@@ -175,17 +199,25 @@ const InstructorChannelsPage = () => {
             const token = localStorage.getItem('token');
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
             
-            const response = await fetch(`${API_URL}/course-channels/${targetCourseId}`, {
+            const response = await fetch(`${API_URL}/course-channels`, {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     name: newChannelName,
-                    description: newChannelDesc
+                    description: newChannelDesc,
+                    course_id: targetCourseId === 'general' ? null : targetCourseId
                 })
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
 
             if (response.ok) {
                 toast.success('Channel created successfully');
@@ -258,8 +290,18 @@ const InstructorChannelsPage = () => {
                 }
 
                 const response = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
                 });
+
+                if (response.status === 401) {
+                    toast.error("Session expired. Redirecting...");
+                    logout();
+                    setTimeout(() => navigate('/instructor-login'), 2000);
+                    return;
+                }
 
                 if (response.ok) {
                     const data = await response.json();
@@ -527,8 +569,17 @@ const InstructorChannelsPage = () => {
 
             const response = await fetch(url, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
 
             if (response.ok) {
                 setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isDeleted: true } : m));
@@ -555,10 +606,17 @@ const InstructorChannelsPage = () => {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ content: newContent })
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
 
             if (response.ok) {
                 const updatedMsg = await response.json();
@@ -577,6 +635,9 @@ const InstructorChannelsPage = () => {
         const finalContent = content || '';
         if (!finalContent.trim() && !attachment) return;
         if (!activeChannel) return;
+        if (isSending) return;
+
+        setIsSending(true);
 
         const originalMessage = finalContent;
         const fileToUpload = attachment;
@@ -618,9 +679,18 @@ const InstructorChannelsPage = () => {
 
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
                 body: formData
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
 
             if (response.ok) {
                 const msg = await response.json();
@@ -628,7 +698,7 @@ const InstructorChannelsPage = () => {
                 let fileDeta = undefined;
                 if (msg.attachmentUrl) {
                     fileDeta = {
-                        name: msg.attachmentUrl.split('/').pop() || 'Attachment',
+                        name: msg.attachmentName || (msg.attachmentUrl.split('/').pop()?.match(/^[0-9a-f-]{36}/i) ? 'Shared File' : msg.attachmentUrl.split('/').pop() || 'Attachment'),
                         size: 'Linked',
                         type: (msg.attachmentUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'other')) as 'image' | 'pdf' | 'other',
                         url: msg.attachmentUrl
@@ -644,12 +714,13 @@ const InstructorChannelsPage = () => {
                         role: msg.senderRole 
                     },
                     content: msg.content,
-                    timestamp: msg.createdAt || 'Just now',
+                    timestamp: msg.createdAt,
                     date: 'Feed',
                     isAnnouncement: msg.type === 'announcement',
+                    file: fileDeta,
                     isDeleted: !!msg.isDeleted,
-                    file: fileDeta
                 };
+                
                 setMessages(prev => {
                     const alreadyExists = prev.some(m => String(m.id) === String(finalMessage.id));
                     if (alreadyExists) {
@@ -658,10 +729,14 @@ const InstructorChannelsPage = () => {
                     return prev.map(m => m.id === optimisticId ? finalMessage : m);
                 });
             } else {
-                alert('Failed to post message.');
+                const errorData = await response.json();
+                toast.error(errorData.message || 'Failed to post message.');
             }
         } catch (error) {
             console.error('Error posting message.', error);
+            toast.error('Network error while sending message.');
+        } finally {
+            setIsSending(false);
         }
     };
 
@@ -1294,6 +1369,7 @@ const InstructorChannelsPage = () => {
                         <div className="chat-input-container">
                             <ChatInput 
                                 onSendMessage={handleSendMessage} 
+                                isSending={isSending}
                                 placeholder={activeChannel ? (activeChannel.type === 'channel' ? `Message #${activeChannel.title}` : `Message ${activeChannel.title}`) : 'Select a channel to send a message'}
                             />
                         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 import {
     ClipboardList,
     Calendar,
@@ -17,6 +18,8 @@ import { toast } from 'react-hot-toast';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 
 export default function StudentAssignments() {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
     const [assignments, setAssignments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -34,6 +37,13 @@ export default function StudentAssignments() {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/login');
+                return;
+            }
+
             const data = await response.json();
             if (response.ok) {
                 setAssignments(data);
@@ -41,7 +51,16 @@ export default function StudentAssignments() {
                 throw new Error(data.message || 'Failed to fetch assignments.');
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error("Fetch Error:", err);
+            if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+                toast.error('Connection failed. Redirecting to login...');
+                setTimeout(() => {
+                    logout();
+                    navigate('/login');
+                }, 2000);
+            } else {
+                setError(err.message);
+            }
         } finally {
             setLoading(false);
         }

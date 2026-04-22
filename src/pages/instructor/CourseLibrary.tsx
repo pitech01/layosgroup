@@ -14,11 +14,13 @@ import {
     HelpCircle,
     UserCheck
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 export default function CourseLibrary() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [courses, setCourses] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -35,6 +37,13 @@ export default function CourseLibrary() {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
             const data = await response.json();
             if (response.ok) {
                 // Filter by instructor
@@ -44,7 +53,16 @@ export default function CourseLibrary() {
                 throw new Error(data.message || 'Failed to retrieve course list.');
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error("Fetch Courses Error:", err);
+            if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+                toast.error('Connection failed. Redirecting to login...');
+                setTimeout(() => {
+                    logout();
+                    navigate('/instructor-login');
+                }, 2000);
+            } else {
+                setError(err.message);
+            }
         } finally {
             setLoading(false);
         }

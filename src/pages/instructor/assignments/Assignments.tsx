@@ -14,7 +14,13 @@ import {
     Trash2
 } from 'lucide-react';
 
+import { toast } from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 export default function InstructorAssignments() {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
     const [assignments, setAssignments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -30,6 +36,13 @@ export default function InstructorAssignments() {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
             const data = await response.json();
             if (response.ok) {
                 setAssignments(data);
@@ -37,7 +50,16 @@ export default function InstructorAssignments() {
                 throw new Error(data.message || 'Failed to fetch assignments.');
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error("Fetch Error:", err);
+            if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+                toast.error('Connection failed. Redirecting to login...');
+                setTimeout(() => {
+                    logout();
+                    navigate('/instructor-login');
+                }, 2000);
+            } else {
+                setError(err.message);
+            }
         } finally {
             setLoading(false);
         }
@@ -59,12 +81,13 @@ export default function InstructorAssignments() {
 
             if (response.ok) {
                 setAssignments(prev => prev.filter(a => a.id !== id));
+                toast.success('Assignment deleted successfully.');
             } else {
                 const data = await response.json();
-                alert(data.message || 'Failed to delete assignment.');
+                toast.error(data.message || 'Failed to delete assignment.');
             }
         } catch (err: any) {
-            alert('A network error occurred.');
+            toast.error('A network error occurred.');
         }
     };
 
@@ -73,8 +96,8 @@ export default function InstructorAssignments() {
     }, []);
 
     const filteredAssignments = assignments.filter(a =>
-        a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        a.cohort?.name.toLowerCase().includes(searchTerm.toLowerCase())
+        a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        a.cohort?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -289,24 +312,27 @@ export default function InstructorAssignments() {
                 }
 
                 .btn-delete {
-                    background: transparent;
-                    width: 38px;
-                    height: 38px;
-                    border-radius: 12px;
+                    background: #fff1f2;
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 14px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #94a3b8;
-                    transition: all 0.2s;
-                    border: 1px solid #f1f5f9;
+                    color: #dc2626;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border: 1px solid #fecaca;
                     cursor: pointer;
                     margin-left: 10px;
+                    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.05);
                 }
 
                 .btn-delete:hover {
-                    background: #fef2f2;
-                    color: #dc2626;
-                    border-color: #fee2e2;
+                    background: #dc2626;
+                    color: white;
+                    transform: scale(1.1);
+                    box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.2);
+                    border-color: #dc2626;
                 }
             `}</style>
 
@@ -400,7 +426,7 @@ export default function InstructorAssignments() {
                                         className="btn-delete"
                                         title="Delete Assignment"
                                     >
-                                        <Trash2 size={18} />
+                                        <Trash2 size={20} />
                                     </button>
                                 </div>
                             </div>

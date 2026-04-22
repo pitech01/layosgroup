@@ -5,6 +5,8 @@ import {
     FileText, MessageSquare, Filter, X, File as FileGeneric,
     Pin, AlertCircle, HelpCircle, BookOpen, GraduationCap, Loader2, Info
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import echo from '../../utils/echo';
 import MessageCard from '../../components/channel/MessageCard';
 import type { Message } from '../../components/channel/MessageCard';
@@ -59,6 +61,10 @@ const StudentChannelsPage = () => {
     const [showPinned, setShowPinned] = useState(false);
     const [activeTab, setActiveTab] = useState<'chat' | 'resources'>('chat');
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+
+    const navigate = useNavigate();
+    const { logout } = useAuth();
     
     // UI Layout State
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
@@ -101,8 +107,18 @@ const StudentChannelsPage = () => {
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
             
             const response = await fetch(`${API_URL}/course-channels`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
+
+            if (response.status === 401) {
+                toast.error("Session expired. Redirecting...");
+                logout();
+                setTimeout(() => navigate('/login'), 2000);
+                return;
+            }
 
             if (response.ok) {
                 const dbChannels = await response.json();
@@ -130,13 +146,21 @@ const StudentChannelsPage = () => {
             }
 
             const dmsResponse = await fetch(`${API_URL}/direct-messages/contacts`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
             if (dmsResponse.ok) {
                 setDms(await dmsResponse.json());
             }
         } catch (error) {
             console.error("Failed to fetch channels", error);
+            if (error instanceof Error && (error.message.includes('fetch') || error.message.includes('Network'))) {
+                toast.error("Connection lost. Redirecting to login...");
+                logout();
+                setTimeout(() => navigate('/login'), 2000);
+            }
         }
     };
 
@@ -162,8 +186,18 @@ const StudentChannelsPage = () => {
                 }
 
                 const response = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
                 });
+
+                if (response.status === 401) {
+                    toast.error("Session expired. Redirecting...");
+                    logout();
+                    setTimeout(() => navigate('/login'), 2000);
+                    return;
+                }
 
                 if (response.ok) {
                     const data = await response.json();
@@ -458,8 +492,17 @@ const StudentChannelsPage = () => {
 
             const response = await fetch(url, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/login');
+                return;
+            }
 
             if (response.ok) {
                 setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isDeleted: true } : m));
@@ -484,10 +527,17 @@ const StudentChannelsPage = () => {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ content: newContent })
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/login');
+                return;
+            }
 
             if (response.ok) {
                 const updatedMsg = await response.json();
@@ -505,6 +555,9 @@ const StudentChannelsPage = () => {
     const handleSendMessage = async (content: string, attachment?: File) => {
         if (!content.trim() && !attachment) return;
         if (!activeChannel) return;
+        if (isSending) return;
+
+        setIsSending(true);
 
         let originalMessage = content.trim();
         if (isAskingQuestion) {
@@ -553,16 +606,25 @@ const StudentChannelsPage = () => {
 
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
                 body: formData
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/login');
+                return;
+            }
 
             if (response.ok) {
                 const msg = await response.json();
                 let fileDeta = undefined;
                 if (msg.attachmentUrl) {
                     fileDeta = {
-                        name: msg.attachmentUrl.split('/').pop() || 'Attachment',
+                        name: msg.attachmentName || (msg.attachmentUrl.split('/').pop()?.match(/^[0-9a-f-]{36}/i) ? 'Shared File' : msg.attachmentUrl.split('/').pop() || 'Attachment'),
                         size: 'Linked',
                         type: (msg.attachmentUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'other')) as 'image' | 'pdf' | 'other',
                         url: msg.attachmentUrl
@@ -601,10 +663,14 @@ const StudentChannelsPage = () => {
                     return prev.map(m => m.id === optimisticId ? finalMessage : m);
                 });
             } else {
-                alert('Failed to post message.');
+                const errorData = await response.json();
+                toast.error(errorData.message || 'Failed to post message.');
             }
         } catch (error) {
             console.error('Error posting message.', error);
+            toast.error('Network error while sending message.');
+        } finally {
+            setIsSending(false);
         }
     };
 
@@ -1127,14 +1193,9 @@ const StudentChannelsPage = () => {
 
                                 {/* Input Area */}
                                 <div className="chat-input-container">
-                                    {isAskingQuestion && (
-                                        <div style={{ background: '#fef3c7', padding: '10px 1.5rem', borderTop: '1px solid #fde68a', color: '#b45309', fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><HelpCircle size={16} /> YOU ARE IN QUESTION MODE (HIGHLIGHTED)</div>
-                                            <X size={16} style={{ cursor: 'pointer' }} onClick={() => setIsAskingQuestion(false)} />
-                                        </div>
-                                    )}
                                     <ChatInput 
                                         onSendMessage={handleSendMessage} 
+                                        isSending={isSending}
                                         placeholder={isAskingQuestion ? "Ask your question to the instructor..." : "Message the class..."}
                                     />
                                     <div style={{ background: 'white', padding: '0 1.5rem 1rem', display: 'flex', gap: '12px' }}>

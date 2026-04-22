@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 import {
     Mic2,
     Plus,
@@ -15,6 +16,8 @@ import {
 import { toast } from 'react-hot-toast';
 
 export default function InstructorInterviews() {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
     const [interviews, setInterviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -31,6 +34,13 @@ export default function InstructorInterviews() {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
             const data = await response.json();
             if (response.ok) {
                 setInterviews(data);
@@ -38,7 +48,16 @@ export default function InstructorInterviews() {
                 throw new Error(data.message || 'Failed to fetch interviews.');
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error("Fetch Interviews Error:", err);
+            if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+                toast.error('Connection failed. Redirecting to login...');
+                setTimeout(() => {
+                    logout();
+                    navigate('/instructor-login');
+                }, 2000);
+            } else {
+                setError(err.message);
+            }
         } finally {
             setLoading(false);
         }

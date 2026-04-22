@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     Play,
     CheckCircle2,
@@ -18,7 +18,8 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 
 export default function StudentDashboard() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [enrollments, setEnrollments] = useState<any[]>([]);
     const [liveSessions, setLiveSessions] = useState<any[]>([]);
     const [certificates, setCertificates] = useState<any[]>([]);
@@ -45,6 +46,12 @@ export default function StudentDashboard() {
                     })
                 ]);
 
+                if (enrollmentsRes.status === 401 || sessionsRes.status === 401 || certsRes.status === 401) {
+                    logout();
+                    navigate('/login');
+                    return;
+                }
+
                 if (enrollmentsRes.ok) {
                     const data = await enrollmentsRes.json();
                     if (data.cohorts) {
@@ -61,9 +68,15 @@ export default function StudentDashboard() {
                     const data = await certsRes.json();
                     setCertificates(data);
                 }
-            } catch (error) {
-                console.error('Error fetching dashboard data:', error);
-                toast.error('Failed to load dashboard data');
+            } catch (err: any) {
+                console.error("Fetch Student Dashboard Error:", err);
+                if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+                    toast.error('Connection failed. Redirecting to login...');
+                    setTimeout(() => {
+                        logout();
+                        navigate('/login');
+                    }, 2000);
+                }
             } finally {
                 setLoading(false);
             }

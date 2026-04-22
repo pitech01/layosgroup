@@ -9,8 +9,11 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 export default function Students() {
+    const { logout } = useAuth();
     const navigate = useNavigate();
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -27,6 +30,13 @@ export default function Students() {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
             const data = await response.json();
             if (response.ok) {
                 setUsers(data);
@@ -34,7 +44,16 @@ export default function Students() {
                 throw new Error(data.message || 'Failed to sync with central student records.');
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error("Fetch Students Error:", err);
+            if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+                toast.error('Connection failed. Redirecting to login...');
+                setTimeout(() => {
+                    logout();
+                    navigate('/instructor-login');
+                }, 2000);
+            } else {
+                setError(err.message);
+            }
         } finally {
             setLoading(false);
         }

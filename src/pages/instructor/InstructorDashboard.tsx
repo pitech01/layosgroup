@@ -7,9 +7,13 @@ import {
     ArrowUpRight,
     Loader2
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 export default function InstructorDashboard() {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
     const [stats, setStats] = useState<any>(null);
     const [activities, setActivities] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -29,6 +33,12 @@ export default function InstructorDashboard() {
                     fetch(`${API_URL}/instructor/activity-logs`, { headers })
                 ]);
                 
+                if (statsRes.status === 401 || activitiesRes.status === 401) {
+                    logout();
+                    navigate('/instructor-login');
+                    return;
+                }
+
                 if (statsRes.ok) {
                     const data = await statsRes.json();
                     setStats(data.stats);
@@ -38,8 +48,15 @@ export default function InstructorDashboard() {
                     const logs = await activitiesRes.json();
                     setActivities(logs);
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Fetch Dashboard Stats Error:", err);
+                if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+                    toast.error('Connection failed. Redirecting to login...');
+                    setTimeout(() => {
+                        logout();
+                        navigate('/instructor-login');
+                    }, 2000);
+                }
             } finally {
                 setLoading(false);
             }
