@@ -740,6 +740,9 @@ const LessonView = () => {
                                             finalUrl = `${baseUrl}/storage/${url}`;
                                         }
 
+                                        // Strip internal Laravel paths if they leak into URLs
+                                        finalUrl = finalUrl.replace('app/public/', '');
+
                                         // Force HTTPS for production domain to prevent mixed content
                                         if (finalUrl.includes('layosgroupllc.com') && finalUrl.startsWith('http:')) {
                                             return finalUrl.replace('http:', 'https:');
