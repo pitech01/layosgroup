@@ -2105,15 +2105,30 @@ export default function EditCourse() {
                                                     const getCleanUrl = (url: string) => {
                                                         if (!url) return '';
                                                         if (url.includes('mediadelivery.net')) return url;
-                                                        if (url.startsWith('/storage')) {
-                                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
-                                                            return `${baseUrl}${url}`;
+                                                        
+                                                        const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+                                                        let finalUrl = url;
+
+                                                        // Handle absolute local/legacy paths by replacing host
+                                                        if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000') || url.includes('192.168.')) {
+                                                            finalUrl = url.replace(/https?:\/\/[^\/]+/, baseUrl);
                                                         }
-                                                        if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
-                                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
-                                                            return url.replace(/https?:\/\/[^\/]+(?=\/storage)/, baseUrl);
+                                                        // Handle relative storage paths (with or without leading slash)
+                                                        else if (url.startsWith('/storage/') || url.startsWith('storage/')) {
+                                                            const cleanPath = url.startsWith('/') ? url : `/${url}`;
+                                                            finalUrl = `${baseUrl}${cleanPath}`;
                                                         }
-                                                        return url;
+                                                        // Fallback: if it's just a path, assume it's under storage if it looks like one
+                                                        else if (url.includes('lessons/') || url.includes('courses/')) {
+                                                            finalUrl = `${baseUrl}/storage/${url}`;
+                                                        }
+
+                                                        // Force HTTPS for production domain to prevent mixed content
+                                                        if (finalUrl.includes('layosgroupllc.com') && finalUrl.startsWith('http:')) {
+                                                            return finalUrl.replace('http:', 'https:');
+                                                        }
+
+                                                        return finalUrl;
                                                     };
                                                     
                                                     const cleanUrl = viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : getCleanUrl(rawUrl);

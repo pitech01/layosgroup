@@ -716,21 +716,33 @@ const LessonView = () => {
 
                                     // URL Resolver & Cleaner
                                     const getCleanUrl = (url: string) => {
+                                        if (!url) return '';
                                         if (url.includes('mediadelivery.net')) return url;
                                         
-                                        // Handle local storage paths
-                                        if (url.startsWith('/storage')) {
-                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
-                                            return `${baseUrl}${url}`;
+                                        const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
+
+                                        let finalUrl = url;
+
+                                        // Handle absolute local/legacy paths by replacing host
+                                        if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000') || url.includes('192.168.')) {
+                                            finalUrl = url.replace(/https?:\/\/[^\/]+/, baseUrl);
+                                        }
+                                        // Handle relative storage paths (with or without leading slash)
+                                        else if (url.startsWith('/storage/') || url.startsWith('storage/')) {
+                                            const cleanPath = url.startsWith('/') ? url : `/${url}`;
+                                            finalUrl = `${baseUrl}${cleanPath}`;
+                                        }
+                                        // Fallback: if it's just a path, assume it's under storage if it looks like one
+                                        else if (url.includes('lessons/') || url.includes('courses/')) {
+                                            finalUrl = `${baseUrl}/storage/${url}`;
                                         }
 
-                                        // Fix legacy localhost/127.0.0.1 URLs for shared hosting
-                                        if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
-                                            const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || '';
-                                            return url.replace(/https?:\/\/[^\/]+(?=\/storage)/, baseUrl);
+                                        // Force HTTPS for production domain to prevent mixed content
+                                        if (finalUrl.includes('layosgroupllc.com') && finalUrl.startsWith('http:')) {
+                                            return finalUrl.replace('http:', 'https:');
                                         }
 
-                                        return url;
+                                        return finalUrl;
                                     };
 
                                     const cleanUrl = getCleanUrl(rawUrl);
