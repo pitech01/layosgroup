@@ -397,7 +397,7 @@ export default function InstructorInterviews() {
                         <div style={{ flex: 1, background: '#f8fafc' }}>
                             {previewAsset.type === 'pdf' ? (
                                 <iframe 
-                                    src={previewAsset.url.includes('bunnycdn.com') || previewAsset.url.includes('mediadelivery.net') 
+                                    src={previewAsset.url.includes('bunnycdn.com') || previewAsset.url.includes('mediadelivery.net') || previewAsset.url.includes('b-cdn.net')
                                         ? `${previewAsset.url}#toolbar=0` 
                                         : `${API_URL}/pdf-proxy?url=${encodeURIComponent(previewAsset.url)}#toolbar=0`} 
                                     style={{ width: '100%', height: '100%', border: 'none' }} 
