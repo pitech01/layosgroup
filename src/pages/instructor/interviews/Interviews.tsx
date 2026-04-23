@@ -10,6 +10,7 @@ import {
     AlertCircle,
     FileText,
     Trash2,
+    Edit,
     Play,
     X
 } from 'lucide-react';
@@ -362,9 +363,22 @@ export default function InstructorInterviews() {
                                 <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>
                                     ADDED {new Date(i.created_at).toLocaleDateString()}
                                 </div>
-                                <button onClick={() => handleDelete(i.id)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer' }}>
-                                    <Trash2 size={18} />
-                                </button>
+                                <div style={{ display: 'flex', gap: '15px' }}>
+                                    <button 
+                                        onClick={() => navigate(`/instructor/interviews/edit/${i.id}`)} 
+                                        style={{ background: 'none', border: 'none', color: '#1a4d3e', cursor: 'pointer' }}
+                                        title="Edit Resource"
+                                    >
+                                        <Edit size={18} />
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDelete(i.id)} 
+                                        style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer' }}
+                                        title="Delete Resource"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -382,7 +396,13 @@ export default function InstructorInterviews() {
                         </div>
                         <div style={{ flex: 1, background: '#f8fafc' }}>
                             {previewAsset.type === 'pdf' ? (
-                                <iframe src={`${previewAsset.url}#toolbar=0`} style={{ width: '100%', height: '100%', border: 'none' }} title="Doc Preview" />
+                                <iframe 
+                                    src={previewAsset.url.includes('bunnycdn.com') || previewAsset.url.includes('mediadelivery.net') 
+                                        ? `${previewAsset.url}#toolbar=0` 
+                                        : `${API_URL}/pdf-proxy?url=${encodeURIComponent(previewAsset.url)}#toolbar=0`} 
+                                    style={{ width: '100%', height: '100%', border: 'none' }} 
+                                    title="Doc Preview" 
+                                />
                             ) : (
                                 <video src={previewAsset.url} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                             )}

@@ -44,6 +44,7 @@ import StudentChannelsPage from './pages/student/StudentChannelsPage';
 import StudentChannelPage from './pages/student/StudentChannelPage';
 import InstructorInterviews from './pages/instructor/interviews/Interviews';
 import CreateInterview from './pages/instructor/interviews/CreateInterview';
+import EditInterview from './pages/instructor/interviews/EditInterview';
 import StudentInterviews from './pages/student/interviews/Interviews';
 import CertificateTemplateManager from './pages/instructor/CertificateTemplateManager';
 import ActivityLogsDetailed from './pages/instructor/ActivityLogsDetailed';
@@ -127,6 +128,7 @@ function App() {
                 <Route path="/instructor/courses/:courseId/channel" element={<InstructorChannelPage />} />
                 <Route path="/instructor/interview" element={<InstructorInterviews />} />
                 <Route path="/instructor/interviews/create" element={<CreateInterview />} />
+                <Route path="/instructor/interviews/edit/:id" element={<EditInterview />} />
                 <Route path="/instructor/settings" element={<InstructorSettings />} />
                 <Route path="/instructor/activity-logs" element={<ActivityLogsDetailed />} />
                 <Route path="/instructor/courses/:courseId/certificate-design" element={<CertificateTemplateManager />} />

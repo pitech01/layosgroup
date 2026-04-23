@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
     ArrowLeft,
     Mic2,
@@ -8,17 +8,21 @@ import {
     FileText,
     Video,
     X,
-    Info
+    Info,
+    RefreshCw
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-export default function CreateInterview() {
+export default function EditInterview() {
+    const { id } = useParams();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [cohorts, setCohorts] = useState<any[]>([]);
     
     const [docFile, setDocFile] = useState<File | null>(null);
     const [videoFile, setVideoFile] = useState<File | null>(null);
+    const [existingInterview, setExistingInterview] = useState<any>(null);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -28,26 +32,48 @@ export default function CreateInterview() {
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
-    const fetchCohorts = async () => {
+    const fetchData = async () => {
         try {
-            const response = await fetch(`${API_URL}/cohorts`, {
+            // Fetch cohorts
+            const cohortsResponse = await fetch(`${API_URL}/cohorts`, {
                 headers: {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            const data = await response.json();
-            if (response.ok) {
-                setCohorts(data);
+            const cohortsData = await cohortsResponse.json();
+            if (cohortsResponse.ok) setCohorts(cohortsData);
+
+            // Fetch interview
+            const interviewResponse = await fetch(`${API_URL}/instructor/interviews/${id}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const interviewData = await interviewResponse.json();
+            if (interviewResponse.ok) {
+                setExistingInterview(interviewData);
+                setFormData({
+                    title: interviewData.title,
+                    description: interviewData.description || '',
+                    cohort_id: interviewData.cohort_id || ''
+                });
+            } else {
+                toast.error("Failed to load interview resource.");
+                navigate('/instructor/interview');
             }
         } catch (err) {
-            console.error("Error fetching cohorts", err);
+            console.error("Error fetching data", err);
+            toast.error("An error occurred while loading data.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchCohorts();
-    }, []);
+        fetchData();
+    }, [id]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'doc' | 'video') => {
         if (e.target.files && e.target.files[0]) {
@@ -73,11 +99,13 @@ export default function CreateInterview() {
             data.append('title', formData.title);
             data.append('description', formData.description);
             if (formData.cohort_id) data.append('cohort_id', formData.cohort_id);
+            else data.append('cohort_id', ''); // Clear cohort if none selected
             
             if (docFile) data.append('document', docFile);
             if (videoFile) data.append('video', videoFile);
 
-            const response = await fetch(`${API_URL}/instructor/interviews`, {
+            // We use POST even for updates because Laravel has issues with PUT and multipart/form-data
+            const response = await fetch(`${API_URL}/instructor/interviews/${id}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -87,11 +115,11 @@ export default function CreateInterview() {
             });
 
             if (response.ok) {
-                toast.success("Interview resource published!");
-                navigate('/instructor/interview'); // Changed from /instructor/interviews to match App.tsx
+                toast.success("Interview resource updated successfully!");
+                navigate('/instructor/interview');
             } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Upload failed.');
+                throw new Error(errorData.message || 'Update failed.');
             }
         } catch (err: any) {
             toast.error(err.message);
@@ -100,10 +128,18 @@ export default function CreateInterview() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80vh' }}>
+                <Loader2 className="animate-spin" size={48} color="#1a4d3e" />
+            </div>
+        );
+    }
+
     return (
-        <div className="create-interview-container">
+        <div className="edit-interview-container">
             <style>{`
-                .create-interview-container {
+                .edit-interview-container {
                     max-width: 1000px;
                     margin: 0 auto;
                     font-family: 'Inter', sans-serif;
@@ -152,8 +188,12 @@ export default function CreateInterview() {
                 }
                 .upload-box:hover { border-color: #1a4d3e; background: #f0f7f4; }
                 .selected-file {
-                    display: flex; align-items: center; gap: 10px; background: white;
-                    padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 1rem;
+                    display: flex; align-items: center; gap: 10px; background: #f0fdf4;
+                    padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid #bbf7d0; margin-top: 1rem;
+                }
+                .existing-file {
+                    display: flex; align-items: center; gap: 10px; background: #f8fafc;
+                    padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 0.5rem;
                 }
                 .btn-submit {
                     background: #1a4d3e; color: white; border: none; padding: 1.25rem;
@@ -170,8 +210,8 @@ export default function CreateInterview() {
             <div className="form-card">
                 <form onSubmit={handleSubmit}>
                     <div className="section-title">
-                        <div className="icon-box"><Mic2 size={24} /></div>
-                        <h2 style={{ fontSize: '1.75rem', fontWeight: 900 }}>Create Interview Resource</h2>
+                        <div className="icon-box"><RefreshCw size={24} /></div>
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: 900 }}>Edit Interview Resource</h2>
                     </div>
 
                     <div className="form-group">
@@ -186,7 +226,7 @@ export default function CreateInterview() {
                     </div>
 
                     <div className="form-group">
-                        <label>Target Cohort (Optional - Leave blank for all students)</label>
+                        <label>Target Cohort</label>
                         <select
                             className="premium-input"
                             value={formData.cohort_id}
@@ -210,35 +250,47 @@ export default function CreateInterview() {
 
                     <div className="upload-grid">
                         <div className="form-group">
-                            <label>Document (PDF, DOCX)</label>
+                            <label>Update Document (Leave empty to keep existing)</label>
+                            {existingInterview?.document_path && !docFile && (
+                                <div className="existing-file">
+                                    <FileText size={16} color="#64748b" />
+                                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Currently: {existingInterview.document_path.split('/').pop()}</span>
+                                </div>
+                            )}
                             {!docFile ? (
                                 <div className="upload-box" onClick={() => document.getElementById('doc-input')?.click()}>
                                     <input type="file" id="doc-input" hidden accept=".pdf,.doc,.docx" onChange={e => handleFileChange(e, 'doc')} />
                                     <FileText size={24} color="#1a4d3e" style={{ marginBottom: '10px' }} />
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>Click to upload doc</div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>Click to replace document</div>
                                 </div>
                             ) : (
                                 <div className="selected-file">
-                                    <FileText size={18} color="#1a4d3e" />
-                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{docFile.name}</span>
-                                    <X size={16} color="#ef4444" style={{ cursor: 'pointer' }} onClick={() => setDocFile(null)} />
+                                    <FileText size={18} color="#166534" />
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#166534', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{docFile.name} (Ready to upload)</span>
+                                    <X size={16} color="#dc2626" style={{ cursor: 'pointer' }} onClick={() => setDocFile(null)} />
                                 </div>
                             )}
                         </div>
 
                         <div className="form-group">
-                            <label>Video (MP4, MOV)</label>
+                            <label>Update Video (Leave empty to keep existing)</label>
+                            {existingInterview?.video_path && !videoFile && (
+                                <div className="existing-file">
+                                    <Video size={16} color="#64748b" />
+                                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Video already uploaded</span>
+                                </div>
+                            )}
                             {!videoFile ? (
                                 <div className="upload-box" onClick={() => document.getElementById('video-input')?.click()}>
                                     <input type="file" id="video-input" hidden accept="video/*" onChange={e => handleFileChange(e, 'video')} />
                                     <Video size={24} color="#1a4d3e" style={{ marginBottom: '10px' }} />
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>Click to upload video</div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>Click to replace video</div>
                                 </div>
                             ) : (
                                 <div className="selected-file">
-                                    <Video size={18} color="#1a4d3e" />
-                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{videoFile.name}</span>
-                                    <X size={16} color="#ef4444" style={{ cursor: 'pointer' }} onClick={() => setVideoFile(null)} />
+                                    <Video size={18} color="#166534" />
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#166534', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{videoFile.name} (Ready to upload)</span>
+                                    <X size={16} color="#dc2626" style={{ cursor: 'pointer' }} onClick={() => setVideoFile(null)} />
                                 </div>
                             )}
                         </div>
@@ -246,14 +298,14 @@ export default function CreateInterview() {
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f8fafc', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid #e2e8f0' }}>
                         <Info size={18} color="#64748b" />
-                        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Files will be securely stored on Bunny.net. Max limits: 50MB for docs, 500MB for videos.</span>
+                        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Updates will be stored on Bunny.net. Old files will be automatically replaced.</span>
                     </div>
 
                     <button className="btn-submit" disabled={isSubmitting}>
                         {isSubmitting ? (
-                            <><Loader2 className="animate-spin" size={20} /> Uploading to Bunny.net...</>
+                            <><Loader2 className="animate-spin" size={20} /> Processing Updates...</>
                         ) : (
-                            <><CheckCircle size={20} /> Publish Interview Resource</>
+                            <><CheckCircle size={20} /> Save Changes</>
                         )}
                     </button>
                 </form>
