@@ -302,11 +302,17 @@ export default function EditCourse() {
                         if (xhr.status >= 200 && xhr.status < 300) {
                             resolve(`https://iframe.mediadelivery.net/play/${libraryId}/${videoId}`);
                         } else {
-                            reject(`Bunny Upload failed: ${xhr.status}`);
+                            const errorMsg = `Bunny Upload failed (Status: ${xhr.status}). ${xhr.responseText || ''}`;
+                            console.error(errorMsg);
+                            reject(errorMsg);
                         }
                     };
 
-                    xhr.onerror = () => reject('Network error during direct upload.');
+                    xhr.onerror = () => {
+                        const errorMsg = 'Network or CORS error during direct upload to Bunny.net. Please ensure your domain is allowed in the Bunny Stream dashboard.';
+                        console.error(errorMsg);
+                        reject(errorMsg);
+                    };
                     xhr.send(file);
                 });
             } else {
