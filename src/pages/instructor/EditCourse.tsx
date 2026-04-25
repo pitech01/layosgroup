@@ -256,48 +256,103 @@ export default function EditCourse() {
 
     const handleFileUpload = async (moduleId: string, lessonId: string, file: File) => {
         const token = localStorage.getItem('token');
-
+        if (!token) return;
 
         setUploadingVideos((prev: any) => ({ ...prev, [lessonId]: true }));
         setUploadProgress((prev: any) => ({ ...prev, [lessonId]: 0 }));
 
-        const formData = new FormData();
-        formData.append('video', file);
+        const isVideo = ['mp4', 'mov', 'mkv', 'avi', 'webm'].includes(file.name.split('.').pop()?.toLowerCase() || '');
 
         try {
-            const url = await new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', `${API_URL}/upload-video`, true);
-                xhr.setRequestHeader('Accept', 'application/json');
-                if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            let finalUrl = '';
 
-                xhr.upload.onprogress = (event) => {
-                    if (event.lengthComputable) {
-                        const percentComplete = Math.round((event.loaded / event.total) * 100);
-                        setUploadProgress((prev: any) => ({ ...prev, [lessonId]: percentComplete }));
-                    }
-                };
+            if (isVideo) {
+                // 1. Get Signature from Backend
+                const sigResponse = await fetch(`${API_URL}/bunny/generate-signature`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ title: file.name })
+                });
 
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try {
-                            const data = JSON.parse(xhr.responseText);
-                            if (data.success && data.video_url) resolve(data.video_url);
-                            else reject(data.message || 'Failed to upload');
-                        } catch { reject('Error parsing response.'); }
-                    } else { reject('Error uploading file. Status: ' + xhr.status); }
-                };
+                const sigData = await sigResponse.json();
+                if (!sigData.success) throw new Error(sigData.message || 'Failed to prepare secure upload');
 
-                xhr.onerror = () => reject('Network error during upload.');
-                xhr.send(formData);
-            });
+                const { videoId, libraryId, signature, expiration } = sigData;
 
-            // Find lesson type for proper field update
+                // 2. Direct Upload to Bunny Stream
+                finalUrl = await new Promise<string>((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    const bunnyUrl = `https://video.bunnycdn.com/library/${libraryId}/videos/${videoId}?authorization=${signature}&expiration=${expiration}`;
+                    
+                    xhr.open('PUT', bunnyUrl, true);
+                    xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            setUploadProgress((prev: any) => ({ ...prev, [lessonId]: percent }));
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            resolve(`https://iframe.mediadelivery.net/play/${libraryId}/${videoId}`);
+                        } else {
+                            reject(`Bunny Upload failed: ${xhr.status}`);
+                        }
+                    };
+
+                    xhr.onerror = () => reject('Network error during direct upload.');
+                    xhr.send(file);
+                });
+            } else {
+                // Traditional Upload for Documents
+                const formData = new FormData();
+                formData.append('video', file);
+
+                finalUrl = await new Promise<string>((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', `${API_URL}/upload-video`, true);
+                    xhr.setRequestHeader('Accept', 'application/json');
+                    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            setUploadProgress((prev: any) => ({ ...prev, [lessonId]: percent }));
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                if (data.success) resolve(data.video_url);
+                                else reject(data.message || 'Upload failed');
+                            } catch { reject('Error parsing response.'); }
+                        } else {
+                            try {
+                                const errorData = JSON.parse(xhr.responseText);
+                                reject(errorData.message || `Upload failed: ${xhr.status}`);
+                            } catch { reject(`Upload failed: ${xhr.status}`); }
+                        }
+                    };
+
+                    xhr.onerror = () => reject('Network error.');
+                    xhr.send(formData);
+                });
+            }
+
+            // Update Lesson Data
             const lesson = modules.find(m => m.id === moduleId)?.lessons.find(l => l.id === lessonId);
             if (lesson?.type === 'material') {
-                updateLesson(moduleId, lessonId, { fileUrl: url as string, fileName: file.name, fileToUpload: undefined });
+                updateLesson(moduleId, lessonId, { fileUrl: finalUrl, fileName: file.name, fileToUpload: undefined });
             } else {
-                updateLesson(moduleId, lessonId, { videoUrl: url as string, videoToUpload: undefined, fileToUpload: undefined });
+                updateLesson(moduleId, lessonId, { videoUrl: finalUrl, videoToUpload: undefined, fileToUpload: undefined });
             }
         } catch (err: any) {
             setError(err.message || 'Upload failed');
