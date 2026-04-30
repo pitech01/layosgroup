@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles } from 'lucide-react';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 import { buildProxyUrl } from '../../../utils/pdfTextExtractor';
+import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
 
 const LessonView = () => {
     const { courseId, lessonId } = useParams();
@@ -1001,12 +1002,10 @@ const LessonView = () => {
                                     </div>
                                 )}
                                 {previewAsset.type === 'pdf' ? (
-                                    <iframe
-                                        src={`${buildProxyUrl(previewAsset.url)}#toolbar=0&navpanes=0`}
-                                        style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
-                                        title="Asset Review"
-                                        onLoad={() => setIframeLoading(false)}
-                                        onContextMenu={(e: any) => e.preventDefault()}
+                                    <SecurePDFViewer 
+                                        url={previewAsset.url} 
+                                        onLoadSuccess={() => setIframeLoading(false)} 
+                                        hideToolbar={false}
                                     />
                                 ) : previewAsset.type === 'ppt' ? (
                                     <iframe

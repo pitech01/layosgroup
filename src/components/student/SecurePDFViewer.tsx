@@ -3,10 +3,8 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Loader2, Shield } from 'lucide-react';
 import { buildProxyUrl } from '../../utils/pdfTextExtractor';
 
-// Configure worker using a reliable local source
-// @ts-ignore
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
+// Use the exact version of pdfjs-dist that react-pdf is using to prevent version mismatch errors
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface SecurePDFViewerProps {
     url: string;
@@ -45,7 +43,7 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
 
     function onDocumentLoadError(err: Error) {
         console.error('PDF Load Error:', err);
-        setError('The secure document stream was interrupted or is unavailable.');
+        setError(`The secure document stream was interrupted or is unavailable. Details: ${err.message}`);
     }
 
     const changePage = (offset: number) => {

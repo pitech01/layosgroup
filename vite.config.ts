@@ -20,9 +20,25 @@ const pdfProxyPlugin = () => ({
       }
 
       try {
-        const client = targetUrl.startsWith('https:') ? https : http;
+        // Ensure the URL is properly parsed. new URL() automatically encodes spaces correctly 
+        // without mutating existing encoded characters like %2F (which breaks AWS S3 signatures).
+        const parsedTargetUrl = new URL(targetUrl);
+        const client = parsedTargetUrl.protocol === 'https:' ? https : http;
 
-        const proxyReq = client.get(targetUrl, (proxyRes) => {
+        const proxyReq = client.get(parsedTargetUrl, {
+          headers: {
+            'Referer': 'https://layosgroupllc.com',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          },
+          rejectUnauthorized: false // Allow self-signed certs for local development
+        }, (proxyRes) => {
+          // If the CDN or backend returns an error (like 404 or 403), pass it along
+          if (proxyRes.statusCode && proxyRes.statusCode !== 200) {
+            res.writeHead(proxyRes.statusCode, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: `Remote server returned ${proxyRes.statusCode}` }));
+            return;
+          }
+
           res.writeHead(200, {
             'Content-Type': 'application/pdf',
             'Access-Control-Allow-Origin': '*',

@@ -1,15 +1,12 @@
 import * as pdfjs from 'pdfjs-dist';
 import JSZip from 'jszip';
 
-// Configure the pdf.js worker using Vite's local loader
-// @ts-ignore
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
+// Configure the pdf.js worker using unpkg to match the specific version
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 // @ts-ignore
 const API_BASE = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-// @ts-ignore
-const IS_DEV = (import.meta as any).env.DEV;
+const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
 /**
  * Build a proxy URL for the given remote PDF url.
@@ -32,6 +29,11 @@ export function buildProxyUrl(remoteUrl: string): string {
   if (!finalUrl.startsWith('http')) {
       const base = API_BASE.replace('/api', '');
       finalUrl = `${base}/${finalUrl.startsWith('/') ? finalUrl.substring(1) : finalUrl}`;
+  }
+  
+  // In development, use the Vite dev server proxy to instantly bypass CORS and hotlinking without relying on production API
+  if (isLocalhost) {
+      return `/dev-pdf-proxy?url=${encodeURIComponent(finalUrl)}`;
   }
 
   return `${API_BASE}/pdf-proxy?url=${encodeURIComponent(finalUrl)}`;

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
+import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
 
 export default function SubmitAssignment() {
     const { id } = useParams();
@@ -605,15 +606,23 @@ export default function SubmitAssignment() {
                                 </div>
                             )}
                             {viewingPdf.url && (
-                                <iframe
-                                    src={viewingPdf.type === 'office' 
-                                        ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(viewingPdf.url)}` 
-                                        : `${viewingPdf.url}#toolbar=0&navpanes=0`}
-                                    style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
-                                    title="Secure Document Viewer"
-                                    onLoad={() => setIframeLoading(false)}
-                                    allow="fullscreen"
-                                />
+                                viewingPdf.type === 'pdf' ? (
+                                    <div style={{ width: '100%', height: '100%', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}>
+                                        <SecurePDFViewer 
+                                            url={viewingPdf.url} 
+                                            onLoadSuccess={() => setIframeLoading(false)} 
+                                            hideToolbar={false}
+                                        />
+                                    </div>
+                                ) : (
+                                    <iframe
+                                        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(viewingPdf.url)}`}
+                                        style={{ width: '100%', height: '100%', border: 'none', opacity: iframeLoading ? 0 : 1, transition: 'opacity 0.4s ease' }}
+                                        title="Secure Document Viewer"
+                                        onLoad={() => setIframeLoading(false)}
+                                        allow="fullscreen"
+                                    />
+                                )
                             )}
                             {/* Overlay to catch clicks on any remaining toolbar elements if browser injects them */}
                             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'transparent', zIndex: 5, pointerEvents: 'none' }}></div>

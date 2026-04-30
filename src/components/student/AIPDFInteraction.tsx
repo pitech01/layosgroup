@@ -189,6 +189,12 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                             >
                                 {ai.state === 'summarizing' ? 'START READING (STILL ANALYZING...)' : 'START READING NOW'}
                             </button>
+                            <button 
+                                onClick={() => setShowChat(true)}
+                                style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#67d9d9', border: '1px solid rgba(73, 186, 186, 0.3)', padding: '0.6rem 1.2rem', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', fontSize: '0.75rem', letterSpacing: '0.05em' }}
+                            >
+                                ASK LAYOS
+                            </button>
                             {ai.state === 'summarizing' && (
                                 <span style={{ fontSize: '0.7rem', color: '#49BABA', fontWeight: 900, animation: 'pulse 2s infinite' }}>
                                     ANALYZING MORE PAGES...
