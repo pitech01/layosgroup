@@ -160,8 +160,9 @@ const Live = () => {
                     background: #000;
                     aspect-ratio: 16/9;
                     display: flex;
-                    align-items: center;
-                    justify-content: center;
+                    align-items: stretch;
+                    justify-content: stretch;
+                    position: relative;
                 }
 
                 .close-btn {
@@ -382,7 +383,7 @@ const Live = () => {
                                     <iframe
                                         src={cleanUrl}
                                         loading="lazy"
-                                        style={{ border: 'none', width: '100%', height: '100%' }}
+                                        style={{ border: 'none', width: '100%', height: '100%', flex: 1, display: 'block' }}
                                         allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
                                         allowFullScreen={true}
                                     ></iframe>

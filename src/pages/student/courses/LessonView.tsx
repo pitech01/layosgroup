@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles } from 'lucide-react';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
-import { buildProxyUrl } from '../../../utils/pdfTextExtractor';
 import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
 
 const LessonView = () => {
@@ -763,7 +762,15 @@ const LessonView = () => {
                                             <iframe
                                                 src={cleanUrl}
                                                 loading="lazy"
-                                                style={{ border: 'none', width: '100%', height: '100%', borderRadius: '16px' }}
+                                                style={{ 
+                                                    border: 'none', 
+                                                    width: '100%', 
+                                                    height: '100%', 
+                                                    flex: 1,
+                                                    alignSelf: 'stretch',
+                                                    borderRadius: isMaximized ? '0' : '16px',
+                                                    display: 'block'
+                                                }}
                                                 allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
                                                 allowFullScreen={true}
                                             ></iframe>
@@ -1016,13 +1023,23 @@ const LessonView = () => {
                                         onContextMenu={(e: any) => e.preventDefault()}
                                     />
                                 ) : previewAsset.type === 'video' ? (
-                                    <video
-                                        controls
-                                        src={previewAsset.url}
-                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                        controlsList="nodownload"
-                                        onContextMenu={(e: any) => e.preventDefault()}
-                                    />
+                                    previewAsset.url.includes('mediadelivery.net') ? (
+                                        <iframe
+                                            src={previewAsset.url}
+                                            loading="lazy"
+                                            style={{ border: 'none', width: '100%', height: '100%', flex: 1, display: 'block' }}
+                                            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                                            allowFullScreen={true}
+                                        />
+                                    ) : (
+                                        <video
+                                            controls
+                                            src={previewAsset.url}
+                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                            controlsList="nodownload"
+                                            onContextMenu={(e: any) => e.preventDefault()}
+                                        />
+                                    )
                                 ) : (
                                     <img
                                         src={previewAsset.url}

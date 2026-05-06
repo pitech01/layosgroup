@@ -319,7 +319,7 @@ export default function StudentInterviews() {
                                 url={previewAsset.url}
                             />
                         ) : (
-                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'stretch', justifyContent: 'stretch', position: 'relative' }}>
                                 {(() => {
                                     const getCleanUrl = (url: string) => {
                                         if (!url) return '';
@@ -341,7 +341,7 @@ export default function StudentInterviews() {
                                         <iframe
                                             src={cleanUrl}
                                             loading="lazy"
-                                            style={{ border: 'none', width: '100%', height: '100%' }}
+                                            style={{ border: 'none', width: '100%', height: '100%', flex: 1, display: 'block' }}
                                             allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
                                             allowFullScreen={true}
                                         ></iframe>

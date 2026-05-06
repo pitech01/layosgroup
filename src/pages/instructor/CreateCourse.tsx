@@ -2077,7 +2077,7 @@ export default function CreateCourse() {
                                                         <iframe
                                                             src={cleanUrl}
                                                             loading="lazy"
-                                                            style={{ border: 'none', width: '100%', height: '100%' }}
+                                                            style={{ border: 'none', width: '100%', height: '100%', flex: 1, display: 'block' }}
                                                             allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
                                                             allowFullScreen={true}
                                                         ></iframe>

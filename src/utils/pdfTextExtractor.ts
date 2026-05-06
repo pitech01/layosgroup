@@ -32,8 +32,13 @@ export function buildProxyUrl(remoteUrl: string): string {
   }
   
   // In development, use the Vite dev server proxy to instantly bypass CORS and hotlinking without relying on production API
-  if (isLocalhost) {
+  if (isLocalhost && !finalUrl.includes('amazonaws.com')) {
       return `/dev-pdf-proxy?url=${encodeURIComponent(finalUrl)}`;
+  }
+
+  // Route S3 URLs to the local backend proxy to utilize S3 authenticated credentials and bypass expired signatures
+  if (isLocalhost && finalUrl.includes('amazonaws.com')) {
+      return `http://127.0.0.1:8000/api/pdf-proxy?url=${encodeURIComponent(finalUrl)}`;
   }
 
   return `${API_BASE}/pdf-proxy?url=${encodeURIComponent(finalUrl)}`;

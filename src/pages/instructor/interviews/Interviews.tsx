@@ -404,7 +404,16 @@ export default function InstructorInterviews() {
                                     title="Doc Preview" 
                                 />
                             ) : (
-                                <video src={previewAsset.url} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                previewAsset.url.includes('mediadelivery.net') ? (
+                                    <iframe
+                                        src={previewAsset.url}
+                                        style={{ width: '100%', height: '100%', border: 'none' }}
+                                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                                        allowFullScreen={true}
+                                    />
+                                ) : (
+                                    <video src={previewAsset.url} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                )
                             )}
                         </div>
                     </div>
