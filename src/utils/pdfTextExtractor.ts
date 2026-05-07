@@ -36,11 +36,8 @@ export function buildProxyUrl(remoteUrl: string): string {
       return `/dev-pdf-proxy?url=${encodeURIComponent(finalUrl)}`;
   }
 
-  // Route S3 URLs to the local backend proxy to utilize S3 authenticated credentials and bypass expired signatures
-  if (isLocalhost && finalUrl.includes('amazonaws.com')) {
-      return `http://127.0.0.1:8000/api/pdf-proxy?url=${encodeURIComponent(finalUrl)}`;
-  }
-
+  // Route ALL external PDF URLs to the backend proxy. This handles both normal CORS bypass
+  // and utilizes S3 authenticated credentials to bypass expired AWS signatures.
   return `${API_BASE}/pdf-proxy?url=${encodeURIComponent(finalUrl)}`;
 }
 

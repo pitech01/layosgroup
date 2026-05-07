@@ -325,16 +325,52 @@ const LessonView = () => {
                             }
                             #document-lesson-viewer {
                                 padding: 2.5rem 1.5rem !important;
-                                min-height: 450px !important;
+                                min-height: 400px !important;
+                                border-radius: 24px !important;
                             }
                             #document-lesson-viewer h3 {
-                                font-size: 1.5rem !important;
+                                font-size: 1.45rem !important;
+                                margin-bottom: 0.75rem !important;
+                            }
+                            #document-lesson-viewer .preview-icon-container {
+                                width: 120px !important;
+                                height: 80px !important;
+                                margin-bottom: 1.5rem !important;
+                                border-radius: 16px !important;
+                            }
+                            #document-lesson-viewer .resource-desc {
+                                font-size: 1rem !important;
+                                margin-bottom: 2rem !important;
+                                line-height: 1.5 !important;
+                            }
+                            #document-lesson-viewer .btn-wrapper {
+                                width: 100% !important;
                             }
                             .btn-primary-forest {
                                 padding: 0 2rem !important;
                                 height: 60px !important;
                                 font-size: 1rem !important;
                                 width: 100% !important;
+                            }
+                            #final-fallback-viewer {
+                                padding: 2.5rem 1.5rem !important;
+                                border-radius: 24px !important;
+                            }
+                            #final-fallback-viewer .fallback-icon-container {
+                                width: 60px !important;
+                                height: 60px !important;
+                                margin-bottom: 1rem !important;
+                            }
+                            #final-fallback-viewer .fallback-title {
+                                font-size: 1.15rem !important;
+                            }
+                            #final-fallback-viewer .fallback-desc {
+                                font-size: 0.95rem !important;
+                            }
+                            .btn-fallback-forest {
+                                width: 100% !important;
+                                padding: 1rem 1.5rem !important;
+                                font-size: 0.95rem !important;
                             }
                             .options-grid {
                                 grid-template-columns: 1fr !important;
@@ -821,7 +857,7 @@ const LessonView = () => {
                                                     flexDirection: 'column', alignItems: 'center',
                                                     justifyContent: 'center', textAlign: 'center'
                                                 }}>
-                                                    <div style={{
+                                                    <div className="preview-icon-container" style={{
                                                         width: '180px', height: '120px', background: '#f8fafc',
                                                         borderRadius: '24px', display: 'flex', alignItems: 'center',
                                                         justifyContent: 'center', marginBottom: '2.5rem',
@@ -837,10 +873,10 @@ const LessonView = () => {
                                                     <h3 style={{ margin: '0 0 12px 0', fontSize: '2rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.03em' }}>
                                                         Instructional Resource Ready
                                                     </h3>
-                                                    <p style={{ margin: '0 0 3rem 0', color: '#64748b', fontSize: '1.25rem', fontWeight: 600, maxWidth: '520px', lineHeight: 1.6 }}>
+                                                    <p className="resource-desc" style={{ margin: '0 0 3rem 0', color: '#64748b', fontSize: '1.25rem', fontWeight: 600, maxWidth: '520px', lineHeight: 1.6 }}>
                                                         Your lesson materials have been architected. Start the neural narrator or explore the visual library below.
                                                     </p>
-                                                    <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', alignItems: 'center' }}>
+                                                    <div className="btn-wrapper" style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
                                                         <button
                                                             onClick={() => {
                                                                 const url = lesson.file_url || '';
@@ -854,7 +890,8 @@ const LessonView = () => {
                                                             style={{
                                                                 padding: '0 4rem', height: '70px', fontSize: '1.25rem', fontWeight: 950,
                                                                 boxShadow: '0 20px 40px -8px rgba(26, 77, 62, 0.4)',
-                                                                borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '14px'
+                                                                borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '14px',
+                                                                justifyContent: 'center'
                                                             }}
                                                         >
                                                             <Eye size={28} /> Preview Lesson Content
@@ -867,24 +904,27 @@ const LessonView = () => {
 
                                     // Final Fallback
                                     return (
-                                        <div style={{ textAlign: 'center', padding: '4rem' }}>
-                                            <div style={{ width: '80px', height: '80px', background: '#f1f5f9', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+                                        <div id="final-fallback-viewer" style={{ textAlign: 'center', padding: '4rem', background: '#f8fafc', borderRadius: '32px', border: '1.5px solid #f1f5f9' }}>
+                                            <div className="fallback-icon-container" style={{ width: '80px', height: '80px', background: '#f1f5f9', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
                                                 <FileText size={40} color="#1a4d3e" opacity={0.5} />
                                             </div>
-                                            <p style={{ color: '#1a4d3e', fontWeight: 900, fontSize: '1.25rem', margin: '0 0 8px 0' }}>Material Resource Prepared</p>
-                                            <p style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>{lesson.file_name || 'Attached File'}</p>
-                                            <div
-                                                onClick={() => {
-                                                    const url = lesson.file_url || '';
-                                                    const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
-                                                    const isPpt = /\.(pptx?)([?#]|$)/i.test(url);
-                                                    const isVideo = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i.test(url);
-                                                    setIframeLoading(true);
-                                                    setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
-                                                }}
-                                                style={{ marginTop: '2rem', background: '#1a4d3e', color: 'white', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 20px rgba(26, 77, 62, 0.2)' }}
-                                            >
-                                                <Eye size={18} /> Open Instructional Workspace
+                                            <p className="fallback-title" style={{ color: '#1a4d3e', fontWeight: 900, fontSize: '1.25rem', margin: '0 0 8px 0' }}>Material Resource Prepared</p>
+                                            <p className="fallback-desc" style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>{lesson.file_name || 'Attached File'}</p>
+                                            <div className="btn-wrapper" style={{ width: '100%', padding: '0 1rem', marginTop: '2rem' }}>
+                                                <div
+                                                    onClick={() => {
+                                                        const url = lesson.file_url || '';
+                                                        const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
+                                                        const isPpt = /\.(pptx?)([?#]|$)/i.test(url);
+                                                        const isVideo = /\.(mp4|webm|ogg|ogv|mov|m4v|avi|mkv)([?#]|$)/i.test(url);
+                                                        setIframeLoading(true);
+                                                        setPreviewAsset({ url, type: isPdf ? 'pdf' : isPpt ? 'ppt' : isVideo ? 'video' : 'image' });
+                                                    }}
+                                                    className="btn-fallback-forest"
+                                                    style={{ background: '#1a4d3e', color: 'white', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 10px 20px rgba(26, 77, 62, 0.2)' }}
+                                                >
+                                                    <Eye size={18} /> Open Instructional Workspace
+                                                </div>
                                             </div>
                                         </div>
                                     );

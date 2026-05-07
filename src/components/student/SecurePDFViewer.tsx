@@ -21,6 +21,9 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
     const [blobUrl, setBlobUrl] = useState<string | null>(null);
     const [isAnimating, setIsAnimating] = useState(false);
 
+    const [loadProgress, setLoadProgress] = useState(0);
+    const [documentLoaded, setDocumentLoaded] = useState(false);
+
     useEffect(() => {
         if (currentPage && currentPage !== pageNumber) {
             setIsAnimating(true);
@@ -33,12 +36,18 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
 
     useEffect(() => {
         setBlobUrl(buildProxyUrl(url));
+        setLoadProgress(0);
+        setDocumentLoaded(false);
     }, [url]);
 
     function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-        setNumPages(numPages);
-        setError(null);
-        if (onLoadSuccess) onLoadSuccess();
+        setLoadProgress(100);
+        setTimeout(() => {
+            setDocumentLoaded(true);
+            setNumPages(numPages);
+            setError(null);
+            if (onLoadSuccess) onLoadSuccess();
+        }, 400); // Give a brief moment for the 100% animation to finish visually
     }
 
     function onDocumentLoadError(err: Error) {
@@ -54,6 +63,8 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
             setIsAnimating(false);
         }, 300);
     };
+
+    const showLoader = !documentLoaded;
 
     return (
         <div style={{ 
@@ -152,24 +163,97 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
                         <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{error}</p>
                     </div>
                 ) : blobUrl ? (
-                    <div className={`pdf-page-container ${isAnimating ? 'pdf-animating' : ''}`}>
-                        <Document
-                            file={blobUrl}
-                            onLoadSuccess={onDocumentLoadSuccess}
-                            onLoadError={onDocumentLoadError}
-                            loading={<Loader2 className="animate-spin" color="#8b5cf6" size={48} />}
-                        >
-                            <Page 
-                                pageNumber={pageNumber} 
-                                scale={scale} 
-                                renderTextLayer={false}
-                                renderAnnotationLayer={false}
-                            />
-                        </Document>
-                    </div>
-                ) : (
-                    <Loader2 className="animate-spin" color="#8b5cf6" size={48} style={{ marginTop: '10rem' }} />
-                )}
+                    <>
+                        {showLoader && (
+                            <div style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#020617' }}>
+                                <div style={{
+                                    background: 'rgba(15, 23, 42, 0.6)',
+                                    backdropFilter: 'blur(16px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                                    borderRadius: '24px',
+                                    padding: '3rem',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '2rem',
+                                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(16, 185, 129, 0.1)',
+                                    maxWidth: '400px',
+                                    width: '100%'
+                                }}>
+                                    <div style={{ position: 'relative' }}>
+                                        <div style={{ position: 'absolute', inset: -10, background: 'rgba(16, 185, 129, 0.2)', borderRadius: '50%', filter: 'blur(12px)', animation: 'pulseGlow 2s infinite' }}></div>
+                                        <div style={{ width: '70px', height: '70px', background: 'rgba(16, 185, 129, 0.1)', border: '1.5px solid rgba(16, 185, 129, 0.3)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                                            <Shield size={32} color="#10b981" />
+                                            <Loader2 size={16} color="white" className="animate-spin" style={{ position: 'absolute', bottom: -6, right: -6, background: '#0f172a', borderRadius: '50%' }} />
+                                        </div>
+                                    </div>
+
+                                    <div style={{ width: '100%' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                            <span style={{ color: 'white', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.02em' }}>
+                                                Architecting Secure View...
+                                            </span>
+                                            <span style={{ color: '#10b981', fontWeight: 900, fontSize: '0.95rem' }}>
+                                                {loadProgress}%
+                                            </span>
+                                        </div>
+                                        <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', overflow: 'hidden', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)' }}>
+                                            <div style={{ 
+                                                width: `${loadProgress}%`, 
+                                                height: '100%', 
+                                                background: 'linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%)', 
+                                                transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
+                                                borderRadius: '100px',
+                                                position: 'relative',
+                                                overflow: 'hidden'
+                                            }}>
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: 0, left: 0, bottom: 0, right: 0,
+                                                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                                                    animation: 'shimmer 2s infinite'
+                                                }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <style>{`
+                                    @keyframes shimmer {
+                                        0% { transform: translateX(-100%); }
+                                        100% { transform: translateX(200%); }
+                                    }
+                                    @keyframes pulseGlow {
+                                        0%, 100% { opacity: 1; transform: scale(1); }
+                                        50% { opacity: 0.6; transform: scale(1.1); }
+                                    }
+                                `}</style>
+                            </div>
+                        )}
+
+                        <div className={`pdf-page-container ${isAnimating ? 'pdf-animating' : ''}`} style={{ opacity: showLoader ? 0 : 1, transition: 'opacity 0.6s ease' }}>
+                            <Document
+                                file={blobUrl}
+                                onLoadSuccess={onDocumentLoadSuccess}
+                                onLoadError={onDocumentLoadError}
+                                onLoadProgress={({ loaded, total }) => {
+                                    if (total) {
+                                        // Scale download progress to max 90% so the user waits for parsing
+                                        const percentage = Math.round((loaded / total) * 90);
+                                        setLoadProgress(percentage);
+                                    }
+                                }}
+                                loading={null}
+                            >
+                                <Page 
+                                    pageNumber={pageNumber} 
+                                    scale={scale} 
+                                    renderTextLayer={false}
+                                    renderAnnotationLayer={false}
+                                />
+                            </Document>
+                        </div>
+                    </>
+                ) : null}
             </div>
         </div>
     );
