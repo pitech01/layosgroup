@@ -1,0 +1,92 @@
+# Layos Group LMS - Frontend
+
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+![Vite](https://img.shields.io/badge/Vite-6-purple?logo=vite)
+
+A premium, state-of-the-art Learning Management System (LMS) built with React, TypeScript, and Vite. Designed for a seamless educational experience with role-based portals for Students, Instructors, and Administrators.
+
+## 🚀 Key Features
+
+### 🎓 Student Experience
+- **Interactive Dashboard:** Personal progress tracking and course management.
+- **Secure Learning:** Advanced PDF viewer with secure document streaming and anti-copy measures.
+- **AI-Powered Learning:** Integrated AI interaction for PDFs, allowing students to ask questions and get instant insights.
+- **Real-time Collaboration:** Live chat channels and real-time notifications via Laravel Echo.
+- **Live Classrooms:** Integrated live session support for real-time instructor interaction.
+- **Assignment Management:** Seamless submission and tracking of coursework.
+
+### 👨‍🏫 Instructor Suite
+- **Advanced Course Creation:** Intuitive curriculum builder with drag-and-drop capabilities.
+- **Student Management:** Detailed analytics, performance tracking, and enrollment management.
+- **Cohort Coordination:** Create and manage student cohorts for organized learning paths.
+- **Live Session Orchestration:** Tools to schedule and host live interactive classes.
+- **Certificate Management:** Custom template builder and automated issuance.
+- **Interactive Interviews:** Dedicated module for managing student interviews and assessments.
+
+### 🛡️ Core Infrastructure
+- **Secure PDF Viewer:** Proprietary viewer using PDF.js and custom security layers.
+- **Real-time Sync:** Powered by Pusher/Laravel Echo for instant updates.
+- **Responsive Design:** Premium UI crafted with Lucide icons and modern CSS patterns.
+- **Certificate Verification:** Public-facing portal for verifying student credentials.
+
+## 🛠️ Technology Stack
+
+- **Framework:** [React 19](https://react.dev/)
+- **Build Tool:** [Vite 6](https://vitejs.dev/)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** Custom CSS with [Lucide React](https://lucide.dev/) icons
+- **State & Routing:** React Router 7
+- **Real-time:** Laravel Echo & Pusher
+- **AI/ML:** @heyputer/puter.js & @xenova/transformers
+- **PDF Engine:** PDF.js (via react-pdf)
+
+## 📦 Getting Started
+
+### Prerequisites
+- Node.js (Latest LTS recommended)
+- npm or yarn
+
+### Installation
+1. Clone the repository
+2. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Configuration
+Create a `.env` file in the root of the `frontend` directory:
+```env
+VITE_API_BASE_URL=your_backend_api_url
+VITE_PUSHER_APP_KEY=your_pusher_key
+VITE_PUSHER_APP_CLUSTER=your_pusher_cluster
+```
+
+### Development
+Start the development server with Hot Module Replacement (HMR):
+```bash
+npm run dev
+```
+
+### Production Build
+Create an optimized production bundle:
+```bash
+npm run build
+```
+The output will be in the `dist/` directory.
+
+## 📁 Project Structure
+
+- `src/components`: Reusable UI components (Common, Student, Instructor).
+- `src/pages`: Main application views categorized by user role.
+- `src/context`: React Context providers for global state management.
+- `src/utils`: Helper functions and custom hooks.
+- `src/assets`: Static assets like images and global styles.
+
+---
+
+Built with ❤️ by the Layos Group Team.
