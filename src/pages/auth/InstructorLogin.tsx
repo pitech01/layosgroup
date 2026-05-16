@@ -175,7 +175,7 @@ export default function InstructorLogin() {
                         />
                         
                         {/* Floating Intel Card */}
-                        <div className="absolute -bottom-10 -right-10 bg-white/10 backdrop-blur-3xl p-8 rounded-[40px] border border-white/20 shadow-2xl animate-fade-in-up delay-700">
+                        <div className="absolute -bottom-10 -right-10 bg-white/10 backdrop-blur-3xl p-8 rounded-xl border border-white/20 shadow-2xl animate-fade-in-up delay-700">
                             <div className="flex items-center gap-6">
                                 <div className="w-16 h-16 bg-white/10 text-white rounded-3xl flex items-center justify-center shadow-inner">
                                     <GraduationCap size={32} />

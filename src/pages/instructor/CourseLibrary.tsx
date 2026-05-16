@@ -144,7 +144,7 @@ export default function CourseLibrary() {
                     </div>
                 ) : error ? (
                     <div className="bg-red-50 dark:bg-red-500/10 border-2 border-red-100 dark:border-red-500/20 rounded-[60px] p-20 text-center space-y-8 max-w-3xl mx-auto shadow-2xl">
-                        <div className="w-24 h-24 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-[40px] flex items-center justify-center mx-auto shadow-sm">
+                        <div className="w-24 h-24 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center mx-auto shadow-sm">
                             <AlertCircle size={48} />
                         </div>
                         <div className="space-y-3">

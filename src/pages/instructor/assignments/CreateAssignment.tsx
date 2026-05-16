@@ -193,7 +193,7 @@ export default function CreateAssignment() {
                         <div className="space-y-4">
                             <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Instructional Artifact (Optional)</label>
                             {!selectedFile ? (
-                                <div onClick={() => document.getElementById('file-input')?.click()} className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border-2 border-brand-border border-dashed text-center space-y-6 group-hover:border-brand-emerald transition-all cursor-pointer">
+                                <div onClick={() => document.getElementById('file-input')?.click()} className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-6 group-hover:border-brand-emerald transition-all cursor-pointer">
                                     <input type="file" id="file-input" hidden onChange={handleFileChange} accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip" />
                                     <div className="w-20 h-20 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[24px] flex items-center justify-center mx-auto text-brand-muted group-hover:text-brand-emerald group-hover:scale-110 transition-all shadow-sm"><Upload size={40} /></div>
                                     <div className="space-y-1">
@@ -202,7 +202,7 @@ export default function CreateAssignment() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="p-8 bg-brand-emerald/10 border-2 border-brand-emerald/20 rounded-[40px] flex items-center justify-between gap-6 shadow-xl shadow-brand-emerald/5">
+                                <div className="p-8 bg-brand-emerald/10 border-2 border-brand-emerald/20 rounded-xl flex items-center justify-between gap-6 shadow-xl shadow-brand-emerald/5">
                                     <div className="flex items-center gap-6 min-w-0">
                                         <div className="w-16 h-16 bg-brand-emerald text-white rounded-[20px] flex items-center justify-center shrink-0 shadow-lg shadow-brand-emerald/20"><FileText size={32} /></div>
                                         <div className="space-y-1 truncate">

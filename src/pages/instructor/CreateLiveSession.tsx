@@ -285,7 +285,7 @@ export default function CreateLiveSession() {
 
                     <div className="space-y-6">
                         {uploading ? (
-                            <div className="p-16 bg-brand-beige/10 dark:bg-white/5 rounded-[40px] border-2 border-brand-border border-dashed text-center space-y-8">
+                            <div className="p-16 bg-brand-beige/10 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-8">
                                 <div className="relative w-32 h-32 mx-auto">
                                     <svg className="w-full h-full transform -rotate-90">
                                         <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-brand-border" />
@@ -296,7 +296,7 @@ export default function CreateLiveSession() {
                                 <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em] animate-pulse">Streaming Artifact...</p>
                             </div>
                         ) : recordingUrl ? (
-                            <div className="p-10 bg-brand-emerald/10 rounded-[40px] border-2 border-brand-emerald/20 flex flex-col md:flex-row items-center justify-between gap-8">
+                            <div className="p-10 bg-brand-emerald/10 rounded-xl border-2 border-brand-emerald/20 flex flex-col md:flex-row items-center justify-between gap-8">
                                 <div className="flex items-center gap-6">
                                     <div className="w-16 h-16 bg-brand-emerald text-white rounded-[24px] flex items-center justify-center shadow-xl shadow-brand-emerald/20"><CheckCircle2 size={32} /></div>
                                     <div className="space-y-1">
@@ -309,7 +309,7 @@ export default function CreateLiveSession() {
                         ) : (
                             <div className="relative group">
                                 <input type="file" accept="video/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0])} />
-                                <div className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border-2 border-brand-border border-dashed text-center space-y-6 group-hover:border-brand-emerald transition-all">
+                                <div className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-6 group-hover:border-brand-emerald transition-all">
                                     <div className="w-20 h-20 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[24px] flex items-center justify-center mx-auto text-brand-muted group-hover:text-brand-emerald group-hover:scale-110 transition-all"><Plus size={40} /></div>
                                     <div className="space-y-1">
                                         <p className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Attach Instruction Artifact</p>
@@ -341,7 +341,7 @@ export default function CreateLiveSession() {
                 </div>
             </form>
 
-            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-[40px] border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-xl border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <Sparkles size={16} className="text-brand-emerald" />
                 Live sessions are automatically broadcasted to the student dashboard at the scheduled time.
             </div>

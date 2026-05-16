@@ -468,7 +468,7 @@ export default function EditCourse() {
                                 </div>
                             </div>
                             <div className="lg:col-span-5">
-                                <div className="p-10 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[40px] space-y-8">
+                                <div className="p-10 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-xl space-y-8">
                                     <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em] block text-center">Visual Identity</label>
                                     <div 
                                         className="relative group cursor-pointer aspect-video rounded-[32px] overflow-hidden bg-white dark:bg-brand-charcoal border-2 border-brand-border border-dashed hover:border-brand-emerald transition-all"
@@ -562,7 +562,7 @@ export default function EditCourse() {
                                     draggable
                                     onDragStart={() => handleModuleDragStart(modIdx)}
                                     onDragOver={(e) => handleModuleDragOver(e, modIdx)}
-                                    className={`bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden transition-all duration-500 ${mod.isOpen ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm'}`}
+                                    className={`bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden transition-all duration-500 ${mod.isOpen ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm'}`}
                                 >
                                     <div className="flex items-center gap-6 p-8 md:p-10 cursor-pointer select-none" onClick={() => toggleModule(mod.id)}>
                                         <div className="w-12 h-12 bg-brand-beige dark:bg-white/5 border border-brand-border rounded-2xl flex items-center justify-center text-brand-muted shrink-0 cursor-grab active:cursor-grabbing"><GripVertical size={24} /></div>
@@ -676,7 +676,7 @@ export default function EditCourse() {
                                 <h2 className="text-4xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Revision Complete</h2>
                                 <p className="text-brand-muted font-medium text-lg leading-relaxed">The master artifact is ready for synchronization. Confirm to finalize all modifications.</p>
                             </div>
-                            <div className="flex items-center justify-center gap-4 p-8 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border border-brand-border">
+                            <div className="flex items-center justify-center gap-4 p-8 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border">
                                 <button onClick={() => setConfirmed(!confirmed)} className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all border-none cursor-pointer ${confirmed ? 'bg-brand-emerald text-white' : 'bg-white dark:bg-brand-charcoal border-2 border-brand-border text-brand-muted'}`}>{confirmed && <CheckCircle2 size={20} />}</button>
                                 <span className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-widest">Verify Technical Compliance</span>
                             </div>

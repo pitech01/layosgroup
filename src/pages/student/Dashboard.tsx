@@ -435,7 +435,7 @@ export default function StudentDashboard() {
                     onClick={() => setPreviewUrl(null)}
                 >
                     <div
-                        className="bg-white dark:bg-brand-charcoal w-full max-w-4xl rounded-[40px] overflow-hidden shadow-2xl border border-brand-border animate-in zoom-in-95 duration-200"
+                        className="bg-white dark:bg-brand-charcoal w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl border border-brand-border animate-in zoom-in-95 duration-200"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="px-8 py-6 border-b border-brand-border flex justify-between items-center">

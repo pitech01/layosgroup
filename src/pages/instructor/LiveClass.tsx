@@ -410,7 +410,7 @@ export default function LiveClass() {
 
                         <div className="space-y-10">
                             {uploading ? (
-                                <div className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border-2 border-brand-border border-dashed text-center space-y-8">
+                                <div className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-8">
                                     <div className="relative w-32 h-32 mx-auto">
                                         <svg className="w-full h-full transform -rotate-90">
                                             <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-brand-border" />
@@ -424,7 +424,7 @@ export default function LiveClass() {
                                     </div>
                                 </div>
                             ) : uploadedUrl ? (
-                                <div className="p-12 bg-brand-emerald/10 rounded-[40px] border-2 border-brand-emerald/20 flex flex-col items-center gap-8 text-center">
+                                <div className="p-12 bg-brand-emerald/10 rounded-xl border-2 border-brand-emerald/20 flex flex-col items-center gap-8 text-center">
                                     <div className="w-20 h-20 bg-brand-emerald text-white rounded-[24px] flex items-center justify-center shadow-xl shadow-brand-emerald/20"><CheckCircle2 size={40} /></div>
                                     <div className="space-y-2">
                                         <h4 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Sync Established</h4>
@@ -440,7 +440,7 @@ export default function LiveClass() {
                                         onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                     />
-                                    <div className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border-2 border-brand-border border-dashed text-center space-y-6 group-hover:border-brand-emerald group-hover:bg-brand-emerald/5 transition-all">
+                                    <div className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-6 group-hover:border-brand-emerald group-hover:bg-brand-emerald/5 transition-all">
                                         <div className="w-20 h-20 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[24px] flex items-center justify-center mx-auto text-brand-muted group-hover:text-brand-emerald group-hover:scale-110 transition-all"><Plus size={40} /></div>
                                         <div className="space-y-2">
                                             <p className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Select Artifact</p>

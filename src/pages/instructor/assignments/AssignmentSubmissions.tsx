@@ -110,7 +110,7 @@ export default function AssignmentSubmissions() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-6 p-8 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border border-brand-border min-w-[240px]">
+                        <div className="flex items-center gap-6 p-8 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border min-w-[240px]">
                             <div className="w-16 h-16 bg-brand-emerald text-white rounded-[24px] flex items-center justify-center shadow-lg shadow-brand-emerald/20 shrink-0">
                                 <CheckCircle2 size={32} />
                             </div>
@@ -157,7 +157,7 @@ export default function AssignmentSubmissions() {
                         ) : (
                             <div className="grid grid-cols-1 gap-6">
                                 {filteredSubmissions.map((submission: any, idx: number) => (
-                                    <div key={submission.id} className="group bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-10 hover:shadow-xl hover:shadow-brand-charcoal/5 transition-all duration-500 animate-fade-in-up" style={{ animationDelay: `${idx * 0.05}s` }}>
+                                    <div key={submission.id} className="group bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-10 hover:shadow-xl hover:shadow-brand-charcoal/5 transition-all duration-500 animate-fade-in-up" style={{ animationDelay: `${idx * 0.05}s` }}>
                                         <div className="flex flex-col md:flex-row items-center gap-8 flex-1 w-full">
                                             {/* Student Identity */}
                                             <div className="flex items-center gap-6 min-w-[280px]">
@@ -216,7 +216,7 @@ export default function AssignmentSubmissions() {
                 </>
             )}
 
-            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-[40px] border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-xl border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                 <Sparkles size={16} className="text-brand-emerald" />
                 Response artifacts are archived and accessible for retroactive evaluation cycles.
             </div>

@@ -84,7 +84,7 @@ export default function AddStudent() {
     if (isSuccess) {
         return (
             <div className="h-[70vh] flex flex-col items-center justify-center text-center space-y-8 animate-fade-in">
-                <div className="w-32 h-32 bg-brand-emerald/10 text-brand-emerald rounded-[40px] flex items-center justify-center shadow-inner animate-bounce">
+                <div className="w-32 h-32 bg-brand-emerald/10 text-brand-emerald rounded-xl flex items-center justify-center shadow-inner animate-bounce">
                     <CheckCircle size={64} />
                 </div>
                 <div className="space-y-2">

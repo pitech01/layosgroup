@@ -91,7 +91,7 @@ export default function StudentInterviews() {
                     <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Syncing Resource Library...</p>
                 </div>
             ) : error ? (
-                <div className="bg-white dark:bg-brand-charcoal p-12 rounded-[40px] border border-red-100 dark:border-red-900/30 text-center space-y-6 shadow-xl shadow-red-500/5">
+                <div className="bg-white dark:bg-brand-charcoal p-12 rounded-xl border border-red-100 dark:border-red-900/30 text-center space-y-6 shadow-xl shadow-red-500/5">
                     <div className="w-20 h-20 bg-red-50 dark:bg-red-900/10 rounded-full flex items-center justify-center mx-auto text-red-500">
                         <AlertCircle size={40} />
                     </div>
@@ -107,7 +107,7 @@ export default function StudentInterviews() {
                     </button>
                 </div>
             ) : filteredInterviews.length === 0 ? (
-                <div className="bg-white dark:bg-brand-charcoal py-24 text-center rounded-[40px] border border-brand-border shadow-sm border-dashed">
+                <div className="bg-white dark:bg-brand-charcoal py-24 text-center rounded-xl border border-brand-border shadow-sm border-dashed">
                     <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8 text-brand-muted/30">
                         <LayoutDashboard size={48} />
                     </div>
@@ -119,7 +119,7 @@ export default function StudentInterviews() {
                     {filteredInterviews.map((i, idx) => (
                         <div 
                             key={i.id} 
-                            className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border p-8 flex flex-col hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500 group animate-fade-in-up"
+                            className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-8 flex flex-col hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500 group animate-fade-in-up"
                             style={{ animationDelay: `${0.1 * (idx + 1)}s` }}
                         >
                             <div className="flex justify-between items-start mb-8">

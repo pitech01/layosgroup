@@ -91,7 +91,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
     };
 
     const insertMention = (name: string) => {
-        const mentionHTML = `<strong class="text-brand-emerald bg-brand-emerald/10 px-1 rounded">@${name}</strong>&nbsp;`;
+        const mentionHTML = `<strong class="text-brand-charcoal bg-brand-emerald/10 px-1 rounded">@${name}</strong>&nbsp;`;
         executeCommand('insertHTML', mentionHTML);
         setShowMentionMenu(false);
         setMentionQuery('');
@@ -109,11 +109,11 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
     };
 
     return (
-        <div className="flex flex-col mx-2 md:mx-4 mb-4 bg-white border border-brand-border rounded-[24px] shadow-lg transition-all duration-300 focus-within:shadow-xl focus-within:border-brand-emerald/30 overflow-hidden relative">
+        <div className="flex flex-col mx-2 md:mx-4 mb-4 bg-white border border-brand-border rounded-[24px] shadow-lg transition-all duration-300 focus-within:shadow-xl focus-within:border-brand-emerald/30  relative">
             
             {/* Mention Menu */}
             {showMentionMenu && (
-                <div className="absolute bottom-full left-4 mb-2 w-72 bg-white border border-brand-border rounded-2xl shadow-2xl z-1000000  animate-in slide-in-from-bottom-2">
+                <div className="absolute bottom-full left-4 mb-2 w-72 bg-white border border-brand-border rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in slide-in-from-bottom-2">
                     <div className="p-3 bg-brand-beige/50 border-b border-brand-border">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-[10px] font-black uppercase tracking-widest text-brand-muted">Mention User</span>

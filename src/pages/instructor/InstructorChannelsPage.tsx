@@ -372,7 +372,7 @@ const InstructorChannelsPage = () => {
             <main className="flex-1 flex flex-col relative bg-brand-beige/10 dark:bg-white/5">
                 {!activeChannel ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-8 animate-fade-in">
-                        <div className="w-32 h-32 bg-brand-beige dark:bg-white/5 rounded-[40px] flex items-center justify-center text-brand-muted/30 shadow-inner">
+                        <div className="w-32 h-32 bg-brand-beige dark:bg-white/5 rounded-xl flex items-center justify-center text-brand-muted/30 shadow-inner">
                             <Globe size={64} className="animate-pulse" />
                         </div>
                         <div className="space-y-2">

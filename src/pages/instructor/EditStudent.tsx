@@ -103,7 +103,7 @@ export default function EditStudent() {
     if (isSuccess) {
         return (
             <div className="h-[70vh] flex flex-col items-center justify-center text-center space-y-8 animate-fade-in">
-                <div className="w-32 h-32 bg-brand-emerald/10 text-brand-emerald rounded-[40px] flex items-center justify-center shadow-inner animate-bounce">
+                <div className="w-32 h-32 bg-brand-emerald/10 text-brand-emerald rounded-xl flex items-center justify-center shadow-inner animate-bounce">
                     <CheckCircle size={64} />
                 </div>
                 <div className="space-y-2">
@@ -243,7 +243,7 @@ export default function EditStudent() {
                 </div>
             </form>
 
-            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-[40px] border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-xl border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <Sparkles size={16} className="text-brand-emerald" />
                 All identity modifications are logged and synchronized across the central academic grid.
             </div>

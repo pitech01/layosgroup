@@ -224,7 +224,7 @@ const InstructorChannelPage = () => {
 
             {/* Intelligence Bar */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <div className="p-8 bg-brand-emerald text-white rounded-[40px] shadow-xl shadow-brand-emerald/20 flex items-center gap-6 group hover:-translate-y-1 transition-all">
+                <div className="p-8 bg-brand-emerald text-white rounded-xl shadow-xl shadow-brand-emerald/20 flex items-center gap-6 group hover:-translate-y-1 transition-all">
                     <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                         <Zap size={24} />
                     </div>
@@ -233,7 +233,7 @@ const InstructorChannelPage = () => {
                         <div className="text-sm font-black uppercase tracking-tight leading-none">Instant Delivery</div>
                     </div>
                 </div>
-                <div className="p-8 bg-white dark:bg-brand-charcoal border border-brand-border rounded-[40px] shadow-sm flex items-center gap-6 group hover:-translate-y-1 transition-all">
+                <div className="p-8 bg-white dark:bg-brand-charcoal border border-brand-border rounded-xl shadow-sm flex items-center gap-6 group hover:-translate-y-1 transition-all">
                     <div className="w-14 h-14 bg-brand-beige dark:bg-white/5 rounded-2xl flex items-center justify-center text-brand-emerald group-hover:scale-110 transition-transform">
                         <Info size={24} />
                     </div>
@@ -242,7 +242,7 @@ const InstructorChannelPage = () => {
                         <div className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Archived Feed</div>
                     </div>
                 </div>
-                <div className="p-8 bg-white dark:bg-brand-charcoal border border-brand-border rounded-[40px] shadow-sm flex items-center gap-6 group hover:-translate-y-1 transition-all">
+                <div className="p-8 bg-white dark:bg-brand-charcoal border border-brand-border rounded-xl shadow-sm flex items-center gap-6 group hover:-translate-y-1 transition-all">
                     <div className="w-14 h-14 bg-brand-beige dark:bg-white/5 rounded-2xl flex items-center justify-center text-brand-emerald group-hover:scale-110 transition-transform">
                         <Sparkles size={24} />
                     </div>

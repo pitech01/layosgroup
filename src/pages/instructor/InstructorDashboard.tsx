@@ -119,7 +119,7 @@ export default function InstructorDashboard() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 {quickStats.map(({ label, value, trend, icon: Icon, color, bg }, i) => (
-                    <div key={i} className="bg-white dark:bg-brand-charcoal p-8 rounded-[40px] border border-brand-border shadow-sm hover:shadow-2xl hover:shadow-brand-charcoal/5 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden">
+                    <div key={i} className="bg-white dark:bg-brand-charcoal p-8 rounded-xl border border-brand-border shadow-sm hover:shadow-2xl hover:shadow-brand-charcoal/5 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-emerald/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-brand-emerald/10 transition-colors"></div>
                         
                         <div className="relative z-10 flex justify-between items-start mb-8">
@@ -180,7 +180,7 @@ export default function InstructorDashboard() {
                                 </div>
                             )) : (
                                 <div className="py-32 text-center space-y-8">
-                                    <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-[40px] flex items-center justify-center mx-auto text-brand-muted/30 shadow-inner">
+                                    <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-xl flex items-center justify-center mx-auto text-brand-muted/30 shadow-inner">
                                         <Globe size={48} className="animate-pulse" />
                                     </div>
                                     <div className="space-y-2">
@@ -245,7 +245,7 @@ export default function InstructorDashboard() {
                             </div>
                         </div>
 
-                        <div className="p-8 bg-brand-charcoal dark:bg-brand-emerald/10 rounded-[40px] border border-white/5 text-center space-y-4">
+                        <div className="p-8 bg-brand-charcoal dark:bg-brand-emerald/10 rounded-xl border border-white/5 text-center space-y-4">
                             <p className="text-[10px] font-bold text-white/70 dark:text-brand-emerald uppercase tracking-widest leading-relaxed">
                                 Global curriculum engagement across all active instructor modules is exceeding quarterly benchmarks by <span className="text-white dark:text-white font-black">18.5%</span>.
                             </p>

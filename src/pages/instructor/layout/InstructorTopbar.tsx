@@ -95,7 +95,7 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                     </button>
 
                     {showNotifications && (
-                        <div ref={notificationRef} className="absolute top-full right-0 mt-6 w-[400px] bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border shadow-2xl animate-fade-in-up overflow-hidden z-[50]">
+                        <div ref={notificationRef} className="absolute top-full right-0 mt-6 w-[400px] bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border shadow-2xl animate-fade-in-up overflow-hidden z-[50]">
                             <div className="p-8 border-b border-brand-border flex items-center justify-between bg-brand-beige/10 dark:bg-white/5">
                                 <div className="flex items-center gap-3">
                                     <Sparkles className="text-brand-emerald" size={18} />
@@ -139,7 +139,7 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                     </div>
 
                     {showProfileMenu && (
-                        <div ref={profileMenuRef} className="absolute top-full right-0 mt-6 w-72 bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border shadow-2xl animate-fade-in-up overflow-hidden z-[50]">
+                        <div ref={profileMenuRef} className="absolute top-full right-0 mt-6 w-72 bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border shadow-2xl animate-fade-in-up overflow-hidden z-[50]">
                             <div className="p-10 text-center border-b border-brand-border bg-brand-beige/10 dark:bg-white/5">
                                 <div className="w-20 h-20 bg-brand-emerald rounded-[28px] flex items-center justify-center font-black text-white text-3xl mx-auto mb-4 shadow-xl shadow-brand-emerald/20">
                                     {userInitial}

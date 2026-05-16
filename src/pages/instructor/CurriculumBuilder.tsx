@@ -234,7 +234,7 @@ export default function CurriculumBuilder() {
                 {/* Modules Hierarchy */}
                 <div className="space-y-10">
                     {modules.map((mod, idx) => (
-                        <div key={mod.id} className={`group bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden transition-all duration-500 ${mod.isOpen ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm opacity-80 hover:opacity-100'}`}>
+                        <div key={mod.id} className={`group bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden transition-all duration-500 ${mod.isOpen ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm opacity-80 hover:opacity-100'}`}>
                             {/* Module Header */}
                             <div 
                                 className="flex items-center gap-6 p-8 md:p-10 cursor-pointer select-none"
@@ -535,7 +535,7 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                 )}
 
                 {type === 'live' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 p-10 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border border-brand-border">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border">
                         <div className="space-y-4">
                             <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Transmission Platform</label>
                             <select className="w-full h-14 px-6 bg-white dark:bg-brand-charcoal/50 border-2 border-brand-border rounded-xl focus:outline-none focus:border-brand-emerald transition-all font-bold text-brand-charcoal dark:text-white cursor-pointer">
@@ -558,7 +558,7 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
 
                 {type === 'evaluation' && (
                     <div className="space-y-10">
-                        <div className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border border-brand-border space-y-6">
+                        <div className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border space-y-6">
                             <div className="flex justify-between items-center">
                                 <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em]">Minimum Proficiency Benchmark: <span className="text-brand-emerald text-lg ml-2">{evaluationFields.pass_mark}%</span></label>
                             </div>
@@ -575,7 +575,7 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
 
                         <div className="space-y-6">
                             {evaluationFields.questions.map((q, idx) => (
-                                <div key={q.id} className="p-10 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[40px] shadow-sm space-y-8 relative group/q">
+                                <div key={q.id} className="p-10 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-xl shadow-sm space-y-8 relative group/q">
                                     <div className="flex justify-between items-center">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-xl flex items-center justify-center font-black text-xs">
@@ -633,7 +633,7 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
 
                 {/* Global Settings */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-16 border-t border-brand-border">
-                    <div className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border border-brand-border space-y-6">
+                    <div className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border space-y-6">
                         <div className="flex items-center gap-6">
                             <div className="w-12 h-12 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center text-brand-emerald shadow-sm">
                                 <Sparkles size={24} />
@@ -653,7 +653,7 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                             <span className="font-bold text-sm text-brand-charcoal dark:text-white">Enable Open Access Manifest</span>
                         </div>
                     </div>
-                    <div className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border border-brand-border space-y-6">
+                    <div className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border space-y-6">
                         <div className="flex items-center gap-6">
                             <div className="w-12 h-12 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center text-red-500 shadow-sm">
                                 <Lock size={24} />

@@ -135,7 +135,7 @@ export default function CohortsPage() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 {stats.map((stat, i) => (
-                    <div key={i} className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border p-10 flex items-center gap-8 group hover:shadow-2xl transition-all duration-500">
+                    <div key={i} className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-10 flex items-center gap-8 group hover:shadow-2xl transition-all duration-500">
                         <div className={`w-20 h-20 rounded-3xl ${stat.bg} ${stat.color} flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500`}>
                             <stat.icon size={40} />
                         </div>
@@ -169,12 +169,12 @@ export default function CohortsPage() {
             {/* Content Area */}
             <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-32 gap-6 bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border border-dashed">
+                    <div className="flex flex-col items-center justify-center py-32 gap-6 bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border border-dashed">
                         <Loader2 className="animate-spin text-brand-emerald" size={64} />
                         <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Syncing Cohort Data...</p>
                     </div>
                 ) : error ? (
-                    <div className="bg-red-50 dark:bg-red-500/10 border-2 border-red-100 dark:border-red-500/20 rounded-[40px] p-16 text-center space-y-6">
+                    <div className="bg-red-50 dark:bg-red-500/10 border-2 border-red-100 dark:border-red-500/20 rounded-xl p-16 text-center space-y-6">
                         <div className="w-20 h-20 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-3xl flex items-center justify-center mx-auto shadow-sm">
                             <AlertCircle size={40} />
                         </div>
@@ -187,7 +187,7 @@ export default function CohortsPage() {
                         </button>
                     </div>
                 ) : (
-                    <div className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden shadow-sm">
+                    <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden shadow-sm">
                         <div className="overflow-x-auto custom-scrollbar">
                             <table className="w-full border-collapse">
                                 <thead>

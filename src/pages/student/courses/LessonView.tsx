@@ -120,7 +120,7 @@ const LessonView = () => {
 
     if (!lesson) {
         return (
-            <div className="py-24 px-4 text-center bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border ">
+            <div className="py-24 px-4 text-center bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border ">
                 <div className="w-20 h-20 bg-red-50 dark:bg-red-900/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
                     <X size={40} />
                 </div>
@@ -295,7 +295,7 @@ const LessonView = () => {
                                             <div className="m-auto text-center max-w-3xl p-8 md:p-16 bg-white/5 backdrop-blur-2xl rounded-[60px] border border-white/10 animate-fade-in-up space-y-10">
                                                 <div className="relative w-32 h-32 mx-auto">
                                                     <div className="absolute inset-0 bg-brand-emerald/20 blur-3xl animate-pulse" />
-                                                    <div className="relative w-full h-full bg-white/5 border border-white/10 rounded-[40px] flex items-center justify-center">
+                                                    <div className="relative w-full h-full bg-white/5 border border-white/10 rounded-xl flex items-center justify-center">
                                                         <HelpCircle size={64} className="text-brand-emerald" strokeWidth={1.5} />
                                                     </div>
                                                 </div>
@@ -528,7 +528,7 @@ const LessonView = () => {
                                                 <img
                                                     src={cleanUrl}
                                                     alt={lesson.title}
-                                                    className="max-w-full max-h-full rounded-2xl md:rounded-[40px] shadow-2xl transition-transform duration-500 hover:scale-[1.02]"
+                                                    className="max-w-full max-h-full rounded-2xl md:rounded-xl shadow-2xl transition-transform duration-500 hover:scale-[1.02]"
                                                     onContextMenu={(e: any) => e.preventDefault()}
                                                 />
                                             </div>
@@ -776,7 +776,7 @@ const LessonView = () => {
             {/* Performance Review Modal */}
             {showReview && (
                 <div className="fixed inset-0 z-[4000] bg-brand-charcoal/90 backdrop-blur-2xl flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-brand-charcoal w-full max-w-5xl h-full max-h-[90vh] rounded-[40px] flex flex-col overflow-hidden shadow-2xl border border-brand-border">
+                    <div className="bg-white dark:bg-brand-charcoal w-full max-w-5xl h-full max-h-[90vh] rounded-xl flex flex-col overflow-hidden shadow-2xl border border-brand-border">
                         <div className="px-8 py-8 border-b border-brand-border flex justify-between items-center shrink-0 bg-brand-beige/20 dark:bg-white/5">
                             <div>
                                 <div className="flex items-center gap-2 text-brand-emerald mb-2">
@@ -812,7 +812,7 @@ const LessonView = () => {
                                     const isCorrect = studentAnswer === q.correct_answer;
 
                                     return (
-                                        <div key={idx} className={`p-8 rounded-[40px] border-2 bg-white dark:bg-white/5 space-y-8 relative overflow-hidden ${isCorrect ? 'border-brand-emerald/20' : 'border-red-500/20'}`}>
+                                        <div key={idx} className={`p-8 rounded-xl border-2 bg-white dark:bg-white/5 space-y-8 relative overflow-hidden ${isCorrect ? 'border-brand-emerald/20' : 'border-red-500/20'}`}>
                                             <div className={`absolute top-0 left-0 bottom-0 w-2 ${isCorrect ? 'bg-brand-emerald' : 'bg-red-500'}`} />
                                             <div className="flex justify-between items-center">
                                                 <span className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Intelligence Block {idx + 1}</span>

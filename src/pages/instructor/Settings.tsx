@@ -195,7 +195,7 @@ const Settings = () => {
             </header>
 
             {/* Content Container */}
-            <div className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 {/* Tabs Navigation */}
                 <nav className="flex px-6 md:px-10 pt-8 gap-2 border-b border-brand-border bg-brand-beige/20 dark:bg-white/5 backdrop-blur-xl shrink-0 overflow-x-auto custom-scrollbar">
                     <button
@@ -311,7 +311,7 @@ const Settings = () => {
                     {activeTab === 'security' && (
                         <div className="max-w-4xl mx-auto space-y-16 animate-fade-in-up">
                             {/* Security Status */}
-                            <div className="flex items-center gap-8 p-10 bg-emerald-500/10 border border-emerald-500/20 rounded-[40px] group">
+                            <div className="flex items-center gap-8 p-10 bg-emerald-500/10 border border-emerald-500/20 rounded-xl group">
                                 <div className="w-20 h-20 rounded-3xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-500">
                                     <Shield size={40} />
                                 </div>
@@ -406,7 +406,7 @@ const Settings = () => {
                                 </div>
 
                                 {isLoadingSessions ? (
-                                    <div className="flex flex-col items-center justify-center py-16 gap-4 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border border-brand-border border-dashed">
+                                    <div className="flex flex-col items-center justify-center py-16 gap-4 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border border-dashed">
                                         <Loader2 size={32} className="animate-spin text-brand-emerald" />
                                         <p className="font-black text-[10px] text-brand-muted uppercase tracking-widest">Scanning Network Sessions...</p>
                                     </div>
