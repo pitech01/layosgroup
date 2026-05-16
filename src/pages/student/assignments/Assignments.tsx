@@ -140,10 +140,10 @@ export default function StudentAssignments() {
                             className="w-full bg-[#FBF9F6] border border-[#E6DFD5] rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[#1A4D3E] transition-colors font-medium placeholder-[#A5ADA9]"
                         />
                     </div>
-                    <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FBF9F6] border border-[#E6DFD5] rounded-xl text-sm font-semibold text-[#2D312E] hover:bg-[#F4EFEA] transition-colors whitespace-nowrap">
+                    {/* <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FBF9F6] border border-[#E6DFD5] rounded-xl text-sm font-semibold text-[#2D312E] hover:bg-[#F4EFEA] transition-colors whitespace-nowrap">
                         <SlidersHorizontal size={15} />
                         <span>Filters</span>
-                    </button>
+                    </button> */}
                 </div>
             </header>
 

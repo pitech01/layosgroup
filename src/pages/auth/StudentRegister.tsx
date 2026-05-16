@@ -421,7 +421,7 @@ export default function StudentRegister() {
                         <img
                             src={loginHero}
                             alt="Academy Preview"
-                            className="w-full h-auto rounded-[40px] shadow-[0_60px_120px_-30px_rgba(0,0,0,0.6)] border border-white/10 transform -rotate-y-12 rotate-x-6 translate-z-20 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-1000 ease-out"
+                            className="w-full h-auto rounded-xl shadow-[0_60px_120px_-30px_rgba(0,0,0,0.6)] border border-white/10 transform -rotate-y-12 rotate-x-6 translate-z-20 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-1000 ease-out"
                         />
 
                         {/* Floating Feature Chip */}

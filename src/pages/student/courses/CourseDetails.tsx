@@ -111,7 +111,7 @@ const CourseDetails = () => {
 
     if (!course) {
         return (
-            <div className="py-24 px-4 text-center bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border">
+            <div className="py-24 px-4 text-center bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border">
                 <div className="w-20 h-20 bg-red-50 dark:bg-red-900/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
                     <ShieldCheck size={40} />
                 </div>
@@ -190,7 +190,7 @@ const CourseDetails = () => {
 
                     <div className="space-y-6">
                         {course.modules.map((module: any, idx: number) => (
-                            <div key={module.id} className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+                            <div key={module.id} className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
                                 <div className="bg-brand-beige/50 dark:bg-white/5 p-6 md:p-8 border-b border-brand-border flex justify-between items-center flex-wrap gap-4">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 rounded-xl bg-brand-charcoal text-white flex items-center justify-center font-black text-xs">

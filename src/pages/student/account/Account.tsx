@@ -155,7 +155,7 @@ const Account = () => {
                 </p>
             </header>
 
-            <div className="bg-white dark:bg-brand-charcoal rounded-3xl md:rounded-[40px] border border-brand-border shadow-sm overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <div className="bg-white dark:bg-brand-charcoal rounded-3xl md:rounded-xl border border-brand-border shadow-sm overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 {/* Navigation Tabs */}
                 <div className="flex p-1.5 sm:p-2 bg-brand-beige/50 dark:bg-white/5 border-b border-brand-border gap-1 sm:gap-2">
                     <button

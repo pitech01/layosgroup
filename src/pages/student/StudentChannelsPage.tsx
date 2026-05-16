@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { 
-    Search, Hash, Users, Circle, Download, Image as ImageIcon, 
+    Search,ArrowLeft, Hash, Users, Circle, Download, Image as ImageIcon, 
     FileText, MessageSquare, Filter, X, File as FileGeneric,
     Pin, AlertCircle, HelpCircle, BookOpen, GraduationCap, Loader2, Info
 } from 'lucide-react';
@@ -139,10 +139,28 @@ const StudentChannelsPage = () => {
                 });
                 setChannels(formattedChannels);
 
-                if (!activeChannel && formattedChannels.length > 0) {
-                    const general = formattedChannels.find(c => c.title === 'general-discussion') || formattedChannels[0];
-                    setActiveChannel(general);
-                }
+                // if (!activeChannel && formattedChannels.length > 0) {
+                //     const general = formattedChannels.find(c => c.title === 'general-discussion') || formattedChannels[0];
+                //     setActiveChannel(general);
+                // }
+
+
+
+
+
+if (!activeChannel && formattedChannels.length > 0) {
+        const isMobile = window.innerWidth < 768; // 768px is Tailwind's 'md' breakpoint
+        if (!isMobile) {
+            const general = formattedChannels.find(c => c.title === 'general-discussion') || formattedChannels[0];
+            setActiveChannel(general);
+        }
+    }
+
+
+
+
+
+                
             }
 
             const dmsResponse = await fetch(`${API_URL}/direct-messages/contacts`, {
@@ -769,7 +787,7 @@ const StudentChannelsPage = () => {
                 /* Sub Sidebar Profile (Left Panel) */
                 .sub-sidebar {
                     width: 260px;
-                    background: #0f172a;
+                    background: #1e293b;
                     display: flex;
                     flex-direction: column;
                     border-right: 1px solid #1e293b;
@@ -894,8 +912,8 @@ const StudentChannelsPage = () => {
                     gap: 6px;
                 }
                 .tab.active {
-                    color: #3b82f6;
-                    border-bottom-color: #3b82f6;
+                    color: #000;
+                    border-bottom-color: #059669;
                 }
                 .tab:hover:not(.active) {
                     color: #0f172a;
@@ -991,7 +1009,7 @@ const StudentChannelsPage = () => {
                         onClick={() => setActiveChannel(null)}
                         style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', fontWeight: 700, color: '#334155' }}
                     >
-                        <Search size={20} className="md:hidden" style={{ marginRight: '8px' }} />
+                        <ArrowLeft size={20} className="" style={{ marginRight: '8px' }} />
                         Back
                     </button>
                 )}
@@ -1063,8 +1081,8 @@ const StudentChannelsPage = () => {
                     <>
                     <div className="chat-area">
                         {/* Enhanced Context Header */}
-                        <div className="context-header">
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="context-header padding-5">
+                            <div className='padding-5' style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', gap: '12px' }}>
                                     <h2 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', wordBreak: 'break-word' }}>
 
@@ -1214,7 +1232,7 @@ const StudentChannelsPage = () => {
                                     extractSharedFiles().map(file => (
                                         <div key={file.id} style={{ border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.25rem', background: 'white', display: 'flex', flexDirection: 'column', gap: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
                                             <div style={{ display: 'flex', gap: '12px' }}>
-                                                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <div className='bg-brand-emerald/80 text-white' style={{ width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     {file.type === 'pdf' ? <FileText size={24} /> : file.type === 'image' ? <ImageIcon size={24} /> : <FileGeneric size={24} />}
                                                 </div>
                                                 <div style={{ flex: 1 }}>
@@ -1230,7 +1248,7 @@ const StudentChannelsPage = () => {
                                                 <button onClick={() => window.open(file.url, '_blank')} style={{ flex: 1, background: '#f1f5f9', border: 'none', color: '#0f172a', padding: '8px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
                                                     Preview
                                                 </button>
-                                                <button onClick={(e) => forceDownload(e, file.url, file.name || 'Resource')} style={{ flex: 1, background: '#3b82f6', border: 'none', color: 'white', padding: '8px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
+                                                <button className='bg-brand-emerald/90' onClick={(e) => forceDownload(e, file.url, file.name || 'Resource')} style={{ flex: 1,  border: 'none', color: 'white', padding: '8px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
                                                     <Download size={16} /> Download
                                                 </button>
                                             </div>

@@ -229,7 +229,7 @@ const CertificateTemplateManager = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 {/* Left Toolbar */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border p-8 space-y-10 shadow-xl shadow-brand-charcoal/5">
+                    <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-8 space-y-10 shadow-xl shadow-brand-charcoal/5">
                         <div className="space-y-4">
                             <h3 className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em] px-2">Artifacts</h3>
                             <div className="space-y-3">
@@ -393,7 +393,7 @@ const CertificateTemplateManager = () => {
                             </div>
                         ) : (
                             <div className="py-20 text-center space-y-8 animate-fade-in">
-                                <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-[40px] flex items-center justify-center mx-auto text-brand-muted/30 border border-brand-border border-dashed shadow-inner">
+                                <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-xl flex items-center justify-center mx-auto text-brand-muted/30 border border-brand-border border-dashed shadow-inner">
                                     <Layers size={40} />
                                 </div>
                                 <div className="space-y-2 px-4">

@@ -122,7 +122,7 @@ export default function CourseDetails() {
     return (
         <div className="space-y-12 pb-12">
             {/* Header */}
-            <header className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border p-8 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 animate-fade-in-up">
+            <header className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-8 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 animate-fade-in-up">
                 <div className="space-y-6">
                     <div className="flex flex-wrap items-center gap-4">
                         <div className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${cohort.status === 'Active' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-brand-beige dark:bg-white/10 text-brand-muted border-brand-border'}`}>
@@ -206,7 +206,7 @@ export default function CourseDetails() {
                         {/* Courses Grid */}
                         <div className="space-y-8">
                             {assignedCourses.filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase())).map((course) => (
-                                <div key={course.id} className={`bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden transition-all duration-500 ${course.isExpanded ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm opacity-90 hover:opacity-100'}`}>
+                                <div key={course.id} className={`bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden transition-all duration-500 ${course.isExpanded ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm opacity-90 hover:opacity-100'}`}>
                                     {/* Course Header */}
                                     <div 
                                         className="flex flex-col md:flex-row items-center justify-between p-8 md:p-10 cursor-pointer select-none gap-8"
@@ -237,7 +237,7 @@ export default function CourseDetails() {
                                         <div className="px-8 md:px-10 pb-10 space-y-8 animate-fade-in-up">
                                             <div className="border-t border-brand-border pt-10">
                                                 {course.modules.length === 0 ? (
-                                                    <div className="flex flex-col items-center justify-center py-20 gap-8 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border-2 border-brand-border border-dashed text-center">
+                                                    <div className="flex flex-col items-center justify-center py-20 gap-8 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center">
                                                         <div className="w-20 h-20 bg-white dark:bg-white/5 rounded-3xl flex items-center justify-center text-brand-muted/30">
                                                             <Sparkles size={40} />
                                                         </div>
@@ -317,8 +317,8 @@ export default function CourseDetails() {
                 )}
 
                 {activeTab === 'students' && (
-                    <div className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border p-20 text-center space-y-8 animate-fade-in-up">
-                        <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-[40px] flex items-center justify-center mx-auto text-brand-muted/30">
+                    <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-20 text-center space-y-8 animate-fade-in-up">
+                        <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-xl flex items-center justify-center mx-auto text-brand-muted/30">
                             <Users size={48} />
                         </div>
                         <div className="space-y-2">

@@ -155,7 +155,7 @@ const Live = () => {
                 </div>
 
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-24 gap-4 bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border border-dashed">
+                    <div className="flex flex-col items-center justify-center py-24 gap-4 bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border border-dashed">
                         {/* <Loader2 className="animate-spin text-brand-emerald" size={40} /> */}
                         <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Syncing Broadcast Feed...</p>
                     </div>
@@ -164,7 +164,7 @@ const Live = () => {
                         {upcomingSessions.map((session: LiveSession) => {
                             const status = getSessionStatus(session);
                             return (
-                                <div key={session.id} className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border p-8 flex flex-col hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500 group relative overflow-hidden">
+                                <div key={session.id} className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-8 flex flex-col hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500 group relative overflow-hidden">
                                     <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none">
                                         <Video size={120} />
                                     </div>
@@ -219,7 +219,7 @@ const Live = () => {
                         })}
                     </div>
                 ) : (
-                    <div className="bg-white dark:bg-brand-charcoal py-24 text-center rounded-[40px] border border-brand-border border-dashed shadow-sm space-y-6">
+                    <div className="bg-white dark:bg-brand-charcoal py-24 text-center rounded-xl border border-brand-border border-dashed shadow-sm space-y-6">
                         <div className="w-20 h-20 bg-brand-beige dark:bg-white/5 rounded-[32px] flex items-center justify-center mx-auto text-brand-muted/30">
                             <Inbox size={40} />
                         </div>
@@ -241,7 +241,7 @@ const Live = () => {
                         <h2 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Archived Recordings</h2>
                     </div>
 
-                    <div className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden shadow-sm">
+                    <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden shadow-sm">
                         {pastSessions.map((session: LiveSession, idx: number) => (
                             <div 
                                 key={session.id} 
@@ -291,7 +291,7 @@ const Live = () => {
             {/* Multimedia Preview Overlay */}
             {previewUrl && (
                 <div className="fixed inset-0 z-[3000] bg-brand-charcoal/95 backdrop-blur-2xl flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-brand-charcoal w-full max-w-6xl rounded-[40px] overflow-hidden shadow-2xl border border-brand-border animate-in zoom-in-95 duration-500">
+                    <div className="bg-white dark:bg-brand-charcoal w-full max-w-6xl rounded-xl overflow-hidden shadow-2xl border border-brand-border animate-in zoom-in-95 duration-500">
                         <div className="px-8 py-6 border-b border-brand-border flex justify-between items-center bg-brand-beige/20 dark:bg-white/5 shrink-0">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-2xl bg-brand-emerald text-white flex items-center justify-center shadow-lg shadow-brand-emerald/20">

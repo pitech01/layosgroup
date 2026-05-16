@@ -164,7 +164,7 @@ export default function CreateInterview() {
                         <div className="space-y-4">
                             <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Documentation (PDF/DOC)</label>
                             {!docFile ? (
-                                <div onClick={() => document.getElementById('doc-input')?.click()} className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border-2 border-brand-border border-dashed text-center space-y-4 hover:border-brand-emerald group transition-all cursor-pointer">
+                                <div onClick={() => document.getElementById('doc-input')?.click()} className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-4 hover:border-brand-emerald group transition-all cursor-pointer">
                                     <input type="file" id="doc-input" hidden accept=".pdf,.doc,.docx" onChange={e => handleFileChange(e, 'doc')} />
                                     <div className="w-14 h-14 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-2xl flex items-center justify-center mx-auto text-brand-muted group-hover:text-brand-emerald group-hover:scale-110 transition-all"><FileText size={24} /></div>
                                     <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Attach Protocol</p>
@@ -184,7 +184,7 @@ export default function CreateInterview() {
                         <div className="space-y-4">
                             <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Video (MP4/MOV)</label>
                             {!videoFile ? (
-                                <div onClick={() => document.getElementById('video-input')?.click()} className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border-2 border-brand-border border-dashed text-center space-y-4 hover:border-brand-emerald group transition-all cursor-pointer">
+                                <div onClick={() => document.getElementById('video-input')?.click()} className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-4 hover:border-brand-emerald group transition-all cursor-pointer">
                                     <input type="file" id="video-input" hidden accept="video/*" onChange={e => handleFileChange(e, 'video')} />
                                     <div className="w-14 h-14 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-2xl flex items-center justify-center mx-auto text-brand-muted group-hover:text-brand-emerald group-hover:scale-110 transition-all"><Video size={24} /></div>
                                     <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Attach Stream</p>
@@ -217,7 +217,7 @@ export default function CreateInterview() {
                 </div>
             </form>
 
-            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-[40px] border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-xl border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <Sparkles size={16} className="text-brand-emerald" />
                 Interview artifacts are immediately indexed and made available to authorized student cohorts.
             </div>

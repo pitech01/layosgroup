@@ -525,7 +525,7 @@ export default function CreateCourse() {
                             </div>
 
                             <div className="lg:col-span-5">
-                                <div className="p-10 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[40px] space-y-8">
+                                <div className="p-10 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-xl space-y-8">
                                     <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em] block text-center">Visual Identity (Thumbnail)</label>
                                     <div 
                                         className="relative group cursor-pointer aspect-video rounded-[32px] overflow-hidden bg-white dark:bg-brand-charcoal border-2 border-brand-border border-dashed hover:border-brand-emerald transition-all"
@@ -636,7 +636,7 @@ export default function CreateCourse() {
 
                         <div className="space-y-8">
                             {modules.map((mod, idx) => (
-                                <div key={mod.id} className={`bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden transition-all duration-500 ${mod.isOpen ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm'}`}>
+                                <div key={mod.id} className={`bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden transition-all duration-500 ${mod.isOpen ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm'}`}>
                                     {/* Module Header */}
                                     <div 
                                         className="flex items-center gap-6 p-8 md:p-10 cursor-pointer select-none"
@@ -880,7 +880,7 @@ export default function CreateCourse() {
                                 </div>
                             </div>
 
-                            <div className="relative z-10 flex items-center justify-center gap-4 p-8 bg-brand-beige/20 dark:bg-white/5 rounded-[40px] border border-brand-border">
+                            <div className="relative z-10 flex items-center justify-center gap-4 p-8 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border">
                                 <button 
                                     onClick={() => setConfirmed(!confirmed)}
                                     className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all border-none cursor-pointer ${confirmed ? 'bg-brand-emerald text-white' : 'bg-white dark:bg-brand-charcoal border-2 border-brand-border text-brand-muted'}`}
@@ -893,15 +893,15 @@ export default function CreateCourse() {
 
                         {/* Summary Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="bg-white dark:bg-brand-charcoal p-10 rounded-[40px] border border-brand-border space-y-3">
+                            <div className="bg-white dark:bg-brand-charcoal p-10 rounded-xl border border-brand-border space-y-3">
                                 <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Instructional Phases</div>
                                 <div className="text-4xl font-black text-brand-emerald">{modules.length}</div>
                             </div>
-                            <div className="bg-white dark:bg-brand-charcoal p-10 rounded-[40px] border border-brand-border space-y-3">
+                            <div className="bg-white dark:bg-brand-charcoal p-10 rounded-xl border border-brand-border space-y-3">
                                 <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Total Assets</div>
                                 <div className="text-4xl font-black text-brand-emerald">{modules.reduce((acc, m) => acc + m.lessons.length, 0)}</div>
                             </div>
-                            <div className="bg-white dark:bg-brand-charcoal p-10 rounded-[40px] border border-brand-border space-y-3">
+                            <div className="bg-white dark:bg-brand-charcoal p-10 rounded-xl border border-brand-border space-y-3">
                                 <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Deployment Cohort</div>
                                 <div className="text-xl font-black text-brand-emerald truncate uppercase tracking-tight">{cohorts.find(c => c.id === selectedCohortId)?.name || 'Library Only'}</div>
                             </div>
@@ -949,7 +949,7 @@ export default function CreateCourse() {
             {showSuccess && (
                 <div className="fixed inset-0 z-[2000] bg-brand-charcoal/95 backdrop-blur-3xl flex items-center justify-center p-6 text-center animate-fade-in">
                     <div className="max-w-xl space-y-12 animate-scale-up">
-                        <div className="w-32 h-32 bg-brand-emerald text-white rounded-[40px] flex items-center justify-center mx-auto shadow-2xl shadow-brand-emerald/40 animate-bounce">
+                        <div className="w-32 h-32 bg-brand-emerald text-white rounded-xl flex items-center justify-center mx-auto shadow-2xl shadow-brand-emerald/40 animate-bounce">
                             <CheckCircle2 size={64} />
                         </div>
                         <div className="space-y-6">

@@ -138,7 +138,7 @@ export default function CohortDetails() {
     if (error || !cohort) {
         return (
             <div className="p-12 md:p-24 flex justify-center items-center">
-                <div className="max-w-xl w-full bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-[40px] p-12 text-center space-y-8 animate-fade-in-up">
+                <div className="max-w-xl w-full bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl p-12 text-center space-y-8 animate-fade-in-up">
                     <div className="w-20 h-20 bg-red-500 text-white rounded-3xl flex items-center justify-center mx-auto shadow-lg shadow-red-500/20">
                         <AlertCircle size={40} />
                     </div>
@@ -178,7 +178,7 @@ export default function CohortDetails() {
             )}
 
             {/* Premium Header */}
-            <header className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border p-8 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 animate-fade-in-up relative overflow-hidden group">
+            <header className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-8 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 animate-fade-in-up relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-brand-emerald/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-brand-emerald/10 transition-colors duration-1000"></div>
                 
                 <div className="relative z-10 space-y-6">
@@ -245,7 +245,7 @@ export default function CohortDetails() {
                 {activeTab === 'curriculum' ? (
                     !cohort.course ? (
                         <div className="bg-white dark:bg-brand-charcoal rounded-[60px] border-2 border-brand-border border-dashed p-20 text-center space-y-10 animate-fade-in-up">
-                            <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-[40px] flex items-center justify-center mx-auto text-brand-muted/30 shadow-inner">
+                            <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-xl flex items-center justify-center mx-auto text-brand-muted/30 shadow-inner">
                                 <Layers size={48} />
                             </div>
                             <div className="space-y-4">
@@ -281,7 +281,7 @@ export default function CohortDetails() {
 
                             <div className="grid grid-cols-1 gap-8">
                                 {cohort.course.modules?.map((module, idx) => (
-                                    <div key={module.id} className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden shadow-sm hover:shadow-xl hover:shadow-brand-charcoal/5 transition-all duration-500 group/module">
+                                    <div key={module.id} className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden shadow-sm hover:shadow-xl hover:shadow-brand-charcoal/5 transition-all duration-500 group/module">
                                         <div className="px-10 py-8 bg-brand-beige/20 dark:bg-white/5 border-b border-brand-border flex flex-col md:flex-row justify-between items-center gap-4">
                                             <div className="flex items-center gap-6">
                                                 <div className="w-12 h-12 bg-white dark:bg-brand-charcoal rounded-2xl flex items-center justify-center text-brand-emerald shadow-sm font-black text-lg">
@@ -334,7 +334,7 @@ export default function CohortDetails() {
                         </div>
 
                         {/* Students Table */}
-                        <div className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5">
+                        <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5">
                             <div className="overflow-x-auto custom-scrollbar">
                                 <table className="w-full border-collapse">
                                     <thead>

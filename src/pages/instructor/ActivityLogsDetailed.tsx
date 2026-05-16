@@ -154,7 +154,7 @@ export default function ActivityLogsDetailed() {
                             )) : (
                                 <tr>
                                     <td colSpan={4} className="px-10 py-32 text-center space-y-8">
-                                        <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-[40px] flex items-center justify-center mx-auto text-brand-muted/30 shadow-inner">
+                                        <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-xl flex items-center justify-center mx-auto text-brand-muted/30 shadow-inner">
                                             <Database size={48} className="animate-pulse" />
                                         </div>
                                         <div className="space-y-2">
