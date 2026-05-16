@@ -138,7 +138,7 @@ const Live = () => {
                             onChange={(e) => setSelectedCourseId(e.target.value)}
                             className="w-full h-14 pl-12 pr-10 bg-white dark:bg-brand-charcoal border border-brand-border rounded-2xl appearance-none focus:outline-none focus:ring-4 focus:ring-brand-emerald/10 focus:border-brand-emerald transition-all text-brand-charcoal dark:text-white font-black text-xs uppercase tracking-widest cursor-pointer shadow-sm"
                         >
-                            <option value="all">Unified Curriculum</option>
+                            <option value="all">All Enrolled Courses</option>
                             {courses.map((course: any) => (
                                 <option key={course.id} value={course.id}>{course.title}</option>
                             ))}

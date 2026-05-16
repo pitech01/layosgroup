@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles, Maximize2, Trophy, Download, RefreshCw, Calendar, Clock, Activity } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles, Maximize2, Minimize2, Trophy, Download, RefreshCw, Calendar, Clock, BookOpen, Activity } from 'lucide-react';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
 
@@ -120,7 +120,7 @@ const LessonView = () => {
 
     if (!lesson) {
         return (
-            <div className="py-24 px-4 text-center bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border">
+            <div className="py-24 px-4 text-center bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border ">
                 <div className="w-20 h-20 bg-red-50 dark:bg-red-900/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
                     <X size={40} />
                 </div>
@@ -198,12 +198,20 @@ const LessonView = () => {
 
     return (
         <div className="flex flex-col h-[calc(100vh-80px)] overflow-hidden">
-            <div className="flex-1 overflow-y-auto scrollbar-none">
+            <div className="flex-1 overflow-y-auto scrollbar 
+            
+            [&::-webkit-scrollbar]:w-2
+  [&::-webkit-scrollbar-track]:bg-slate-100
+  [&::-webkit-scrollbar-thumb]:bg-brand-emerald/40
+  active:[&::-webkit-scrollbar-thumb]:bg-brand-emerald
+  [&::-webkit-scrollbar-thumb:hover]:bg-brand-emerald
+  [&::-webkit-scrollbar-thumb]:rounded-full">
+
                 <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
                     {/* Navigation Header */}
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
-                        <Link 
-                            to={`/student/courses/${courseId}?cohortId=${cohortId}`} 
+                        <Link
+                            to={`/student/courses/${courseId}?cohortId=${cohortId}`}
                             className="flex items-center gap-2 text-brand-muted font-black text-xs uppercase tracking-widest hover:text-brand-emerald transition-colors"
                         >
                             <ChevronLeft size={16} /> Course Curriculum
@@ -212,9 +220,9 @@ const LessonView = () => {
                             <button
                                 onClick={() => prevLesson && handleNavigateLesson(prevLesson.id)}
                                 disabled={!prevLesson}
-                                className="flex-1 sm:flex-none px-6 py-3 rounded-xl border border-brand-border text-brand-muted font-black text-[10px] uppercase tracking-widest hover:bg-brand-beige dark:hover:bg-white/5 disabled:opacity-30 transition-all"
+                                className="flex-1 sm:flex-none px-6 py-3 rounded-xl border border-brand-charcoal/30 text-brand-charcoal font-black text-[10px] uppercase tracking-widest hover:bg-green-600 hover:text-white disabled:opacity-30 transition-all transition-all flex items-center justify-center gap-2"
                             >
-                                Previous
+                                {prevLesson ? <ChevronLeft size={14} /> : null}   Previous
                             </button>
                             <button
                                 onClick={() => nextLesson && handleNavigateLesson(nextLesson.id)}
@@ -227,9 +235,9 @@ const LessonView = () => {
                     </div>
 
                     {/* Content Player Container */}
-                    <div 
+                    <div
                         className={`
-                            bg-black rounded-[40px] overflow-hidden shadow-2xl transition-all duration-500 border border-brand-border
+                            bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-500 border border-brand-border
                             ${isMaximized ? 'fixed inset-0 z-[2000] rounded-none' : 'aspect-video relative'}
                         `}
                     >
@@ -237,7 +245,7 @@ const LessonView = () => {
                             onClick={() => setIsMaximized(!isMaximized)}
                             className="absolute top-6 right-6 z-[2100] w-12 h-12 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-white/10 transition-all active:scale-95"
                         >
-                            {isMaximized ? <X size={24} /> : <Maximize2 size={24} />}
+                            {isMaximized ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
                         </button>
 
                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-brand-charcoal to-black">
@@ -313,8 +321,8 @@ const LessonView = () => {
                                                     </div>
                                                 </div>
 
-                                                <button 
-                                                    onClick={() => setQuizStarted(true)} 
+                                                <button
+                                                    onClick={() => setQuizStarted(true)}
                                                     className="w-full sm:w-auto bg-brand-emerald text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-brand-emerald/40 hover:-translate-y-1 active:scale-95 transition-all border-none cursor-pointer"
                                                 >
                                                     Initialize Assessment
@@ -411,8 +419,8 @@ const LessonView = () => {
                                                                         onClick={() => setSelectedAnswers({ ...selectedAnswers, [currentQuestionIndex]: idx })}
                                                                         className={`
                                                                             flex items-center gap-6 p-6 rounded-[32px] text-left transition-all duration-300 group border-none cursor-pointer
-                                                                            ${isSelected 
-                                                                                ? 'bg-brand-emerald/10 border-brand-emerald ring-2 ring-brand-emerald/50 text-white' 
+                                                                            ${isSelected
+                                                                                ? 'bg-brand-emerald/10 border-brand-emerald ring-2 ring-brand-emerald/50 text-white'
                                                                                 : 'bg-white/5 border border-white/10 text-brand-muted hover:bg-white/10 hover:text-white'}
                                                                         `}
                                                                     >
@@ -494,7 +502,7 @@ const LessonView = () => {
                                             <iframe
                                                 src={cleanUrl}
                                                 loading="lazy"
-                                                className="w-full h-full border-none rounded-2xl md:rounded-[40px]"
+                                                className="w-full h-full border-none rounded-xl "
                                                 allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
                                                 allowFullScreen={true}
                                             />
@@ -507,7 +515,7 @@ const LessonView = () => {
                                                 controls
                                                 src={cleanUrl}
                                                 autoPlay
-                                                className="w-full h-full border-none rounded-2xl md:rounded-[40px] object-contain"
+                                                className="w-full h-full border-none rounded-sm  object-contain"
                                                 controlsList="nodownload"
                                                 onContextMenu={(e: any) => e.preventDefault()}
                                             />
@@ -540,9 +548,9 @@ const LessonView = () => {
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="space-y-4">
+                                                <div className="space-y-4 ">
                                                     <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight">Intelligence Pack Ready</h3>
-                                                    <p className="text-brand-muted text-lg font-medium max-w-xl mx-auto leading-relaxed">
+                                                    <p className="text-brand-muted text-lg  font-medium max-w-xl mx-auto leading-relaxed">
                                                         High-fidelity instructional materials have been architected. Launch the secure viewer below.
                                                     </p>
                                                 </div>
@@ -602,7 +610,7 @@ const LessonView = () => {
                                     </div>
                                     <span className="text-[10px] font-black text-brand-emerald uppercase tracking-[0.2em]">{lesson.moduleTitle}</span>
                                 </div>
-                                <h1 className="text-4xl md:text-5xl font-black text-brand-charcoal dark:text-white tracking-tight leading-none">
+                                <h1 className="text-4xl md:text-5xl sm:text-xl font-black text-brand-charcoal dark:text-white tracking-tight leading-none text-wrap break-words">
                                     {lesson.title}
                                 </h1>
                             </div>
@@ -625,8 +633,8 @@ const LessonView = () => {
                                     disabled={isCompleting}
                                     className={`
                                         w-full sm:w-auto h-16 px-12 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 border-none cursor-pointer active:scale-95
-                                        ${isCompleted 
-                                            ? 'bg-brand-beige dark:bg-white/5 text-brand-emerald border-2 border-brand-emerald shadow-none' 
+                                        ${isCompleted
+                                            ? 'bg-brand-beige dark:bg-white/5 text-brand-emerald border-2 border-brand-emerald shadow-none'
                                             : 'bg-brand-charcoal dark:bg-brand-emerald text-white shadow-2xl shadow-brand-charcoal/30 hover:scale-105'}
                                     `}
                                 >
@@ -639,11 +647,11 @@ const LessonView = () => {
 
                         {/* Sidebar: Progress Context */}
                         <div className="space-y-8">
-                            <div className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border p-8 shadow-sm space-y-8">
+                            <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-8 shadow-sm space-y-8">
                                 <h4 className="text-xs font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] flex items-center gap-2">
                                     <BookOpen size={16} className="text-brand-emerald" /> Curriculum Status
                                 </h4>
-                                
+
                                 <div className="space-y-2">
                                     {allLessons.map((l, i) => {
                                         const isCurrent = l.id == lessonId;
@@ -672,84 +680,98 @@ const LessonView = () => {
             </div>
 
             {/* Global Asset Preview Modal */}
-            {previewAsset && (
-                <div className="fixed inset-0 z-[3000] bg-white dark:bg-brand-charcoal flex flex-col animate-in fade-in zoom-in-95 duration-300">
-                    <div className="px-8 py-6 border-b border-brand-border flex justify-between items-center bg-white/80 dark:bg-brand-charcoal/80 backdrop-blur-xl">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-brand-emerald/10 flex items-center justify-center text-brand-emerald">
-                                {previewAsset.type === 'pdf' || previewAsset.type === 'ppt' ? <FileText size={24} /> : <Eye size={24} />}
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Intelligence Hub</h3>
-                                <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Secured Instructional Protocol</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => setShowAiInteraction(true)}
-                                className="flex items-center gap-2 px-4 py-2 rounded-full border border-indigo-500 text-indigo-500 font-black text-[10px] uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all active:scale-95 cursor-pointer bg-transparent"
-                            >
-                                <Sparkles size={14} /> Virtual Tutor
-                            </button>
-                            <button
-                                onClick={() => setPreviewAsset(null)}
-                                className="w-12 h-12 rounded-2xl bg-brand-beige dark:bg-white/10 text-brand-muted flex items-center justify-center hover:text-red-500 transition-all border-none cursor-pointer"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
-                    </div>
+{previewAsset && (
+    <div className="fixed inset-0 z-[3000] bg-white dark:bg-brand-charcoal flex flex-col animate-in fade-in zoom-in-95 duration-300">
+        
+        {/* Responsive Header Banner */}
+        <div className="px-4 py-3 md:px-8 md:py-6 border-b border-brand-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/80 dark:bg-brand-charcoal/80 backdrop-blur-xl">
+            
+            {/* Asset Meta Info */}
+            <div className="flex items-center gap-3 md:gap-4">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-brand-emerald/10 flex items-center justify-center text-brand-emerald shrink-0">
+                    {previewAsset.type === 'pdf' || previewAsset.type === 'ppt' ? <FileText size={20} className="md:w-6 md:h-6" /> : <Eye size={20} className="md:w-6 md:h-6" />}
+                </div>
+                <div className="min-w-0">
+                    <h3 className="text-base md:text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight truncate">
+                        Intelligence Hub
+                    </h3>
+                    <p className="text-[9px] md:text-[10px] font-black text-brand-muted uppercase tracking-[0.15em] md:tracking-[0.2em] truncate">
+                        Secured Instructional Protocol
+                    </p>
+                </div>
+            </div>
 
-                    <div className="flex-1 relative bg-brand-beige dark:bg-brand-charcoal overflow-hidden flex items-center justify-center">
-                        {iframeLoading && (previewAsset.type === 'pdf' || previewAsset.type === 'ppt') && (
-                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-brand-beige dark:bg-brand-charcoal animate-pulse">
-                                <div className="w-16 h-16 border-4 border-brand-border border-t-brand-emerald rounded-full animate-spin mb-6" />
-                                <h4 className="font-black text-brand-charcoal dark:text-white uppercase tracking-widest">Architecting Workspace...</h4>
-                            </div>
-                        )}
-                        {previewAsset.type === 'pdf' ? (
-                            <SecurePDFViewer 
-                                url={previewAsset.url} 
-                                onLoadSuccess={() => setIframeLoading(false)} 
-                                hideToolbar={false}
-                            />
-                        ) : previewAsset.type === 'ppt' ? (
-                            <iframe
-                                src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewAsset.url)}`}
-                                className="w-full h-full border-none"
-                                title="PPT Review"
-                                onLoad={() => setIframeLoading(false)}
-                                onContextMenu={(e: any) => e.preventDefault()}
-                            />
-                        ) : previewAsset.type === 'video' ? (
-                            previewAsset.url.includes('mediadelivery.net') ? (
-                                <iframe
-                                    src={previewAsset.url}
-                                    loading="lazy"
-                                    className="w-full h-full border-none"
-                                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-                                    allowFullScreen={true}
-                                />
-                            ) : (
-                                <video
-                                    controls
-                                    src={previewAsset.url}
-                                    className="w-full h-full object-contain"
-                                    controlsList="nodownload"
-                                    onContextMenu={(e: any) => e.preventDefault()}
-                                />
-                            )
-                        ) : (
-                            <img
-                                src={previewAsset.url}
-                                className="max-w-full max-h-full object-contain"
-                                alt="Asset"
-                                onContextMenu={(e: any) => e.preventDefault()}
-                            />
-                        )}
-                    </div>
+            {/* Core Action Panel */}
+            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-brand-border/40 sm:border-t-0 pt-3 sm:pt-0">
+                <button
+                    onClick={() => setShowAiInteraction(true)}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 rounded-full border border-indigo-500 text-indigo-500 font-black text-[10px] uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all active:scale-95 cursor-pointer bg-transparent flex-1 sm:flex-none"
+                >
+                    <Sparkles size={14} /> <span>Virtual Tutor</span>
+                </button>
+                <button
+                    onClick={() => setPreviewAsset(null)}
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-brand-beige dark:bg-white/10 text-brand-muted flex items-center justify-center hover:text-red-500 transition-all border-none cursor-pointer shrink-0"
+                >
+                    <X size={20} className="md:w-6 md:h-6" />
+                </button>
+            </div>
+        </div>
+
+        {/* Adaptive Viewport Stage */}
+        <div className="flex-1 relative bg-brand-beige dark:bg-brand-charcoal overflow-hidden flex items-center justify-center p-2 md:p-0">
+            {iframeLoading && (previewAsset.type === 'pdf' || previewAsset.type === 'ppt') && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-brand-beige dark:bg-brand-charcoal animate-pulse p-4 text-center">
+                    <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-brand-border border-t-brand-emerald rounded-full animate-spin mb-4 md:mb-6" />
+                    <h4 className="font-black text-xs md:text-sm text-brand-charcoal dark:text-white uppercase tracking-widest">
+                        Architecting Workspace...
+                    </h4>
                 </div>
             )}
+            
+            {previewAsset.type === 'pdf' ? (
+                <SecurePDFViewer
+                    url={previewAsset.url}
+                    onLoadSuccess={() => setIframeLoading(false)}
+                    hideToolbar={false}
+                />
+            ) : previewAsset.type === 'ppt' ? (
+                <iframe
+                    src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewAsset.url)}`}
+                    className="w-full h-full border-none"
+                    title="PPT Review"
+                    onLoad={() => setIframeLoading(false)}
+                    onContextMenu={(e: any) => e.preventDefault()}
+                />
+            ) : previewAsset.type === 'video' ? (
+                previewAsset.url.includes('mediadelivery.net') ? (
+                    <iframe
+                        src={previewAsset.url}
+                        loading="lazy"
+                        className="w-full h-full border-none"
+                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                        allowFullScreen={true}
+                    />
+                ) : (
+                    <video
+                        controls
+                        src={previewAsset.url}
+                        className="w-full h-full object-contain max-h-screen"
+                        controlsList="nodownload"
+                        onContextMenu={(e: any) => e.preventDefault()}
+                    />
+                )
+            ) : (
+                <img
+                    src={previewAsset.url}
+                    className="max-w-full max-h-full object-contain select-none"
+                    alt="Asset"
+                    onContextMenu={(e: any) => e.preventDefault()}
+                />
+            )}
+        </div>
+    </div>
+)}
 
             {/* Performance Review Modal */}
             {showReview && (
@@ -809,9 +831,9 @@ const LessonView = () => {
                                                             key={oIdx}
                                                             className={`
                                                                 p-5 rounded-2xl border-2 flex items-center gap-4 transition-all
-                                                                ${isRightAnswer ? 'bg-brand-emerald/10 border-brand-emerald text-brand-charcoal dark:text-white' : 
-                                                                  isStudentPick ? 'bg-red-500/10 border-red-500 text-red-500' : 
-                                                                  'bg-transparent border-brand-border text-brand-muted'}
+                                                                ${isRightAnswer ? 'bg-brand-emerald/10 border-brand-emerald text-brand-charcoal dark:text-white' :
+                                                                    isStudentPick ? 'bg-red-500/10 border-red-500 text-red-500' :
+                                                                        'bg-transparent border-brand-border text-brand-muted'}
                                                             `}
                                                         >
                                                             <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[10px] ${isRightAnswer ? 'bg-brand-emerald text-white' : isStudentPick ? 'bg-red-500 text-white' : 'bg-brand-beige dark:bg-white/10'}`}>
@@ -828,7 +850,7 @@ const LessonView = () => {
                                 })}
                             </div>
                         </div>
-                        
+
                         <div className="p-8 bg-brand-beige/20 dark:bg-white/5 border-t border-brand-border shrink-0">
                             <button onClick={() => setShowReview(false)} className="w-full py-5 bg-brand-charcoal text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-brand-emerald transition-all border-none cursor-pointer">
                                 Dismiss Audit Report

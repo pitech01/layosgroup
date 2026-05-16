@@ -113,7 +113,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
             
             {/* Mention Menu */}
             {showMentionMenu && (
-                <div className="absolute bottom-full left-4 mb-2 w-72 bg-white border border-brand-border rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in slide-in-from-bottom-2">
+                <div className="absolute bottom-full left-4 mb-2 w-72 bg-white border border-brand-border rounded-2xl shadow-2xl z-1000000  animate-in slide-in-from-bottom-2">
                     <div className="p-3 bg-brand-beige/50 border-b border-brand-border">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-[10px] font-black uppercase tracking-widest text-brand-muted">Mention User</span>

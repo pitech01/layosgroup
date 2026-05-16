@@ -118,7 +118,7 @@ const Courses = () => {
                                 <div className="mt-auto pt-8 border-t border-brand-border flex items-center justify-between relative z-10">
                                     <div className="flex items-center gap-3 text-brand-muted text-xs font-black uppercase tracking-widest">
                                         <BookOpen size={16} className="text-brand-emerald" /> 
-                                        {cohort.courses.length} Modules
+                                        {cohort.courses.length} {cohort.courses.length>1     ? "Courses" : "Course"} 
                                     </div>
                                     <div className="bg-brand-charcoal dark:bg-white/5 w-10 h-10 rounded-xl flex items-center justify-center text-white dark:text-brand-emerald group-hover:bg-brand-emerald group-hover:text-white transition-all">
                                         <ChevronRight size={20} className="transition-transform group-hover:translate-x-1" />
@@ -175,7 +175,7 @@ const Courses = () => {
                     return (
                         <div 
                             key={course.id} 
-                            className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden flex flex-col h-full shadow-sm hover:shadow-2xl transition-all duration-500 group"
+                            className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden flex flex-col h-full shadow-sm hover:shadow-2xl transition-all duration-500 group"
                         >
                             <div className="relative aspect-[16/10] overflow-hidden">
                                 <img
@@ -188,7 +188,7 @@ const Courses = () => {
                                     isCompleted ? 'bg-emerald-500 text-white' : 
                                     isStarted ? 'bg-indigo-500 text-white' : 'bg-white/90 text-brand-charcoal'
                                 } uppercase tracking-widest border border-white/20`}>
-                                    {isCompleted ? 'Finished' : isStarted ? 'In Progress' : 'Locked'}
+                                    {isCompleted ? 'Finished' : isStarted ? 'In Progress' : 'Ready to Start'}
                                 </div>
                             </div>
 
