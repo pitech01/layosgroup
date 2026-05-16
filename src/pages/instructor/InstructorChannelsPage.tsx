@@ -7,7 +7,7 @@ import {
     ChevronRight, ArrowLeft, MoreVertical,
     Paperclip, Send, Bell, Settings,
     Layout, Globe, Zap, CheckCircle2,
-    Clock, ShieldCheck
+    Clock, ShieldCheck, Sparkles, Layers
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';

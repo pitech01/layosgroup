@@ -48,7 +48,7 @@ const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
                 className={`flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-full border transition-all cursor-pointer ${isOpen ? 'bg-brand-border border-brand-border' : 'bg-white dark:bg-brand-charcoal border-brand-border hover:border-brand-emerald shadow-sm hover:shadow-md'}`}
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white shadow-sm ${role === 'instructor' ? 'bg-indigo-600' : 'bg-brand-emerald'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white shadow-sm bg-brand-emerald`}>
                     {userInitial}
                 </div>
                 <div className="hidden sm:flex flex-col items-start ml-1">

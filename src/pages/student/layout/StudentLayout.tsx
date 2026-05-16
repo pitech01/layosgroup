@@ -30,7 +30,7 @@ const StudentLayout = () => {
                     }}
                 />
 
-                <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
+                <main className="flex-1 overflow-y-auto scrollbar-none p-4 md:p-8">
                     <div className="animate-fade-in-up">
                         <Outlet />
                     </div>

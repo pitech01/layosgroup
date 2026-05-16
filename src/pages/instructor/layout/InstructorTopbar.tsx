@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Bell, Menu, ChevronDown, Clock, Search, ShieldCheck, Sparkles, User, LogOut, Settings as SettingsIcon } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ThemeToggle from '../../../components/common/ThemeToggle';
 
 interface InstructorTopbarProps {
     collapsed: boolean;
@@ -78,6 +79,8 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
 
             {/* Right Section */}
             <div className="flex items-center gap-6">
+                <ThemeToggle />
+                
                 {/* Notifications */}
                 <div className="relative">
                     <button

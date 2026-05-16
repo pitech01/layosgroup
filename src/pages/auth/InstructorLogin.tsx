@@ -35,7 +35,7 @@ export default function InstructorLogin() {
             }
 
             login(data.user, data.token);
-            navigate('/instructor/dashboard');
+            navigate('/instructor-dashboard');
         } catch (err: any) {
             setError(err.message || 'System uplink failure. Check connection.');
         } finally {

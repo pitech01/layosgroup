@@ -87,7 +87,7 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }:
 
             <div className="flex items-center gap-4">
                 {/* Search Field (Desktop only) */}
-                <div className="hidden lg:flex items-center relative">
+                {/* <div className="hidden lg:flex items-center relative">
                     <input 
                         type="text" 
                         placeholder="Search..." 
@@ -97,7 +97,7 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }:
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <ThemeToggle />
+                <ThemeToggle /> */}
                 <TopbarRight role={role} />
             </div>
         </header>

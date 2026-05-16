@@ -158,7 +158,7 @@ const CourseDetails = () => {
                         </p>
                     </div>
 
-                    <div className="bg-white dark:bg-brand-charcoal p-8 rounded-[40px] border border-brand-border shadow-sm min-w-full lg:min-w-[340px]">
+                    <div className="bg-white dark:bg-brand-charcoal p-8 rounded-lg border border-brand-border shadow-sm min-w-full lg:min-w-[340px]">
                         <div className="text-[10px] font-black text-brand-muted mb-4 uppercase tracking-[0.2em]">
                             Global Mastery Status
                         </div>
@@ -255,7 +255,7 @@ const CourseDetails = () => {
 
                 {/* Right Column: Info & Certificates */}
                 <div className="space-y-8">
-                    <div className="bg-white dark:bg-brand-charcoal p-8 rounded-[40px] border border-brand-border shadow-sm sticky top-24 space-y-10">
+                    <div className="bg-white dark:bg-brand-charcoal p-8 rounded-xl border border-brand-border shadow-sm sticky top-24 space-y-10">
                         <div>
                             <h4 className="flex items-center gap-3 text-lg font-black text-brand-charcoal dark:text-white mb-6 uppercase tracking-tight">
                                 <BookOpen size={20} className="text-brand-emerald" /> Syllabus Info

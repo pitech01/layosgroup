@@ -14,7 +14,10 @@ import {
     X,
     Sparkles,
     LayoutGrid,
-    Trophy
+    Trophy,
+    Search,
+    SlidersHorizontal,
+    MoreVertical
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
@@ -29,6 +32,7 @@ export default function StudentAssignments() {
     const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string, type: 'pdf' | 'office' } | null>(null);
     const [iframeLoading, setIframeLoading] = useState(true);
     const [showAiInteraction, setShowAiInteraction] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -93,122 +97,172 @@ export default function StudentAssignments() {
 
         setViewingPdf({ url: fileUrl, title, type });
         setIframeLoading(true);
+
+        // Defensive fallback loader dismissal
+        setTimeout(() => {
+            setIframeLoading(false);
+        }, 5000);
     };
 
+    const filteredAssignments = assignments.filter(a => 
+        a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.cohort?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
-        <div className="space-y-12 pb-12">
-            {/* Header */}
-            <header className="max-w-3xl animate-fade-in-up">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-brand-emerald/10 rounded-lg">
-                        <Sparkles className="text-brand-emerald" size={18} />
+        <div className="space-y-6 md:space-y-8 pb-12 max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 text-[#2D312E]">
+            {/* Top Header Section */}
+            <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[#E6DFD5] pb-6 md:pb-8">
+                <div className="max-w-2xl">
+                    <div className="flex items-center gap-2 mb-2.5">
+                        <div className="p-1.5 bg-[#1A4D3E]/10 rounded-md">
+                            <Sparkles className="text-[#1A4D3E]" size={14} />
+                        </div>
+                        <span className="text-[#1A4D3E] font-bold text-[10px] md:text-xs uppercase tracking-wider">Academic Portal</span>
                     </div>
-                    <span className="text-brand-emerald font-black text-xs uppercase tracking-widest">Academic Tasks</span>
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-[#1A4D3E] mb-2">
+                        Assignments & Deliverables
+                    </h1>
+                    <p className="text-[#7A827E] text-xs sm:text-sm md:text-base font-medium leading-relaxed">
+                        Manage your academic tasks, download specifications, and track evaluation progress.
+                    </p>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-black text-brand-charcoal dark:text-white tracking-tight mb-4">
-                    Coursework <span className="text-brand-emerald">& Deliverables</span>
-                </h1>
-                <p className="text-brand-muted font-medium text-lg leading-relaxed">
-                    Track your assignments, access instructional materials, and manage your academic progress across all active modules.
-                </p>
+
+                {/* Search and Filter Row */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                    <div className="relative flex-1 sm:w-72 md:w-80">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7A827E]" size={16} />
+                        <input 
+                            type="text" 
+                            placeholder="Search tasks..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-[#FBF9F6] border border-[#E6DFD5] rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[#1A4D3E] transition-colors font-medium placeholder-[#A5ADA9]"
+                        />
+                    </div>
+                    <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FBF9F6] border border-[#E6DFD5] rounded-xl text-sm font-semibold text-[#2D312E] hover:bg-[#F4EFEA] transition-colors whitespace-nowrap">
+                        <SlidersHorizontal size={15} />
+                        <span>Filters</span>
+                    </button>
+                </div>
             </header>
 
+            {/* Content States */}
             {loading ? (
-                <div className="flex flex-col items-center justify-center py-32 gap-4">
-                    <Loader2 className="animate-spin text-brand-emerald" size={48} />
-                    <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Syncing Assignment Grid...</p>
+                <div className="flex flex-col items-center justify-center py-24 md:py-32 gap-3">
+                    <Loader2 className="animate-spin text-[#1A4D3E]" size={40} />
+                    <p className="text-[10px] font-bold text-[#7A827E] uppercase tracking-widest animate-pulse">Syncing Workspace...</p>
                 </div>
             ) : error ? (
-                <div className="bg-white dark:bg-brand-charcoal p-12 rounded-[40px] border border-red-100 dark:border-red-900/30 text-center space-y-6 shadow-xl shadow-red-500/5">
-                    <div className="w-20 h-20 bg-red-50 dark:bg-red-900/10 rounded-full flex items-center justify-center mx-auto text-red-500">
-                        <AlertCircle size={40} />
+                <div className="bg-white p-6 sm:p-10 rounded-[24px] border border-red-100 text-center max-w-xl mx-auto space-y-4 shadow-sm">
+                    <div className="w-12 h-12 sm:w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto text-red-500">
+                        <AlertCircle size={26} />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Sync Error</h2>
-                        <p className="text-brand-muted font-medium mt-2">{error}</p>
+                        <h2 className="text-lg sm:text-xl font-semibold text-[#2D312E]">Sync Error</h2>
+                        <p className="text-[#7A827E] text-xs sm:text-sm mt-1">{error}</p>
                     </div>
                     <button 
                         onClick={fetchAssignments} 
-                        className="bg-brand-emerald text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all border-none cursor-pointer shadow-xl shadow-brand-emerald/20"
+                        className="w-full sm:w-auto bg-[#1A4D3E] text-white px-6 py-2.5 rounded-xl font-semibold text-xs uppercase tracking-wider hover:bg-[#12362C] transition-all"
                     >
                         Retry Connection
                     </button>
                 </div>
-            ) : assignments.length === 0 ? (
-                <div className="bg-white dark:bg-brand-charcoal py-24 text-center rounded-[40px] border border-brand-border shadow-sm border-dashed">
-                    <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8 text-brand-muted/30">
-                        <LayoutGrid size={48} />
+            ) : filteredAssignments.length === 0 ? (
+                <div className="bg-[#FBF9F6] py-16 md:py-20 px-4 text-center rounded-[32px] border border-dashed border-[#E6DFD5] max-w-2xl mx-auto">
+                    <div className="w-14 h-14 sm:w-16 h-16 bg-[#F4EFEA] rounded-full flex items-center justify-center mx-auto mb-4 text-[#A5ADA9]">
+                        <LayoutGrid size={26} />
                     </div>
-                    <h2 className="text-3xl font-black text-brand-charcoal dark:text-white mb-3 uppercase tracking-tight">Ecosystem Clear</h2>
-                    <p className="text-brand-muted font-medium max-w-md mx-auto">No pending assignments found in your active curriculums. Keep up the excellent work.</p>
+                    <h2 className="text-lg sm:text-xl font-semibold text-[#2D312E] mb-1">No Assignments Found</h2>
+                    <p className="text-[#7A827E] text-xs sm:text-sm max-w-xs mx-auto font-medium">Your schedule is currently clear. Active deliverables will appear here.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6">
-                    {assignments.map(a => {
+                /* Fully fluid layout system responsive across all devices */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    {filteredAssignments.map(a => {
                         const hasSubmitted = !!a.my_submission;
                         const overdue = !hasSubmitted && isOverdue(a.due_date);
 
                         return (
-                            <div key={a.id} className="bg-white dark:bg-brand-charcoal p-8 md:p-10 rounded-[40px] border border-brand-border flex flex-col lg:flex-row justify-between lg:items-center gap-8 hover:shadow-2xl hover:shadow-brand-emerald/5 transition-all duration-500 group relative overflow-hidden">
-                                <div className="flex gap-8 items-start flex-1 relative z-10">
-                                    <div className="w-16 h-16 rounded-2xl bg-brand-beige dark:bg-white/5 flex items-center justify-center text-brand-emerald shrink-0 shadow-inner border border-brand-border group-hover:scale-110 group-hover:rotate-3 transition-transform">
-                                        <FileText size={32} />
+                            <div 
+                                key={a.id} 
+                                className="bg-white border border-[#E6DFD5] rounded-[24px] p-5 md:p-6 flex flex-col justify-between hover:shadow-md transition-all duration-300 relative group overflow-hidden"
+                            >
+                                <div>
+                                    {/* Top Row: Context Tag & Options Icon */}
+                                    <div className="flex items-center justify-between mb-3.5">
+                                        <span className="text-[10px] md:text-[11px] font-semibold text-[#7A827E] uppercase tracking-wider block max-w-[85%] truncate">
+                                            {a.cohort?.name || "General Module"}
+                                        </span>
+                                        <button className="text-[#A5ADA9] hover:text-[#2D312E] transition-colors p-1 -mr-1">
+                                            <MoreVertical size={16} />
+                                        </button>
                                     </div>
-                                    <div className="flex-1 space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-[10px] font-black text-brand-emerald uppercase tracking-[0.2em] px-3 py-1 bg-brand-emerald/10 rounded-lg border border-brand-emerald/20">{a.cohort?.name}</span>
-                                            {hasSubmitted ? (
-                                                <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-500 uppercase tracking-widest">
-                                                    <CheckCircle size={14} /> Completed
-                                                </span>
-                                            ) : overdue ? (
-                                                <span className="flex items-center gap-1.5 text-[10px] font-black text-red-500 uppercase tracking-widest animate-pulse">
-                                                    <AlertCircle size={14} /> Overdue
-                                                </span>
-                                            ) : (
-                                                <span className="flex items-center gap-1.5 text-[10px] font-black text-amber-500 uppercase tracking-widest">
-                                                    <Clock size={14} /> Pending
-                                                </span>
-                                            )}
+
+                                    {/* Title */}
+                                    <h3 className="text-base md:text-lg font-semibold text-[#2D312E] tracking-tight leading-snug group-hover:text-[#1A4D3E] transition-colors mb-4 line-clamp-2 sm:min-h-[3rem] md:min-h-[3.5rem]">
+                                        {a.title}
+                                    </h3>
+
+                                    {/* Metadata Row: Calendar and Time */}
+                                    <div className="space-y-2 border-b border-[#F4EFEA] pb-4 mb-4">
+                                        <div className="flex items-center gap-2 text-xs font-medium text-[#7A827E]">
+                                            <Calendar size={14} className="text-[#1A4D3E] flex-shrink-0" />
+                                            <span className="truncate">Due: {new Date(a.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                         </div>
-                                        <h3 className="text-2xl md:text-3xl font-black text-brand-charcoal dark:text-white tracking-tight leading-tight">{a.title}</h3>
-                                        <div className="flex flex-wrap gap-6 items-center">
-                                            <div className="flex items-center gap-2 text-brand-muted text-xs font-black uppercase tracking-widest">
-                                                <Calendar size={16} className="text-brand-emerald" />
-                                                Due: {new Date(a.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                            </div>
-                                            <div className="flex items-center gap-2 text-brand-muted text-xs font-black uppercase tracking-widest">
-                                                <Clock size={16} className="text-brand-emerald" />
-                                                {new Date(a.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
+                                        <div className="flex items-center gap-2 text-xs font-medium text-[#7A827E]">
+                                            <Clock size={14} className="text-[#1A4D3E] flex-shrink-0" />
+                                            <span className="truncate">Time: {new Date(a.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row lg:flex-col lg:items-end gap-4 shrink-0 relative z-10">
-                                    {a.assignment_file && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => handleViewResource(e, a.title, a.assignment_file_url, a.assignment_file)}
-                                            className="flex items-center justify-center gap-2 bg-transparent text-brand-muted hover:text-brand-emerald font-black text-[10px] uppercase tracking-widest py-2 px-4 rounded-xl transition-all border-none cursor-pointer"
-                                        >
-                                            <Eye size={16} /> Technical Instructions
-                                        </button>
-                                    )}
+                                {/* Dynamic Status Badges & Action CTA Block */}
+                                <div className="space-y-3.5">
+                                    <div className="flex items-center justify-between gap-2">
+                                        {hasSubmitted ? (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider bg-[#E8F2EE] text-[#1A4D3E] rounded-md whitespace-nowrap">
+                                                <CheckCircle size={12} /> Completed
+                                            </span>
+                                        ) : overdue ? (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider bg-red-50 text-red-600 rounded-md whitespace-nowrap">
+                                                <AlertCircle size={12} /> Overdue
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider bg-amber-50 text-amber-700 rounded-md whitespace-nowrap">
+                                                <Clock size={12} /> Pending
+                                            </span>
+                                        )}
 
+                                        {/* Technical Instructions link */}
+                                        {a.assignment_file && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => handleViewResource(e, a.title, a.assignment_file_url, a.assignment_file)}
+                                                className="inline-flex items-center gap-1 text-[10px] md:text-[11px] font-bold uppercase text-[#7A827E] hover:text-[#1A4D3E] transition-colors border-none bg-transparent cursor-pointer whitespace-nowrap p-1"
+                                            >
+                                                <Eye size={13} /> View Guidelines
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Action Launch Button Block */}
                                     {hasSubmitted ? (
-                                        <div className="bg-emerald-500 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">
-                                            <Trophy size={20} /> Accomplished
+                                        <div className="w-full bg-[#F4EFEA] text-[#1A4D3E] text-center py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+                                            <Trophy size={14} className="flex-shrink-0" /> Submission Received
                                         </div>
                                     ) : (
                                         <Link 
                                             to={`/student/assignments/${a.id}/submit`} 
-                                            className={`
-                                                px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 no-underline
-                                                ${overdue ? 'bg-red-500 text-white shadow-red-500/20' : 'bg-brand-charcoal dark:bg-brand-emerald text-white shadow-brand-charcoal/20 dark:shadow-brand-emerald/20'}
-                                            `}
+                                            className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all no-underline text-center border ${
+                                                overdue 
+                                                    ? 'bg-red-600 border-red-600 text-white hover:bg-red-700' 
+                                                    : 'bg-[#1A4D3E] border-[#1A4D3E] text-white hover:bg-[#12362C]'
+                                            }`}
                                         >
-                                            {overdue ? 'Remediate' : 'Launch Assignment'} <ArrowRight size={20} />
+                                            <span>{overdue ? 'Submit Late' : 'Open Assignment'}</span>
+                                            <ArrowRight size={14} className="flex-shrink-0" />
                                         </Link>
                                     )}
                                 </div>
@@ -218,30 +272,32 @@ export default function StudentAssignments() {
                 </div>
             )}
 
-            {/* Secure PDF Viewer Modal */}
+            {/* Responsive Full-screen Document Viewer Modal */}
             {viewingPdf && (
-                <div className="fixed inset-0 z-[2000] bg-white dark:bg-brand-charcoal flex flex-col animate-in fade-in duration-300">
-                    <div className="px-8 py-6 border-b border-brand-border flex justify-between items-center bg-white/80 dark:bg-brand-charcoal/80 backdrop-blur-xl">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-brand-emerald/10 flex items-center justify-center text-brand-emerald">
-                                <FileText size={24} />
+                <div className="fixed inset-0 z-[2000] bg-[#FBF9F6] flex flex-col animate-in fade-in duration-200">
+                    {/* Header: Made highly responsive to preserve layout structural integrity on small phones */}
+                    <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-[#E6DFD5] flex justify-between items-center bg-white gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1A4D3E]/10 flex items-center justify-center text-[#1A4D3E] flex-shrink-0 hidden xs:flex">
+                                <FileText size={18} />
                             </div>
-                            <div>
-                                <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">
+                            <div className="min-w-0">
+                                <h3 className="text-xs sm:text-sm font-semibold text-[#2D312E] truncate max-w-[140px] xs:max-w-[200px] sm:max-w-md md:max-w-xl">
                                     {viewingPdf.title}
                                 </h3>
-                                <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em] mt-1">
-                                    Secure {viewingPdf.type === 'office' ? 'Document' : 'Credential'} Viewer
+                                <p className="text-[9px] sm:text-[10px] font-bold text-[#7A827E] uppercase tracking-wider mt-0.5 truncate">
+                                    {viewingPdf.type === 'office' ? 'Secure Office Viewer' : 'Secure Encrypted PDF Viewer'}
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                             {viewingPdf.type === 'pdf' && (
                                 <button 
                                     onClick={() => setShowAiInteraction(true)}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-indigo-500 text-indigo-500 font-black text-[10px] uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all active:scale-95 cursor-pointer bg-transparent"
+                                    className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-bold text-[9px] sm:text-[11px] uppercase tracking-wider hover:bg-indigo-100 transition-colors"
                                 >
-                                    <Sparkles size={14} /> Virtual Tutor
+                                    <Sparkles size={12} className="sm:size-[13px]" /> 
+                                    <span>Virtual Tutor</span>
                                 </button>
                             )}
                             <button
@@ -249,31 +305,34 @@ export default function StudentAssignments() {
                                     setViewingPdf(null);
                                     setIframeLoading(true);
                                 }}
-                                className="w-12 h-12 rounded-2xl bg-brand-beige dark:bg-white/10 text-brand-muted flex items-center justify-center hover:text-red-500 transition-all border-none cursor-pointer"
+                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#F4EFEA] text-[#7A827E] flex items-center justify-center hover:text-red-500 hover:bg-red-50 transition-colors"
                             >
-                                <X size={24} />
+                                <X size={18} />
                             </button>
                         </div>
                     </div>
 
+                    {/* Viewer Sandbox Canvas */}
                     <div 
-                        className="flex-1 relative bg-brand-beige dark:bg-brand-charcoal overflow-hidden flex items-center justify-center"
+                        className="flex-1 relative bg-[#F4EFEA] overflow-hidden flex items-center justify-center"
                         onContextMenu={(e) => e.preventDefault()}
                     >
                         {iframeLoading && (
-                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-brand-beige dark:bg-brand-charcoal">
-                                <div className="w-16 h-16 border-4 border-brand-border border-t-brand-emerald rounded-full animate-spin mb-6" />
-                                <h4 className="font-black text-brand-charcoal dark:text-white uppercase tracking-widest">Synchronizing Workspace...</h4>
-                                <p className="text-brand-muted font-black text-[10px] uppercase tracking-widest mt-2 animate-pulse">Establishing high-fidelity secure tunnel</p>
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#F4EFEA] p-4 text-center">
+                                <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 text-[#1A4D3E] animate-spin mb-3" />
+                                <h4 className="font-semibold text-xs sm:text-sm text-[#2D312E]">Loading Document Environment...</h4>
+                                <p className="text-[#7A827E] text-[11px] sm:text-xs mt-1">Establishing high-fidelity verification bridge</p>
                             </div>
                         )}
                         {viewingPdf.url && (
                             viewingPdf.type === 'pdf' ? (
-                                <SecurePDFViewer 
-                                    url={viewingPdf.url} 
-                                    onLoadSuccess={() => setIframeLoading(false)} 
-                                    hideToolbar={false}
-                                />
+                                <div className="w-full h-full overflow-auto flex justify-center">
+                                    <SecurePDFViewer 
+                                        url={viewingPdf.url} 
+                                        onLoadSuccess={() => setIframeLoading(false)} 
+                                        hideToolbar={false}
+                                    />
+                                </div>
                             ) : (
                                 <iframe
                                     src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(viewingPdf.url)}`}
@@ -286,12 +345,14 @@ export default function StudentAssignments() {
                         )}
                     </div>
 
-                    <div className="px-8 py-4 bg-brand-beige/20 dark:bg-brand-charcoal border-t border-brand-border text-center">
-                        <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">End-to-End Encryption Protocol Active</p>
+                    {/* Modal Footer Section */}
+                    <div className="px-4 py-2.5 sm:py-3 bg-white border-t border-[#E6DFD5] text-center">
+                        <p className="text-[9px] sm:text-[10px] font-bold text-[#A5ADA9] uppercase tracking-widest">End-to-End Encryption Protocol Active</p>
                     </div>
                 </div>
             )}
 
+            {/* AI Assistant Overlay Container */}
             {showAiInteraction && viewingPdf && (
                 <AIPDFInteraction 
                     pdfUrl={viewingPdf.url} 

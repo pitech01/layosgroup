@@ -22,7 +22,28 @@
   --color-brand-beige: var(--color-beige-50);
   --color-brand-border: var(--color-beige-200);
   --color-brand-muted: #64748b;
+  
+  --color-link-color: #1e293b;
+  --color-link-hover:#f8fbff;
 
   --radius-premium: 12px;
   --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
 }
+
+@layer components {
+  .nav-link {
+    @apply text-link-color no-underline transition-colors duration-200;
+    /* rounded-premium works because you defined --radius-premium */
+    @apply rounded-premium px-3 py-2; 
+  }
+
+  .nav-link:hover {
+    @apply text-white bg-[#020617];
+  }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+
+

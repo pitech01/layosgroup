@@ -12,6 +12,8 @@ import {
     Loader2,
     Maximize2,
     X,
+    Download,
+    Check,
     FileVideo,
     Sparkles,
     Trophy
@@ -175,7 +177,7 @@ export default function StudentDashboard() {
     return (
         <div className="space-y-8 pb-12">
             {/* Hero Section */}
-            <section className="relative h-64 md:h-80 rounded-[40px] overflow-hidden group shadow-2xl">
+            <section className="relative h-full sm:h-full md:h-80 rounded-xl overflow-hidden group shadow-2xl p-2">
                 <img
                     src="/learning_journey_hero.png"
                     alt="Hero"
@@ -199,9 +201,9 @@ export default function StudentDashboard() {
                     <div className="flex items-center gap-4 animate-fade-in-up delay-300">
                         <Link 
                             to="/student/courses" 
-                            className="bg-brand-emerald hover:bg-brand-emerald/90 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-brand-emerald/20 flex items-center gap-3 active:scale-95"
+                            className="bg-brand-emerald hover:bg-brand-emerald/90  px-8 py-4 rounded-lg font-bold text-xs uppercase tracking-widest transition-all shadow-xl shadow-brand-emerald/20 flex items-center gap-3 active:scale-95"
                         >
-                            Continue Journey <ArrowRight size={16} />
+                           <span className='text-white dark:text-muted'>Continue Journey</span>  <ArrowRight size={16} className='text-white' />
                         </Link>
                     </div>
                 </div>
@@ -215,16 +217,16 @@ export default function StudentDashboard() {
             </section>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid md:grid-cols-2 grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
                 {stats.map(({ label, value, icon: Icon, color, bg }, idx) => (
-                    <div key={idx} className="bg-white dark:bg-brand-charcoal p-6 rounded-[32px] border border-brand-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
+                    <div key={idx} className="bg-white dark:bg-brand-charcoal p-6 rounded-2xl border border-brand-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group ">
                         <div className="flex items-center gap-4">
                             <div className={`p-4 rounded-2xl ${bg} ${color} transition-transform group-hover:scale-110`}>
                                 <Icon size={24} />
                             </div>
                             <div>
-                                <div className="text-2xl md:text-3xl font-black text-brand-charcoal dark:text-white leading-none mb-1">{value}</div>
-                                <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest">{label}</div>
+                                <div className="text-2xl md:text-3xl font-black text-brand-charcoal dark:text-white leading-none mb-1 text-wrap">{value}</div>
+                                <div className="text-[0.6em] font-black text-brand-muted uppercase tracking-widest text-wrap">{label}</div>
                             </div>
                         </div>
                     </div>
@@ -234,7 +236,7 @@ export default function StudentDashboard() {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {/* Left: Course Progress */}
                 <div className="xl:col-span-2 space-y-6">
-                    <div className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden shadow-sm">
+                    <div className="bg-white dark:bg-brand-charcoal rounded-2xl border border-brand-border overflow-hidden shadow-sm">
                         <div className="p-8 border-b border-brand-border flex items-center justify-between">
                             <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Active Courses</h3>
                             <Link to="/student/courses" className="text-xs font-black text-brand-emerald hover:underline underline-offset-4 uppercase tracking-widest flex items-center gap-2">
@@ -243,78 +245,125 @@ export default function StudentDashboard() {
                         </div>
 
                         <div className="p-4 space-y-4">
-                            {enrollments.length > 0 ? enrollments.map((cohort: any) => {
-                                const progress = cohort.pivot?.progress || 0;
-                                const isCompleted = progress >= 100;
-                                const cert = certificates.find(c => Number(c.course_id) === Number(cohort.course?.id));
+                            {enrollments.length > 0 ? (
+  <div className="grid gap-6">
+    {enrollments.map((cohort: any) => {
+      const progress = cohort.pivot?.progress || 0;
+      const isCompleted = progress >= 100;
+      const cert = certificates.find((c) => Number(c.course_id) === Number(cohort.course?.id));
+      const lessons = cohort.course?.modules?.reduce(
+        (total: number, module: any) => total + (module.lessons?.length || 0),
+        0
+      );
 
-                                return (
-                                    <div key={cohort.id} className="p-6 rounded-[32px] hover:bg-brand-beige/50 dark:hover:bg-white/5 transition-all border border-transparent hover:border-brand-border group">
-                                        <div className="flex flex-col md:flex-row md:items-center gap-6">
-                                            <div className="w-16 h-16 rounded-2xl bg-brand-beige dark:bg-white/5 flex items-center justify-center text-3xl shadow-inner border border-brand-border shrink-0 group-hover:scale-105 transition-transform">
-                                                {getCourseIcon(cohort.course?.title || 'Course')}
-                                            </div>
-                                            
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-lg font-black text-brand-charcoal dark:text-white truncate mb-4">{cohort.course?.title || cohort.name}</h4>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="flex-1 h-2 bg-brand-beige dark:bg-white/5 rounded-full overflow-hidden border border-brand-border">
-                                                        <div 
-                                                            className="h-full bg-brand-emerald rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(16,185,129,0.3)]" 
-                                                            style={{ width: `${progress}%` }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-sm font-black text-brand-charcoal dark:text-white w-10">{progress}%</span>
-                                                </div>
-                                            </div>
+      return (
+        <div
+          key={cohort.id}
+          className="group relative bg-white dark:bg-white/5 border border-brand-border rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:shadow-brand-charcoal/5 hover:-translate-y-1"
+        >
+          <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+            {/* Icon Section */}
+            <div className="relative shrink-0">
+              <div className="w-20 h-20 rounded-2xl bg-brand-beige dark:bg-white/10 flex items-center justify-center text-4xl shadow-inner border border-brand-border/50 group-hover:rotate-3 transition-transform duration-300">
+                {getCourseIcon(cohort.course?.title || 'Course')}
+              </div>
+              {isCompleted && (
+                <div className="absolute -top-2 -right-2 bg-brand-emerald text-white p-1 rounded-full shadow-lg border-2 border-white dark:border-brand-charcoal">
+                  <Check size={14} strokeWidth={3} />
+                </div>
+              )}
+            </div>
 
-                                            <div className="shrink-0 flex items-center gap-3">
-                                                {isCompleted ? (
-                                                    cert ? (
-                                                        <button 
-                                                            onClick={() => downloadCertificate(cert.certificate_uuid)} 
-                                                            className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-amber-500/20 active:scale-95"
-                                                        >
-                                                            Download Certificate
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleClaimCertificate(cohort.course?.id)}
-                                                            disabled={claiming === cohort.course?.id}
-                                                            className="px-6 py-3 bg-brand-emerald hover:bg-brand-emerald/90 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-brand-emerald/20 flex items-center gap-2 disabled:opacity-50"
-                                                        >
-                                                            {claiming === cohort.course?.id ? <Loader2 size={14} className="animate-spin" /> : 'Claim Certificate'}
-                                                        </button>
-                                                    )
-                                                ) : (
-                                                    <Link
-                                                        to={`/student/courses/${cohort.course?.id}?cohortId=${cohort.id}`}
-                                                        className="w-12 h-12 rounded-2xl bg-brand-charcoal dark:bg-brand-emerald text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl shadow-brand-charcoal/20"
-                                                    >
-                                                        <Play size={20} fill="currentColor" className="ml-1" />
-                                                    </Link>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            }) : (
-                                <div className="py-20 text-center">
-                                    <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl grayscale opacity-50">📚</div>
-                                    <h5 className="text-brand-charcoal dark:text-white font-black uppercase tracking-widest mb-2">No Active Enrollments</h5>
-                                    <p className="text-brand-muted font-medium text-sm mb-8">Start your learning journey today by exploring our courses.</p>
-                                    <Link to="/student/courses" className="inline-flex items-center gap-2 bg-brand-emerald text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all">
-                                        Explore Courses <ArrowRight size={16} />
-                                    </Link>
-                                </div>
-                            )}
+            {/* Content Section */}
+            <div className="flex-1 min-w-0 space-y-3">
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-emerald opacity-80">
+                  {isCompleted ? 'Course Completed' : 'In Progress'}
+                </span>
+                <h4 className="text-xl font-bold text-brand-charcoal dark:text-white truncate tracking-tight">
+                  {cohort.course?.title || cohort.name}
+                </h4>
+              </div>
+
+              <div className="flex items-center gap-4 text-xs font-medium text-brand-muted dark:text-white/60">
+                <div className="flex items-center gap-1.5">
+                  <BookOpen size={14} />
+                  {lessons} {lessons === 1 ? 'Lesson' : 'Lessons'}
+                </div>
+                <div className="w-1 h-1 rounded-full bg-brand-border" />
+                <div>{progress}% Completed</div>
+              </div>
+
+              {/* Modern Progress Bar */}
+              <div className="relative w-full h-1.5 bg-brand-beige dark:bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="absolute top-0 left-0 h-full bg-brand-emerald transition-all duration-1000 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Action Section */}
+            <div className="shrink-0 w-full md:w-auto">
+              {isCompleted ? (
+                cert ? (
+                  <button
+                    onClick={() => downloadCertificate(cert.certificate_uuid)}
+                    className="w-full md:w-auto px-6 py-3 bg-brand-charcoal text-white dark:bg-white dark:text-brand-charcoal rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <Download size={16} />
+                    Certificate
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleClaimCertificate(cohort.course?.id)}
+                    disabled={claiming === cohort.course?.id}
+                    className="w-full md:w-auto px-6 py-3 bg-brand-emerald text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {claiming === cohort.course?.id ? <Loader2 size={16} className="animate-spin" /> : 'Claim Reward'}
+                  </button>
+                )
+              ) : (
+                <Link
+                  to={`/student/courses/${cohort.course?.id}?cohortId=${cohort.id}`}
+                  className="w-full md:w-auto flex items-center justify-center gap-3 px-6 py-3 bg-brand-emerald text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:shadow-lg hover:shadow-brand-emerald/30 transition-all active:scale-95"
+                >
+                  Resume Progress
+                  <Play size={14} fill="currentColor" />
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+) : (
+  <div className="py-24 text-center bg-brand-beige/30 dark:bg-white/5 rounded-3xl border-2 border-dashed border-brand-border">
+    <div className="w-20 h-20 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl shadow-sm">
+      ✨
+    </div>
+    <h5 className="text-xl font-bold text-brand-charcoal dark:text-white mb-2">
+      Ready to start something new?
+    </h5>
+    <p className="text-brand-muted max-w-xs mx-auto mb-8">
+      You aren't enrolled in any courses yet. Your learning journey is just a click away.
+    </p>
+    <Link
+      to="/student/courses"
+      className="inline-flex items-center gap-2 bg-brand-charcoal text-white dark:bg-white dark:text-brand-charcoal px-8 py-4 rounded-2xl font-bold text-sm transition-transform hover:scale-105"
+    >
+      Browse Courses <ArrowRight size={18} />
+    </Link>
+  </div>
+)}
                         </div>
                     </div>
                 </div>
 
                 {/* Right: Live Sessions */}
                 <div className="space-y-6">
-                    <div className="bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden shadow-sm sticky top-24">
+                    <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden shadow-sm sticky top-24">
                         <div className="p-8 border-b border-brand-border flex items-center justify-between">
                             <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Live Classes</h3>
                             <div className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
@@ -327,7 +376,7 @@ export default function StudentDashboard() {
                                 const status = getSessionStatus(session);
 
                                 return (
-                                    <div key={session.id} className="p-5 rounded-[24px] bg-brand-beige dark:bg-white/5 border border-brand-border group hover:border-brand-emerald transition-colors">
+                                    <div key={session.id} className="p-5 rounded-lg bg-brand-beige/30 dark:bg-white/5 border border-brand-border group hover:border-brand-charcoal/30 transition-colors">
                                         <div className="flex items-center gap-2 text-[10px] font-black text-brand-muted uppercase tracking-widest mb-3">
                                             <Clock size={14} className={status === 'live' ? 'text-red-500' : ''} />
                                             <span className={status === 'live' ? 'text-red-500' : ''}>
@@ -336,7 +385,9 @@ export default function StudentDashboard() {
                                         </div>
 
                                         <h6 className="font-black text-brand-charcoal dark:text-white mb-2 leading-snug line-clamp-2">{session.title}</h6>
-                                        <p className="text-xs font-bold text-brand-muted mb-6">{session.course?.title}</p>
+
+                                        <p className="text-xs font-bold text-brand-muted mb-6">{session.course?.title}                                        <span className="px-1 py-1 m-1 bg-gray-100  text-gray-400 rounded-md font-black text-[10px] uppercase transition-all items-center  disabled:opacity-50">ENDED</span>
+                                        </p>
 
                                         {status === 'ended' ? (
                                             <button

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronLeft, Loader2, MessageSquare, Sparkles } from 'lucide-react';
+import { ChevronLeft, Loader2 } from 'lucide-react';
 import ChannelHeader from '../../components/channel/ChannelHeader';
 import ChannelFeed from '../../components/channel/ChannelFeed';
 import ChatInput from '../../components/channel/ChatInput';
@@ -91,49 +91,65 @@ const StudentChannelPage = () => {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-                <Loader2 className="animate-spin text-brand-emerald" size={40} />
-                <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Initializing Channel...</p>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                <Loader2 size={40} className="animate-spin text-blue-500" />
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)] md:h-[calc(100vh-120px)] bg-white dark:bg-brand-charcoal rounded-[40px] border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up">
-            {/* Header Navigation */}
-            <div className="flex items-center px-6 py-4 md:px-10 md:py-6 border-b border-brand-border bg-brand-beige/20 dark:bg-white/5 backdrop-blur-xl shrink-0 gap-6">
-                <Link 
-                    to="/student/channels" 
-                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-white/10 text-brand-muted hover:text-brand-emerald transition-all active:scale-90 no-underline shadow-sm"
-                >
-                    <ChevronLeft size={20} />
-                </Link>
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3">
-                        <MessageSquare className="text-brand-emerald" size={16} />
-                        <h1 className="text-lg md:text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight truncate leading-none">
-                            {courseTitle}
-                        </h1>
-                    </div>
-                    <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
-                        <Sparkles size={10} className="text-brand-emerald" /> Curriculum Synchronization Active
-                    </p>
-                </div>
+        <div className="animate-fade-in-up student-channel-container">
+            <style>{`
+                .student-channel-container {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(100vh - 120px);
+                    background: white;
+                    border-radius: 24px;
+                    border: 1.5px solid #e2e8f0;
+                    overflow: hidden;
+                    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+                    padding: 2rem;
+                }
+
+                @media (max-width: 1024px) {
+                    .student-channel-container {
+                        height: calc(100dvh - 100px);
+                        padding: 1rem;
+                        border-radius: 0;
+                        border: none;
+                    }
+                }
+            `}</style>
+            <Link to="/student/channels" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: '#64748b',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                marginBottom: '1.5rem',
+                flex: 'none'
+            }}>
+                <ChevronLeft size={16} />
+                Back to Channels
+            </Link>
+
+            <div style={{ padding: '0 10px', flex: 'none' }}>
+                <ChannelHeader
+                    courseTitle={courseTitle}
+                    showPostButton={false}
+                />
             </div>
 
-            {/* Discussion Feed */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10 space-y-8 bg-brand-beige/5 dark:bg-brand-charcoal">
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 1.5rem', display: 'flex', flexDirection: 'column' }}>
                 <ChannelFeed messages={messages} userRole="student" />
                 <div ref={feedEndRef} />
             </div>
 
-            {/* Input Terminal */}
-            <div className="p-6 md:p-8 bg-white dark:bg-brand-charcoal border-t border-brand-border shrink-0">
-                <ChatInput 
-                    onSendMessage={handleSendMessage} 
-                    isSending={isSending} 
-                    placeholder={`Transmit to #${courseTitle.toLowerCase().replace(/\s+/g, '-')}`} 
-                />
+            <div style={{ flex: 'none' }}>
+                <ChatInput onSendMessage={handleSendMessage} isSending={isSending} placeholder="Message channel" />
             </div>
         </div>
     );

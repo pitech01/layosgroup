@@ -58,7 +58,7 @@ const Sidebar = ({ collapsed, mobileOpen }: SidebarProps) => {
             </div>
 
             {/* Nav Menu */}
-            <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2 scrollbar-none">
+            <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2 scrollbar-none ">
                 {navItems.map(({ icon: Icon, label, path, exact }) => {
                     const active = isActive(path, exact);
                     return (
@@ -66,16 +66,16 @@ const Sidebar = ({ collapsed, mobileOpen }: SidebarProps) => {
                             key={path}
                             to={path}
                             className={`
-                                flex items-center gap-4 px-4 py-3.5 rounded-2xl
-                                font-black text-sm transition-all duration-200
+                                 flex items-center gap-4 px-4 py-3.5 rounded-2xl
+                                font-black text-sm transition-all duration-200 nav-link dark:text-gray-100
                                 ${active
                                     ? 'bg-brand-emerald text-white shadow-xl shadow-brand-emerald/20 translate-x-1'
-                                    : 'text-brand-muted dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5 hover:text-brand-emerald dark:hover:text-white'
+                                    : ''
                                 }
                                 ${collapsed ? 'justify-center px-0' : ''}
                             `}
                         >
-                            <Icon size={20} strokeWidth={active ? 3 : 2} className="flex-shrink-0" />
+                            <Icon size={20} strokeWidth={active ? 3 : 2} className="flex-shrink-0 dark:text-gray-100" />
                             {!collapsed && <span>{label}</span>}
                         </Link>
                     );
