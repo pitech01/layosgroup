@@ -15,15 +15,7 @@ import {
     Activity,
     PlusCircle,
     Check,
-    ChevronDown,
-    Sparkles,
-    Zap,
-    Target,
-    Layers,
-    BookOpen,
-    ArrowRight,
-    Save,
-    Share2
+    ChevronDown
 } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 
@@ -72,7 +64,7 @@ export default function CurriculumBuilder() {
     const [modules, setModules] = useState<Module[]>([]);
     const [courseInfo] = useState({ title: 'Executive Brand Systems', status: 'draft' });
     const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
-    const [deliveryMode, setDeliveryMode] = useState('Planning Phase');
+    const [deliveryMode, setDeliveryMode] = useState('Course Planning');
 
     // UI state for Modals
     const [activeModal, setActiveModal] = useState<{
@@ -98,7 +90,7 @@ export default function CurriculumBuilder() {
         loadCurriculum: () => {
             const saved = localStorage.getItem(`course_${courseId}_curriculum`);
             return saved ? JSON.parse(saved) : [
-                { id: 'm1', title: 'Unit 1: Foundational Frameworks', order_position: 1, isOpen: true, sessions: [] }
+                { id: 'm1', title: 'Module 1: Getting Started', order_position: 1, isOpen: true, sessions: [] }
             ];
         }
     };
@@ -113,17 +105,17 @@ export default function CurriculumBuilder() {
             const allSessions = modules.flatMap(m => m.sessions);
             const types = new Set(allSessions.map(s => s.type));
             if (types.has('live') && types.has('video')) setDeliveryMode('Hybrid Delivery');
-            else if (types.has('live')) setDeliveryMode('Synchronous Live');
-            else if (types.has('video')) setDeliveryMode('Asynchronous Self-paced');
-            else if (allSessions.length > 0) setDeliveryMode('Resource Catalog');
-            else setDeliveryMode('Architecture Draft');
+            else if (types.has('live')) setDeliveryMode('Live Sessions');
+            else if (types.has('video')) setDeliveryMode('Self-paced');
+            else if (allSessions.length > 0) setDeliveryMode('Resources Only');
+            else setDeliveryMode('Drafting');
         }
     }, [modules]);
 
     const handleAddModule = () => {
         setModules([...modules, {
             id: `mod_${Date.now()}`,
-            title: 'New Instructional Module',
+            title: 'New Course Module',
             order_position: modules.length + 1,
             isOpen: true,
             sessions: []
@@ -135,7 +127,7 @@ export default function CurriculumBuilder() {
     };
 
     const handleDeleteModule = (modId: string) => {
-        if (window.confirm('Are you sure you want to redact this module? All internal assets will be permanently removed.')) {
+        if (window.confirm('Are you sure you want to delete this module? All lessons within it will be removed.')) {
             setModules(modules.filter(m => m.id !== modId));
         }
     };
@@ -168,7 +160,7 @@ export default function CurriculumBuilder() {
                     const newSession: Session = {
                         id: `sess_${Date.now()}`,
                         module_id: moduleId,
-                        title: sessionData.title || 'Untitled Asset',
+                        title: sessionData.title || 'Untitled Lesson',
                         description: sessionData.description || '',
                         type: type!,
                         order_position: m.sessions.length + 1,
@@ -185,240 +177,230 @@ export default function CurriculumBuilder() {
     };
 
     return (
-        <div className="min-h-screen bg-brand-beige/20 dark:bg-brand-charcoal text-brand-charcoal dark:text-white pb-32">
-            {/* Sticky Navigation Header */}
-            <header className="sticky top-0 z-[100] bg-white/80 dark:bg-brand-charcoal/80 backdrop-blur-2xl border-b border-brand-border px-6 py-4 md:px-12 flex justify-between items-center shadow-2xl shadow-brand-charcoal/5">
-                <div className="flex items-center gap-6">
-                    <Link to="/instructor/courses" className="w-12 h-12 bg-brand-beige dark:bg-white/5 text-brand-muted hover:text-brand-emerald border border-brand-border rounded-2xl flex items-center justify-center transition-all active:scale-90 no-underline group shadow-sm">
-                        <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-                    </Link>
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-4">
-                            <h1 className="text-lg md:text-xl font-black uppercase tracking-tight line-clamp-1">{courseInfo.title}</h1>
-                            <div className="hidden md:flex items-center gap-2 px-4 py-1 bg-brand-emerald/10 text-brand-emerald border border-brand-emerald/20 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                <Target size={12} /> {deliveryMode}
-                            </div>
+        <div className="curriculum-container">
+            <style>{`
+                .staff-scope .curriculum-container { min-height: 100vh; background: #fcfdfe; color: #0f172a; padding-bottom: 5rem; }
+                .staff-scope .curriculum-header { background: white; padding: 1.25rem 4rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid rgba(226, 232, 240, 0.7); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+                .staff-scope .header-brand { display: flex; align-items: center; gap: 2rem; }
+                .staff-scope .exit-btn { width: 44px; height: 44px; border-radius: 14px; background: #f8fafc; border: 1.5px solid #f1f5f9; display: flex; align-items: center; justify-content: center; color: #64748b; transition: all 0.2s; text-decoration: none; }
+                .exit-btn:hover { background: #1a4d3e; color: white; border-color: #1a4d3e; transform: translateX(-4px); }
+                .staff-scope .header-title-row { display: flex; alignItems: center; gap: 16px; }
+                .header-title-row h1 { font-size: 1.4rem; font-weight: 950; margin: 0; color: #0f172a; letter-spacing: -0.02em; }
+                .staff-scope .badge-blueprint { background: #f0fdf4; color: #1a4d3e; font-size: 0.75rem; font-weight: 900; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #1a4d3e10; }
+                .staff-scope .save-status { font-size: 0.8rem; font-weight: 800; color: #94a3b8; display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+                .save-status.saving { color: #1a4d3e; }
+                .staff-scope .header-actions { display: flex; gap: 1.25rem; }
+                
+                .staff-scope .btn-primary-forest { background: #1a4d3e; color: white; border: none; padding: 0.85rem 2rem; border-radius: 16px; font-weight: 900; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2); }
+                .btn-primary-forest:hover { transform: translateY(-2px); box-shadow: 0 15px 20px -5px rgba(26, 77, 62, 0.25); }
+                .staff-scope .btn-outline-premium { background: white; color: #475569; border: 2.5px solid #f1f5f9; padding: 0.85rem 1.75rem; border-radius: 16px; font-weight: 850; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+                .btn-outline-premium:hover { border-color: #1a4d3e30; background: #fcfdfe; color: #1a4d3e; }
+
+                .staff-scope .curriculum-canvas { max-width: 1000px; margin: 5rem auto; padding: 0 3rem; }
+                .staff-scope .canvas-header { margin-bottom: 4rem; }
+                .canvas-header h2 { font-size: 2.5rem; font-weight: 950; margin-bottom: 0.75rem; color: #0f172a; letter-spacing: -0.04em; }
+                .canvas-header p { color: #64748b; font-weight: 600; font-size: 1.15rem; line-height: 1.6; }
+
+                .staff-scope .modules-list { display: flex; flex-direction: column; gap: 2.5rem; }
+                .staff-scope .module-box { background: white; border-radius: 32px; border: 1.5px solid rgba(226, 232, 240, 0.8); overflow: hidden; transition: all 0.4s; }
+                .module-box.expanded { border-color: #1a4d3e15; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.04); }
+                
+                .staff-scope .module-top { padding: 2.25rem 2.5rem; display: flex; align-items: center; gap: 2rem; cursor: pointer; background: #fcfdfe; }
+                .module-top:hover { background: #f8fafc; }
+                .staff-scope .drag-handle { color: #cbd5e1; cursor: grab; }
+                .staff-scope .module-title-zone { flex: 1; display: flex; flex-direction: column; }
+                .staff-scope .module-title-input { font-size: 1.35rem; font-weight: 950; border: none; background: transparent; padding: 6px 0; outline: none; transition: border 0.2s; border-bottom: 2.5px solid transparent; color: #0f172a; letter-spacing: -0.02em; }
+                .module-title-input:focus { border-bottom-color: #1a4d3e; }
+                .staff-scope .module-meta { font-size: 0.85rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 6px; }
+                
+                .staff-scope .module-controls { display: flex; align-items: center; gap: 1.5rem; }
+                .staff-scope .ctrl-btn { border: none; background: transparent; padding: 10px; border-radius: 12px; cursor: pointer; color: #94a3b8; transition: all 0.2s; }
+                .ctrl-btn.delete:hover { background: #fef2f2; color: #ef4444; }
+                
+                .staff-scope .module-body { padding: 0 2.5rem 2.5rem 2.5rem; border-top: 1.5px solid rgba(241, 245, 249, 0.8); background: white; }
+                .staff-scope .sessions-container { display: flex; flex-direction: column; gap: 1rem; padding: 2.5rem 0; }
+                
+                .staff-scope .session-item { background: white; border: 1.5px solid #f1f5f9; padding: 1.5rem 2.5rem; border-radius: 24px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+                .session-item:hover { transform: translateX(10px); border-color: #1a4d3e30; box-shadow: 0 10px 25px -5px rgba(26,77,62,0.05); }
+                .staff-scope .session-left { display: flex; align-items: center; gap: 2rem; }
+                .staff-scope .session-icon { width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; }
+                .staff-scope .session-icon.video { background: #eff6ff; color: #1d4ed8; }
+                .staff-scope .session-icon.live { background: #fef2f2; color: #b91c1c; }
+               .staff-scope  .session-icon.docs { background: #f0fdf4; color: #166534; }
+                .staff-scope .session-icon.evaluation { background: #fefce8; color: #854d0e; }
+                .staff-scope .session-text h4 { font-size: 1.15rem; font-weight: 900; margin: 0; color: #0f172a; }
+                .staff-scope .session-text p { font-size: 0.85rem; font-weight: 800; color: #64748b; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em; }
+
+                .staff-scope .add-module-master { width: 100%; padding: 3rem; border-radius: 40px; border: 3px dashed rgba(26, 77, 62, 0.2); background: white; color: #1a4d3e; font-size: 1.35rem; font-weight: 950; display: flex; align-items: center; justify-content: center; gap: 20px; cursor: pointer; transition: all 0.4s; margin-top: 4rem; }
+                .add-module-master:hover { background: #f0fdf4; border-color: #1a4d3e60; transform: translateY(-8px); box-shadow: 0 30px 60px -15px rgba(26, 77, 62, 0.1); }
+
+                /* MODAL SYSTEM */
+                .staff-scope .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 2rem; }
+                .staff-scope .modal-content { background: white; border-radius: 52px; width: 100%; max-width: 1000px; max-height: 94vh; overflow-y: auto; position: relative; box-shadow: 0 60px 120px -30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+                .staff-scope .session-selector { padding: 6rem; text-align: center; }
+                .staff-scope .session-selector h3 { font-size: 2.75rem; font-weight: 950; margin-bottom: 1.5rem; color: #0f172a; letter-spacing: -0.04em; }
+                .staff-scope .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 5rem; }
+                .staff-scope .select-opt { padding: 3.5rem; border: 3px solid #f1f5f9; border-radius: 44px; text-align: left; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+                .select-opt:hover { border-color: #1a4d3e; background: #f0fdf4; transform: scale(1.02) translateY(-10px); }
+               .staff-scope  .select-opt h4 { font-size: 1.5rem; font-weight: 950; margin: 2rem 0 0.75rem 0; color: #0f172a; }
+               .staff-scope  .select-opt p { color: #64748b; font-weight: 600; line-height: 1.5; }
+                .staff-scope .modal-close { position: absolute; top: 3rem; right: 3rem; border: none; background: #f1f5f9; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; transition: all 0.3s; }
+                .staff-scope .modal-close:hover { background: #fef2f2; color: #ef4444; transform: rotate(90deg); }
+
+                /* FORMS */
+                .staff-scope .form-wrapper { padding: 6rem; }
+                .staff-scope .form-header { display: flex; gap: 3rem; align-items: center; margin-bottom: 5rem; }
+                .staff-scope .form-header h2 { font-size: 2.5rem; font-weight: 950; margin: 0; color: #0f172a; letter-spacing: -0.05em; }
+                .staff-scope .form-body { display: flex; flex-direction: column; gap: 3rem; }
+                .staff-scope .form-input-premium { width: 100%; background: #fcfdfe; border: 2.5px solid #e2e8f0; border-radius: 20px; padding: 1.25rem 1.75rem; font-size: 1.15rem; font-weight: 700; color: #0f172a; outline: none; transition: all 0.3s; }
+
+                .staff-scope .form-input-premium:focus { border-color: #1a4d3e; background: white; box-shadow: 0 0 0 8px rgba(26, 77, 62, 0.08); }
+                .staff-scope .form-textarea-premium { width: 100%; background: #fcfdfe; border: 2.5px solid #e2e8f0; border-radius: 20px; padding: 1.75rem; font-size: 1.15rem; font-weight: 700; color: #0f172a; outline: none; min-height: 160px; resize: none; transition: all 0.3s; }
+                .staff-scope .form-textarea-premium:focus { border-color: #1a4d3e; background: white; box-shadow: 0 0 0 8px rgba(26, 77, 62, 0.08); }
+                
+                .staff-scope .deploy-btn-forest { background: #1a4d3e; color: white; border: none; border-radius: 24px; padding: 1.75rem 5rem; font-weight: 950; cursor: pointer; font-size: 1.25rem; box-shadow: 0 20px 40px -10px rgba(26, 77, 62, 0.4); transition: all 0.4s; }
+
+                .staff-scope .deploy-btn-forest:hover { transform: translateY(-5px); box-shadow: 0 30px 60px -15px rgba(26, 77, 62, 0.5); }
+            `}</style>
+
+            <header className="curriculum-header">
+                <div className="header-brand">
+                    <Link to="/instructor/courses" className="exit-btn"><ChevronLeft size={24} /></Link>
+                    <div className="header-info">
+                        <div className="header-title-row">
+                            <h1>{courseInfo.title}</h1>
+                            <span className="badge-blueprint">
+                                <Activity size={14} /> {deliveryMode}
+                            </span>
                         </div>
-                        <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors ${saveStatus === 'saving' ? 'text-brand-emerald animate-pulse' : 'text-brand-muted'}`}>
-                            {saveStatus === 'saving' ? <><Clock size={12} /> Synchronizing Architecture...</> : <><Check size={12} /> Local Cloud Sync Active</>}
+                        <div className={`save-status ${saveStatus}`}>
+                            {saveStatus === 'saving' ? <><Clock size={14} /> Saving Curriculum...</> : <><Check size={14} /> Curriculum Saved</>}
                         </div>
                     </div>
                 </div>
-
-                <div className="flex gap-4">
-                    <button className="hidden md:flex h-12 px-6 bg-white dark:bg-white/10 border border-brand-border rounded-xl font-black text-[10px] uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all items-center gap-2 border-none cursor-pointer">
-                        <Eye size={18} /> Preview Canvas
-                    </button>
-                    <button className="h-12 px-8 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer">
-                        Release Artifact
-                    </button>
+                <div className="header-actions">
+                    <button className="btn-outline-premium"><Eye size={20} /> Preview</button>
+                    <button className="btn-primary-forest">Publish Changes</button>
                 </div>
             </header>
 
-            {/* Main Canvas Area */}
-            <main className="max-w-5xl mx-auto px-6 md:px-0 py-16 md:py-24 space-y-16 animate-fade-in-up">
-                {/* Introduction Section */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-brand-emerald/10 rounded-lg">
-                            <Layers className="text-brand-emerald" size={18} />
-                        </div>
-                        <span className="text-brand-emerald font-black text-xs uppercase tracking-widest">Curriculum Engineering</span>
-                    </div>
-                    <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-[1.1]">Architect the <span className="text-brand-emerald">Learning Journey</span></h2>
-                    <p className="text-brand-muted font-medium text-lg md:text-xl max-w-3xl leading-relaxed">
-                        Design an immersive educational ecosystem. Sequence your instructional assets, configure prerequisite gates, and manage interactive evaluation points.
-                    </p>
+            <main className="curriculum-canvas">
+                <div className="canvas-header">
+                    <h2>Course Curriculum</h2>
+                    <p>Map out the learning journey for your students. Organize content into modules and lessons to create a structured educational experience.</p>
                 </div>
 
-                {/* Modules Hierarchy */}
-                <div className="space-y-10">
-                    {modules.map((mod, idx) => (
-                        <div key={mod.id} className={`group bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden transition-all duration-500 ${mod.isOpen ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm opacity-80 hover:opacity-100'}`}>
-                            {/* Module Header */}
-                            <div 
-                                className="flex items-center gap-6 p-8 md:p-10 cursor-pointer select-none"
-                                onClick={() => toggleModule(mod.id)}
-                            >
-                                <div className="w-12 h-12 bg-brand-beige dark:bg-white/5 border border-brand-border rounded-2xl flex items-center justify-center text-brand-muted shrink-0 group-hover:text-brand-emerald transition-colors">
-                                    <GripVertical size={24} />
-                                </div>
-                                <div className="flex-1 space-y-2">
+                <div className="modules-list">
+                    {modules.map((mod) => (
+                        <div key={mod.id} className={`module-box ${mod.isOpen ? 'expanded' : 'collapsed'}`}>
+                            <div className="module-top" onClick={() => toggleModule(mod.id)}>
+                                <div className="drag-handle"><GripVertical size={24} /></div>
+                                <div className="module-title-zone">
                                     <input
-                                        className="w-full bg-transparent border-none text-xl md:text-2xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight focus:outline-none focus:text-brand-emerald transition-colors cursor-text"
+                                        className="module-title-input"
                                         value={mod.title}
                                         onChange={(e) => handleEditModuleTitle(mod.id, e.target.value)}
                                         onClick={(e) => e.stopPropagation()}
-                                        placeholder="Module Identifier..."
+                                        placeholder="Module Title..."
                                     />
-                                    <div className="flex items-center gap-3 text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">
-                                        <BookOpen size={14} className="text-brand-emerald" /> {mod.sessions.length} Instructional Assets Synchronized
-                                    </div>
+                                    <span className="module-meta">{mod.sessions.length} Lessons Added</span>
                                 </div>
-                                <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
-                                    <button 
-                                        onClick={() => handleDeleteModule(mod.id)} 
-                                        className="w-10 h-10 flex items-center justify-center bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                    <div className={`w-10 h-10 flex items-center justify-center bg-brand-beige dark:bg-white/5 border border-brand-border rounded-xl text-brand-muted transition-transform duration-500 ${mod.isOpen ? 'rotate-180' : ''}`}>
+                                <div className="module-controls" onClick={(e) => e.stopPropagation()}>
+                                    <button onClick={() => handleDeleteModule(mod.id)} className="ctrl-btn delete"><Trash2 size={20} /></button>
+                                    <div style={{ transform: mod.isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s', color: '#64748b' }}>
                                         <ChevronDown size={24} />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Module Content */}
                             {mod.isOpen && (
-                                <div className="px-8 md:px-10 pb-10 space-y-6 animate-fade-in-up">
-                                    <div className="border-t border-brand-border pt-10 grid grid-cols-1 gap-4">
-                                        {mod.sessions.length === 0 ? (
-                                            <div className="flex flex-col items-center justify-center py-16 gap-6 bg-brand-beige/20 dark:bg-white/5 rounded-[32px] border border-brand-border border-dashed text-center">
-                                                <div className="w-16 h-16 bg-white dark:bg-white/5 rounded-2xl flex items-center justify-center text-brand-muted/30">
-                                                    <Sparkles size={32} />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <h4 className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Empty Artifact Container</h4>
-                                                    <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest">No assets detected within this instructional block.</p>
-                                                </div>
-                                            </div>
-                                        ) : mod.sessions.map((sess) => (
-                                            <div key={sess.id} className="group/item flex flex-col md:flex-row items-center justify-between p-6 bg-white dark:bg-brand-charcoal border border-brand-border rounded-[28px] hover:shadow-xl hover:shadow-brand-charcoal/5 hover:border-brand-emerald/50 transition-all duration-300">
-                                                <div className="flex items-center gap-6 mb-6 md:mb-0 w-full md:w-auto">
-                                                    <div className={`
-                                                        w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner group-hover/item:scale-110 transition-transform duration-500
-                                                        ${sess.type === 'video' ? 'bg-blue-500/10 text-blue-600' : 
-                                                          sess.type === 'live' ? 'bg-red-500/10 text-red-600' : 
-                                                          sess.type === 'docs' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'}
-                                                    `}>
-                                                        {sess.type === 'video' && <Video size={24} />}
-                                                        {sess.type === 'live' && <Activity size={24} />}
-                                                        {sess.type === 'docs' && <FileText size={24} />}
-                                                        {sess.type === 'evaluation' && <HelpCircle size={24} />}
+                                <div className="module-body">
+                                    <div className="sessions-container">
+                                        {mod.sessions.length === 0 && (
+                                            <div className="empty-placeholder">No lessons added to this module yet.</div>
+                                        )}
+                                        {mod.sessions.map((sess) => (
+                                            <div key={sess.id} className="session-item">
+                                                <div className="session-left">
+                                                    <div className={`session-icon ${sess.type}`}>
+                                                        {sess.type === 'video' && <Video size={22} />}
+                                                        {sess.type === 'live' && <Activity size={22} />}
+                                                        {sess.type === 'docs' && <FileText size={22} />}
+                                                        {sess.type === 'evaluation' && <HelpCircle size={22} />}
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <h4 className="text-base font-black text-brand-charcoal dark:text-white uppercase tracking-tight line-clamp-1">{sess.title}</h4>
-                                                        <div className="flex items-center gap-3 text-[10px] font-black text-brand-muted uppercase tracking-widest">
-                                                            <span className="text-brand-emerald">{sess.type === 'evaluation' ? 'Final Evaluation' : sess.type}</span>
-                                                            <span className="w-1 h-1 bg-brand-muted/30 rounded-full"></span>
-                                                            <span>{sess.is_locked ? 'Sequence Required' : 'Public Manifest'}</span>
-                                                        </div>
+                                                    <div className="session-text">
+                                                        <h4>{sess.title}</h4>
+                                                        <p>{sess.type === 'evaluation' ? 'Evaluation' : sess.type} • {sess.is_locked ? 'Prerequisite Required' : 'Public Access'}</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                                                    <button 
-                                                        onClick={() => handleOpenEditSession(mod.id, sess)} 
-                                                        className="h-11 px-5 bg-brand-beige dark:bg-white/10 text-brand-muted hover:text-brand-charcoal dark:hover:text-white rounded-xl flex items-center gap-2 font-black text-[10px] uppercase tracking-widest transition-all border-none cursor-pointer"
-                                                    >
-                                                        <Edit2 size={16} /> Edit
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleDeleteSession(mod.id, sess.id)} 
-                                                        className="h-11 w-11 flex items-center justify-center bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
+                                                <div className="module-controls">
+                                                    <button onClick={() => handleOpenEditSession(mod.id, sess)} className="ctrl-btn"><Edit2 size={18} /></button>
+                                                    <button onClick={() => handleDeleteSession(mod.id, sess.id)} className="ctrl-btn delete"><Trash2 size={18} /></button>
                                                 </div>
                                             </div>
                                         ))}
-
-                                        <button 
-                                            onClick={() => handleOpenAddSession(mod.id)} 
-                                            className="mt-6 flex flex-col items-center justify-center py-8 gap-3 bg-brand-beige/10 dark:bg-white/5 border-2 border-brand-border border-dashed rounded-[32px] text-brand-muted hover:text-brand-emerald hover:border-brand-emerald hover:bg-brand-emerald/5 transition-all duration-300 group/add border-none cursor-pointer"
-                                        >
-                                            <div className="w-12 h-12 bg-white dark:bg-white/10 rounded-full flex items-center justify-center shadow-sm group-hover/add:scale-110 transition-transform">
-                                                <PlusCircle size={24} />
-                                            </div>
-                                            <span className="font-black text-[10px] uppercase tracking-[0.2em]">Initiate New Asset Deployment</span>
-                                        </button>
                                     </div>
+                                    <button onClick={() => handleOpenAddSession(mod.id)} style={{
+                                        width: '100%',
+                                        padding: '1.5rem',
+                                        background: '#f8fafc',
+                                        border: '2px dashed #e2e8f0',
+                                        borderRadius: '20px',
+                                        color: '#1a4d3e',
+                                        fontWeight: 800,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '12px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        marginTop: '1.5rem'
+                                    }} onMouseOver={e => e.currentTarget.style.background = '#f0fdf4'} onMouseOut={e => e.currentTarget.style.background = '#f8fafc'}>
+                                        <PlusCircle size={22} />
+                                        <span>Add New Lesson</span>
+                                    </button>
                                 </div>
                             )}
                         </div>
                     ))}
 
-                    <button 
-                        className="w-full flex flex-col items-center justify-center py-20 gap-8 bg-white dark:bg-brand-charcoal border-4 border-brand-border border-dashed rounded-[60px] text-brand-muted hover:text-brand-emerald hover:border-brand-emerald/50 hover:bg-brand-emerald/5 hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500 group/module-add border-none cursor-pointer" 
-                        onClick={handleAddModule}
-                    >
-                        <div className="w-24 h-24 bg-brand-beige dark:bg-white/10 rounded-[32px] flex items-center justify-center shadow-lg group-hover/module-add:scale-110 transition-transform duration-500">
-                            <Layout size={48} />
-                        </div>
-                        <div className="text-center space-y-2">
-                            <h3 className="text-3xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Expand Curriculum</h3>
-                            <p className="font-black text-xs uppercase tracking-[0.3em]">Initialize Sequential Module Protocol</p>
-                        </div>
+                    <button className="add-module-master" onClick={handleAddModule}>
+                        <Layout size={32} />
+                        Add New Module
                     </button>
                 </div>
             </main>
 
-            {/* Premium Modal System */}
             {activeModal.isOpen && (
-                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 md:p-12 overflow-hidden">
-                    <div className="absolute inset-0 bg-brand-charcoal/90 backdrop-blur-2xl animate-fade-in" onClick={() => setActiveModal({ ...activeModal, isOpen: false })}></div>
-                    <div className="relative w-full max-w-6xl max-h-full bg-white dark:bg-brand-charcoal rounded-[60px] shadow-2xl overflow-y-auto custom-scrollbar animate-scale-up border border-white/10">
-                        <button 
-                            className="absolute top-10 right-10 w-16 h-16 bg-brand-beige dark:bg-white/5 text-brand-muted hover:text-red-500 rounded-full flex items-center justify-center transition-all border-none cursor-pointer z-50 shadow-sm" 
-                            onClick={() => setActiveModal({ ...activeModal, isOpen: false })}
-                        >
-                            <X size={32} />
-                        </button>
-
+                <div className="modal-overlay" onClick={() => setActiveModal({ ...activeModal, isOpen: false })}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
                         {!activeModal.type ? (
-                            <div className="p-16 md:p-32 space-y-20">
-                                <div className="text-center space-y-6">
-                                    <div className="flex items-center justify-center gap-3">
-                                        <div className="p-2 bg-brand-emerald/10 rounded-lg">
-                                            <Zap className="text-brand-emerald" size={24} />
-                                        </div>
-                                        <span className="text-brand-emerald font-black text-sm uppercase tracking-widest">Asset Classification</span>
+                            <div className="session-selector">
+                                <h3>Select Lesson Type</h3>
+                                <p>Choose the type of content you want to add to this module.</p>
+                                <div className="selector-grid">
+                                    <div className="select-opt video" onClick={() => setActiveModal({ ...activeModal, type: 'video' })}>
+                                        <div className="opt-icon"><Video size={40} /></div>
+                                        <h4>Video Lesson</h4>
+                                        <p>Recordings or uploaded videos for students to watch at their own pace.</p>
                                     </div>
-                                    <h3 className="text-4xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tight uppercase">Select Asset <span className="text-brand-emerald">Type</span></h3>
-                                    <p className="text-brand-muted font-medium text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">Choose the specific instructional modality for this curriculum unit. Each type offers specialized delivery protocols.</p>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                    <div 
-                                        className="group/opt p-12 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[48px] text-left cursor-pointer hover:border-brand-emerald hover:bg-brand-emerald/5 hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500" 
-                                        onClick={() => setActiveModal({ ...activeModal, type: 'video' })}
-                                    >
-                                        <div className="w-20 h-20 bg-blue-500/10 text-blue-600 rounded-3xl flex items-center justify-center shadow-sm group-hover/opt:scale-110 transition-transform">
-                                            <Video size={40} />
-                                        </div>
-                                        <h4 className="text-2xl font-black text-brand-charcoal dark:text-white mt-10 mb-4 uppercase tracking-tight">Kinetic Artifact</h4>
-                                        <p className="text-brand-muted font-medium leading-relaxed">Serialized video content and screen-capture recordings for asynchronous consumption.</p>
+                                    <div className="select-opt live" onClick={() => setActiveModal({ ...activeModal, type: 'live' })}>
+                                        <div className="opt-icon"><Activity size={40} /></div>
+                                        <h4>Live Session</h4>
+                                        <p>Schedule a real-time meeting or stream for direct engagement.</p>
                                     </div>
-                                    <div 
-                                        className="group/opt p-12 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[48px] text-left cursor-pointer hover:border-brand-emerald hover:bg-brand-emerald/5 hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500" 
-                                        onClick={() => setActiveModal({ ...activeModal, type: 'live' })}
-                                    >
-                                        <div className="w-20 h-20 bg-red-500/10 text-red-600 rounded-3xl flex items-center justify-center shadow-sm group-hover/opt:scale-110 transition-transform">
-                                            <Activity size={40} />
-                                        </div>
-                                        <h4 className="text-2xl font-black text-brand-charcoal dark:text-white mt-10 mb-4 uppercase tracking-tight">Synchronous Event</h4>
-                                        <p className="text-brand-muted font-medium leading-relaxed">Real-time instructional sessions, interactive workshops, and live broadcast protocols.</p>
+                                    <div className="select-opt docs" onClick={() => setActiveModal({ ...activeModal, type: 'docs' })}>
+                                        <div className="opt-icon"><FileText size={40} /></div>
+                                        <h4>Course Material</h4>
+                                        <p>PDFs, documents, and resources for students to download.</p>
                                     </div>
-                                    <div 
-                                        className="group/opt p-12 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[48px] text-left cursor-pointer hover:border-brand-emerald hover:bg-brand-emerald/5 hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500" 
-                                        onClick={() => setActiveModal({ ...activeModal, type: 'docs' })}
-                                    >
-                                        <div className="w-20 h-20 bg-emerald-500/10 text-emerald-600 rounded-3xl flex items-center justify-center shadow-sm group-hover/opt:scale-110 transition-transform">
-                                            <FileText size={40} />
-                                        </div>
-                                        <h4 className="text-2xl font-black text-brand-charcoal dark:text-white mt-10 mb-4 uppercase tracking-tight">Textual Repository</h4>
-                                        <p className="text-brand-muted font-medium leading-relaxed">Digital blueprints, PDF resources, and technical documentation for offline analysis.</p>
-                                    </div>
-                                    <div 
-                                        className="group/opt p-12 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[48px] text-left cursor-pointer hover:border-brand-emerald hover:bg-brand-emerald/5 hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500" 
-                                        onClick={() => setActiveModal({ ...activeModal, type: 'evaluation' })}
-                                    >
-                                        <div className="w-20 h-20 bg-amber-500/10 text-amber-600 rounded-3xl flex items-center justify-center shadow-sm group-hover/opt:scale-110 transition-transform">
-                                            <HelpCircle size={40} />
-                                        </div>
-                                        <h4 className="text-2xl font-black text-brand-charcoal dark:text-white mt-10 mb-4 uppercase tracking-tight">Cognitive Assessment</h4>
-                                        <p className="text-brand-muted font-medium leading-relaxed">Advanced quizzes and validation checkpoints to measure curriculum comprehension.</p>
+                                    <div className="select-opt evaluation" onClick={() => setActiveModal({ ...activeModal, type: 'evaluation' })}>
+                                        <div className="opt-icon"><HelpCircle size={40} /></div>
+                                        <h4>Evaluation</h4>
+                                        <p>Create quizzes and tests to evaluate student understanding.</p>
                                     </div>
                                 </div>
+                                <button className="modal-close" onClick={() => setActiveModal({ ...activeModal, isOpen: false })}><X size={32} /></button>
                             </div>
                         ) : (
                             <SessionForm
@@ -434,6 +416,8 @@ export default function CurriculumBuilder() {
         </div>
     );
 }
+
+
 
 function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionType, initialData: Session | null, onCancel: () => void, onSave: (data: Partial<Session>) => void }) {
     const [formData, setFormData] = useState<Partial<Session>>(initialData || {
@@ -478,217 +462,103 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
     };
 
     return (
-        <div className="p-16 md:p-24 space-y-16 animate-fade-in-up">
-            <header className="flex flex-col md:flex-row items-center gap-10">
-                <div className={`
-                    w-24 h-24 rounded-[32px] flex items-center justify-center shadow-lg shrink-0
-                    ${type === 'video' ? 'bg-blue-500/10 text-blue-600' : 
-                      type === 'live' ? 'bg-red-500/10 text-red-600' : 
-                      type === 'docs' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'}
-                `}>
-                    {type === 'video' && <Video size={40} />}
-                    {type === 'live' && <Activity size={40} />}
-                    {type === 'docs' && <FileText size={40} />}
-                    {type === 'evaluation' && <HelpCircle size={40} />}
+        <div className="form-wrapper">
+            <header className="form-header">
+                <div className={`form-icon ${type}`}>
+                    {type === 'video' && <Video size={36} />}
+                    {type === 'live' && <Activity size={36} />}
+                    {type === 'docs' && <FileText size={36} />}
+                    {type === 'evaluation' && <HelpCircle size={36} />}
                 </div>
-                <div className="text-center md:text-left space-y-2">
-                    <h2 className="text-4xl md:text-5xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">
-                        {initialData ? 'Update Artifact' : `Deploy ${type === 'docs' ? 'Resource' : (type === 'evaluation' ? 'Evaluation' : type)}`}
-                    </h2>
-                    <p className="text-brand-muted font-medium text-lg md:text-xl">Configure the technical metadata and content parameters for this unit.</p>
+                <div>
+                    <h2>{initialData ? 'Update Lesson' : `Add New ${type === 'docs' ? 'Resource' : (type === 'evaluation' ? 'Evaluation' : type)}`}</h2>
+                    <p>Configure the details for this curriculum unit.</p>
                 </div>
             </header>
 
-            <div className="space-y-12">
-                <div className="grid grid-cols-1 gap-12">
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Instructional Asset Title</label>
-                        <input 
-                            className="w-full h-16 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold text-xl" 
-                            value={formData.title} 
-                            onChange={e => handleFieldChange('title', e.target.value)} 
-                            placeholder="e.g. Fundamental Systems Architecture" 
-                        />
-                    </div>
+            <div className="form-body">
+                <div className="form-group">
+                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '12px', display: 'block' }}>Lesson Title</label>
+                    <input className="form-input-premium" value={formData.title} onChange={e => handleFieldChange('title', e.target.value)} placeholder="e.g. Introduction to Course" />
+                </div>
 
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Content Narrative & Objectives</label>
-                        <textarea 
-                            className="w-full p-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[32px] focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold text-lg min-h-[160px] resize-none" 
-                            value={formData.description} 
-                            onChange={e => handleFieldChange('description', e.target.value)} 
-                            placeholder="Articulate the core concepts and learning outcomes for this session..." 
-                        />
-                    </div>
+                <div className="form-group">
+                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '12px', display: 'block' }}>Description</label>
+                    <textarea className="form-textarea-premium" value={formData.description} onChange={e => handleFieldChange('description', e.target.value)} placeholder="Describe what students will learn in this session..." />
                 </div>
 
                 {type === 'video' && (
-                    <div className="flex flex-col items-center justify-center p-16 bg-brand-emerald/5 border-2 border-brand-emerald/20 border-dashed rounded-[48px] text-center gap-6 group hover:bg-brand-emerald/10 transition-colors">
-                        <div className="w-20 h-20 bg-brand-emerald/10 text-brand-emerald rounded-3xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                            <UploadCloud size={48} />
-                        </div>
-                        <div className="space-y-2">
-                            <h4 className="text-2xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Initiate Artifact Upload</h4>
-                            <p className="text-brand-muted font-medium">Synchronize MP4, MOV, or external VOD endpoints.</p>
-                        </div>
+                    <div className="upload-box">
+                        <UploadCloud size={56} color="#1a4d3e" />
+                        <h4>Upload Video Lesson</h4>
+                        <p>MP4, MOV or link to external video sources.</p>
                     </div>
                 )}
 
                 {type === 'live' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border">
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Transmission Platform</label>
-                            <select className="w-full h-14 px-6 bg-white dark:bg-brand-charcoal/50 border-2 border-brand-border rounded-xl focus:outline-none focus:border-brand-emerald transition-all font-bold text-brand-charcoal dark:text-white cursor-pointer">
-                                <option>Microsoft Teams Ecosystem</option>
-                                <option>Zoom Enterprise Protocol</option>
-                                <option>Google Meet Endpoint</option>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                        <div>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#475569', marginBottom: '8px', display: 'block' }}>Live Platform</label>
+                            <select className="form-input-premium">
+                                <option>Microsoft Teams</option>
                             </select>
                         </div>
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Meeting Access Link</label>
-                            <div className="relative group">
-                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors">
-                                    <Share2 size={18} />
-                                </div>
-                                <input className="w-full h-14 pl-14 pr-6 bg-white dark:bg-brand-charcoal/50 border-2 border-brand-border rounded-xl focus:outline-none focus:border-brand-emerald transition-all font-bold text-brand-charcoal dark:text-white" placeholder="https://synchronization.link/..." />
-                            </div>
+                        <div>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#475569', marginBottom: '8px', display: 'block' }}>Meeting Link</label>
+                            <input className="form-input-premium" placeholder="https://..." />
                         </div>
                     </div>
                 )}
 
                 {type === 'evaluation' && (
-                    <div className="space-y-10">
-                        <div className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border space-y-6">
-                            <div className="flex justify-between items-center">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em]">Minimum Proficiency Benchmark: <span className="text-brand-emerald text-lg ml-2">{evaluationFields.pass_mark}%</span></label>
-                            </div>
-                            <input 
-                                type="range" 
-                                min="0" 
-                                max="100" 
-                                step="5" 
-                                value={evaluationFields.pass_mark} 
-                                onChange={e => setEvaluationFields({ ...evaluationFields, pass_mark: parseInt(e.target.value) })} 
-                                className="w-full h-3 bg-brand-border rounded-full appearance-none cursor-pointer accent-brand-emerald" 
-                            />
+                    <div className="questions-builder">
+                        <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '24px', border: '2px solid #e2e8f0' }}>
+                            <label style={{ fontWeight: 900, color: '#0f172a' }}>Passing Grade: {evaluationFields.pass_mark}%</label>
+                            <input type="range" min="0" max="100" step="5" value={evaluationFields.pass_mark} onChange={e => setEvaluationFields({ ...evaluationFields, pass_mark: parseInt(e.target.value) })} style={{ width: '100%', marginTop: '1rem', accentColor: '#1a4d3e' }} />
                         </div>
 
-                        <div className="space-y-6">
-                            {evaluationFields.questions.map((q, idx) => (
-                                <div key={q.id} className="p-10 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-xl shadow-sm space-y-8 relative group/q">
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-xl flex items-center justify-center font-black text-xs">
-                                                {idx + 1}
-                                            </div>
-                                            <span className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Validation Checkpoint</span>
-                                        </div>
-                                        <button 
-                                            onClick={() => setEvaluationFields({ ...evaluationFields, questions: evaluationFields.questions.filter(x => x.id !== q.id) })} 
-                                            className="w-10 h-10 flex items-center justify-center bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </div>
-                                    <input 
-                                        className="w-full h-14 px-6 bg-brand-beige/30 dark:bg-white/5 border border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald transition-all font-bold text-brand-charcoal dark:text-white text-lg" 
-                                        value={q.text} 
-                                        onChange={e => updateQuestion(q.id, { text: e.target.value })} 
-                                        placeholder="Formulate the validation question..." 
-                                    />
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {q.options.map((opt, oIdx) => (
-                                            <div key={oIdx} className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${q.correctIndex === oIdx ? 'bg-brand-emerald/10 border-brand-emerald' : 'bg-brand-beige/20 dark:bg-white/5 border-brand-border'}`}>
-                                                <input 
-                                                    type="radio" 
-                                                    checked={q.correctIndex === oIdx} 
-                                                    onChange={() => updateQuestion(q.id, { correctIndex: oIdx })} 
-                                                    className="w-5 h-5 accent-brand-emerald cursor-pointer"
-                                                />
-                                                <input 
-                                                    type="text" 
-                                                    value={opt} 
-                                                    onChange={e => {
-                                                        const newOpts = [...q.options];
-                                                        newOpts[oIdx] = e.target.value;
-                                                        updateQuestion(q.id, { options: newOpts });
-                                                    }} 
-                                                    className="bg-transparent border-none focus:outline-none font-bold text-brand-charcoal dark:text-white flex-1"
-                                                    placeholder={`Hypothesis ${oIdx + 1}`} 
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
+                        {evaluationFields.questions.map((q, idx) => (
+                            <div key={q.id} className="q-card">
+                                <div className="q-header">
+                                    <span>Question {idx + 1}</span>
+                                    <button onClick={() => setEvaluationFields({ ...evaluationFields, questions: evaluationFields.questions.filter(x => x.id !== q.id) })} className="del-btn"><Trash2 size={16} /></button>
                                 </div>
-                            ))}
-                            <button 
-                                className="w-full h-20 flex items-center justify-center gap-4 bg-brand-beige dark:bg-white/5 border-2 border-brand-border border-dashed rounded-[32px] text-brand-muted hover:text-brand-emerald hover:border-brand-emerald hover:bg-brand-emerald/5 transition-all font-black text-xs uppercase tracking-widest border-none cursor-pointer" 
-                                onClick={addQuestion}
-                            >
-                                <PlusCircle size={20} /> Extend Validation Matrix
-                            </button>
-                        </div>
+                                <input className="form-input-premium" style={{ marginBottom: '1.5rem' }} value={q.text} onChange={e => updateQuestion(q.id, { text: e.target.value })} placeholder="Enter your question here..." />
+                                <div className="options-grid">
+                                    {q.options.map((opt, oIdx) => (
+                                        <div key={oIdx} className={`opt-row ${q.correctIndex === oIdx ? 'correct' : ''}`}>
+                                            <input type="radio" checked={q.correctIndex === oIdx} onChange={() => updateQuestion(q.id, { correctIndex: oIdx })} />
+                                            <input type="text" value={opt} onChange={e => {
+                                                const newOpts = [...q.options];
+                                                newOpts[oIdx] = e.target.value;
+                                                updateQuestion(q.id, { options: newOpts });
+                                            }} placeholder={`Option ${oIdx + 1}`} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                        <button className="add-q-btn" onClick={addQuestion}><PlusCircle size={20} /> Add Question</button>
                     </div>
                 )}
 
-                {/* Global Settings */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-16 border-t border-brand-border">
-                    <div className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border space-y-6">
-                        <div className="flex items-center gap-6">
-                            <div className="w-12 h-12 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center text-brand-emerald shadow-sm">
-                                <Sparkles size={24} />
-                            </div>
-                            <div className="space-y-1">
-                                <h4 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Preview Authorization</h4>
-                                <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Allow unsolicited artifact analysis</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 p-4 bg-white dark:bg-brand-charcoal border border-brand-border rounded-2xl">
-                            <input 
-                                type="checkbox" 
-                                checked={formData.preview_enabled} 
-                                onChange={e => handleFieldChange('preview_enabled', e.target.checked)} 
-                                className="w-6 h-6 accent-brand-emerald cursor-pointer"
-                            />
-                            <span className="font-bold text-sm text-brand-charcoal dark:text-white">Enable Open Access Manifest</span>
-                        </div>
+                <div style={{ display: 'flex', gap: '3rem', paddingTop: '3rem', borderTop: '2.5px solid #f1f5f9' }}>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>Preview Access</label>
+                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '6px' }}>Allow students to view this lesson before enrolling.</p>
+                        <input type="checkbox" checked={formData.preview_enabled} onChange={e => handleFieldChange('preview_enabled', e.target.checked)} style={{ marginTop: '12px', width: '24px', height: '24px', accentColor: '#1a4d3e' }} />
                     </div>
-                    <div className="p-10 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border space-y-6">
-                        <div className="flex items-center gap-6">
-                            <div className="w-12 h-12 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center text-red-500 shadow-sm">
-                                <Lock size={24} />
-                            </div>
-                            <div className="space-y-1">
-                                <h4 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Sequence Protocol</h4>
-                                <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Enforce strict prerequisite gates</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 p-4 bg-white dark:bg-brand-charcoal border border-brand-border rounded-2xl">
-                            <input 
-                                type="checkbox" 
-                                checked={formData.is_locked} 
-                                onChange={e => handleFieldChange('is_locked', e.target.checked)} 
-                                className="w-6 h-6 accent-brand-emerald cursor-pointer"
-                            />
-                            <span className="font-bold text-sm text-brand-charcoal dark:text-white">Activate Decryption Locks</span>
-                        </div>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>Lock Lesson</label>
+                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '6px' }}>Require completion of previous lessons.</p>
+                        <input type="checkbox" checked={formData.is_locked} onChange={e => handleFieldChange('is_locked', e.target.checked)} style={{ marginTop: '12px', width: '24px', height: '24px', accentColor: '#1a4d3e' }} />
                     </div>
                 </div>
             </div>
 
-            <footer className="pt-20 flex flex-col md:flex-row justify-end gap-6 border-t border-brand-border bg-white dark:bg-brand-charcoal -mx-16 md:-mx-24 px-16 md:px-24 pb-12 sticky bottom-0 z-50">
-                <button 
-                    onClick={onCancel} 
-                    className="h-16 px-10 bg-brand-beige dark:bg-white/10 text-brand-muted hover:text-brand-charcoal dark:hover:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all border-none cursor-pointer"
-                >
-                    Abort Changes
-                </button>
-                <button 
-                    className="h-16 px-12 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 border-none cursor-pointer" 
-                    onClick={handleSubmit}
-                >
-                    <Save size={20} /> Commit to Module Repository
-                </button>
+            <footer style={{ marginTop: '5rem', display: 'flex', justifyContent: 'flex-end', gap: '2rem', background: 'white', padding: '2.5rem 0', borderTop: '2px solid #f1f5f9', position: 'sticky', bottom: 0 }}>
+                <button onClick={onCancel} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontWeight: 900, cursor: 'pointer', fontSize: '1.1rem' }}>Cancel</button>
+                <button className="deploy-btn-forest" onClick={handleSubmit}>Save to Module</button>
             </footer>
         </div>
     );

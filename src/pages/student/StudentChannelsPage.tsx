@@ -8,9 +8,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import echo from '../../utils/echo';
-import MessageCard from '../../components/channel/MessageCard';
-import type { Message } from '../../components/channel/MessageCard';
-import ChatInput from '../../components/channel/ChatInput';
+import MessageCard from '../../components/student_channel/MessageCard';
+import type { Message } from '../../components/student_channel/MessageCard';
+import ChatInput from '../../components/student_channel/ChatInput';
 
 interface Channel {
     id: string;

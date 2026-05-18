@@ -10,7 +10,7 @@ interface ProfileDropdownProps {
 const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const buttonRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
@@ -42,46 +42,48 @@ const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
     }, []);
 
     return (
-        <div className="profile-dropdown-container">
-            <div
+        <div className="relative">
+            <button
                 ref={buttonRef}
-                className={`user-profile-pill ${isOpen ? 'is-active' : ''}`}
+                className={`flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-full border transition-all cursor-pointer ${isOpen ? 'bg-brand-border border-brand-border' : 'bg-white dark:bg-brand-charcoal border-brand-border hover:border-brand-emerald shadow-sm hover:shadow-md'}`}
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <div className={`user-avatar-small ${role === 'instructor' ? 'role-instructor' : 'role-student'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white shadow-sm bg-brand-emerald`}>
                     {userInitial}
                 </div>
-                <div className="user-info-text">
-                    <span className="user-name">{userData.name}</span>
-                    {userData.tier && <span className="user-role">{userData.tier}</span>}
+                <div className="hidden sm:flex flex-col items-start ml-1">
+                    <span className="text-sm font-bold text-brand-charcoal dark:text-white leading-tight">{userData.name}</span>
+                    {userData.tier && <span className="text-[10px] text-brand-muted font-black uppercase tracking-wider leading-tight">{userData.tier}</span>}
                 </div>
                 <ChevronDown
-                    size={14}
-                    className="dropdown-arrow"
-                    style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }}
+                    size={16}
+                    className={`text-brand-muted ml-1 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
                 />
-            </div>
+            </button>
 
             {isOpen && (
-                <div className="notifications-dropdown-premium profile-dropdown-menu" ref={dropdownRef}>
-                    <div className="profile-dropdown-header">
-                        <p className="profile-dropdown-name">{userData.name}</p>
-                        <p className="profile-dropdown-email">{userData.email}</p>
+                <div 
+                    ref={dropdownRef}
+                    className="absolute right-0 mt-3 w-64 bg-white dark:bg-brand-charcoal border border-brand-border rounded-[24px] shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 origin-top-right overflow-hidden"
+                >
+                    <div className="p-5 border-b border-brand-border bg-brand-beige/20 dark:bg-white/5">
+                        <p className="font-black text-sm text-brand-charcoal dark:text-white truncate m-0">{userData.name}</p>
+                        <p className="text-xs text-brand-muted font-medium truncate mt-1 m-0">{userData.email}</p>
                     </div>
 
-                    <div className="profile-dropdown-actions">
+                    <div className="p-2 flex flex-col gap-1">
                         <button
-                            className="profile-dropdown-btn"
+                            className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl text-sm font-bold text-brand-charcoal dark:text-white hover:bg-brand-beige dark:hover:bg-white/10 transition-colors border-none cursor-pointer text-left group"
                             onClick={() => { setIsOpen(false); navigate(role === 'instructor' ? '/instructor/settings' : '/student/account'); }}
                         >
-                            <User size={18} />
+                            <User size={18} className="text-brand-muted group-hover:text-brand-emerald transition-colors" />
                             <span>My Profile</span>
                         </button>
 
-                        <div className="profile-dropdown-divider"></div>
+                        <div className="h-px bg-brand-border my-1 mx-2"></div>
 
                         <button
-                            className="profile-dropdown-btn logout"
+                            className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-none cursor-pointer text-left"
                             onClick={handleLogout}
                         >
                             <LogOut size={18} />

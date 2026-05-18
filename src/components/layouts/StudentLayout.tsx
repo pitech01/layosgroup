@@ -11,8 +11,10 @@ import {
     LogOut,
     Settings
 } from 'lucide-react';
-import Topbar from '../../components/layout/Topbar';
+import Topbar from '../../components/student_layout/Topbar';
 import MobileBottomNav from '../common/MobileBottomNav';
+//import '../../index.css'
+
 
 const StudentLayout = () => {
     const { logout } = useAuth();

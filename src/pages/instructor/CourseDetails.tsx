@@ -15,13 +15,7 @@ import {
     ChevronDown,
     ChevronRight,
     Search,
-    BookOpen,
-    Sparkles,
-    Target,
-    BarChart3,
-    ArrowRight,
-    Clock,
-    Lock
+    BookOpen
 } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 
@@ -50,7 +44,7 @@ interface CourseBlueprint {
     isExpanded?: boolean;
 }
 
-export default function CourseDetails() {
+export default function CohortDetails() {
     const { id: cohortCode } = useParams();
     const [activeTab, setActiveTab] = useState('roadmap');
     const [searchQuery, setSearchQuery] = useState('');
@@ -120,217 +114,312 @@ export default function CourseDetails() {
     };
 
     return (
-        <div className="space-y-12 pb-12">
-            {/* Header */}
-            <header className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-8 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 animate-fade-in-up">
-                <div className="space-y-6">
-                    <div className="flex flex-wrap items-center gap-4">
-                        <div className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${cohort.status === 'Active' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-brand-beige dark:bg-white/10 text-brand-muted border-brand-border'}`}>
-                            {cohort.status}
+        <div className="cohort-management-page">
+            <style>{`
+                .staff-scope .cohort-header-premium {
+                    background: white;
+                    border: 1.5px solid rgba(226, 232, 240, 0.8);
+                    border-radius: 32px;
+                    padding: 2.5rem;
+                    margin-bottom: 2.5rem;
+                    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02);
+                }
+
+                .staff-scope .badge-premium {
+                    padding: 6px 14px;
+                    border-radius: 12px;
+                    font-size: 0.75rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+                .staff-scope .badge-active { background: #f0fdf4; color: #1a4d3e; border: 1px solid #1a4d3e20; }
+                .staff-scope .badge-completed { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+                .staff-scope .management-tabs-premium {
+                    display: flex;
+                    gap: 3rem;
+                    border-bottom: 2px solid #f1f5f9;
+                    margin-bottom: 3rem;
+                }
+
+                .staff-scope .tab-premium {
+                    padding: 1.25rem 0;
+                    font-weight: 850;
+                    color: #94a3b8;
+                    cursor: pointer;
+                    position: relative;
+                    transition: all 0.3s;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .tab-premium.active { color: #1a4d3e; }
+                .tab-premium.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 0;
+                    width: 100%;
+                    height: 3.5px;
+                    background: #1a4d3e;
+                    border-radius: 4px;
+                }
+
+                .staff-scope .course-blueprint-card {
+                    background: white;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 28px;
+                    margin-bottom: 2.5rem;
+                    overflow: hidden;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);
+                }
+
+                .staff-scope .blueprint-header {
+                    padding: 2rem 2.5rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    cursor: pointer;
+                    background: #fcfdfe;
+                    transition: background 0.2s;
+                }
+
+                .blueprint-header:hover { background: #f8fafc; }
+
+                .blueprint-title-zone h3 {
+                    margin: 0;
+                    font-size: 1.4rem;
+                    font-weight: 950;
+                    color: #0f172a;
+                    letter-spacing: -0.02em;
+                }
+
+                .blueprint-title-zone p {
+                    margin: 6px 0 0 0;
+                    color: #64748b;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                }
+
+                .staff-scope .blueprint-content {
+                    padding: 0 2.5rem 2.5rem 2.5rem;
+                    border-top: 1.5px solid #f8fafc;
+                }
+
+                .staff-scope .module-card-premium {
+                    background: #fcfdfe;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 24px;
+                    margin-top: 1.5rem;
+                    overflow: hidden;
+                }
+
+                .staff-scope .module-header-premium {
+                    padding: 1.25rem 2rem;
+                    background: white;
+                    border-bottom: 1.5px solid rgba(241, 245, 249, 0.6);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .staff-scope .session-row-premium {
+                    padding: 1.25rem 2rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    border-bottom: 1.25px solid rgba(241, 245, 249, 0.4);
+                }
+
+                .staff-scope .icon-box-premium {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .staff-scope .tp-video { background: #eff6ff; color: #2563eb; }
+                .staff-scope .tp-live { background: #fef2f2; color: #dc2626; }
+                .staff-scope .tp-material { background: #f0fdf4; color: #10b981; }
+
+                .staff-scope .btn-primary-forest {
+                    background: #1a4d3e;
+                    color: white;
+                    border: none;
+                    padding: 0.85rem 2.25rem;
+                    border-radius: 16px;
+                    font-weight: 950;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    transition: all 0.3s;
+                }
+
+                .staff-scope .action-pill {
+                    padding: 0.6rem 1.25rem;
+                    border: 2px solid #f1f5f9;
+                    background: white;
+                    border-radius: 12px;
+                    font-size: 0.85rem;
+                    font-weight: 850;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    color: #475569;
+                }
+
+                .staff-scope .search-bar-premium {
+                    background: white;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 18px;
+                    padding: 0 1.5rem;
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    width: 100%;
+                    max-width: 400px;
+                }
+
+               .staff-scope  .search-bar-premium input {
+                    border: none;
+                    background: transparent;
+                    outline: none;
+                    font-weight: 600;
+                    color: #0f172a;
+                    width: 100%;
+                }
+            `}</style>
+
+            <div className="cohort-header-premium">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '1.25rem' }}>
+                            <span className={`badge-premium ${cohort.status === 'Active' ? 'badge-active' : 'badge-completed'}`}>{cohort.status}</span>
+                            <span style={{ fontSize: '0.9rem', color: '#1a4d3e', fontWeight: 900, background: '#f0fdf4', padding: '4px 12px', borderRadius: '8px' }}>{cohort.code}</span>
+                            <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Operational Cycle: {cohort.launchDate} — {cohort.endDate}</span>
                         </div>
-                        <div className="px-4 py-1.5 bg-brand-emerald/10 text-brand-emerald rounded-xl text-[10px] font-black uppercase tracking-widest border border-brand-emerald/20">
-                            {cohort.code}
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] font-black text-brand-muted uppercase tracking-widest">
-                            <Calendar size={14} className="text-brand-emerald" /> {cohort.launchDate} — {cohort.endDate}
-                        </div>
+                        <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em' }}>Cohort Management</h1>
+                        <p style={{ margin: 0, color: '#64748b', fontSize: '1.15rem', fontWeight: 600 }}>Managing {assignedCourses.length} Assigned Courses</p>
                     </div>
-                    <div className="space-y-2">
-                        <h1 className="text-4xl md:text-5xl font-black text-brand-charcoal dark:text-white tracking-tight uppercase">Cohort <span className="text-brand-emerald">Console</span></h1>
-                        <p className="text-brand-muted font-medium text-lg leading-relaxed">Orchestrating {assignedCourses.length} Assigned Curriculums for this operational cycle.</p>
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button className="action-pill"><Settings size={18} /> Cohort Settings</button>
+                        <button className="btn-primary-forest" onClick={handleAddCourse}><Plus size={20} /> Assign New Course</button>
                     </div>
                 </div>
+            </div>
 
-                <div className="flex gap-4 w-full md:w-auto">
-                    <button className="flex-1 md:flex-none h-14 px-8 bg-brand-beige dark:bg-white/5 text-brand-charcoal dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 border-none cursor-pointer hover:bg-brand-charcoal hover:text-white dark:hover:bg-brand-emerald transition-all shadow-sm">
-                        <Settings size={18} /> Settings
-                    </button>
-                    <button 
-                        onClick={handleAddCourse}
-                        className="flex-1 md:flex-none h-14 px-8 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 border-none cursor-pointer hover:scale-105 active:scale-95 transition-all"
-                    >
-                        <Plus size={20} /> Assign Blueprint
-                    </button>
-                </div>
-            </header>
+            <div className="management-tabs-premium">
+                <div className={`tab-premium ${activeTab === 'roadmap' ? 'active' : ''}`} onClick={() => setActiveTab('roadmap')}><Layers size={18} /> Course Curriculum</div>
+                <div className={`tab-premium ${activeTab === 'students' ? 'active' : ''}`} onClick={() => setActiveTab('students')}><Users size={18} /> Enrollment List</div>
+                <div className={`tab-premium ${activeTab === 'performance' ? 'active' : ''}`} onClick={() => setActiveTab('performance')}><TrendingUp size={18} /> Performance Metrics</div>
+            </div>
 
-            {/* Navigation Tabs */}
-            <nav className="flex gap-12 border-b border-brand-border px-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                {[
-                    { id: 'roadmap', label: 'Course Curriculum', icon: Layers },
-                    { id: 'students', label: 'Enrollment List', icon: Users },
-                    { id: 'performance', label: 'Performance Metrics', icon: BarChart3 }
-                ].map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-3 pb-6 font-black text-[10px] uppercase tracking-[0.2em] transition-all border-none cursor-pointer relative ${activeTab === tab.id ? 'text-brand-emerald' : 'text-brand-muted hover:text-brand-charcoal dark:hover:text-white'}`}
-                    >
-                        <tab.icon size={18} />
-                        {tab.label}
-                        {activeTab === tab.id && (
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-emerald rounded-t-full"></div>
-                        )}
-                    </button>
-                ))}
-            </nav>
-
-            {/* Tab Content */}
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                {activeTab === 'roadmap' && (
-                    <div className="space-y-12">
-                        {/* Roadmap Controls */}
-                        <div className="flex flex-col lg:flex-row justify-between items-center gap-8">
-                            <div className="w-full lg:max-w-md relative group">
-                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors">
-                                    <Search size={22} />
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder="Search blueprint architecture..."
-                                    className="w-full h-16 pl-16 pr-6 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-                            <div className="flex gap-4 w-full lg:w-auto">
-                                <button className="flex-1 lg:flex-none h-16 px-8 bg-brand-beige dark:bg-white/5 border border-brand-border rounded-2xl flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all border-none cursor-pointer shadow-sm">
-                                    <Calendar size={18} /> Schedule
-                                </button>
-                                <button className="flex-1 lg:flex-none h-16 px-8 bg-brand-beige dark:bg-white/5 border border-brand-border rounded-2xl flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all border-none cursor-pointer shadow-sm">
-                                    <Activity size={18} /> Content Drip
-                                </button>
-                            </div>
+            {activeTab === 'roadmap' && (
+                <div style={{ animation: 'fadeInUp 0.6s ease-out' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                        <div className="search-bar-premium">
+                            <Search size={20} color="#94a3b8" />
+                            <input
+                                placeholder="Search courses in this cohort..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
                         </div>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button className="action-pill"><Calendar size={18} /> Schedule</button>
+                            <button className="action-pill"><Activity size={18} /> Drip Content</button>
+                        </div>
+                    </div>
 
-                        {/* Courses Grid */}
-                        <div className="space-y-8">
-                            {assignedCourses.filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase())).map((course) => (
-                                <div key={course.id} className={`bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden transition-all duration-500 ${course.isExpanded ? 'shadow-2xl shadow-brand-charcoal/5 ring-1 ring-brand-emerald/20' : 'shadow-sm opacity-90 hover:opacity-100'}`}>
-                                    {/* Course Header */}
-                                    <div 
-                                        className="flex flex-col md:flex-row items-center justify-between p-8 md:p-10 cursor-pointer select-none gap-8"
-                                        onClick={() => toggleCourseExpansion(course.id)}
-                                    >
-                                        <div className="flex items-center gap-8 flex-1">
-                                            <div className="w-16 h-16 bg-brand-emerald/10 text-brand-emerald rounded-[20px] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                                                <BookOpen size={32} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <h3 className="text-2xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none group-hover:text-brand-emerald transition-colors">{course.title}</h3>
-                                                <p className="text-brand-muted font-medium text-sm line-clamp-1">{course.description}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-12 w-full md:w-auto border-t md:border-t-0 border-brand-border pt-6 md:pt-0">
-                                            <div className="text-right space-y-1">
-                                                <span className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Mastery Level</span>
-                                                <h4 className="text-xl font-black text-brand-emerald leading-none">68% <span className="text-xs text-brand-muted font-bold tracking-normal uppercase">Avg.</span></h4>
-                                            </div>
-                                            <div className={`w-10 h-10 rounded-xl bg-brand-beige dark:bg-white/10 flex items-center justify-center text-brand-muted transition-transform duration-500 ${course.isExpanded ? 'rotate-180' : ''}`}>
-                                                <ChevronDown size={24} />
-                                            </div>
-                                        </div>
+                    {assignedCourses.filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase())).map(course => (
+                        <div key={course.id} className="course-blueprint-card">
+                            <div className="blueprint-header" onClick={() => toggleCourseExpansion(course.id)}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                                    <div style={{ padding: '12px', background: '#f0fdf4', borderRadius: '14px', color: '#1a4d3e' }}>
+                                        <BookOpen size={24} />
                                     </div>
+                                    <div className="blueprint-title-zone">
+                                        <h3>{course.title}</h3>
+                                        <p>{course.description}</p>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>Completion</div>
+                                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0f172a' }}>68% Avg.</div>
+                                    </div>
+                                    <div style={{ color: '#cbd5e1' }}>
+                                        {course.isExpanded ? <ChevronDown size={28} /> : <ChevronRight size={28} />}
+                                    </div>
+                                </div>
+                            </div>
 
-                                    {/* Course Content */}
-                                    {course.isExpanded && (
-                                        <div className="px-8 md:px-10 pb-10 space-y-8 animate-fade-in-up">
-                                            <div className="border-t border-brand-border pt-10">
-                                                {course.modules.length === 0 ? (
-                                                    <div className="flex flex-col items-center justify-center py-20 gap-8 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center">
-                                                        <div className="w-20 h-20 bg-white dark:bg-white/5 rounded-3xl flex items-center justify-center text-brand-muted/30">
-                                                            <Sparkles size={40} />
-                                                        </div>
-                                                        <div className="space-y-4">
-                                                            <p className="text-brand-muted font-black text-xs uppercase tracking-widest">No curriculum architecture defined.</p>
-                                                            <Link to={`/instructor/curriculum/${course.id}`} className="h-14 px-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 no-underline shadow-xl shadow-brand-charcoal/20">
-                                                                Initiate Curriculum Builder <ArrowRight size={18} />
-                                                            </Link>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-10">
-                                                        {course.modules.map((mod) => (
-                                                            <div key={mod.id} className="bg-brand-beige/10 dark:bg-white/5 rounded-[32px] border border-brand-border overflow-hidden">
-                                                                <div className="px-8 py-6 bg-white dark:bg-brand-charcoal/50 border-b border-brand-border flex justify-between items-center">
-                                                                    <div className="flex items-center gap-4">
-                                                                        <GripVertical size={20} className="text-brand-muted" />
-                                                                        <h4 className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-[0.15em]">{mod.title}</h4>
-                                                                    </div>
-                                                                    <button className="w-10 h-10 bg-brand-beige dark:bg-white/10 text-brand-muted hover:text-brand-emerald rounded-xl flex items-center justify-center transition-all border-none cursor-pointer">
-                                                                        <Edit3 size={16} />
-                                                                    </button>
-                                                                </div>
-                                                                <div className="divide-y divide-brand-border/50">
-                                                                    {mod.sessions.map((sess) => (
-                                                                        <div key={sess.id} className="px-8 py-6 flex flex-col md:flex-row items-center gap-8 hover:bg-white dark:hover:bg-brand-charcoal/30 transition-colors group/row">
-                                                                            <div className={`
-                                                                                w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover/row:scale-110 transition-transform duration-500
-                                                                                ${sess.type === 'video' ? 'bg-blue-500/10 text-blue-600' : 
-                                                                                  sess.type === 'live' ? 'bg-red-500/10 text-red-600' : 
-                                                                                  sess.type === 'material' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'}
-                                                                            `}>
-                                                                                {sess.type === 'video' && <Video size={24} />}
-                                                                                {sess.type === 'live' && <Activity size={24} />}
-                                                                                {sess.type === 'material' && <FileText size={24} />}
-                                                                            </div>
-                                                                            <div className="flex-1 space-y-1 text-center md:text-left w-full md:w-auto">
-                                                                                <h5 className="text-base font-black text-brand-charcoal dark:text-white uppercase tracking-tight">{sess.title}</h5>
-                                                                                <div className="flex items-center justify-center md:justify-start gap-3 text-[10px] font-black text-brand-muted uppercase tracking-widest">
-                                                                                    <span>{sess.type}</span>
-                                                                                    <span className="w-1 h-1 bg-brand-muted/30 rounded-full"></span>
-                                                                                    <span>{sess.duration || sess.format || sess.time}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                                                                                <button className="h-11 w-11 flex items-center justify-center bg-brand-beige dark:bg-white/10 text-brand-muted hover:text-brand-charcoal dark:hover:text-white rounded-xl transition-all border-none cursor-pointer">
-                                                                                    <Settings size={18} />
-                                                                                </button>
-                                                                                <button className="h-11 w-11 flex items-center justify-center bg-brand-beige dark:bg-white/10 text-brand-muted hover:text-brand-emerald rounded-xl transition-all border-none cursor-pointer">
-                                                                                    <ShieldCheck size={18} />
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                                <div className="p-6 bg-brand-beige/20 dark:bg-white/5 flex justify-center">
-                                                                    <button className="flex items-center gap-3 text-xs font-black text-brand-emerald uppercase tracking-widest hover:scale-105 transition-all border-none cursor-pointer bg-transparent">
-                                                                        <Plus size={18} /> Extend Unit
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                        <div className="pt-8 flex justify-center">
-                                                            <Link to={`/instructor/curriculum/${course.id}`} className="h-16 px-12 bg-white dark:bg-brand-charcoal border-2 border-brand-border border-dashed rounded-[32px] font-black text-xs uppercase tracking-widest text-brand-muted hover:text-brand-emerald hover:border-brand-emerald transition-all flex items-center gap-4 no-underline">
-                                                                <Edit3 size={20} /> Full Curriculum Engineering Console
-                                                            </Link>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
+                            {course.isExpanded && (
+                                <div className="blueprint-content">
+                                    {course.modules.length === 0 && (
+                                        <div style={{ padding: '3rem', textAlign: 'center', border: '2px dashed #f1f5f9', borderRadius: '24px', margin: '1.5rem 0' }}>
+                                            <p style={{ color: '#94a3b8', fontWeight: 600 }}>No curriculum structure defined for this course yet.</p>
+                                            <Link to={`/instructor/curriculum/${course.id}`} className="btn-primary-forest" style={{ display: 'inline-flex', marginTop: '1rem' }}>Open Curriculum Builder</Link>
                                         </div>
                                     )}
+                                    {course.modules.map(mod => (
+                                        <div key={mod.id} className="module-card-premium">
+                                            <div className="module-header-premium">
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                    <GripVertical size={20} color="#cbd5e1" />
+                                                    <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#0f172a' }}>{mod.title}</h4>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button className="action-pill" style={{ padding: '6px 10px' }}><Edit3 size={14} /></button>
+                                                </div>
+                                            </div>
+                                            <div className="module-body">
+                                                {mod.sessions.map(sess => (
+                                                    <div key={sess.id} className="session-row-premium">
+                                                        <div className={`icon-box-premium tp-${sess.type}`}>
+                                                            {sess.type === 'video' && <Video size={18} />}
+                                                            {sess.type === 'live' && <Activity size={18} />}
+                                                            {sess.type === 'material' && <FileText size={18} />}
+                                                        </div>
+                                                        <div style={{ flex: 1 }}>
+                                                            <div style={{ fontWeight: 850, fontSize: '0.95rem', color: '#0f172a' }}>{sess.title}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px', fontWeight: 700, textTransform: 'uppercase' }}>
+                                                                {sess.type} • {sess.duration || sess.format || sess.time}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                                            <button className="action-pill" style={{ padding: '8px 12px' }}><Settings size={16} /></button>
+                                                            <button className="action-pill" style={{ padding: '8px 12px' }}><ShieldCheck size={16} /></button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <div style={{ padding: '1rem 2rem', background: '#fcfdfe', display: 'flex', gap: '1rem' }}>
+                                                    <button style={{ border: 'none', background: 'transparent', color: '#1a4d3e', fontWeight: 900, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Lesson</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center' }}>
+                                        <Link to={`/instructor/curriculum/${course.id}`} className="action-pill" style={{ borderStyle: 'dashed', background: 'transparent', padding: '1rem 3rem' }}>
+                                            <Edit3 size={18} /> Edit Course Curriculum
+                                        </Link>
+                                    </div>
                                 </div>
-                            ))}
+                            )}
                         </div>
-                    </div>
-                )}
-
-                {activeTab === 'students' && (
-                    <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-20 text-center space-y-8 animate-fade-in-up">
-                        <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-xl flex items-center justify-center mx-auto text-brand-muted/30">
-                            <Users size={48} />
-                        </div>
-                        <div className="space-y-2">
-                            <h3 className="text-3xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Enrollment Manifest</h3>
-                            <p className="text-brand-muted font-medium max-w-md mx-auto">Access the detailed directory of cadets currently synchronized with this operational cycle.</p>
-                        </div>
-                        <button className="h-14 px-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 mx-auto shadow-xl shadow-brand-charcoal/20 border-none cursor-pointer">
-                            Sync Directory <ArrowRight size={18} />
-                        </button>
-                    </div>
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
+

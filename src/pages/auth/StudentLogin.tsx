@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, X, Star, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import loginHero from '../../assets/login-hero.jpeg';
+import '../../student.css';
 
 export default function StudentLogin() {
     const [email, setEmail] = useState('');

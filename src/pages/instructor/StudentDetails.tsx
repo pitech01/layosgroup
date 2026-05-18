@@ -17,18 +17,7 @@ import {
     User,
     CheckCircle2,
     X,
-    HelpCircle,
-    ChevronDown,
-    ChevronUp,
-    MoreVertical,
-    BarChart3,
-    FileText,
-    Zap,
-    Target,
-    ShieldAlert,
-    Sparkles,
-    ChevronRight,
-    ArrowUpRight
+    HelpCircle
 } from 'lucide-react';
 
 export default function StudentDetails() {
@@ -42,7 +31,6 @@ export default function StudentDetails() {
     const [pendingCohortId, setPendingCohortId] = useState<string | null>(null);
     const [viewingQuizResult, setViewingQuizResult] = useState<any>(null);
     const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
-    const [expandedCohortMap, setExpandedCohortMap] = useState<Record<string, boolean>>({});
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -50,11 +38,17 @@ export default function StudentDetails() {
         setLoading(true);
         try {
             const response = await fetch(`${API_URL}/students/${id}`, {
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             const data = await response.json();
-            if (response.ok) setStudent(data);
-            else throw new Error(data.message || 'Synchronization with student repository failed.');
+            if (response.ok) {
+                setStudent(data);
+            } else {
+                throw new Error(data.message || 'Failed to retrieve student profile.');
+            }
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -64,43 +58,78 @@ export default function StudentDetails() {
 
     const toggleActivation = async (cohortId: string, currentStatus: string, message?: string) => {
         const newStatus = currentStatus === 'inactive' ? 'active' : 'inactive';
+
+        // If deactivating and no message yet, show modal
         if (newStatus === 'inactive' && !message) {
             setPendingCohortId(cohortId);
             setShowDeactivateModal(true);
             return;
         }
+
         try {
             const response = await fetch(`${API_URL}/cohorts/${cohortId}/students/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ status: newStatus, message: message })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    status: newStatus,
+                    message: message
+                })
             });
+
             if (response.ok) {
                 setShowDeactivateModal(false);
                 setDeactivateMessage('');
                 setPendingCohortId(null);
-                setNotification({ type: 'success', message: `Uplink status modified: ${newStatus}.` });
+                setNotification({ type: 'success', message: `Student status updated to ${newStatus}.` });
                 fetchStudentData();
+                setTimeout(() => setNotification(null), 4000);
+            } else {
+                const data = await response.json();
+                setNotification({ type: 'error', message: data.message || 'Failed to update access status.' });
                 setTimeout(() => setNotification(null), 4000);
             }
         } catch (err) {
-            setNotification({ type: 'error', message: 'Operational failure during status modification.' });
+            console.error('Toggle status error:', err);
+            setNotification({ type: 'error', message: 'An error occurred while updating access.' });
+            setTimeout(() => setNotification(null), 4000);
         }
     };
+
+    const confirmDeactivation = () => {
+        if (pendingCohortId) {
+            toggleActivation(pendingCohortId, 'active', deactivateMessage);
+        }
+    };
+
+    const [expandedCohortMap, setExpandedCohortMap] = useState<Record<string, boolean>>({});
 
     const toggleLessonCompletion = async (lessonId: string, currentCompleted: boolean) => {
         try {
             const response = await fetch(`${API_URL}/lessons/${lessonId}/complete`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ student_id: student.id, completed: !currentCompleted })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    student_id: student.id,
+                    completed: !currentCompleted
+                })
             });
+            const data = await response.json();
             if (response.ok) {
-                setNotification({ type: 'success', message: 'Curriculum progress synchronized.' });
+                setNotification({ type: 'success', message: 'Lesson progress updated successfully.' });
                 fetchStudentData(); 
+            } else {
+                setNotification({ type: 'error', message: data.message || 'Failed to update lesson progress.' });
             }
         } catch (err) {
-            setNotification({ type: 'error', message: 'Progress update failed.' });
+            setNotification({ type: 'error', message: 'Network error updating progress.' });
         }
     };
 
@@ -108,339 +137,743 @@ export default function StudentDetails() {
         fetchStudentData();
     }, [id]);
 
-    if (loading) {
-        return (
-            <div className="h-[70vh] flex flex-col items-center justify-center gap-6 animate-pulse">
-                <Loader2 className="animate-spin text-brand-emerald" size={48} />
-                <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em]">Synchronizing Portfolio Intel...</p>
-            </div>
-        );
-    }
+    // Derived Metrics
+    const validCohorts = student?.cohorts || [];
+    const avgCompletion = validCohorts.length > 0
+        ? Math.round(validCohorts.reduce((acc: number, c: any) => acc + Number(c.pivot?.progress || 0), 0) / validCohorts.length)
+        : 0;
 
-    if (error || !student) {
-        return (
-            <div className="max-w-2xl mx-auto py-20 px-10 bg-red-50 dark:bg-red-500/10 border-2 border-red-100 dark:border-red-500/20 rounded-[48px] text-center space-y-8 animate-fade-in-up">
-                <div className="w-24 h-24 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-[32px] flex items-center justify-center mx-auto shadow-sm">
-                    <ShieldAlert size={48} />
-                </div>
-                <div className="space-y-2">
-                    <h3 className="text-3xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Sync Protocol Error</h3>
-                    <p className="text-brand-muted font-medium text-lg leading-relaxed">{error || 'Target cadet profile could not be retrieved from the central repository.'}</p>
-                </div>
-                <button onClick={() => navigate(-1)} className="h-14 px-10 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 mx-auto hover:scale-105 transition-all border-none cursor-pointer"><ArrowLeft size={20} /> Back to Directory</button>
-            </div>
-        );
-    }
-
-    const validCohorts = student.cohorts || [];
-    const avgCompletion = validCohorts.length > 0 ? Math.round(validCohorts.reduce((acc: number, c: any) => acc + Number(c.pivot?.progress || 0), 0) / validCohorts.length) : 0;
-    const scoredLessons = student.completed_lessons?.filter((l: any) => l.pivot?.score != null) || [];
-    const avgQuizScore = scoredLessons.length > 0 ? Math.round(scoredLessons.reduce((acc: number, l: any) => acc + Number(l.pivot?.score), 0) / scoredLessons.length) : 'N/A';
+    const scoredLessons = student?.completed_lessons?.filter((l: any) => l.pivot?.score != null) || [];
+    const avgQuizScore = scoredLessons.length > 0 
+        ? Math.round(scoredLessons.reduce((acc: number, l: any) => acc + Number(l.pivot?.score), 0) / scoredLessons.length) 
+        : 'N/A';
 
     return (
-        <div className="max-w-7xl mx-auto space-y-12 pb-32">
-            {/* Header / Breadcrumb */}
-            <div className="flex items-center justify-between animate-fade-in-up">
-                <button onClick={() => navigate(-1)} className="group flex items-center gap-4 text-[10px] font-black text-brand-muted hover:text-brand-emerald uppercase tracking-[0.3em] transition-all border-none bg-transparent cursor-pointer">
-                    <ArrowLeft size={18} className="group-hover:-translate-x-2 transition-transform" /> Back to Cadet Directory
-                </button>
-                <div className="flex gap-4">
-                    <button onClick={fetchStudentData} className="h-11 px-6 bg-brand-beige dark:bg-white/10 text-brand-muted hover:text-brand-charcoal dark:hover:text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-none cursor-pointer">Refresh Portfolio</button>
-                </div>
-            </div>
+        <div className="student-details-container">
+            <style>{`
+                .staff-scope .student-details-container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                }
 
-            {/* Notification Toast */}
+                .staff-scope .back-link {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #64748b;
+                    text-decoration: none;
+                    font-weight: 800;
+                    font-size: 0.9rem;
+                    margin-bottom: 2rem;
+                    transition: all 0.3s;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 0;
+                }
+
+                .back-link:hover {
+                    color: #0f172a;
+                    transform: translateX(-4px);
+                }
+
+                .staff-scope .profile-header-premium {
+                    background: white;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 32px;
+                    padding: 3rem;
+                    display: flex;
+                    gap: 3rem;
+                    align-items: center;
+                    margin-bottom: 2.5rem;
+                    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02);
+                }
+
+                .staff-scope .avatar-massive {
+                    width: 140px;
+                    height: 140px;
+                    background: linear-gradient(135deg, #1a4d3e, #2d5a4c);
+                    border-radius: 45px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 3.5rem;
+                    font-weight: 950;
+                    box-shadow: 0 20px 40px -10px rgba(26, 77, 62, 0.3);
+                }
+
+                .profile-info h1 {
+                    margin: 0 0 0.5rem 0;
+                    font-size: 2.5rem;
+                    font-weight: 950;
+                    color: #0f172a;
+                    letter-spacing: -0.04em;
+                }
+
+                .staff-scope .status-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 16px;
+                    background: #f0fdf4;
+                    color: #1a4d3e;
+                    border-radius: 12px;
+                    font-size: 0.85rem;
+                    font-weight: 950;
+                    margin-bottom: 1.5rem;
+                }
+
+                .staff-scope .contact-grid-mini {
+                    display: flex;
+                    gap: 2rem;
+                    flex-wrap: wrap;
+                }
+
+                .staff-scope .contact-item-mini {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: #64748b;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                }
+
+                .staff-scope .details-layout {
+                    display: grid;
+                    grid-template-columns: 1fr 0.4fr;
+                    gap: 2.5rem;
+                }
+
+                .staff-scope .card-premium-records {
+                    background: white;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 28px;
+                    padding: 2.5rem;
+                    margin-bottom: 2.5rem;
+                }
+
+                .staff-scope .card-title-records {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 2rem;
+                }
+
+                .card-title-records h3 {
+                    margin: 0;
+                    font-size: 1.25rem;
+                    font-weight: 950;
+                    color: #0f172a;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .staff-scope .enrollment-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    padding: 1.5rem;
+                    background: #fcfdfe;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 20px;
+                    margin-bottom: 1rem;
+                    transition: all 0.3s;
+                }
+
+                .enrollment-row:hover {
+                    border-color: #1a4d3e;
+                    background: white;
+                    transform: translateY(-2px);
+                }
+
+                .staff-scope .progress-ring-mini {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 14px;
+                    background: #f0fdf4;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #1a4d3e;
+                    font-weight: 950;
+                    font-size: 0.9rem;
+                }
+
+                .staff-scope .activity-item {
+                    display: flex;
+                    gap: 16px;
+                    padding-bottom: 1.5rem;
+                    border-left: 2px solid #f1f5f9;
+                    margin-left: 10px;
+                    padding-left: 20px;
+                    position: relative;
+                }
+
+                .activity-item::before {
+                    content: '';
+                    position: absolute;
+                    left: -7px;
+                    top: 0;
+                    width: 12px;
+                    height: 12px;
+                    background: white;
+                    border: 2px solid #1a4d3e;
+                    border-radius: 50%;
+                }
+
+                .activity-content div {
+                    font-weight: 850;
+                    color: #0f172a;
+                    font-size: 0.95rem;
+                }
+
+                .activity-content span {
+                    color: #94a3b8;
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                }
+
+                .staff-scope .btn-secondary-outline {
+                    background: transparent;
+                    color: #475569;
+                    border: 1.5px solid #f1f5f9;
+                    padding: 0.6rem 1.2rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.3s;
+                    font-size: 0.85rem;
+                }
+
+                .btn-secondary-outline:hover {
+                    background: #f8fafc;
+                    border-color: #cbd5e1;
+                }
+
+                .staff-scope .btn-toggle-active {
+                    background: #f0fdf4;
+                    color: #1a4d3e;
+                    border: 1.5px solid #dcfce7;
+                    padding: 0.6rem 1.2rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    font-size: 0.85rem;
+                }
+
+                .btn-toggle-active:hover {
+                    background: #dcfce7;
+                }
+
+                .staff-scope .btn-toggle-inactive {
+                    background: #fef2f2;
+                    color: #b91c1c;
+                    border: 1.5px solid #fee2e2;
+                    padding: 0.6rem 1.2rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    font-size: 0.85rem;
+                }
+
+                .btn-toggle-inactive:hover {
+                    background: #fee2e2;
+                }
+
+                .staff-scope .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    backdrop-filter: blur(4px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                }
+
+                .staff-scope .modal-box {
+                    background: white;
+                    padding: 2.5rem;
+                    border-radius: 28px;
+                    width: 100%;
+                    max-width: 500px;
+                    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                }
+
+                .modal-box h3 {
+                    margin: 0 0 1rem 0;
+                    font-weight: 950;
+                    color: #0f172a;
+                    font-size: 1.5rem;
+                }
+
+                .modal-box textarea {
+                    width: 100%;
+                    height: 120px;
+                    padding: 1rem;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 16px;
+                    margin-bottom: 1.5rem;
+                    font-family: inherit;
+                    resize: none;
+                }
+
+                .modal-box textarea:focus {
+                    outline: none;
+                    border-color: #1a4d3e;
+                }
+
+                .staff-scope .modal-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                }
+
+                .staff-scope .btn-confirm {
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                }
+
+                .staff-scope .btn-cancel {
+                    background: #f1f5f9;
+                    color: #64748b;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                }
+
+                @media (max-width: 1024px) {
+                    .staff-scope .profile-header-premium {
+                        padding: 2rem;
+                        gap: 2rem;
+                    }
+                    .staff-scope .avatar-massive {
+                        width: 100px;
+                        height: 100px;
+                        font-size: 2.5rem;
+                        border-radius: 32px;
+                    }
+                    .profile-info h1 {
+                        font-size: 2rem;
+                    }
+                    .staff-scope .details-layout {
+                        grid-template-columns: 1fr;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .staff-scope .profile-header-premium {
+                        flex-direction: column;
+                        text-align: center;
+                        padding: 2.5rem 1.5rem;
+                    }
+                    .staff-scope .contact-grid-mini {
+                        justify-content: center;
+                    }
+                    .staff-scope .enrollment-row {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 1rem;
+                    }
+                    .enrollment-row > div:last-child {
+                        width: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.75rem;
+                    }
+                    .enrollment-row button {
+                        width: 100%;
+                        justify-content: center;
+                        height: 48px;
+                    }
+                    .staff-scope .card-premium-records {
+                        padding: 1.5rem;
+                    }
+                    .staff-scope .metrics-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .staff-scope .stat-box-mini {
+                        min-width: 100%;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .profile-info h1 {
+                        font-size: 1.5rem;
+                    }
+                    .staff-scope .contact-grid-mini {
+                        gap: 1rem;
+                    }
+                    .staff-scope .avatar-massive {
+                        width: 80px;
+                        height: 80px;
+                        font-size: 2rem;
+                    }
+                }
+            `}</style>
+
+            <button onClick={() => navigate(-1)} className="back-link">
+                <ArrowLeft size={18} /> Back to Students
+            </button>
+
             {notification && (
-                <div className={`fixed top-12 right-12 z-[1000] px-8 py-5 rounded-[28px] shadow-2xl flex items-center gap-4 animate-slide-in ${notification.type === 'success' ? 'bg-brand-emerald text-white' : 'bg-red-600 text-white'}`}>
-                    {notification.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
-                    <span className="font-black text-xs uppercase tracking-widest">{notification.message}</span>
-                    <button onClick={() => setNotification(null)} className="p-1 hover:bg-white/20 rounded-lg border-none bg-transparent cursor-pointer"><X size={18} /></button>
+                <div className="animate-slide-in" style={{
+                    position: 'fixed',
+                    top: '2rem',
+                    right: '2rem',
+                    zIndex: 1000,
+                    padding: '1rem 1.5rem',
+                    background: notification.type === 'success' ? '#f0fdf4' : '#fff1f2',
+                    border: `1px solid ${notification.type === 'success' ? '#bbf7d0' : '#ffe4e6'}`,
+                    color: notification.type === 'success' ? '#166534' : '#e11d48',
+                    borderRadius: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+                    fontWeight: 700
+                }}>
+                    {notification.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+                    <span>{notification.message}</span>
+                    <button onClick={() => setNotification(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
+                        <X size={16} color={notification.type === 'success' ? '#166534' : '#e11d48'} />
+                    </button>
                 </div>
             )}
 
-            {/* Profile Hero */}
-            <div className="bg-white dark:bg-brand-charcoal rounded-[60px] border border-brand-border p-12 md:p-16 flex flex-col lg:flex-row items-center gap-16 shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up">
-                <div className="relative group">
-                    <div className="absolute inset-0 bg-brand-emerald/20 blur-[60px] rounded-full group-hover:bg-brand-emerald/30 transition-all"></div>
-                    <div className="relative w-48 h-48 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[56px] flex items-center justify-center font-black text-7xl shadow-2xl shadow-brand-charcoal/20 border-4 border-white/10 select-none">
-                        {student.name.charAt(0)}
-                    </div>
+            {loading ? (
+                <div style={{ padding: '8rem 0', textAlign: 'center' }}>
+                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#64748b' }}>Loading Profile...</p>
                 </div>
-                <div className="flex-1 space-y-8 text-center lg:text-left">
-                    <div className="space-y-2">
-                        <div className="inline-flex items-center gap-3 px-4 py-2 bg-brand-emerald/10 text-brand-emerald rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border border-brand-emerald/20">
-                            <ShieldCheck size={14} /> Identity Verified
+            ) : error || !student ? (
+                <div style={{ padding: '4rem', background: '#fff1f2', borderRadius: '32px', border: '1.5px solid #ffe4e6', textAlign: 'center' }}>
+                    <AlertCircle size={40} color="#e11d48" style={{ margin: '0 auto 1rem' }} />
+                    <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 950 }}>Student Not Found</h3>
+                    <p style={{ color: '#64748b', fontWeight: 600, margin: '8px 0 2rem' }}>{error || 'Unable to load student details.'}</p>
+                    <button onClick={fetchStudentData} className="back-link" style={{ margin: '0 auto' }}>Try Again</button>
+                </div>
+            ) : (
+                <>
+                    <div className="profile-header-premium shadow-premium">
+                        <div className="avatar-massive">
+                            {student.name.charAt(0)}
                         </div>
-                        <h1 className="text-5xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none">{student.name}</h1>
-                    </div>
-                    <div className="flex flex-wrap justify-center lg:justify-start gap-8">
-                        <div className="flex items-center gap-3 text-sm font-bold text-brand-muted group">
-                            <div className="p-2 bg-brand-beige/50 dark:bg-white/5 rounded-lg group-hover:bg-brand-emerald/10 transition-colors"><Mail size={18} className="text-brand-emerald" /></div>
-                            {student.email}
-                        </div>
-                        {student.phone && (
-                            <div className="flex items-center gap-3 text-sm font-bold text-brand-muted group">
-                                <div className="p-2 bg-brand-beige/50 dark:bg-white/5 rounded-lg group-hover:bg-brand-emerald/10 transition-colors"><Phone size={18} className="text-brand-emerald" /></div>
-                                {student.phone}
+                        <div className="profile-info">
+                            <div className="status-pill">
+                                <ShieldCheck size={16} /> Verified Student
                             </div>
-                        )}
-                        <div className="flex items-center gap-3 text-sm font-bold text-brand-muted group">
-                            <div className="p-2 bg-brand-beige/50 dark:bg-white/5 rounded-lg group-hover:bg-brand-emerald/10 transition-colors"><Calendar size={18} className="text-brand-emerald" /></div>
-                            Joined {new Date(student.created_at).toLocaleDateString()}
+                            <h1>{student.name}</h1>
+                            <div className="contact-grid-mini">
+                                <div className="contact-item-mini"><Mail size={18} /> {student.email}</div>
+                                {student.phone && <div className="contact-item-mini"><Phone size={18} /> {student.phone}</div>}
+                                <div className="contact-item-mini"><Calendar size={18} /> Member since {new Date(student.created_at).toLocaleDateString()}</div>
+                                <div className="contact-item-mini"><MapPin size={18} /> Student Access</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            {/* Metrics Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <div className="bg-white dark:bg-brand-charcoal p-10 rounded-[48px] border border-brand-border flex items-center gap-8 group hover:shadow-2xl transition-all duration-500">
-                    <div className="w-20 h-20 bg-brand-emerald/10 text-brand-emerald rounded-[32px] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                        <Target size={40} />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em] mb-1">Engagement</p>
-                        <h3 className="text-4xl font-black text-brand-charcoal dark:text-white tracking-tight leading-none group-hover:text-brand-emerald transition-colors">{avgCompletion}%</h3>
-                    </div>
-                </div>
-                <div className="bg-white dark:bg-brand-charcoal p-10 rounded-[48px] border border-brand-border flex items-center gap-8 group hover:shadow-2xl transition-all duration-500">
-                    <div className="w-20 h-20 bg-blue-500/10 text-blue-600 rounded-[32px] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                        <Layers size={40} />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em] mb-1">Operational Nodes</p>
-                        <h3 className="text-4xl font-black text-brand-charcoal dark:text-white tracking-tight leading-none group-hover:text-blue-500 transition-colors">{student.cohorts?.length || 0}</h3>
-                    </div>
-                </div>
-                <div className="bg-white dark:bg-brand-charcoal p-10 rounded-[48px] border border-brand-border flex items-center gap-8 group hover:shadow-2xl transition-all duration-500">
-                    <div className="w-20 h-20 bg-amber-500/10 text-amber-600 rounded-[32px] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                        <BarChart3 size={40} />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em] mb-1">Proficiency Avg</p>
-                        <h3 className="text-4xl font-black text-brand-charcoal dark:text-white tracking-tight leading-none group-hover:text-amber-500 transition-colors">{avgQuizScore}{avgQuizScore !== 'N/A' ? '%' : ''}</h3>
-                    </div>
-                </div>
-            </div>
-
-            {/* Content Layout */}
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                {/* Main: Academic Records */}
-                <div className="xl:col-span-8 space-y-8">
-                    <div className="bg-white dark:bg-brand-charcoal rounded-[48px] border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5">
-                        <div className="p-10 border-b border-brand-border flex items-center justify-between bg-brand-beige/10 dark:bg-white/5">
-                            <div className="flex items-center gap-4">
-                                <div className="p-2.5 bg-brand-charcoal text-white rounded-xl">
-                                    <BookOpen size={20} />
+                    <div className="details-layout">
+                        <div className="main-records">
+                            <div className="card-premium-records shadow-premium">
+                                <div className="card-title-records">
+                                    <h3><BookOpen size={20} color="#1a4d3e" /> Academic Enrollments</h3>
                                 </div>
-                                <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Academic Deployments</h3>
-                            </div>
-                        </div>
 
-                        <div className="p-8 space-y-6">
-                            {student.cohorts && student.cohorts.length > 0 ? student.cohorts.map((cohort: any) => (
-                                <div key={cohort.id} className="group border border-brand-border rounded-[32px] overflow-hidden bg-brand-beige/10 dark:bg-white/5 hover:bg-white dark:hover:bg-brand-charcoal/50 hover:shadow-xl transition-all duration-500">
-                                    <div className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-                                        <div className="flex items-center gap-6 flex-1">
-                                            <div className="relative w-16 h-16 rounded-2xl bg-white dark:bg-brand-charcoal border border-brand-border flex items-center justify-center shadow-sm overflow-hidden group-hover:border-brand-emerald transition-colors">
-                                                <span className="text-xl font-black text-brand-charcoal dark:text-white">{Math.round(cohort.pivot?.progress || 0)}%</span>
-                                                <div className="absolute bottom-0 left-0 h-1 bg-brand-emerald transition-all duration-1000" style={{ width: `${cohort.pivot?.progress}%` }}></div>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <h4 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight group-hover:text-brand-emerald transition-colors">{cohort.name}</h4>
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-[10px] font-black text-brand-muted uppercase tracking-widest">{cohort.course?.title || 'General Curriculum'}</span>
-                                                    <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] ${cohort.pivot?.status === 'inactive' ? 'bg-red-500/10 text-red-600' : 'bg-emerald-500/10 text-emerald-600'}`}>
-                                                        {cohort.pivot?.status || 'Active'}
-                                                    </span>
+                                {student.cohorts && student.cohorts.length > 0 ? student.cohorts.map((cohort: any) => (
+                                    <div key={cohort.id} style={{ marginBottom: '1rem' }}>
+                                        <div className="enrollment-row" style={{ marginBottom: 0, borderRadius: expandedCohortMap[cohort.id] ? '20px 20px 0 0' : '20px' }}>
+                                            <div className="progress-ring-mini">{Math.round(cohort.pivot?.progress || 0)}%</div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: 950, color: '#0f172a', fontSize: '1.1rem' }}>{cohort.name}</div>
+                                                <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
+                                                    {cohort.course?.title || 'General Curriculum'} • Joined {new Date(cohort.pivot?.created_at).toLocaleDateString()}
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                                                    <div style={{
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 850,
+                                                        color: cohort.pivot?.status === 'inactive' ? '#ef4444' : '#10b981',
+                                                        background: cohort.pivot?.status === 'inactive' ? '#fef2f2' : '#f0fdf4',
+                                                        padding: '2px 8px',
+                                                        borderRadius: '4px'
+                                                    }}>
+                                                        {cohort.pivot?.status?.toUpperCase() || 'ENROLLED'}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 w-full md:w-auto">
-                                            <button 
-                                                onClick={() => setExpandedCohortMap(p => ({ ...p, [cohort.id]: !p[cohort.id] }))}
-                                                className={`flex-1 md:flex-none h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-none cursor-pointer flex items-center justify-center gap-2 ${expandedCohortMap[cohort.id] ? 'bg-brand-charcoal text-white' : 'bg-white dark:bg-brand-charcoal border border-brand-border text-brand-muted hover:border-brand-emerald'}`}
-                                            >
-                                                {expandedCohortMap[cohort.id] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                                Intel
-                                            </button>
-                                            <button 
-                                                onClick={() => toggleActivation(cohort.id, cohort.pivot?.status)}
-                                                className={`flex-1 md:flex-none h-12 px-8 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-none cursor-pointer ${cohort.pivot?.status === 'inactive' ? 'bg-brand-emerald text-white shadow-lg shadow-brand-emerald/20' : 'bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white'}`}
-                                            >
-                                                {cohort.pivot?.status === 'inactive' ? 'Authorize' : 'Redact Access'}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {expandedCohortMap[cohort.id] && (
-                                        <div className="p-10 bg-white dark:bg-brand-charcoal/50 border-t border-brand-border animate-fade-in-up space-y-10">
-                                            <div className="space-y-2">
-                                                <div className="flex items-center gap-3">
-                                                    <Sparkles className="text-brand-emerald" size={18} />
-                                                    <h5 className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-widest leading-none">Curriculum Override Protocol</h5>
-                                                </div>
-                                                <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest leading-relaxed">Manually adjust unit completion status for direct instructional intervention.</p>
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                <button className="btn-secondary-outline" onClick={() => setExpandedCohortMap(p => ({ ...p, [cohort.id]: !p[cohort.id] }))}>
+                                                    {expandedCohortMap[cohort.id] ? 'Hide Progress' : 'Manage Progress'}
+                                                </button>
+                                                <button
+                                                    className={cohort.pivot?.status === 'inactive' ? "btn-toggle-active" : "btn-toggle-inactive"}
+                                                    onClick={() => toggleActivation(cohort.id, cohort.pivot?.status)}
+                                                >
+                                                    {cohort.pivot?.status === 'inactive' ? 'Activate' : 'Deactivate'}
+                                                </button>
                                             </div>
-
-                                            <div className="space-y-8">
+                                        </div>
+                                        {expandedCohortMap[cohort.id] && (
+                                            <div className="animate-fade-in-up" style={{ padding: '2.5rem', background: '#fcfdfe', border: '1.5px solid #f1f5f9', borderTop: 'none', borderRadius: '0 0 20px 20px', boxShadow: 'inset 0 4px 6px -4px rgba(0,0,0,0.02)' }}>
+                                                <h4 style={{ margin: '0 0 1.5rem 0', color: '#0f172a', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <CheckCircle2 size={18} color="#1a4d3e" /> Curriculum Override Access
+                                                </h4>
+                                                <p style={{ margin: '0 0 2rem 0', color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>Toggle the checkboxes below to manually apply or revoke completion status for a specific resource. This persists immediately to the backend and adjusts percentages automatically.</p>
+                                                
                                                 {cohort.course?.modules?.map((mod: any) => (
-                                                    <div key={mod.id} className="space-y-4">
-                                                        <div className="flex items-center justify-between px-2">
-                                                            <span className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.3em]">{mod.title}</span>
-                                                            <div className="h-[1px] flex-1 bg-brand-border mx-6"></div>
-                                                        </div>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                    <div key={mod.id} style={{ marginBottom: '1.5rem', background: 'white', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
+                                                        <div style={{ fontWeight: 800, color: '#1a4d3e', padding: '1rem 1.5rem', background: '#f8fafc', fontSize: '0.95rem', borderBottom: '1px solid #e2e8f0' }}>{mod.title}</div>
+                                                        <div style={{ display: 'grid', padding: '1rem' }}>
                                                             {mod.lessons?.map((lesson: any) => {
                                                                 const isCompleted = student?.completed_lessons?.some((cl: any) => cl.id === lesson.id);
                                                                 return (
-                                                                    <div key={lesson.id} className={`p-5 rounded-[24px] border transition-all flex items-center justify-between group ${isCompleted ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-brand-beige/20 dark:bg-white/5 border-brand-border'}`}>
-                                                                        <div className="flex items-center gap-4 truncate">
+                                                                    <div key={lesson.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f1f5f9' }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                                                             <button 
                                                                                 onClick={() => toggleLessonCompletion(lesson.id, !!isCompleted)}
-                                                                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border-none cursor-pointer shrink-0 ${isCompleted ? 'bg-brand-emerald text-white' : 'bg-white dark:bg-brand-charcoal border-2 border-brand-border text-brand-muted hover:border-brand-emerald'}`}
+                                                                                style={{ width: '26px', height: '26px', borderRadius: '8px', border: `2px solid ${isCompleted ? '#10b981' : '#cbd5e1'}`, background: isCompleted ? '#10b981' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, transition: 'all 0.2s' }}
                                                                             >
-                                                                                {isCompleted ? <CheckCircle2 size={18} /> : <div className="w-2 h-2 rounded-full bg-brand-border"></div>}
+                                                                                {isCompleted && <CheckCircle2 size={16} color="white" />}
                                                                             </button>
-                                                                            <span className={`text-xs font-black uppercase truncate tracking-tight transition-all ${isCompleted ? 'text-brand-emerald opacity-60 line-through' : 'text-brand-charcoal dark:text-white'}`}>
-                                                                                {lesson.title}
-                                                                            </span>
+                                                                            <span style={{ fontWeight: 700, color: isCompleted ? '#94a3b8' : '#334155', fontSize: '0.9rem', textDecoration: isCompleted ? 'line-through' : 'none', transition: 'all 0.2s' }}>{lesson.title}</span>
                                                                         </div>
-                                                                        <div className="px-3 py-1 bg-white dark:bg-brand-charcoal border border-brand-border rounded-lg text-[8px] font-black text-brand-muted uppercase tracking-widest">{lesson.type}</div>
+                                                                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px' }}>{lesson.type}</span>
                                                                     </div>
                                                                 );
                                                             })}
+                                                            {(!mod.lessons || mod.lessons.length === 0) && (
+                                                                <p style={{ margin: '0.5rem 1rem', color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic', fontWeight: 600 }}>No lessons active in module...</p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 ))}
+                                                {(!cohort.course?.modules || cohort.course.modules.length === 0) && (
+                                                    <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>No curriculum data bound to this record.</p>
+                                                )}
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )) : (
-                                <div className="py-24 text-center space-y-6">
-                                    <div className="w-20 h-20 bg-brand-beige dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto text-brand-muted/30 border border-brand-border border-dashed">
-                                        <Zap size={32} />
+                                        )}
                                     </div>
-                                    <div className="space-y-1">
-                                        <h5 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">No Active Linkages</h5>
-                                        <p className="text-xs font-medium text-brand-muted">This cadet profile currently has no operational enrollment records.</p>
+                                )) : (
+                                    <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>
+                                        <BookOpen size={32} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
+                                        <p style={{ color: '#64748b', fontWeight: 600 }}>No course enrollments found for this student.</p>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Quiz Results Section */}
-                    <div className="bg-white dark:bg-brand-charcoal rounded-[48px] border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5">
-                        <div className="p-10 border-b border-brand-border flex items-center justify-between bg-brand-beige/10 dark:bg-white/5">
-                            <div className="flex items-center gap-4">
-                                <div className="p-2.5 bg-amber-500 text-white rounded-xl">
-                                    <HelpCircle size={20} />
-                                </div>
-                                <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Comprehension Assessments</h3>
+                                )}
                             </div>
-                        </div>
-                        <div className="p-8">
-                             {student.completed_lessons && student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.quiz_data && l.quiz_data !== 'null' && l.quiz_data !== '{}') || l.pivot?.score != null).length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.quiz_data && l.quiz_data !== 'null' && l.quiz_data !== '{}') || l.pivot?.score != null).map((lesson: any) => {
-                                         const isPass = (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80);
-                                         return (
-                                            <div key={lesson.id} className="p-6 bg-brand-beige/10 dark:bg-white/5 border border-brand-border rounded-[32px] flex items-center justify-between group hover:border-brand-emerald transition-all">
-                                                <div className="flex items-center gap-5 truncate">
-                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg shadow-inner ${isPass ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'}`}>
-                                                        {lesson.pivot?.score || 0}%
-                                                    </div>
-                                                    <div className="truncate space-y-1">
-                                                        <h5 className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-tight truncate">{lesson.title}</h5>
-                                                        <p className="text-[9px] font-black text-brand-muted uppercase tracking-widest">{new Date(lesson.pivot?.updated_at).toLocaleDateString()}</p>
+
+                            <div className="card-premium-records shadow-premium">
+                                <div className="card-title-records">
+                                    <h3><Award size={20} color="#1a4d3e" /> Learning Metrics</h3>
+                                </div>
+                                <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+                                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', textAlign: 'center' }}>
+                                        <TrendingUp size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
+                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Completion</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>
+                                            {avgCompletion}%
+                                        </div>
+                                    </div>
+                                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', textAlign: 'center' }}>
+                                        <Clock size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
+                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Total Cohorts</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>{student.cohorts?.length || 0}</div>
+                                    </div>
+                                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', textAlign: 'center' }}>
+                                        <Activity size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
+                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Quiz Score</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>
+                                            {avgQuizScore}{avgQuizScore !== 'N/A' ? '%' : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="card-premium-records shadow-premium">
+                                <div className="card-title-records">
+                                    <h3><HelpCircle size={20} color="#1a4d3e" /> Quiz Submissions</h3>
+                                </div>
+
+                                 {student.completed_lessons && student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.quiz_data && l.quiz_data !== 'null' && l.quiz_data !== '{}') || l.pivot?.score != null).length > 0 ? (
+                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                        {student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.quiz_data && l.quiz_data !== 'null' && l.quiz_data !== '{}') || l.pivot?.score != null).map((lesson: any) => (
+                                            <div key={lesson.id} className="enrollment-row" style={{ marginBottom: 0 }}>
+                                                <div className="progress-ring-mini" style={{ background: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#f0fdf4' : '#fef2f2', color: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#1a4d3e' : '#ef4444' }}>
+                                                    {lesson.pivot?.score || 0}%
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: 950, color: '#0f172a', fontSize: '1.05rem' }}>{lesson.title}</div>
+                                                    <div style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 700 }}>
+                                                        Submitted on {new Date(lesson.pivot?.updated_at).toLocaleDateString()}
                                                     </div>
                                                 </div>
-                                                <button className="w-10 h-10 bg-white dark:bg-brand-charcoal border border-brand-border rounded-xl flex items-center justify-center text-brand-muted hover:text-brand-emerald transition-all border-none cursor-pointer"><ArrowUpRight size={18} /></button>
+                                                <button 
+                                                    className="btn-secondary-outline" 
+                                                    onClick={() => {
+                                                        const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
+                                                        const answers = typeof lesson.pivot.answers === 'string' ? JSON.parse(lesson.pivot.answers) : lesson.pivot.answers;
+                                                        setViewingQuizResult({ ...lesson, quiz_data: quizData, pivot: { ...lesson.pivot, answers } });
+                                                    }}
+                                                >
+                                                    Analysis <Activity size={14} />
+                                                </button>
                                             </div>
-                                         );
-                                    })}
-                                </div>
-                            ) : (
-                                <div className="py-16 text-center text-brand-muted italic text-xs font-bold uppercase tracking-widest">No assessment artifacts detected.</div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Sidebar: Intelligence Log */}
-                <div className="xl:col-span-4 space-y-8 sticky top-32">
-                    <div className="bg-brand-charcoal dark:bg-brand-emerald p-10 rounded-[48px] text-white space-y-8 shadow-2xl shadow-brand-charcoal/20">
-                        <div className="flex items-center gap-4">
-                            <div className="p-2 bg-white/10 rounded-xl">
-                                <Sparkles size={20} />
-                            </div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em]">Profile Intelligence</h4>
-                        </div>
-                        <p className="text-sm font-medium leading-relaxed opacity-80">
-                            Cadet has maintained a <span className="font-black text-white">{avgCompletion}% operational efficiency</span> across synchronized learning phases.
-                        </p>
-                        <div className="h-[1px] bg-white/10"></div>
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                                <span>Sync Protocol</span>
-                                <span className="text-brand-emerald bg-white px-2 py-0.5 rounded-lg">High Density</span>
-                            </div>
-                            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-white transition-all duration-1000" style={{ width: `${avgCompletion}%` }}></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-brand-charcoal rounded-[48px] border border-brand-border p-10 space-y-8 shadow-sm">
-                        <h4 className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">Operational Timeline</h4>
-                        <div className="space-y-8">
-                             <div className="flex gap-6 relative">
-                                <div className="absolute top-10 left-6 bottom-0 w-[2px] bg-brand-border"></div>
-                                <div className="w-12 h-12 bg-brand-emerald text-white rounded-2xl flex items-center justify-center font-black text-xs shrink-0 z-10 shadow-lg shadow-brand-emerald/20">
-                                    <Zap size={18} />
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-xs font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Account Initialized</div>
-                                    <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest">{new Date(student.created_at).toLocaleString()}</div>
-                                </div>
-                            </div>
-                            {student.cohorts?.slice(0, 3).map((c: any, i: number) => (
-                                <div key={c.id} className="flex gap-6 relative">
-                                    {i < 2 && <div className="absolute top-10 left-6 bottom-0 w-[2px] bg-brand-border"></div>}
-                                    <div className="w-12 h-12 bg-brand-beige dark:bg-white/10 text-brand-muted rounded-2xl flex items-center justify-center font-black text-xs shrink-0 z-10 border border-brand-border">
-                                        <Layers size={18} />
+                                        ))}
                                     </div>
-                                    <div className="space-y-1">
-                                        <div className="text-xs font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Phase Linkage: {c.name}</div>
-                                        <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest">{new Date(c.pivot?.created_at).toLocaleDateString()}</div>
+                                ) : (
+                                    <div style={{ textAlign: 'center', padding: '2rem', background: '#f8fafc', borderRadius: '20px', border: '2px dashed #e2e8f0' }}>
+                                        <HelpCircle size={24} color="#cbd5e1" style={{ marginBottom: '0.5rem' }} />
+                                        <p style={{ color: '#64748b', fontWeight: 600, fontSize: '0.9rem' }}>No quiz submissions available yet.</p>
                                     </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="sidebar-records">
+                            <div className="card-premium-records shadow-premium" style={{ padding: '2rem' }}>
+                                <div className="card-title-records">
+                                    <h3><User size={20} color="#1a4d3e" /> Profile Note</h3>
                                 </div>
-                            ))}
+                                <p style={{ margin: 0, color: '#64748b', fontWeight: 600, lineHeight: 1.6 }}>
+                                    Standard student account with access to enrolled cohorts and assignments.
+                                </p>
+                            </div>
+
+                            <div className="card-premium-records shadow-premium" style={{ padding: '2rem' }}>
+                                <div className="card-title-records">
+                                    <h3><Activity size={20} color="#1a4d3e" /> History Log</h3>
+                                </div>
+                                <div style={{ marginTop: '1.5rem' }}>
+                                    <div className="activity-item">
+                                        <div className="activity-content">
+                                            <div>Account Activated</div>
+                                            <span>{new Date(student.created_at).toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                    {student.cohorts?.slice(0, 3).map((c: any) => (
+                                        <div key={c.id} className="activity-item">
+                                            <div className="activity-content">
+                                                <div>Joined {c.name}</div>
+                                                <span>{new Date(c.pivot?.created_at).toLocaleString()}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </>
+            )}
 
-            {/* Modals */}
             {showDeactivateModal && (
-                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 animate-fade-in">
-                    <div className="absolute inset-0 bg-brand-charcoal/90 backdrop-blur-2xl" onClick={() => setShowDeactivateModal(false)}></div>
-                    <div className="relative w-full max-w-lg bg-white dark:bg-brand-charcoal rounded-[48px] p-12 space-y-10 shadow-2xl animate-scale-up">
-                        <div className="space-y-3">
-                            <h3 className="text-3xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Redact Authorization</h3>
-                            <p className="text-brand-muted font-medium leading-relaxed italic">You are about to suspend cadet access to the operational node. Define the rationale for this redaction.</p>
-                        </div>
-                        <textarea 
-                            className="w-full p-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[32px] focus:outline-none focus:border-brand-emerald font-bold h-40 resize-none" 
-                            placeholder="Reason for access suspension..."
+                <div className="modal-overlay">
+                    <div className="modal-box animate-fade-in-up">
+                        <h3>Deactivate Access</h3>
+                        <p style={{ color: '#64748b', fontWeight: 600, marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                            You are about to deactivate access for <strong>{student?.name}</strong>. Input a message explaining why (this will be sent to their email).
+                        </p>
+                        <textarea
+                            placeholder="e.g. Your subscription has expired or you've completed the program curriculum..."
                             value={deactivateMessage}
                             onChange={(e) => setDeactivateMessage(e.target.value)}
                         />
-                        <div className="flex gap-4">
-                            <button onClick={() => setShowDeactivateModal(false)} className="flex-1 h-14 rounded-2xl font-black text-xs uppercase tracking-widest text-brand-muted hover:bg-brand-beige transition-all border-none cursor-pointer">Abort</button>
-                            <button onClick={() => toggleActivation(pendingCohortId!, 'active', deactivateMessage)} className="flex-1 h-14 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-red-600/20 hover:scale-105 transition-all border-none cursor-pointer">Confirm Redaction</button>
+                        <div className="modal-actions">
+                            <button className="btn-cancel" onClick={() => {
+                                setShowDeactivateModal(false);
+                                setPendingCohortId(null);
+                                setDeactivateMessage('');
+                            }}>Cancel</button>
+                            <button className="btn-confirm" onClick={confirmDeactivation}>Deactivate Access</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {viewingQuizResult && (
+                <div className="modal-overlay" style={{ zIndex: 1100 }}>
+                    <div className="modal-box animate-fade-in-up" style={{ maxWidth: '800px', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 0 }}>
+                        <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', borderTopLeftRadius: '28px', borderTopRightRadius: '28px' }}>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '1.4rem' }}>Evaluation Intelligence Analysis</h3>
+                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontWeight: 700, fontSize: '0.9rem' }}>
+                                    {viewingQuizResult.title} • Score: <span style={{ color: viewingQuizResult.pivot.score >= (viewingQuizResult.quiz_data?.pass_mark || 80) ? '#10b981' : '#ef4444' }}>{viewingQuizResult.pivot.score}%</span>
+                                </p>
+                            </div>
+                            <button onClick={() => setViewingQuizResult(null)} style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem' }}>
+                            {viewingQuizResult.quiz_data?.questions?.map((q: any, idx: number) => {
+                                const studentAnswer = viewingQuizResult.pivot.answers[idx];
+                                const isCorrect = studentAnswer === q.correct_answer;
+                                
+                                return (
+                                    <div key={idx} style={{ marginBottom: '2rem', padding: '1.5rem', borderRadius: '20px', border: `1.5px solid ${isCorrect ? '#f0fdf4' : '#fef2f2'}`, background: isCorrect ? '#fcfdfe' : '#fffbff' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8' }}>Question {idx + 1}</span>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: isCorrect ? '#10b981' : '#ef4444', background: isCorrect ? '#f0fdf4' : '#fef2f2', padding: '4px 10px', borderRadius: '8px' }}>
+                                                {isCorrect ? 'VALIDATED' : 'ERRONEOUS'}
+                                            </span>
+                                        </div>
+                                        <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: '#0f172a', lineHeight: 1.4 }}>{q.question}</h4>
+                                        <div style={{ display: 'grid', gap: '0.75rem' }}>
+                                            {q.options.map((opt: string, oIdx: number) => {
+                                                const isStudentPick = studentAnswer === oIdx;
+                                                const isRightAnswer = q.correct_answer === oIdx;
+                                                
+                                                return (
+                                                    <div 
+                                                        key={oIdx} 
+                                                        style={{ 
+                                                            padding: '1rem', 
+                                                            borderRadius: '12px', 
+                                                            background: isRightAnswer ? '#f0fdf4' : isStudentPick ? '#fef2f2' : 'white',
+                                                            border: `1.2px solid ${isRightAnswer ? '#10b98140' : isStudentPick ? '#ef444440' : '#f1f5f9'}`,
+                                                            color: isRightAnswer ? '#166534' : isStudentPick ? '#991b1b' : '#334155',
+                                                            fontWeight: (isStudentPick || isRightAnswer) ? 800 : 500,
+                                                            fontSize: '0.9rem',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '12px'
+                                                        }}
+                                                    >
+                                                        <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                            {(isStudentPick || isRightAnswer) && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }}></div>}
+                                                        </div>
+                                                        {opt}
+                                                        {isRightAnswer && <CheckCircle2 size={16} style={{ marginLeft: 'auto' }} />}
+                                                        {!isCorrect && isStudentPick && <X size={16} style={{ marginLeft: 'auto' }} />}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        
+                        <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', borderBottomLeftRadius: '28px', borderBottomRightRadius: '28px' }}>
+                            <button onClick={() => setViewingQuizResult(null)} className="btn-confirm" style={{ background: '#0f172a' }}>Close Analysis</button>
                         </div>
                     </div>
                 </div>

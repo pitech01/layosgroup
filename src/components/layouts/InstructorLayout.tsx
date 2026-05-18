@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import InstructorSidebar from '../../pages/instructor/layout/InstructorSidebar';
 import Topbar from '../../components/layout/Topbar';
+import './staff.css'
+
+
 
 const InstructorLayout = () => {
     const [collapsed, setCollapsed] = useState(false);
@@ -14,10 +17,10 @@ const InstructorLayout = () => {
     }, [location]);
 
     return (
-        <div className="flex min-h-screen bg-brand-beige dark:bg-brand-charcoal overflow-hidden">
+        <div className={`dashboard-layout ${mobileOpen ? 'sidebar-open' : ''} ${collapsed ? 'sidebar-collapsed' : ''}`}>
             <InstructorSidebar collapsed={collapsed} mobileOpen={mobileOpen} />
 
-            <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+            <div className="main-content-wrapper">
                 <Topbar
                     role="instructor"
                     collapsed={window.innerWidth <= 1024 ? !mobileOpen : collapsed}
@@ -30,17 +33,16 @@ const InstructorLayout = () => {
                     }}
                 />
 
-                <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
+                <main className="main-content staff-scope staff-scope-2">
                     <div className="animate-fade-in-up">
                         <Outlet />
                     </div>
                 </main>
             </div>
 
-            {/* Mobile Overlay */}
             {mobileOpen && (
                 <div
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[45] animate-in fade-in duration-300 md:hidden"
+                    className="sidebar-mobile-overlay"
                     onClick={() => setMobileOpen(false)}
                 />
             )}

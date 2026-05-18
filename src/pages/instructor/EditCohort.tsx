@@ -6,12 +6,7 @@ import {
     ArrowLeft,
     AlertCircle,
     X,
-    Loader2,
-    Calendar,
-    Target,
-    Zap,
-    Settings,
-    Sparkles
+    Loader2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -38,7 +33,10 @@ export default function EditCohort() {
             const token = localStorage.getItem('token');
             try {
                 const response = await fetch(`${API_URL}/cohorts/${id}`, {
-                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
                 const data = await response.json();
                 if (response.ok) {
@@ -50,8 +48,11 @@ export default function EditCohort() {
                         timezone: data.timezone || 'UTC+1 (WAT)',
                         visibility: data.visibility || 'public'
                     });
-                } else throw new Error(data.message || 'Retrieval failure.');
+                } else {
+                    throw new Error(data.message || 'Failed to fetch cohort data.');
+                }
             } catch (err: any) {
+                console.error("Fetch Cohort Error:", err);
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -64,11 +65,16 @@ export default function EditCohort() {
         e.preventDefault();
         setUpdating(true);
         setError(null);
+
         const token = localStorage.getItem('token');
         try {
             const response = await fetch(`${API_URL}/cohorts/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     name: formData.name,
                     start_date: formData.startDate,
@@ -79,10 +85,17 @@ export default function EditCohort() {
                     instructor_id: user?.id
                 })
             });
-            if (response.ok) navigate(`/instructor/cohorts/${id}`);
-            else throw new Error('Modification failed.');
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to update cohort.');
+            }
+
+            navigate(`/instructor/cohorts/${id}`);
         } catch (err: any) {
-            setError(err.message);
+            console.error('Cohort Update Error:', err);
+            setError(err.message || 'A network error occurred.');
         } finally {
             setUpdating(false);
         }
@@ -90,133 +103,241 @@ export default function EditCohort() {
 
     if (loading) {
         return (
-            <div className="h-[70vh] flex flex-col items-center justify-center gap-6 animate-pulse">
-                <Loader2 className="animate-spin text-brand-emerald" size={48} />
-                <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em]">Synchronizing Parameters...</p>
+            <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+                <Loader2 className="animate-spin" size={48} color="#1a4d3e" />
+                <p style={{ fontWeight: 800, color: '#64748b', fontSize: '1.1rem' }}>Loading Settings...</p>
             </div>
         );
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-12 pb-32 px-6 md:px-0">
-            {/* Header / Breadcrumb */}
-            <div className="flex items-center justify-between animate-fade-in-up">
-                <Link to={`/instructor/cohorts/${id}`} className="group flex items-center gap-4 text-[10px] font-black text-brand-muted hover:text-brand-emerald uppercase tracking-[0.3em] transition-all no-underline">
-                    <ArrowLeft size={18} className="group-hover:-translate-x-2 transition-transform" /> Back to Node Details
-                </Link>
+        <div className="create-cohort-container animate-fade-in">
+            <style>{`
+             .staff-scope    .create-cohort-container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 2rem 1.5rem;
+                }
+
+             .staff-scope    .breadcrumb-back {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #64748b;
+                    text-decoration: none;
+                    font-weight: 700;
+                    font-size: 0.9rem;
+                    margin-bottom: 2rem;
+                    transition: color 0.2s;
+                }
+
+            .staff-scope .breadcrumb-back:hover { color: #1a4d3e; }
+
+            .staff-scope     .form-header-premium {
+                    margin-bottom: 3rem;
+                }
+
+                .staff-scope .form-header-premium h1 {
+                    font-size: 2.5rem;
+                    font-weight: 950;
+                    color: #0f172a;
+                    letter-spacing: -0.04em;
+                    margin: 0 0 0.5rem 0;
+                }
+
+             .staff-scope    .cohort-form-card {
+                    background: white;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 32px;
+                    padding: 3rem;
+                    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
+                }
+
+             .staff-scope    .input-group-premium {
+                    margin-bottom: 2rem;
+                }
+
+              .staff-scope   .input-group-premium label {
+                    display: block;
+                    font-size: 0.85rem;
+                    font-weight: 900;
+                    color: #0f172a;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    margin-bottom: 12px;
+                }
+
+              .staff-scope   .input-premium {
+                    width: 100%;
+                    height: 56px;
+                    background: #f8fafc;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 16px;
+                    padding: 0 1.25rem;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: #0f172a;
+                    transition: all 0.3s;
+                    box-sizing: border-box;
+                }
+
+              .staff-scope   .input-premium:focus {
+                    background: white;
+                    border-color: #1a4d3e;
+                    outline: none;
+                    box-shadow: 0 0 0 5px rgba(26, 77, 62, 0.05);
+                }
+
+                .staff-scope .form-grid-2 {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.5rem;
+                }
+
+                .staff-scope .submit-btn-premium {
+                    width: 100%;
+                    height: 64px;
+                    background: #1a4d3e;
+                    color: white;
+                    border: none;
+                    border-radius: 20px;
+                    font-size: 1.1rem;
+                    font-weight: 950;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    margin-top: 1rem;
+                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    transition: all 0.3s;
+                }
+
+                .staff-scope .submit-btn-premium:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.25);
+                }
+
+                .staff-scope .section-tile {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 2rem;
+                    margin-top: 1rem;
+                    padding-bottom: 1rem;
+                    border-bottom: 1px solid #f1f5f9;
+                }
+
+                .staff-scope .section-tile span {
+                    font-size: 1.1rem;
+                    font-weight: 900;
+                    color: #0f172a;
+                }
+            `}</style>
+
+            <Link to={`/instructor/cohorts/${id}`} className="breadcrumb-back">
+                <ArrowLeft size={18} /> Back to Cohort Details
+            </Link>
+
+            <div className="form-header-premium" style={{ marginBottom: '2.5rem' }}>
+                <h1>Cohort Settings</h1>
+                <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem' }}>
+                    Adjust configuration for <strong>{formData.name}</strong>
+                </p>
             </div>
 
-            <header className="space-y-6 animate-fade-in-up">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-brand-emerald/10 rounded-xl">
-                        <Settings className="text-brand-emerald" size={18} />
-                    </div>
-                    <span className="text-brand-emerald font-black text-[10px] uppercase tracking-[0.4em]">Node Configuration</span>
-                </div>
-                <div className="space-y-4">
-                    <h1 className="text-5xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none uppercase">Edit <span className="text-brand-emerald">Cohort</span></h1>
-                    <p className="text-brand-muted font-medium text-xl max-w-2xl leading-relaxed">Adjust operational parameters for <strong>{formData.name}</strong> to align with current academic requirements.</p>
-                </div>
-            </header>
-
             {error && (
-                <div className="p-6 bg-red-50 dark:bg-red-500/10 border-2 border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 rounded-[32px] animate-in slide-in-from-top-4 duration-500 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <AlertCircle size={24} />
-                        <span className="font-black text-xs uppercase tracking-widest">{error}</span>
-                    </div>
-                    <button onClick={() => setError(null)} className="p-2 hover:bg-white/20 rounded-xl border-none bg-transparent cursor-pointer"><X size={18} /></button>
+                <div className="animate-slide-in" style={{
+                    padding: '1rem 1.25rem',
+                    background: '#fff1f2',
+                    border: '1px solid #ffe4e6',
+                    color: '#e11d48',
+                    borderRadius: '16px',
+                    marginBottom: '2rem',
+                    fontSize: '0.95rem',
+                    fontWeight: 500,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
+                }}>
+                    <AlertCircle size={20} strokeWidth={2.5} />
+                    <span style={{ flex: 1 }}>{error}</span>
+                    <button
+                        onClick={() => setError(null)}
+                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px' }}
+                    >
+                        <X size={16} />
+                    </button>
                 </div>
             )}
 
-            <form className="bg-white dark:bg-brand-charcoal rounded-[60px] border border-brand-border p-12 md:p-16 space-y-12 shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up" style={{ animationDelay: '0.1s' }} onSubmit={handleSubmit}>
-                <div className="space-y-10">
-                    <div className="flex items-center gap-4 border-b border-brand-border pb-6">
-                        <Shield className="text-brand-emerald" size={20} />
-                        <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">System Parameters</h3>
+            <form className="cohort-form-card shadow-premium" onSubmit={handleSubmit}>
+                <div className="section-tile">
+                    <Shield size={20} color="#1a4d3e" />
+                    <span>Cohort Configuration</span>
+                </div>
+
+                <div className="input-group-premium">
+                    <label>Title</label>
+                    <input
+                        type="text"
+                        className="input-premium"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    />
+                </div>
+
+                <div className="form-grid-2">
+                    <div className="input-group-premium">
+                        <label>Start Date</label>
+                        <input
+                            type="date"
+                            className="input-premium"
+                            required
+                            value={formData.startDate}
+                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        />
                     </div>
-
-                    <div className="space-y-8">
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Cohort Title</label>
-                            <input
-                                type="text"
-                                className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-base focus:border-brand-emerald transition-all"
-                                required
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Deployment Start</label>
-                                <div className="relative">
-                                    <input
-                                        type="date"
-                                        className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
-                                        required
-                                        value={formData.startDate}
-                                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                    />
-                                    <Calendar className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Deployment End</label>
-                                <div className="relative">
-                                    <input
-                                        type="date"
-                                        className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
-                                        required
-                                        value={formData.endDate}
-                                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                    />
-                                    <Calendar className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Enrollment Cut-off</label>
-                            <div className="relative">
-                                <input
-                                    type="date"
-                                    className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
-                                    required
-                                    value={formData.enrollmentDeadline}
-                                    onChange={(e) => setFormData({ ...formData, enrollmentDeadline: e.target.value })}
-                                />
-                                <Target className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
-                            </div>
-                        </div>
+                    <div className="input-group-premium">
+                        <label>End Date</label>
+                        <input
+                            type="date"
+                            className="input-premium"
+                            required
+                            value={formData.endDate}
+                            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        />
                     </div>
                 </div>
 
-                <div className="pt-8">
-                    <button 
-                        type="submit" 
-                        disabled={updating}
-                        className="w-full h-20 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[28px] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4 border-none cursor-pointer"
-                    >
-                        {updating ? (
-                            <>
-                                <Loader2 className="animate-spin" size={24} />
-                                <span>Synchronizing...</span>
-                            </>
-                        ) : (
-                            <>
-                                Update Configuration <ChevronRight size={24} />
-                            </>
-                        )}
-                    </button>
+                <div className="input-group-premium">
+                    <label>Registration Deadline</label>
+                    <input
+                        type="date"
+                        className="input-premium"
+                        required
+                        value={formData.enrollmentDeadline}
+                        onChange={(e) => setFormData({ ...formData, enrollmentDeadline: e.target.value })}
+                    />
                 </div>
+
+
+
+                <button type="submit" className="submit-btn-premium" disabled={updating}>
+                    {updating ? (
+                        <>
+                            <Loader2 className="animate-spin" size={20} />
+                            Updating...
+                        </>
+                    ) : (
+                        <>
+                            Save Changes <ChevronRight size={20} />
+                        </>
+                    )}
+                </button>
             </form>
-
-            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-xl border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <Sparkles size={16} className="text-brand-emerald" />
-                Parameters are verified before commit to the central repository.
-            </div>
         </div>
     );
 }

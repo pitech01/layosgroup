@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
     ClipboardList,
     Plus,
@@ -11,15 +11,12 @@ import {
     Loader2,
     AlertCircle,
     FileText,
-    Trash2,
-    Sparkles,
-    Zap,
-    Inbox,
-    ArrowUpRight,
-    ArrowRight
+    Trash2
 } from 'lucide-react';
+
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function InstructorAssignments() {
     const { logout } = useAuth();
@@ -34,39 +31,69 @@ export default function InstructorAssignments() {
     const fetchAssignments = async () => {
         try {
             const response = await fetch(`${API_URL}/instructor/assignments`, {
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
-            if (response.status === 401) { logout(); navigate('/instructor-login'); return; }
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
             const data = await response.json();
-            if (response.ok) setAssignments(data);
-            else throw new Error(data.message || 'Retrieval failure.');
+            if (response.ok) {
+                setAssignments(data);
+            } else {
+                throw new Error(data.message || 'Failed to fetch assignments.');
+            }
         } catch (err: any) {
+            console.error("Fetch Error:", err);
             if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
-                toast.error('Network sync lost');
-                setTimeout(() => { logout(); navigate('/instructor-login'); }, 2000);
-            } else setError(err.message);
+                toast.error('Connection failed. Redirecting to login...');
+                setTimeout(() => {
+                    logout();
+                    navigate('/instructor-login');
+                }, 2000);
+            } else {
+                setError(err.message);
+            }
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm('Redact this assignment and all associated student artifacts?')) return;
+        if (!window.confirm('Are you sure you want to delete this assignment? This action cannot be undone.')) {
+            return;
+        }
+
         try {
             const response = await fetch(`${API_URL}/instructor/assignments/${id}`, {
                 method: 'DELETE',
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
+
             if (response.ok) {
                 setAssignments(prev => prev.filter(a => a.id !== id));
-                toast.success('Assignment redacted');
-            } else throw new Error('Deletion failure.');
+                toast.success('Assignment deleted successfully.');
+            } else {
+                const data = await response.json();
+                toast.error(data.message || 'Failed to delete assignment.');
+            }
         } catch (err: any) {
-            toast.error(err.message);
+            toast.error('A network error occurred.');
         }
     };
 
-    useEffect(() => { fetchAssignments(); }, []);
+    useEffect(() => {
+        fetchAssignments();
+    }, []);
 
     const filteredAssignments = assignments.filter(a =>
         a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,141 +101,339 @@ export default function InstructorAssignments() {
     );
 
     return (
-        <div className="max-w-7xl mx-auto space-y-12 pb-32 px-6 md:px-0">
-            {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 animate-fade-in-up">
-                <div className="space-y-6 flex-1">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-brand-emerald/10 rounded-xl">
-                            <ClipboardList className="text-brand-emerald" size={18} />
-                        </div>
-                        <span className="text-brand-emerald font-black text-[10px] uppercase tracking-[0.4em]">Curriculum Control</span>
-                    </div>
-                    <div className="space-y-4">
-                        <h1 className="text-5xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none uppercase">Manage <span className="text-brand-emerald">Assessments</span></h1>
-                        <p className="text-brand-muted font-medium text-xl max-w-2xl leading-relaxed">Orchestrate academic evaluations and review student performance artifacts.</p>
-                    </div>
+        <div className="assignments-container">
+            <style>{`
+                .staff-scope .assignments-container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    font-family: 'Inter', sans-serif;
+                    padding: 2rem;
+                }
+
+                .staff-scope .page-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 3rem;
+                }
+
+                .staff-scope .header-content h1 {
+                    font-size: 2.5rem;
+                    font-weight: 900;
+                    color: #0f172a;
+                    margin: 0 0 0.5rem 0;
+                    letter-spacing: -0.04em;
+                }
+
+                .header-content p {
+                    color: #64748b;
+                    font-weight: 600;
+                    margin: 0;
+                    font-size: 1.1rem;
+                }
+
+                .staff-scope .btn-create {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    background: #1a4d3e;
+                    color: white;
+                    padding: 1rem 2rem;
+                    border-radius: 16px;
+                    text-decoration: none;
+                    font-weight: 900;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.3);
+                }
+
+                .btn-create:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.4);
+                }
+
+                .staff-scope .search-bar {
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 20px;
+                    padding: 1.25rem;
+                    margin-bottom: 2.5rem;
+                    display: flex;
+                    gap: 1rem;
+                    align-items: center;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                }
+
+                .staff-scope .search-input-group {
+                    flex: 1;
+                    position: relative;
+                }
+
+                .staff-scope .search-icon {
+                    position: absolute;
+                    left: 16px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #94a3b8;
+                }
+
+                .staff-scope .search-input {
+                    width: 100%;
+                    padding: 0.85rem 1rem 0.85rem 3rem;
+                    border: 1px solid #f1f5f9;
+                    border-radius: 14px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    background: #f8fafc;
+                    transition: all 0.2s;
+                    color: #0f172a;
+                }
+
+                .staff-scope .search-input:focus {
+                    outline: none;
+                    border-color: #1a4d3e;
+                    background: white;
+                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                }
+
+                .staff-scope .assignment-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+                    gap: 2rem;
+                }
+
+                .staff-scope .assignment-card {
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 28px;
+                    padding: 2rem;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .staff-scope .assignment-card:hover {
+                    border-color: #1a4d3e;
+                    transform: translateY(-6px);
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+                }
+
+                .staff-scope .cohort-badge {
+                    display: inline-flex;
+                    padding: 6px 14px;
+                    background: #f0fdf4;
+                    color: #166534;
+                    border-radius: 10px;
+                    font-size: 0.75rem;
+                    font-weight: 900;
+                    margin-bottom: 1.25rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    width: fit-content;
+                }
+
+                .staff-scope .assignment-title {
+                    font-size: 1.4rem;
+                    font-weight: 900;
+                    color: #0f172a;
+                    margin: 0 0 1rem 0;
+                    line-height: 1.3;
+                    letter-spacing: -0.02em;
+                }
+
+                .staff-scope .assignment-meta {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .staff-scope .meta-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: #64748b;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                }
+
+                .staff-scope .card-footer {
+                    margin-top: auto;
+                    padding-top: 1.5rem;
+                    border-top: 1px solid #f1f5f9;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .staff-scope .submission-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .staff-scope .submission-count {
+                    font-size: 1.25rem;
+                    font-weight: 900;
+                    color: #0f172a;
+                }
+
+                .staff-scope .submission-label {
+                    font-size: 0.75rem;
+                    color: #94a3b8;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                }
+
+                .staff-scope .btn-submissions {
+                    background: #f8fafc;
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #1a4d3e;
+                    transition: all 0.2s;
+                    border: 1px solid #f1f5f9;
+                }
+
+                .staff-scope .btn-submissions:hover {
+                    background: #1a4d3e;
+                    color: white;
+                    transform: scale(1.05);
+                }
+
+                .staff-scope .file-indicator {
+                    position: absolute;
+                    top: 2rem;
+                    right: 4.5rem;
+                    color: #cbd5e1;
+                }
+
+                .staff-scope .btn-delete {
+                    background: #fff1f2;
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #dc2626;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border: 1px solid #fecaca;
+                    cursor: pointer;
+                    margin-left: 10px;
+                    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.05);
+                }
+
+                .staff-scope .btn-delete:hover {
+                    background: #dc2626;
+                    color: white;
+                    transform: scale(1.1);
+                    box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.2);
+                    border-color: #dc2626;
+                }
+            `}</style>
+
+            <div className="page-header">
+                <div className="header-content">
+                    <h1>Assignments</h1>
+                    <p>Manage coursework and review student submissions.</p>
                 </div>
-
-                <Link 
-                    to="/instructor/assignments/create" 
-                    className="h-20 px-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[32px] font-black text-xs uppercase tracking-[0.3em] flex items-center gap-4 shadow-2xl shadow-brand-charcoal/20 transition-all hover:scale-105 active:scale-95 group no-underline"
-                >
-                    <Plus size={24} className="group-hover:rotate-90 transition-transform" /> New Assignment
+                <Link to="/instructor/assignments/create" className="btn-create shadow-premium">
+                    <Plus size={20} /> New Assignment
                 </Link>
-            </header>
+            </div>
 
-            {/* Controls Bar */}
-            <div className="flex flex-col xl:flex-row gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <div className="flex-1 relative group">
-                    <Search className="absolute left-8 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors" size={24} />
+            <div className="search-bar">
+                <div className="search-input-group">
+                    <Search className="search-icon" size={20} />
                     <input
                         type="text"
-                        placeholder="Filter assessments by title or cohort identity..."
-                        className="w-full h-20 pl-20 pr-10 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[32px] focus:outline-none focus:border-brand-emerald transition-all text-sm font-bold text-brand-charcoal dark:text-white"
+                        className="search-input"
+                        placeholder="Search by title or cohort name..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="h-20 px-10 bg-white dark:bg-white/5 border-2 border-brand-border rounded-[32px] flex items-center gap-4 font-black text-[10px] uppercase tracking-[0.3em] text-brand-muted hover:text-brand-emerald transition-all border-none cursor-pointer">
-                    <Filter size={20} /> Evaluation Protocol
+                <button className="btn-standard" style={{ padding: '0.85rem 1.5rem', background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', fontWeight: 800, color: '#475569' }}>
+                    <Filter size={18} /> Filters
                 </button>
             </div>
 
-            {/* Grid / Content */}
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                {loading ? (
-                    <div className="py-40 flex flex-col items-center justify-center gap-8 bg-brand-beige/20 dark:bg-white/5 rounded-[60px] border-2 border-brand-border border-dashed">
-                        <Loader2 className="animate-spin text-brand-emerald" size={64} />
-                        <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em] animate-pulse">Syncing Evaluation Grid...</p>
-                    </div>
-                ) : error ? (
-                    <div className="p-20 bg-red-50 dark:bg-red-500/5 border-2 border-red-100 dark:border-red-500/10 rounded-[60px] text-center space-y-8">
-                        <AlertCircle size={64} className="text-red-500 mx-auto" />
-                        <div className="space-y-4">
-                            <h3 className="text-3xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Sync Terminated</h3>
-                            <p className="text-red-600/60 dark:text-red-400/60 font-medium">{error}</p>
-                        </div>
-                        <button onClick={fetchAssignments} className="px-10 h-16 bg-red-500 text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all border-none cursor-pointer">Re-Establish Sync</button>
-                    </div>
-                ) : filteredAssignments.length === 0 ? (
-                    <div className="bg-white dark:bg-brand-charcoal py-40 text-center rounded-[60px] border-2 border-brand-border border-dashed shadow-sm space-y-10">
-                        <div className="w-32 h-32 bg-brand-beige dark:bg-white/5 rounded-[48px] flex items-center justify-center mx-auto text-brand-muted/30 group relative overflow-hidden">
-                            <Inbox size={64} className="group-hover:scale-125 transition-transform duration-1000" />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-4xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Assessment Vacuum</h3>
-                            <p className="text-brand-muted font-medium text-lg max-w-md mx-auto">No academic evaluations have been initialized in the current sector.</p>
-                        </div>
-                        <Link to="/instructor/assignments/create" className="inline-flex h-18 px-12 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[32px] font-black text-xs uppercase tracking-[0.4em] items-center gap-4 shadow-2xl shadow-brand-charcoal/20 no-underline hover:scale-105 transition-all">
-                            Initialize Protocol <Plus size={20} />
-                        </Link>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        {filteredAssignments.map((assignment, idx) => (
-                            <div key={assignment.id} className="group bg-white dark:bg-brand-charcoal rounded-[56px] border border-brand-border p-10 flex flex-col hover:shadow-[0_40px_80px_-20px_rgba(26,77,62,0.15)] transition-all duration-700 relative overflow-hidden animate-fade-in-up" style={{ animationDelay: `${0.1 * idx}s` }}>
-                                <div className="absolute top-0 right-0 p-8 flex gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                                    <button onClick={() => handleDelete(assignment.id)} className="w-10 h-10 flex items-center justify-center bg-red-500/10 border-2 border-red-500/20 rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all cursor-pointer"><Trash2 size={16} /></button>
+            {loading ? (
+                <div style={{ padding: '10rem 0', textAlign: 'center' }}>
+                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '2rem', fontWeight: 800, color: '#64748b', fontSize: '1.1rem' }}>Sychronizing assignment data...</p>
+                </div>
+            ) : error ? (
+                <div style={{ padding: '4rem', background: '#fff1f2', borderRadius: '32px', textAlign: 'center', border: '1px solid #ffe4e6' }}>
+                    <AlertCircle size={48} color="#e11d48" style={{ margin: '0 auto 1.5rem' }} />
+                    <h3 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.5rem' }}>Connection Interrupted</h3>
+                    <p style={{ color: '#64748b', fontWeight: 600, margin: '1rem 0 2.5rem' }}>{error}</p>
+                    <button onClick={fetchAssignments} className="btn-create" style={{ margin: '0 auto' }}>Retry Sync</button>
+                </div>
+            ) : filteredAssignments.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '8rem 2rem', background: 'white', border: '2px dashed #e2e8f0', borderRadius: '40px' }}>
+                    <ClipboardList size={80} color="#cbd5e1" style={{ marginBottom: '2rem' }} />
+                    <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', margin: '0 0 1rem 0' }}>No assignments yet</h2>
+                    <p style={{ color: '#64748b', fontWeight: 600, marginBottom: '3rem', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 3rem auto' }}>
+                        Start creating your first assignment to share resources and track student progress.
+                    </p>
+                    <Link to="/instructor/assignments/create" className="btn-create" style={{ display: 'inline-flex', margin: '0 auto' }}>
+                        Create First Assignment
+                    </Link>
+                </div>
+            ) : (
+                <div className="assignment-grid">
+                    {filteredAssignments.map(assignment => (
+                        <div key={assignment.id} className="assignment-card shadow-sm">
+                            {assignment.assignment_file && (
+                                <div className="file-indicator" title="Has resource file">
+                                    <FileText size={20} />
                                 </div>
+                            )}
+                            <div className="cohort-badge">{assignment.cohort?.name}</div>
+                            <h3 className="assignment-title">{assignment.title}</h3>
 
-                                <div className="flex-1 space-y-10">
-                                    <div className="flex items-center gap-4">
-                                        <div className="px-4 py-1.5 bg-brand-emerald/10 text-brand-emerald border border-brand-emerald/20 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
-                                            {assignment.cohort?.name || 'General Terminal'}
-                                        </div>
-                                        {assignment.assignment_file && (
-                                            <div className="p-1.5 bg-brand-beige dark:bg-white/10 rounded-lg text-brand-muted" title="Instructional Artifact Attached">
-                                                <FileText size={12} />
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <h3 className="text-3xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-tight group-hover:text-brand-emerald transition-colors line-clamp-2 uppercase">
-                                            {assignment.title}
-                                        </h3>
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-3 text-brand-muted font-bold text-[11px] uppercase tracking-wider">
-                                                <Calendar size={14} className="text-brand-emerald" /> 
-                                                <span>Deadline: {new Date(assignment.due_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-brand-muted font-bold text-[11px] uppercase tracking-wider">
-                                                <Clock size={14} className="text-brand-emerald" /> 
-                                                <span>Terminal: {new Date(assignment.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <p className="text-brand-muted font-medium text-sm line-clamp-2 leading-relaxed">
-                                        {assignment.description}
-                                    </p>
+                            <div className="assignment-meta">
+                                <div className="meta-row">
+                                    <Calendar size={18} color="#1a4d3e" />
+                                    <span>Due: {new Date(assignment.due_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                 </div>
-
-                                <div className="mt-12 pt-10 border-t border-brand-border flex items-center justify-between">
-                                    <div className="space-y-1">
-                                        <div className="text-3xl font-black text-brand-charcoal dark:text-white leading-none tracking-tighter">
-                                            {assignment.submissions_count || 0}
-                                        </div>
-                                        <div className="text-[9px] font-black text-brand-muted uppercase tracking-[0.2em]">Submissions</div>
-                                    </div>
-                                    <Link 
-                                        to={`/instructor/assignments/${assignment.id}/submissions`} 
-                                        className="w-16 h-16 bg-brand-beige/50 dark:bg-white/5 group-hover:bg-brand-emerald border-2 border-brand-border rounded-[24px] flex items-center justify-center text-brand-muted group-hover:text-white transition-all shadow-xl shadow-brand-charcoal/5"
-                                    >
-                                        <ArrowRight size={24} />
-                                    </Link>
+                                <div className="meta-row">
+                                    <Clock size={18} color="#64748b" />
+                                    <span>Time: {new Date(assignment.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                )}
-            </div>
 
-            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-xl border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <Sparkles size={16} className="text-brand-emerald" />
-                Evaluations are synchronized with student dashboard timelines in real-time.
-            </div>
+                            <p style={{ color: '#64748b', fontSize: '0.95rem', fontWeight: 600, margin: '0 0 2rem 0', lineBreak: 'anywhere', height: '3.6rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                {assignment.description}
+                            </p>
+
+                            <div className="card-footer">
+                                <div className="submission-info">
+                                    <div className="submission-count">{assignment.submissions_count || 0}</div>
+                                    <div className="submission-label">Submissions</div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <Link to={`/instructor/assignments/${assignment.id}/submissions`} className="btn-submissions" title="Review Submissions">
+                                        <ChevronRight size={24} />
+                                    </Link>
+                                    <button
+                                        onClick={() => handleDelete(assignment.id)}
+                                        className="btn-delete"
+                                        title="Delete Assignment"
+                                    >
+                                        <Trash2 size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

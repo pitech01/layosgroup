@@ -1,4 +1,4 @@
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Search } from 'lucide-react';
 
 interface TopbarLeftProps {
     collapsed: boolean;
@@ -10,29 +10,34 @@ interface TopbarLeftProps {
 
 const TopbarLeft = ({ collapsed, onToggle, title, subtitle, icon }: TopbarLeftProps) => {
     return (
-        <div className="flex items-center gap-3">
+        <div className="top-nav-left">
             <button
-                className={`lg:hidden p-2 rounded-lg text-brand-muted hover:bg-brand-border/50 transition-colors border-none cursor-pointer ${!collapsed ? 'text-brand-emerald bg-brand-emerald/10' : ''}`}
+                className={`sidebar-toggle-btn ${!collapsed ? 'is-active' : ''}`}
                 onClick={onToggle}
                 aria-label="Toggle Sidebar"
             >
-                {collapsed ? <Menu size={24} /> : <X size={24} />}
+                {collapsed ? <Menu size={20} /> : <X size={20} />}
             </button>
 
-            <div className="flex items-center gap-3">
+            <div className="top-nav-context-wrapper">
                 {icon && (
-                    <div className="hidden lg:flex p-2 bg-brand-emerald/10 text-brand-emerald rounded-xl shadow-inner">
+                    <div className="top-nav-context-icon">
                         {icon}
                     </div>
                 )}
-                <div>
-                    <h1 className="text-xl lg:text-3xl font-black tracking-tight text-brand-charcoal dark:text-white truncate max-w-[160px] sm:max-w-md m-0">
-                        {title}
-                    </h1>
+                <div className="top-nav-title-container">
+                    <div className="top-nav-title-row">
+                        <h1 className="top-nav-page-title">
+                            {title}
+                        </h1>
+                        <button className="top-nav-search-trigger" aria-label="Quick Search">
+                            <Search size={18} strokeWidth={2.5} />
+                        </button>
+                    </div>
                     {subtitle && (
-                        <p className="hidden lg:block text-sm font-medium text-brand-muted dark:text-slate-400 mt-1 m-0">
+                        <span className="top-nav-page-subtitle">
                             {subtitle}
-                        </p>
+                        </span>
                     )}
                 </div>
             </div>

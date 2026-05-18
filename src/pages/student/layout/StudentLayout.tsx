@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import Topbar from '../../../components/layout/Topbar';
+import Topbar from '../../../components/student_layout/Topbar';
+import '../../../student.css';
+
 
 const StudentLayout = () => {
     const location = useLocation();

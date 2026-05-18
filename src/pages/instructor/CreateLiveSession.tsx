@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
     Plus,
     Clock,
@@ -9,16 +9,8 @@ import {
     ArrowLeft,
     MonitorIcon,
     CalendarDays,
-    FileVideo,
-    Loader2,
-    ChevronRight,
-    Zap,
-    Sparkles,
-    ShieldCheck,
-    X,
-    CheckCircle2
+    FileVideo
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 
 interface Course {
     id: number;
@@ -40,8 +32,8 @@ export default function CreateLiveSession() {
     const [recordingUrl, setRecordingUrl] = useState<string>('');
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -49,10 +41,15 @@ export default function CreateLiveSession() {
         const fetchCourses = async () => {
             try {
                 const response = await fetch(`${API_URL}/courses`, {
-                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
                 });
                 const data = await response.json();
-                if (response.ok) setCourses(data);
+                if (response.ok) {
+                    setCourses(data);
+                }
             } catch (err) {
                 console.error("Fetch Courses Error:", err);
             } finally {
@@ -62,38 +59,72 @@ export default function CreateLiveSession() {
         fetchCourses();
     }, [API_URL]);
 
+    const validateForm = () => {
+        const errors: Record<string, string> = {};
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selectedDate = new Date(formData.date);
+
+        if (!formData.title) errors.title = 'Session title is required';
+        if (!formData.courseId) errors.courseId = 'Please select a course';
+        if (!formData.date) {
+            errors.date = 'Date is required';
+        } else if (selectedDate < today) {
+            errors.date = 'Date cannot be in the past';
+        }
+        if (!formData.startTime) errors.startTime = 'Start time is required';
+        if (!formData.endTime) errors.endTime = 'End time is required';
+        if (formData.startTime && formData.endTime && formData.startTime >= formData.endTime) {
+            errors.endTime = 'End time must be after start time';
+        }
+
+        // Meeting link is now optional
+        if (formData.meetingLink && !/^https?:\/\/.+/.test(formData.meetingLink)) {
+            errors.meetingLink = 'Must be a valid URL (starting with http/https)';
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
-        setError(null);
+        if (validateForm()) {
+            setIsSubmitting(true);
 
-        try {
-            const submitData = new FormData();
-            submitData.append('title', formData.title);
-            submitData.append('course_id', formData.courseId);
-            submitData.append('scheduled_date', formData.date);
-            submitData.append('start_time', formData.startTime);
-            submitData.append('end_time', formData.endTime);
-            submitData.append('meeting_link', formData.meetingLink);
-            if (recordingUrl) submitData.append('recording_link', recordingUrl);
+            try {
+                const submitData = new FormData();
+                submitData.append('title', formData.title);
+                submitData.append('course_id', formData.courseId);
+                submitData.append('scheduled_date', formData.date);
+                submitData.append('start_time', formData.startTime);
+                submitData.append('end_time', formData.endTime);
+                submitData.append('meeting_link', formData.meetingLink);
+                if (recordingUrl) {
+                    submitData.append('recording_link', recordingUrl);
+                }
 
-            const response = await fetch(`${API_URL}/live-sessions`, {
-                method: 'POST',
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                body: submitData
-            });
+                const response = await fetch(`${API_URL}/live-sessions`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: submitData
+                });
 
-            if (response.ok) {
-                toast.success('Broadcast scheduled');
-                navigate('/instructor/live');
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Initialization failure.');
+                if (response.ok) {
+                    navigate('/instructor/live', { state: { success: true } });
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.message || 'Failed to create live session');
+                }
+            } catch (err) {
+                console.error("Create Live Session Error:", err);
+                alert('An error occurred. Please try again.');
+            } finally {
+                setIsSubmitting(false);
             }
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -101,8 +132,9 @@ export default function CreateLiveSession() {
         const token = localStorage.getItem('token');
         setUploading(true);
         setUploadProgress(0);
-        const fData = new FormData();
-        fData.append('video', file);
+
+        const formData = new FormData();
+        formData.append('video', file);
 
         try {
             const xhr = new XMLHttpRequest();
@@ -110,240 +142,345 @@ export default function CreateLiveSession() {
             xhr.setRequestHeader('Accept', 'application/json');
             if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
-            xhr.upload.onprogress = (ev) => {
-                if (ev.lengthComputable) setUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    setUploadProgress(Math.round((event.loaded / event.total) * 100));
+                }
             };
 
             const response: any = await new Promise((resolve, reject) => {
                 xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText));
-                    else reject(new Error('Upload failed'));
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            resolve(JSON.parse(xhr.responseText));
+                        } catch { reject(new Error('Invalid response')); }
+                    } else {
+                        reject(new Error('Upload failed'));
+                    }
                 };
-                xhr.onerror = () => reject(new Error('Network failure'));
-                xhr.send(fData);
+                xhr.onerror = () => reject(new Error('Network error'));
+                xhr.send(formData);
             });
 
             if (response.success) {
                 setRecordingUrl(response.video_url);
-                toast.success('Archival artifact synchronized');
-            } else throw new Error(response.message);
+            } else {
+                alert(response.message || 'Upload failed');
+            }
         } catch (err: any) {
-            toast.error(err.message);
+            alert(err.message || 'An error occurred during upload');
         } finally {
             setUploading(false);
         }
     };
 
     const handleDeleteVideo = async () => {
-        if (!window.confirm('Redact this artifact?')) return;
+        if (!window.confirm('Delete this recording permanently?')) return;
         const token = localStorage.getItem('token');
+
         try {
             const response = await fetch(`${API_URL}/delete-video`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ video_url: recordingUrl })
             });
+
             if (response.ok) {
                 setRecordingUrl('');
-                toast.success('Asset redacted');
+            } else {
+                alert('Failed to delete video');
             }
         } catch (err) {
-            toast.error('Operation failure');
+            alert('An error occurred during deletion');
         }
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-12 pb-32 px-6 md:px-0">
-            {/* Header / Breadcrumb */}
-            <div className="flex items-center justify-between animate-fade-in-up">
-                <Link to="/instructor/live" className="group flex items-center gap-4 text-[10px] font-black text-brand-muted hover:text-brand-emerald uppercase tracking-[0.3em] transition-all no-underline">
-                    <ArrowLeft size={18} className="group-hover:-translate-x-2 transition-transform" /> Back to Operations
-                </Link>
+        <div className="animate-fade-in-up" style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <style>{`
+                .staff-scope .create-live-card {
+                    background: white;
+                    border-radius: 24px;
+                    padding: 3rem;
+                    border: 1px solid #e2e8f0;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+                }
+
+                @media (max-width: 768px) {
+                    .staff-scope .create-live-card {
+                        padding: 1.5rem;
+                        border-radius: 20px;
+                    }
+                }
+
+                .staff-scope .form-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.5rem;
+                }
+
+                .staff-scope .form-group-modern {
+                    margin-bottom: 2rem;
+                }
+
+                .staff-scope .form-label-modern {
+                    display: block;
+                    font-size: 0.9rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-bottom: 0.75rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+                .staff-scope .form-input-modern {
+                    width: 100%;
+                    padding: 0.85rem 1.15rem;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 14px;
+                    background: #f8fafc;
+                    outline: none;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    font-size: 0.95rem;
+                }
+
+                .form-input-modern:focus {
+                    background: white;
+                    border-color: #3b82f6;
+                    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+                }
+
+                .form-input-modern.error {
+                    border-color: #ef4444;
+                    background: #fffafa;
+                }
+
+                .staff-scope .error-text {
+                    color: #ef4444;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    margin-top: 0.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.35rem;
+                }
+
+                .staff-scope .btn-submit-live {
+                    background: #020617;
+                    color: white;
+                    width: 100%;
+                    padding: 1.15rem;
+                    border-radius: 16px;
+                    border: none;
+                    font-size: 1rem;
+                    font-weight: 800;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.75rem;
+                    transition: all 0.3s;
+                    margin-top: 1rem;
+                    box-shadow: 0 10px 20px rgba(2, 6, 23, 0.2);
+                }
+
+                .btn-submit-live:hover:not(:disabled) {
+                    background: #0f172a;
+                    transform: translateY(-2px);
+                    box-shadow: 0 15px 30px rgba(2, 6, 23, 0.3);
+                }
+
+                .staff-scope .btn-submit-live:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+
+                .staff-scope .back-btn {
+                    background: #f1f5f9;
+                    border: none;
+                    padding: 0.75rem;
+                    border-radius: 14px;
+                    cursor: pointer;
+                    color: #020617;
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .staff-scope .back-btn:hover {
+                    background: #e2e8f0;
+                    color: #0f172a;
+                }
+
+                @media (max-width: 640px) {
+                    .staff-scope .form-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .staff-scope .create-live-card {
+                        padding: 1.5rem;
+                    }
+                }
+            `}</style>
+
+            <div style={{ marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <button
+                    onClick={() => navigate('/instructor/live')}
+                    className="back-btn"
+                >
+                    <ArrowLeft size={20} />
+                </button>
+                <div>
+                    <h1 className="dashboard-header-title" style={{ margin: 0, fontSize: '1.75rem' }}>Schedule Live Session</h1>
+                    <p style={{ color: '#64748b', marginTop: '0.25rem' }}>Create a new interactive session for your students.</p>
+                </div>
+
+                <style>{`
+                    @media (max-width: 640px) {
+                        .staff-scope .dashboard-header-title {
+                            font-size: 1.25rem !important;
+                        }
+                        .dashboard-header-title + p {
+                            font-size: 0.85rem !important;
+                        }
+                    }
+                `}</style>
             </div>
 
-            <header className="space-y-6 animate-fade-in-up">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-brand-emerald/10 rounded-xl">
-                        <Zap className="text-brand-emerald" size={18} />
-                    </div>
-                    <span className="text-brand-emerald font-black text-[10px] uppercase tracking-[0.4em]">Broadcast Initialization</span>
-                </div>
-                <div className="space-y-4">
-                    <h1 className="text-5xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none uppercase">Schedule <span className="text-brand-emerald">Link</span></h1>
-                    <p className="text-brand-muted font-medium text-xl max-w-2xl leading-relaxed">Configure the operational parameters for a new real-time instructional engagement.</p>
-                </div>
-            </header>
-
-            {error && (
-                <div className="p-6 bg-red-50 dark:bg-red-500/10 border-2 border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 rounded-[32px] animate-in slide-in-from-top-4 duration-500 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <AlertCircle size={24} />
-                        <span className="font-black text-xs uppercase tracking-widest">{error}</span>
-                    </div>
-                    <button onClick={() => setError(null)} className="p-2 hover:bg-white/20 rounded-xl border-none bg-transparent cursor-pointer"><X size={18} /></button>
-                </div>
-            )}
-
-            <form className="bg-white dark:bg-brand-charcoal rounded-[60px] border border-brand-border p-12 md:p-16 space-y-12 shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up" style={{ animationDelay: '0.1s' }} onSubmit={handleSubmit}>
-                {/* Logistics Section */}
-                <div className="space-y-10">
-                    <div className="flex items-center gap-4 border-b border-brand-border pb-6">
-                        <ShieldCheck className="text-brand-emerald" size={20} />
-                        <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">System Logistics</h3>
+            <div className="create-live-card">
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group-modern">
+                        <label className="form-label-modern">
+                            <MonitorIcon size={16} /> Session Title
+                        </label>
+                        <input
+                            type="text"
+                            className={`form-input-modern ${formErrors.title ? 'error' : ''}`}
+                            placeholder="e.g. Advanced System Design Q&A"
+                            value={formData.title}
+                            onChange={e => setFormData({ ...formData, title: e.target.value })}
+                        />
+                        {formErrors.title && <p className="error-text"><AlertCircle size={14} /> {formErrors.title}</p>}
                     </div>
 
-                    <div className="space-y-8">
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Session Title</label>
+                    <div className="form-group-modern">
+                        <label className="form-label-modern">
+                            <Video size={16} /> Associate Course
+                        </label>
+                        <select
+                            className={`form-input-modern ${formErrors.courseId ? 'error' : ''}`}
+                            value={formData.courseId}
+                            onChange={e => setFormData({ ...formData, courseId: e.target.value })}
+                            disabled={loadingCourses}
+                        >
+                            <option value="">{loadingCourses ? 'Loading courses...' : 'Select a course'}</option>
+                            {courses.map(c => (
+                                <option key={c.id} value={c.id}>{c.title}</option>
+                            ))}
+                        </select>
+                        {formErrors.courseId && <p className="error-text"><AlertCircle size={14} /> {formErrors.courseId}</p>}
+                    </div>
+
+                    <div className="form-grid">
+                        <div className="form-group-modern">
+                            <label className="form-label-modern">
+                                <CalendarDays size={16} /> Select Date
+                            </label>
                             <input
-                                type="text"
-                                className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-base focus:border-brand-emerald transition-all placeholder:text-brand-muted/30"
-                                placeholder="e.g. Advanced Q&A Workshop"
-                                required
-                                value={formData.title}
-                                onChange={e => setFormData({ ...formData, title: e.target.value })}
+                                type="date"
+                                className={`form-input-modern ${formErrors.date ? 'error' : ''}`}
+                                value={formData.date}
+                                onChange={e => setFormData({ ...formData, date: e.target.value })}
                             />
+                            {formErrors.date && <p className="error-text"><AlertCircle size={14} /> {formErrors.date}</p>}
                         </div>
 
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Academic Course Link</label>
-                            <select
-                                className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all appearance-none"
-                                required
-                                value={formData.courseId}
-                                onChange={e => setFormData({ ...formData, courseId: e.target.value })}
-                            >
-                                <option value="">{loadingCourses ? 'Accessing Syllabus Archive...' : 'Select Target Course'}</option>
-                                {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                            </select>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Broadcast Date</label>
-                                <div className="relative">
-                                    <input
-                                        type="date"
-                                        className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
-                                        required
-                                        value={formData.date}
-                                        onChange={e => setFormData({ ...formData, date: e.target.value })}
-                                    />
-                                    <CalendarDays className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Start Time</label>
-                                <div className="relative">
-                                    <input
-                                        type="time"
-                                        className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
-                                        required
-                                        value={formData.startTime}
-                                        onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                                    />
-                                    <Clock className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">End Time</label>
-                                <div className="relative">
-                                    <input
-                                        type="time"
-                                        className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
-                                        required
-                                        value={formData.endTime}
-                                        onChange={e => setFormData({ ...formData, endTime: e.target.value })}
-                                    />
-                                    <Clock className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Broadcast URL (Teams/Zoom)</label>
-                            <div className="relative">
+                        <div className="form-grid">
+                            <div className="form-group-modern">
+                                <label className="form-label-modern">
+                                    <Clock size={16} /> Start Time
+                                </label>
                                 <input
-                                    type="url"
-                                    className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
-                                    placeholder="https://teams.microsoft.com/l/meetup-join/..."
-                                    value={formData.meetingLink}
-                                    onChange={e => setFormData({ ...formData, meetingLink: e.target.value })}
+                                    type="time"
+                                    className={`form-input-modern ${formErrors.startTime ? 'error' : ''}`}
+                                    value={formData.startTime}
+                                    onChange={e => setFormData({ ...formData, startTime: e.target.value })}
                                 />
-                                <LinkIcon className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
+                                {formErrors.startTime && <p className="error-text"><AlertCircle size={14} /> {formErrors.startTime}</p>}
+                            </div>
+                            <div className="form-group-modern">
+                                <label className="form-label-modern">
+                                    <Clock size={16} /> End Time
+                                </label>
+                                <input
+                                    type="time"
+                                    className={`form-input-modern ${formErrors.endTime ? 'error' : ''}`}
+                                    value={formData.endTime}
+                                    onChange={e => setFormData({ ...formData, endTime: e.target.value })}
+                                />
+                                {formErrors.endTime && <p className="error-text"><AlertCircle size={14} /> {formErrors.endTime}</p>}
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Artifact Section */}
-                <div className="space-y-10">
-                    <div className="flex items-center gap-4 border-b border-brand-border pb-6">
-                        <FileVideo className="text-brand-emerald" size={20} />
-                        <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Archival Artifact</h3>
+                    <div className="form-group-modern">
+                        <label className="form-label-modern">
+                            <LinkIcon size={16} /> Meeting Link (Microsoft Teams)
+                        </label>
+                        <input
+                            type="text"
+                            className={`form-input-modern ${formErrors.meetingLink ? 'error' : ''}`}
+                            placeholder="https://teams.microsoft.com/l/meetup-join/..."
+                            value={formData.meetingLink}
+                            onChange={e => setFormData({ ...formData, meetingLink: e.target.value })}
+                        />
+                        {formErrors.meetingLink && <p className="error-text"><AlertCircle size={14} /> {formErrors.meetingLink}</p>}
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Optional. Visible to students when the session is live.</p>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="form-group-modern">
+                        <label className="form-label-modern">
+                            <FileVideo size={16} /> Pre-recorded Session (Optional)
+                        </label>
                         {uploading ? (
-                            <div className="p-16 bg-brand-beige/10 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-8">
-                                <div className="relative w-32 h-32 mx-auto">
-                                    <svg className="w-full h-full transform -rotate-90">
-                                        <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-brand-border" />
-                                        <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray="377" strokeDashoffset={377 - (377 * uploadProgress) / 100} className="text-brand-emerald transition-all duration-500" />
-                                    </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center font-black text-xl text-brand-charcoal dark:text-white">{uploadProgress}%</div>
+                            <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '14px', textAlign: 'center' }}>
+                                <div style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Uploading... {uploadProgress}%</div>
+                                <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
                                 </div>
-                                <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em] animate-pulse">Streaming Artifact...</p>
                             </div>
                         ) : recordingUrl ? (
-                            <div className="p-10 bg-brand-emerald/10 rounded-xl border-2 border-brand-emerald/20 flex flex-col md:flex-row items-center justify-between gap-8">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-16 h-16 bg-brand-emerald text-white rounded-[24px] flex items-center justify-center shadow-xl shadow-brand-emerald/20"><CheckCircle2 size={32} /></div>
-                                    <div className="space-y-1">
-                                        <div className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Asset Synchronized</div>
-                                        <div className="text-[10px] font-bold text-brand-muted uppercase tracking-widest truncate max-w-[200px]">{recordingUrl}</div>
-                                    </div>
-                                </div>
-                                <button type="button" onClick={handleDeleteVideo} className="px-8 h-12 bg-red-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all border-none cursor-pointer">Redact Artifact</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#f0fdf4', padding: '1rem', borderRadius: '14px', border: '1px solid #bcf0da' }}>
+                                <FileVideo size={20} color="#10b981" />
+                                <div style={{ flex: 1, fontSize: '0.85rem', fontWeight: 600, color: '#1a4d3e', wordBreak: 'break-all' }}>{recordingUrl}</div>
+                                <button type="button" onClick={handleDeleteVideo} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>Remove</button>
                             </div>
                         ) : (
-                            <div className="relative group">
-                                <input type="file" accept="video/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0])} />
-                                <div className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-6 group-hover:border-brand-emerald transition-all">
-                                    <div className="w-20 h-20 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[24px] flex items-center justify-center mx-auto text-brand-muted group-hover:text-brand-emerald group-hover:scale-110 transition-all"><Plus size={40} /></div>
-                                    <div className="space-y-1">
-                                        <p className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Attach Instruction Artifact</p>
-                                        <p className="text-xs font-medium text-brand-muted">Optional: Synchronize a pre-recorded broadcast for immediate archival access.</p>
-                                    </div>
-                                </div>
-                            </div>
+                            <>
+                                <input
+                                    type="file"
+                                    accept="video/*"
+                                    className="form-input-modern"
+                                    onChange={e => {
+                                        if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                                        e.target.value = '';
+                                    }}
+                                    style={{ padding: '0.6rem' }}
+                                />
+                                <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Upload a video file for students to watch later.</p>
+                            </>
                         )}
                     </div>
-                </div>
 
-                <div className="pt-8">
-                    <button 
-                        type="submit" 
-                        disabled={isSubmitting}
-                        className="w-full h-20 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[28px] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4 border-none cursor-pointer"
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 className="animate-spin" size={24} />
-                                <span>Establishing Link...</span>
-                            </>
-                        ) : (
-                            <>
-                                Schedule Broadcast <ChevronRight size={24} />
-                            </>
-                        )}
+                    <button type="submit" className="btn-submit-live" disabled={isSubmitting}>
+                        {isSubmitting ? 'Scheduling...' : 'Create Live Session'}
+                        {!isSubmitting && <Plus size={20} />}
                     </button>
-                </div>
-            </form>
-
-            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-xl border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <Sparkles size={16} className="text-brand-emerald" />
-                Live sessions are automatically broadcasted to the student dashboard at the scheduled time.
+                </form>
             </div>
         </div>
     );

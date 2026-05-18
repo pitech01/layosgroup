@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
     FileText,
@@ -10,17 +10,8 @@ import {
     AlertCircle,
     CheckCircle2,
     Clock,
-    User,
-    ChevronRight,
-    Zap,
-    ShieldCheck,
-    Sparkles,
-    Eye,
-    Inbox,
-    Mail,
-    ArrowRight
+    User
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 
 export default function AssignmentSubmissions() {
     const { id } = useParams();
@@ -36,11 +27,17 @@ export default function AssignmentSubmissions() {
     const fetchSubmissions = async () => {
         try {
             const response = await fetch(`${API_URL}/instructor/assignments/${id}/submissions`, {
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             const result = await response.json();
-            if (response.ok) setData(result);
-            else throw new Error(result.message || 'Retrieval failure.');
+            if (response.ok) {
+                setData(result);
+            } else {
+                throw new Error(result.message || 'Failed to fetch submissions.');
+            }
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -48,7 +45,9 @@ export default function AssignmentSubmissions() {
         }
     };
 
-    useEffect(() => { fetchSubmissions(); }, [id]);
+    useEffect(() => {
+        fetchSubmissions();
+    }, [id]);
 
     const filteredSubmissions = data?.submissions?.filter((s: any) =>
         s.student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -63,149 +62,383 @@ export default function AssignmentSubmissions() {
     };
 
     return (
-        <div className="max-w-7xl mx-auto space-y-12 pb-32 px-6 md:px-0">
-            {/* Header / Breadcrumb */}
-            <div className="flex items-center justify-between animate-fade-in-up">
-                <Link to="/instructor/assignments" className="group flex items-center gap-4 text-[10px] font-black text-brand-muted hover:text-brand-emerald uppercase tracking-[0.3em] transition-all no-underline">
-                    <ArrowLeft size={18} className="group-hover:-translate-x-2 transition-transform" /> Back to Assessments
-                </Link>
-            </div>
+        <div className="submissions-container">
+            <style>{`
+                .staff-scope .submissions-container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    font-family: 'Inter', sans-serif;
+                    padding: 2rem;
+                }
+
+                .staff-scope .back-link {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #64748b;
+                    text-decoration: none;
+                    font-weight: 800;
+                    font-size: 0.95rem;
+                    margin-bottom: 2.5rem;
+                    transition: all 0.3s;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 0;
+                }
+
+                .staff-scope .back-link:hover {
+                    color: #0f172a;
+                    transform: translateX(-4px);
+                }
+
+                .staff-scope .assignment-header-premium {
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 32px;
+                    padding: 3rem;
+                    margin-bottom: 3rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                }
+
+                .staff-scope .header-main-info {
+                    flex: 1;
+                }
+
+                .staff-scope .header-main-info h1 {
+                    font-size: 2.5rem;
+                    font-weight: 900;
+                    color: #0f172a;
+                    margin: 0 0 1rem 0;
+                    letter-spacing: -0.04em;
+                }
+
+                .staff-scope .cohort-label {
+                    display: inline-flex;
+                    padding: 6px 14px;
+                    background: #f1f5f9;
+                    color: #475569;
+                    border-radius: 10px;
+                    font-size: 0.8rem;
+                    font-weight: 800;
+                    margin-bottom: 1rem;
+                    text-transform: uppercase;
+                }
+
+                .staff-scope .header-meta-group {
+                    display: flex;
+                    gap: 2rem;
+                    color: #64748b;
+                    font-size: 1rem;
+                    font-weight: 600;
+                }
+
+                .staff-scope .meta-badge {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .staff-scope .stats-box-premium {
+                    padding: 1.5rem 2.5rem;
+                    background: #f8fafc;
+                    border-radius: 24px;
+                    text-align: center;
+                    border: 1px solid #f1f5f9;
+                    min-width: 180px;
+                }
+
+                .stats-box-premium .value {
+                    font-size: 2rem;
+                    font-weight: 950;
+                    color: #1a4d3e;
+                    line-height: 1.2;
+                }
+
+                .stats-box-premium .label {
+                    font-size: 0.75rem;
+                    color: #94a3b8;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    letter-spacing: 0.1em;
+                    margin-top: 4px;
+                }
+
+                .staff-scope .submissions-card {
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 32px;
+                    padding: 3rem;
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+                }
+
+                .staff-scope .search-container {
+                    position: relative;
+                    margin-bottom: 2.5rem;
+                }
+
+                .staff-scope .search-icon-fixed {
+                    position: absolute;
+                    left: 1.25rem;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #94a3b8;
+                }
+
+                .staff-scope .premium-search-input {
+                    width: 100%;
+                    padding: 1rem 1.25rem 1rem 3.5rem;
+                    background: #f8fafc;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 18px;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    transition: all 0.3s;
+                    color: #0f172a;
+                }
+
+                .staff-scope .premium-search-input:focus {
+                    outline: none;
+                    border-color: #1a4d3e;
+                    background: white;
+                    box-shadow: 0 0 0 5px rgba(26, 77, 62, 0.05);
+                }
+
+                .staff-scope .submissions-table-header {
+                    display: grid;
+                    grid-template-columns: 1.5fr 1fr 1.5fr 120px;
+                    padding: 1rem 1.5rem;
+                    background: #f8fafc;
+                    border-radius: 14px;
+                    margin-bottom: 1rem;
+                    font-weight: 900;
+                    font-size: 0.75rem;
+                    color: #94a3b8;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+
+                .staff-scope .submission-item-row {
+                    display: grid;
+                    grid-template-columns: 1.5fr 1fr 1.5fr 120px;
+                    align-items: center;
+                    padding: 1.5rem;
+                    background: white;
+                    border: 1px solid #f1f5f9;
+                    border-radius: 20px;
+                    margin-bottom: 1rem;
+                    gap: 1.5rem;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .staff-scope .submission-item-row:hover {
+                    border-color: #1a4d3e;
+                    background: #fcfdfe;
+                    transform: scale(1.01);
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+                }
+
+                .staff-scope .student-info-group {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                }
+
+                .staff-scope .student-avatar {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 16px;
+                    background: #f1f5f9;
+                    color: #1a4d3e;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 900;
+                    font-size: 1.2rem;
+                    flex-shrink: 0;
+                }
+
+                .student-text h3 {
+                    margin: 0;
+                    font-size: 1rem;
+                    font-weight: 800;
+                    color: #0f172a;
+                }
+
+                .staff-scope .student-text p {
+                    margin: 0;
+                    font-size: 0.8rem;
+                    color: #94a3b8;
+                    font-weight: 600;
+                }
+
+                .staff-scope .timestamp-cell {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #475569;
+                    font-size: 0.9rem;
+                    font-weight: 700;
+                }
+
+                .staff-scope .answer-cell {
+                    color: #64748b;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    line-height: 1.5;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+
+                .staff-scope .action-cell {
+                    display: flex;
+                    justify-content: center;
+                }
+
+                .staff-scope .download-btn-premium {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    background: #f0fdf4;
+                    color: #1a4d3e;
+                    padding: 10px 18px;
+                    border-radius: 12px;
+                    text-decoration: none;
+                    font-size: 0.8rem;
+                    font-weight: 900;
+                    transition: all 0.2s;
+                    border: 1px solid transparent;
+                }
+
+                .staff-scope .download-btn-premium:hover {
+                    background: #1a4d3e;
+                    color: white;
+                    border-color: #1a4d3e;
+                }
+            `}</style>
+
+            <button onClick={() => navigate(-1)} className="back-link">
+                <ArrowLeft size={20} /> Back to Assignments
+            </button>
 
             {loading ? (
-                <div className="h-[60vh] flex flex-col items-center justify-center gap-8 animate-pulse">
-                    <Loader2 className="animate-spin text-brand-emerald" size={64} />
-                    <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em]">Aggregating Submission Data...</p>
+                <div style={{ padding: '10rem 0', textAlign: 'center' }}>
+                    <Loader2 className="animate-spin" size={60} color="#1a4d3e" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '2rem', fontWeight: 800, color: '#64748b', fontSize: '1.2rem' }}>Processing submission records...</p>
                 </div>
             ) : error ? (
-                <div className="p-20 bg-red-50 dark:bg-red-500/5 border-2 border-red-100 dark:border-red-500/10 rounded-[60px] text-center space-y-8">
-                    <AlertCircle size={64} className="text-red-500 mx-auto" />
-                    <div className="space-y-4">
-                        <h3 className="text-3xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Sync Error</h3>
-                        <p className="text-red-600/60 dark:text-red-400/60 font-medium">{error}</p>
-                    </div>
-                    <button onClick={fetchSubmissions} className="px-10 h-16 bg-red-500 text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all border-none cursor-pointer">Re-Establish Sync</button>
+                <div style={{ padding: '4rem', background: '#fff1f2', borderRadius: '40px', textAlign: 'center', border: '1px solid #ffe4e6' }}>
+                    <AlertCircle size={56} color="#e11d48" style={{ margin: '0 auto 1.5rem' }} />
+                    <h2 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.8rem' }}>Operation Aborted</h2>
+                    <p style={{ color: '#64748b', fontWeight: 600, margin: '1rem 0 2.5rem' }}>{error}</p>
+                    <button onClick={fetchSubmissions} className="btn-create" style={{ margin: '0 auto', width: 'auto', padding: '1rem 2rem' }}>Retry Sync</button>
                 </div>
             ) : (
                 <>
-                    {/* Assignment Info Card */}
-                    <header className="bg-white dark:bg-brand-charcoal rounded-[60px] border border-brand-border p-10 md:p-16 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12 shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up">
-                        <div className="space-y-8 flex-1">
-                            <div className="flex flex-wrap items-center gap-4">
-                                <div className="px-5 py-2 bg-brand-emerald/10 text-brand-emerald border border-brand-emerald/20 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
-                                    {data.assignment?.cohort?.name || 'Authorized Cohort'}
+                    <div className="assignment-header-premium shadow-premium">
+                        <div className="header-main-info">
+                            <span className="cohort-label">{data.assignment?.cohort?.name}</span>
+                            <h1>{data.assignment?.title}</h1>
+                            <div className="header-meta-group">
+                                <div className="meta-badge">
+                                    <Calendar size={20} color="#1a4d3e" />
+                                    <span>Due {new Date(data.assignment?.due_date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
                                 </div>
-                                <div className="flex items-center gap-3 text-brand-muted font-bold text-[11px] uppercase tracking-wider">
-                                    <Calendar size={14} className="text-brand-emerald" /> 
-                                    Due {new Date(data.assignment?.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                <div className="meta-badge">
+                                    <CheckCircle2 size={20} color="#1a4d3e" />
+                                    <span>{data.submissions?.length || 0} Responses received</span>
                                 </div>
-                            </div>
-                            
-                            <div className="space-y-4">
-                                <h1 className="text-4xl md:text-5xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none uppercase">{data.assignment?.title}</h1>
                                 {data.assignment?.assignment_file && (
-                                    <a href={getFileUrl(data.assignment.assignment_file)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 text-brand-emerald font-black text-[10px] uppercase tracking-widest hover:translate-x-2 transition-transform no-underline">
-                                        <FileText size={16} /> Reference Artifact Attached <ChevronRight size={14} />
+                                    <a
+                                        href={getFileUrl(data.assignment.assignment_file)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="meta-badge"
+                                        style={{ color: '#1a4d3e', textDecoration: 'underline' }}
+                                    >
+                                        <FileText size={20} />
+                                        <span>Instructions File</span>
                                     </a>
                                 )}
                             </div>
                         </div>
-
-                        <div className="flex items-center gap-6 p-8 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border min-w-[240px]">
-                            <div className="w-16 h-16 bg-brand-emerald text-white rounded-[24px] flex items-center justify-center shadow-lg shadow-brand-emerald/20 shrink-0">
-                                <CheckCircle2 size={32} />
+                        <div className="stats-box-premium shadow-sm">
+                            <div className="value">
+                                {data.submissions?.length || 0}
                             </div>
-                            <div className="space-y-1">
-                                <div className="text-4xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none">
-                                    {data.submissions?.length || 0}
-                                </div>
-                                <div className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Total Responses</div>
-                            </div>
+                            <div className="label">Total Submissions</div>
                         </div>
-                    </header>
+                    </div>
 
-                    {/* Submissions List */}
-                    <div className="space-y-10 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-                            <div className="flex items-center gap-4">
-                                <div className="p-2.5 bg-brand-emerald/10 rounded-xl text-brand-emerald">
-                                    <Eye size={20} />
-                                </div>
-                                <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Review Manifest</h3>
-                            </div>
-                            <div className="w-full md:w-96 relative group">
-                                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors" size={20} />
-                                <input
-                                    type="text"
-                                    placeholder="Search by student identity..."
-                                    className="w-full h-16 pl-16 pr-6 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[24px] focus:outline-none focus:border-brand-emerald transition-all text-sm font-bold text-brand-charcoal dark:text-white"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
+                    <div className="submissions-card shadow-premium">
+                        <div className="search-container">
+                            <Search className="search-icon-fixed" size={24} />
+                            <input
+                                type="text"
+                                className="premium-search-input"
+                                placeholder="Filter by student name or email identification..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="submissions-table-header">
+                            <div>Student Information</div>
+                            <div>Submitted At</div>
+                            <div>Answer / Note</div>
+                            <div style={{ textAlign: 'center' }}>Resource</div>
                         </div>
 
                         {filteredSubmissions.length === 0 ? (
-                            <div className="bg-white dark:bg-brand-charcoal py-32 text-center rounded-[60px] border-2 border-brand-border border-dashed shadow-sm space-y-8">
-                                <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-[32px] flex items-center justify-center mx-auto text-brand-muted/30 group">
-                                    <Inbox size={48} className="group-hover:scale-110 transition-transform" />
-                                </div>
-                                <div className="space-y-3">
-                                    <h3 className="text-2xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Response Vacuum</h3>
-                                    <p className="text-brand-muted font-medium text-base max-w-xs mx-auto">No student records were identified matching your query filter.</p>
-                                </div>
+                            <div style={{ textAlign: 'center', padding: '6rem 0' }}>
+                                <User size={64} color="#cbd5e1" style={{ marginBottom: '1.5rem' }} />
+                                <h3 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.4rem' }}>No student records matched</h3>
+                                <p style={{ color: '#64748b', fontWeight: 600 }}>Try adjusting your search query for "{searchTerm}"</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 gap-6">
-                                {filteredSubmissions.map((submission: any, idx: number) => (
-                                    <div key={submission.id} className="group bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-10 hover:shadow-xl hover:shadow-brand-charcoal/5 transition-all duration-500 animate-fade-in-up" style={{ animationDelay: `${idx * 0.05}s` }}>
-                                        <div className="flex flex-col md:flex-row items-center gap-8 flex-1 w-full">
-                                            {/* Student Identity */}
-                                            <div className="flex items-center gap-6 min-w-[280px]">
-                                                <div className="w-20 h-20 bg-brand-beige/50 dark:bg-white/5 rounded-[28px] border-2 border-brand-border flex items-center justify-center text-brand-charcoal dark:text-white font-black text-2xl shrink-0 group-hover:bg-brand-emerald group-hover:text-white group-hover:border-brand-emerald transition-all duration-500">
-                                                    {submission.student?.name.charAt(0)}
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <h4 className="text-xl font-black text-brand-charcoal dark:text-white tracking-tight uppercase leading-none">{submission.student?.name}</h4>
-                                                    <div className="flex items-center gap-2 text-brand-muted font-bold text-[10px] uppercase tracking-widest">
-                                                        <Mail size={12} className="text-brand-emerald" /> {submission.student?.email}
-                                                    </div>
-                                                </div>
+                            <div className="submissions-list">
+                                {filteredSubmissions.map((submission: any) => (
+                                    <div key={submission.id} className="submission-item-row">
+                                        <div className="student-info-group">
+                                            <div className="student-avatar">
+                                                {submission.student?.name.charAt(0)}
                                             </div>
-
-                                            {/* Submission Metadata */}
-                                            <div className="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-16 flex-1 w-full">
-                                                <div className="space-y-2 shrink-0">
-                                                    <div className="text-[9px] font-black text-brand-muted uppercase tracking-[0.2em]">Transmission Log</div>
-                                                    <div className="flex items-center gap-3 text-brand-charcoal dark:text-white font-bold text-xs uppercase tracking-tight">
-                                                        <Clock size={16} className="text-brand-emerald" />
-                                                        {new Date(submission.submitted_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                </div>
-
-                                                <div className="space-y-2 flex-1 w-full">
-                                                    <div className="text-[9px] font-black text-brand-muted uppercase tracking-[0.2em]">Evaluation Note</div>
-                                                    <p className="text-sm font-medium text-brand-muted line-clamp-2 leading-relaxed">
-                                                        {submission.answer_text || "No accompanying protocol notes provided."}
-                                                    </p>
-                                                </div>
+                                            <div className="student-text">
+                                                <h3>{submission.student?.name}</h3>
+                                                <p>{submission.student?.email}</p>
                                             </div>
                                         </div>
 
-                                        {/* Action Cell */}
-                                        <div className="shrink-0 w-full md:w-auto">
+                                        <div className="timestamp-cell">
+                                            <Clock size={16} />
+                                            {new Date(submission.submitted_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </div>
+
+                                        <div className="answer-cell">
+                                            {submission.answer_text ? submission.answer_text : (
+                                                <span style={{ fontStyle: 'italic', opacity: 0.6 }}>No accompanying text provided.</span>
+                                            )}
+                                        </div>
+
+                                        <div className="action-cell">
                                             {submission.submission_file ? (
-                                                <a 
-                                                    href={getFileUrl(submission.submission_file, submission.submission_file_url)} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer" 
-                                                    className="w-full md:w-48 h-18 bg-brand-emerald text-white rounded-[24px] font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 shadow-xl shadow-brand-emerald/10 hover:scale-105 active:scale-95 transition-all no-underline"
+                                                <a
+                                                    href={getFileUrl(submission.submission_file, submission.submission_file_url)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="download-btn-premium"
                                                 >
-                                                    <Download size={18} /> Review Artifact
+                                                    <Download size={16} />
+                                                    <span>REVIEW</span>
                                                 </a>
                                             ) : (
-                                                <div className="w-full md:w-48 h-18 bg-brand-beige/50 dark:bg-white/5 border-2 border-brand-border border-dashed rounded-[24px] flex items-center justify-center text-brand-muted text-[10px] font-black uppercase tracking-[0.3em]">
-                                                    N/A
-                                                </div>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 950, color: '#94a3b8' }}>N/A</span>
                                             )}
                                         </div>
                                     </div>
@@ -215,11 +448,6 @@ export default function AssignmentSubmissions() {
                     </div>
                 </>
             )}
-
-            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-xl border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                <Sparkles size={16} className="text-brand-emerald" />
-                Response artifacts are archived and accessible for retroactive evaluation cycles.
-            </div>
         </div>
     );
 }

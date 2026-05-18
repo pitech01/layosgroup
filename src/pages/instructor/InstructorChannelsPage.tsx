@@ -3,16 +3,13 @@ import toast from 'react-hot-toast';
 import { 
     Search, Hash, Users, Circle, Trash2,
     Plus, Filter, X, Info, 
-    Megaphone, Loader2, MessageSquare,
-    ChevronRight, ArrowLeft, MoreVertical,
-    Paperclip, Send, Bell, Settings,
-    Layout, Globe, Zap, CheckCircle2,
-    Clock, ShieldCheck, Sparkles, Layers
+    Megaphone, Loader2
 } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import echo from '../../utils/echo';
 import MessageCard from '../../components/channel/MessageCard';
+import type { Message } from '../../components/channel/MessageCard';
 import ChatInput from '../../components/channel/ChatInput';
 
 interface Channel {
@@ -67,9 +64,13 @@ const InstructorChannelsPage = () => {
     const [announcementTitle, setAnnouncementTitle] = useState('');
     const [announcementContent, setAnnouncementContent] = useState('');
 
+    // DM Search State
+    const [isUserSearchOpen, setIsUserSearchOpen] = useState(false);
+    const [userSearchQuery, setUserSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<Channel[]>([]);
+    
     // UI Layout State
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
-    const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
     
     // Create Channel State
     const [isCreateChannelModalOpen, setIsCreateChannelModalOpen] = useState(false);
@@ -80,10 +81,33 @@ const InstructorChannelsPage = () => {
     const [instructorCourses, setInstructorCourses] = useState<any[]>([]);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const formatTime = (ts: string) => {
+        try {
+            const date = new Date(ts);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch (e) { return '...'; }
+    };
+
+    const formatDateDivider = (ts: string) => {
+        try {
+            const date = new Date(ts);
+            const today = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+
+            if (date.toDateString() === today.toDateString()) return 'Today';
+            if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+            
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+        } catch (e) { return 'Earlier'; }
+    };
 
     const cleanContent = (content: string, attachmentUrl?: string) => {
         if (!content) return '';
         if (attachmentUrl && content.includes(attachmentUrl)) return '';
+        if (content.includes('amazonaws.com') || content.includes('channel_attachments/')) {
+            if (attachmentUrl) return '';
+        }
         return content;
     };
 
@@ -92,8 +116,12 @@ const InstructorChannelsPage = () => {
             const token = localStorage.getItem('token');
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
             
+            // 1. Fetch Backend Channels
             const channelsResponse = await fetch(`${API_URL}/course-channels`, {
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
 
             if (channelsResponse.status === 401) {
@@ -106,6 +134,7 @@ const InstructorChannelsPage = () => {
                 const dbChannels = await channelsResponse.json();
                 const lastReadMap = JSON.parse(localStorage.getItem('channels_last_read') || '{}');
 
+                // Map DB channels to UI
                 const formattedChannels: Channel[] = dbChannels.map((c: any) => {
                     const channelIdStr = c.id.toString();
                     const lastReadId = lastReadMap[channelIdStr];
@@ -121,13 +150,19 @@ const InstructorChannelsPage = () => {
                 });
 
                 setChannels(formattedChannels);
+
                 if (!activeChannel && formattedChannels.length > 0) {
-                    setActiveChannel(formattedChannels.find(c => c.title === 'general-discussion') || formattedChannels[0]);
+                    const general = formattedChannels.find(c => c.title === 'general-discussion') || formattedChannels[0];
+                    setActiveChannel(general);
                 }
             }
 
+            // 2. Fetch Instructor's Cohorts (to know which courses they can add channels to)
             const cohortsResponse = await fetch(`${API_URL}/cohorts`, {
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
             if (cohortsResponse.ok) {
                 const cohorts = await cohortsResponse.json();
@@ -135,37 +170,68 @@ const InstructorChannelsPage = () => {
             }
 
             const dmsResponse = await fetch(`${API_URL}/direct-messages/contacts`, {
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
-            if (dmsResponse.ok) setDms(await dmsResponse.json());
+            if (dmsResponse.ok) {
+                setDms(await dmsResponse.json());
+            }
         } catch (error) {
             console.error("Failed to fetch channels", error);
+            if (error instanceof Error && (error.message.includes('fetch') || error.message.includes('Network'))) {
+                toast.error("Connection lost. Redirecting to login...");
+                logout();
+                setTimeout(() => navigate('/instructor-login'), 2000);
+            }
         }
     };
 
     const handleCreateChannel = async () => {
-        if (!newChannelName.trim()) return toast.error('Channel name is required');
+        if (!newChannelName.trim()) {
+            toast.error('Channel name is required');
+            return;
+        }
+        
         setIsCreatingChannel(true);
         try {
             const token = localStorage.getItem('token');
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+            
             const response = await fetch(`${API_URL}/course-channels`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json', 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newChannelName, description: newChannelDesc, course_id: targetCourseId === 'general' ? null : targetCourseId })
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: newChannelName,
+                    description: newChannelDesc,
+                    course_id: targetCourseId === 'general' ? null : targetCourseId
+                })
             });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
             if (response.ok) {
-                toast.success('Channel initialized');
+                toast.success('Channel created successfully');
                 setIsCreateChannelModalOpen(false);
                 setNewChannelName('');
                 setNewChannelDesc('');
                 fetchChannels();
             } else {
-                const data = await response.json();
-                toast.error(data.message || 'Initialization failed');
+                const errorData = await response.json();
+                toast.error(errorData.message || 'Failed to create channel');
             }
         } catch (error) {
-            toast.error('Network interruption');
+            console.error("Failed to create channel", error);
+            toast.error('A network error occurred');
         } finally {
             setIsCreatingChannel(false);
         }
@@ -173,18 +239,31 @@ const InstructorChannelsPage = () => {
 
     const handleDeleteChannel = async () => {
         if (!activeChannel || activeChannel.type !== 'channel') return;
-        if (!window.confirm(`Are you sure you want to redact the channel #${activeChannel.title}?`)) return;
+        
+        if (!window.confirm(`Are you sure you want to delete the channel #${activeChannel.title}? This action cannot be undone.`)) {
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
             const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-            const response = await fetch(`${API_URL}/course-channels/${activeChannel.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            
+            const response = await fetch(`${API_URL}/course-channels/${activeChannel.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
             if (response.ok) {
-                toast.success('Channel redacted');
+                toast.success('Channel deleted successfully');
                 setActiveChannel(null);
                 fetchChannels();
+            } else {
+                const errorData = await response.json();
+                toast.error(errorData.message || 'Failed to delete channel');
             }
         } catch (error) {
-            toast.error('Redaction failed');
+            console.error("Failed to delete channel", error);
+            toast.error('A network error occurred');
         }
     };
 
@@ -196,93 +275,277 @@ const InstructorChannelsPage = () => {
         const fetchAll = async () => {
             fetchChannels();
             if (!activeChannel) return;
+
             setIsLoadingMessages(true);
             try {
                 const token = localStorage.getItem('token');
                 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-                const url = activeChannel.type === 'dm' ? `${API_URL}/direct-messages/${activeChannel.id}` : `${API_URL}/channels/${activeChannel.id}/messages`;
-                const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' } });
+                
+                let url = '';
+                if (activeChannel.type === 'dm') {
+                    url = `${API_URL}/direct-messages/${activeChannel.id}`;
+                } else {
+                    // It's a real Channel ID from DB
+                    url = `${API_URL}/channels/${activeChannel.id}/messages`;
+                }
+
+                const response = await fetch(url, {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.status === 401) {
+                    toast.error("Session expired. Redirecting...");
+                    logout();
+                    setTimeout(() => navigate('/instructor-login'), 2000);
+                    return;
+                }
+
                 if (response.ok) {
                     const data = await response.json();
                     const rawMsgs = Array.isArray(data) ? data : (data.messages || []);
-                    const formattedMsgs = rawMsgs.map((msg: any) => ({
-                        id: String(msg.id),
-                        user: { id: msg.userId || msg.user_id || msg.senderId, name: msg.senderName, avatar: msg.senderName.charAt(0).toUpperCase(), role: msg.senderRole },
-                        content: cleanContent(msg.content, msg.attachmentUrl),
-                        timestamp: msg.createdAt,
-                        date: 'Feed',
-                        isAnnouncement: msg.type === 'announcement',
-                        isDeleted: !!msg.isDeleted,
-                        file: msg.attachmentUrl ? {
-                            name: msg.attachmentName || 'Shared Artifact',
-                            size: 'Linked',
-                            type: (msg.attachmentUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'other')),
-                            url: msg.attachmentUrl
-                        } : undefined
-                    }));
-                    setMessages(formattedMsgs);
-                }
-            } finally {
-                setIsLoadingMessages(false);
-            }
-        };
-        fetchAll();
+                    
+                    const formattedMsgs = rawMsgs.map((msg: any) => {
+                        let file = undefined;
+                        const getFileName = (m: any) => {
+                            if (m.attachmentName) return m.attachmentName;
+                            if (!m.attachmentUrl) return 'File';
+                            const cleanUrl = m.attachmentUrl.split('?')[0];
+                            const baseName = cleanUrl.split('/').pop() || 'File';
+                            if (baseName.match(/^[0-9a-f-]{36}/i)) {
+                                const ext = baseName.split('.').pop()?.toUpperCase();
+                                return ext ? `${ext} File` : 'Shared File';
+                            }
+                            return baseName;
+                        };
 
-        let currentEchoChannel: any;
-        if (activeChannel?.type === 'channel') {
-            currentEchoChannel = echo.channel(`course-channel.${activeChannel.id}`)
-                .listen('.message.created', (data: any) => {
-                    const msg = data.message;
-                    setMessages(prev => {
-                        if (prev.some(m => m.id === String(msg.id))) return prev;
-                        return [...prev, {
+                        if (msg.attachmentUrl) {
+                            file = {
+                                name: getFileName(msg),
+                                size: 'Linked',
+                                type: (msg.attachmentUrl.split('?')[0].match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().split('?')[0].endsWith('.pdf') ? 'pdf' : 'other')) as 'image' | 'pdf' | 'other',
+                                url: msg.attachmentUrl
+                            };
+                        }
+                        return {
                             id: String(msg.id),
-                            user: { id: msg.user_id, name: msg.senderName, avatar: msg.senderName.charAt(0).toUpperCase(), role: msg.senderRole },
+                            user: { 
+                                id: msg.userId || msg.user_id || msg.senderId,
+                                name: msg.senderName, 
+                                avatar: msg.senderName.charAt(0).toUpperCase(), 
+                                role: msg.senderRole 
+                            },
                             content: cleanContent(msg.content, msg.attachmentUrl),
                             timestamp: msg.createdAt,
                             date: 'Feed',
                             isAnnouncement: msg.type === 'announcement',
                             isDeleted: !!msg.isDeleted,
-                            file: msg.attachmentUrl ? { name: msg.attachmentName || 'Shared Artifact', size: 'Linked', type: (msg.attachmentUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'other')), url: msg.attachmentUrl } : undefined
-                        }];
+                            file
+                        };
                     });
+                    
+                    setMessages(formattedMsgs);
+
+                    if (formattedMsgs.length > 0) {
+                        const latestMsg = formattedMsgs[formattedMsgs.length - 1];
+                        const lastReadMap = JSON.parse(localStorage.getItem('channels_last_read') || '{}');
+                        let needsUpdate = false;
+                        if (activeChannel.type === 'channel' && lastReadMap[activeChannel.id] !== latestMsg.id) {
+                            lastReadMap[activeChannel.id] = latestMsg.id;
+                            needsUpdate = true;
+                        } else if (activeChannel.type === 'dm' && lastReadMap[`dm_${activeChannel.id}`] !== latestMsg.id) {
+                            lastReadMap[`dm_${activeChannel.id}`] = latestMsg.id;
+                            needsUpdate = true;
+                        }
+                        
+                        if (needsUpdate) {
+                            localStorage.setItem('channels_last_read', JSON.stringify(lastReadMap));
+                            
+                            // Immediately clear the unread badge visually for the active channel
+                            if (activeChannel.type === 'channel') {
+                                setChannels(prev => prev.map(c => c.id === activeChannel.id ? { ...c, unread: 0 } : c));
+                            } else {
+                                setDms(prev => prev.map(d => d.id === activeChannel.id ? { ...d, unread: 0 } : d));
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch messages", error);
+            } finally {
+                setIsLoadingMessages(false);
+            }
+        };
+
+        fetchAll();
+        
+        // Listen to WebSocket for real-time messages on active channel
+        let currentEchoChannel: any;
+        if (activeChannel && activeChannel.type === 'channel') {
+            currentEchoChannel = echo.channel(`course-channel.${activeChannel.id}`)
+                .listen('.message.created', (data: any) => {
+                    const msg = data.message;
+                    let file = undefined;
+                    const getFileName = (m: any) => {
+                        if (m.attachmentName) return m.attachmentName;
+                        if (!m.attachmentUrl) return 'File';
+                        const cleanUrl = m.attachmentUrl.split('?')[0];
+                        const baseName = cleanUrl.split('/').pop() || 'File';
+                        if (baseName.match(/^[0-9a-f-]{36}/i)) {
+                            const ext = baseName.split('.').pop()?.toUpperCase();
+                            return ext ? `${ext} File` : 'Shared File';
+                        }
+                        return baseName;
+                    };
+
+                    if (msg.attachmentUrl) {
+                        file = {
+                            name: getFileName(msg),
+                            size: 'Linked',
+                            type: (msg.attachmentUrl.split('?')[0].match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().split('?')[0].endsWith('.pdf') ? 'pdf' : 'other')) as 'image' | 'pdf' | 'other',
+                            url: msg.attachmentUrl
+                        };
+                    }
+
+                    const finalMessage: ChatMessage = {
+                        id: String(msg.id),
+                        user: { 
+                            id: msg.userId || msg.user_id || msg.senderId,
+                            name: msg.senderName, 
+                            avatar: msg.senderName.charAt(0).toUpperCase(), 
+                            role: msg.senderRole 
+                        },
+                        content: cleanContent(msg.content, msg.attachmentUrl),
+                        timestamp: msg.createdAt,
+                        date: 'Feed',
+                        isAnnouncement: msg.type === 'announcement',
+                        isDeleted: !!msg.isDeleted,
+                        file
+                    };
+                    
+                    setMessages(prev => {
+                        const index = prev.findIndex(m => String(m.id) === String(finalMessage.id));
+                        if (index === -1) {
+                            return [...prev, finalMessage];
+                        }
+                        const newMessages = [...prev];
+                        newMessages[index] = { ...prev[index], ...finalMessage };
+                        return newMessages;
+                    });
+                    
+                    // Instantly mark as read in local storage so background poll doesn't mark it unread
+                    const lastReadMap = JSON.parse(localStorage.getItem('channels_last_read') || '{}');
+                    lastReadMap[activeChannel.id] = msg.id;
+                    localStorage.setItem('channels_last_read', JSON.stringify(lastReadMap));
                 })
-                .listen('.message.deleted', (data: any) => setMessages(prev => prev.map(m => m.id === String(data.messageId) ? { ...m, isDeleted: true } : m)));
+                .listen('.message.deleted', (data: any) => {
+                    setMessages(prev => prev.map(m => m.id === String(data.messageId) ? { ...m, isDeleted: true } : m));
+                });
+        }
+        
+        
+        let dmEchoChannel: any;
+        if (currentUser && currentUser.id) {
+            dmEchoChannel = echo.private(`user.${currentUser.id}`)
+                .listen('.dm.created', (data: any) => {
+                    const msg = data; 
+                    
+                    if (activeChannel && activeChannel.type === 'dm' && String(activeChannel.id) === String(msg.senderId)) {
+                        setMessages((prev: any) => {
+                            const dmId = String(msg.id);
+                            const index = prev.findIndex((m: any) => String(m.id) === dmId);
+                            const finalMsg = {
+                                id: dmId,
+                                user: { 
+                                    id: msg.senderId,
+                                    name: msg.senderName, 
+                                    role: msg.senderRole, 
+                                    avatar: msg.senderName.charAt(0).toUpperCase() 
+                                },
+                                content: cleanContent(msg.content, msg.attachmentUrl),
+                                timestamp: msg.createdAt,
+                                date: 'Feed',
+                                isDeleted: !!msg.isDeleted,
+                                file: msg.attachmentUrl ? {
+                                    name: msg.attachmentName || (msg.attachmentUrl.split('?')[0].split('/').pop()?.match(/^[0-9a-f-]{36}/i) ? 'Shared File' : msg.attachmentUrl.split('?')[0].split('/').pop() || 'Attachment'),
+                                    size: 'Linked',
+                                    type: (msg.attachmentUrl.split('?')[0].match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().split('?')[0].endsWith('.pdf') ? 'pdf' : 'other')),
+                                    url: msg.attachmentUrl
+                                } : undefined
+                            };
+
+                            if (index === -1) {
+                                return [...prev, finalMsg];
+                            } else {
+                                const newMessages = [...prev];
+                                newMessages[index] = { ...prev[index], ...finalMsg };
+                                return newMessages;
+                            }
+                        });
+                        
+                        // Mark instantly read in local storage
+                        const lastReadMap = JSON.parse(localStorage.getItem('channels_last_read') || '{}');
+                        lastReadMap[`dm_${activeChannel.id}`] = msg.id;
+                        localStorage.setItem('channels_last_read', JSON.stringify(lastReadMap));
+                    } else {
+                        // Increment unread badge dynamically
+                        setDms(prev => {
+                            return prev.map(d => {
+                                if (String(d.id) === String(msg.senderId)) {
+                                    return { ...d, unread: (d.unread || 0) + 1 };
+                                }
+                                return d;
+                            });
+                        });
+                    }
+                })
+                .listen('.dm.deleted', (data: any) => {
+                    setMessages(prev => prev.map(m => m.id === String(data.messageId) ? { ...m, isDeleted: true } : m));
+                });
         }
 
         return () => {
-            if (currentEchoChannel) echo.leave(`course-channel.${activeChannel?.id}`);
+            if (currentEchoChannel && activeChannel) {
+                echo.leave(`course-channel.${activeChannel.id}`);
+            }
+            if (dmEchoChannel) {
+                echo.leave(`user.${currentUser?.id}`);
+            }
         };
     }, [activeChannel]);
 
-    const handleSendMessage = async (content: string, attachment: File | null = null, msgType: 'message' | 'announcement' = 'message') => {
-        if (!content.trim() && !attachment) return;
-        if (!activeChannel || isSending) return;
-        setIsSending(true);
-        try {
-            const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-            const url = activeChannel.type === 'dm' ? `${API_URL}/direct-messages/${activeChannel.id}` : `${API_URL}/channels/${activeChannel.id}/messages`;
-            const formData = new FormData();
-            formData.append('content', content || 'Shared Artifact');
-            formData.append('type', msgType);
-            if (attachment) formData.append('attachment', attachment);
-            const response = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }, body: formData });
-            if (response.ok) {
-                const msg = await response.json();
-                setMessages(prev => [...prev, {
-                    id: String(msg.id),
-                    user: { id: msg.user_id, name: msg.senderName, avatar: msg.senderName.charAt(0).toUpperCase(), role: msg.senderRole },
-                    content: msg.content,
-                    timestamp: msg.createdAt,
-                    date: 'Feed',
-                    isAnnouncement: msg.type === 'announcement',
-                    isDeleted: !!msg.isDeleted,
-                    file: msg.attachmentUrl ? { name: msg.attachmentName || 'Shared Artifact', size: 'Linked', type: 'other', url: msg.attachmentUrl } : undefined
-                }]);
+    // Global listener for background channels (Unread Counters)
+    useEffect(() => {
+        if (!channels.length) return;
+        
+        channels.forEach(c => {
+            echo.channel(`course-channel.${c.id}`)
+                .listen('.message.created', () => {
+                    if (!activeChannel || activeChannel.type !== 'channel' || String(activeChannel.id) !== String(c.id)) {
+                        setChannels(prev => prev.map(ch => String(ch.id) === String(c.id) ? { ...ch, unread: (ch.unread || 0) + 1 } : ch));
+                    }
+                });
+        });
+
+        return () => {
+            channels.forEach(c => {
+                if (!activeChannel || activeChannel.type !== 'channel' || String(activeChannel.id) !== String(c.id)) {
+                    echo.leave(`course-channel.${c.id}`);
+                }
+            });
+        };
+    }, [channels.map(c => c.id).join(','), activeChannel?.id]);
+
+    const handleChannelSelect = (channel: Channel) => {
+        setActiveChannel(channel);
+        if (channel.unread && channel.unread > 0) {
+            if (channel.type === 'channel') {
+                setChannels(prev => prev.map(c => c.id === channel.id ? { ...c, unread: 0 } : c));
+            } else {
+                setDms(prev => prev.map(d => d.id === channel.id ? { ...d, unread: 0 } : d));
             }
-        } finally {
-            setIsSending(false);
         }
     };
 
@@ -290,250 +553,1061 @@ const InstructorChannelsPage = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    const handleDeleteMessage = async (messageId: string) => {
+        if (!confirm('Are you sure you want to delete this message?')) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+            
+            let url = '';
+            if (activeChannel?.type === 'dm') {
+                url = `${API_URL}/direct-messages/${activeChannel.id}/${messageId}`;
+            } else {
+                url = `${API_URL}/channel-messages/${messageId}`;
+            }
+
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
+            if (response.ok) {
+                setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isDeleted: true } : m));
+                toast.success('Message deleted');
+            } else {
+                toast.error('Failed to delete message');
+            }
+        } catch (error) {
+            console.error('Delete error', error);
+            toast.error('Error deleting message');
+        }
+    };
+
+    const handleEditMessage = async (messageId: string, newContent: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+            
+            // Note: DB doesn't support DM editing yet in this quick fix, but we can add it if route exists
+            // For now, focusing on ChannelMessage editing
+            const url = `${API_URL}/channel-messages/${messageId}`;
+            
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ content: newContent })
+            });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
+            if (response.ok) {
+                const updatedMsg = await response.json();
+                setMessages(prev => prev.map(m => String(m.id) === String(messageId) ? { ...m, content: updatedMsg.content } : m));
+                toast.success('Message updated');
+            } else {
+                toast.error('Failed to update message');
+            }
+        } catch (error) {
+            console.error('Edit error', error);
+            toast.error('Error updating message');
+        }
+    };
+
+    const handleSendMessage = async (content: string, attachment: File | null = null, msgType: 'message' | 'announcement' = 'message') => {
+        const finalContent = content || '';
+        if (!finalContent.trim() && !attachment) return;
+        if (!activeChannel) return;
+        if (isSending) return;
+
+        setIsSending(true);
+
+        const originalMessage = finalContent;
+        const fileToUpload = attachment;
+        const optimisticId = 'temp-' + Date.now();
+
+        const tempMsg: ChatMessage = {
+             id: optimisticId,
+             user: { 
+                 id: currentUser?.id || 'temp',
+                 name: 'You', 
+                 avatar: 'Y', 
+                 role: 'instructor' 
+             },
+             content: fileToUpload ? (originalMessage || 'Sending file...') : originalMessage,
+             timestamp: new Date().toISOString(),
+             date: 'Feed',
+             isAnnouncement: msgType === 'announcement',
+             isDeleted: false
+        };
+        setMessages(prev => [...prev, tempMsg]);
+
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+            let url = '';
+            if (activeChannel.type === 'dm') {
+                url = `${API_URL}/direct-messages/${activeChannel.id}`;
+            } else {
+                url = `${API_URL}/channels/${activeChannel.id}/messages`;
+            }
+
+            const formData = new FormData();
+            formData.append('content', originalMessage || 'Shared a file');
+            formData.append('type', msgType);
+            if (fileToUpload) {
+                formData.append('attachment', fileToUpload);
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/instructor-login');
+                return;
+            }
+
+            if (response.ok) {
+                const msg = await response.json();
+                
+                let fileDeta = undefined;
+                if (msg.attachmentUrl) {
+                    fileDeta = {
+                        name: msg.attachmentName || (msg.attachmentUrl.split('/').pop()?.match(/^[0-9a-f-]{36}/i) ? 'Shared File' : msg.attachmentUrl.split('/').pop() || 'Attachment'),
+                        size: 'Linked',
+                        type: (msg.attachmentUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'other')) as 'image' | 'pdf' | 'other',
+                        url: msg.attachmentUrl
+                    };
+                }
+
+                const finalMessage: ChatMessage = {
+                    id: String(msg.id),
+                    user: { 
+                        id: msg.userId || msg.user_id || msg.senderId,
+                        name: msg.senderName, 
+                        avatar: msg.senderName.charAt(0).toUpperCase(), 
+                        role: msg.senderRole 
+                    },
+                    content: msg.content,
+                    timestamp: msg.createdAt,
+                    date: 'Feed',
+                    isAnnouncement: msg.type === 'announcement',
+                    file: fileDeta,
+                    isDeleted: !!msg.isDeleted,
+                };
+                
+                setMessages(prev => {
+                    const alreadyExists = prev.some(m => String(m.id) === String(finalMessage.id));
+                    if (alreadyExists) {
+                        return prev.filter(m => m.id !== optimisticId);
+                    }
+                    return prev.map(m => m.id === optimisticId ? finalMessage : m);
+                });
+            } else {
+                const errorData = await response.json();
+                toast.error(errorData.message || 'Failed to post message.');
+            }
+        } catch (error) {
+            console.error('Error posting message.', error);
+            toast.error('Network error while sending message.');
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+
+
+
+
+    const StatusDot = ({ status }: { status?: string }) => {
+        const color = status === 'online' ? '#10b981' : status === 'away' ? '#f59e0b' : '#64748b';
+        return <Circle size={10} fill={color} color={color} style={{ flexShrink: 0 }} />;
+    };
+
+
+
     return (
-        <div className="flex h-[calc(100vh-140px)] bg-white dark:bg-brand-charcoal rounded-[48px] border border-brand-border overflow-hidden shadow-2xl animate-fade-in-up">
-            {/* Sidebar: Channels & Contacts */}
-            <aside className={`w-80 border-r border-brand-border flex flex-col transition-all duration-500 ${isLeftSidebarOpen ? 'translate-x-0' : '-translate-x-full absolute z-20 h-full'}`}>
-                <div className="p-8 space-y-8 h-full flex flex-col">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-brand-emerald/10 rounded-lg">
-                                <MessageSquare size={18} className="text-brand-emerald" />
+        <div className="comm-module animate-fade-in-up">
+            <style>{`
+                .staff-scope .comm-module {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(100vh - 120px);
+                    background: white;
+                    border-radius: 20px;
+                    border: 1px solid #e2e8f0;
+                    overflow: hidden;
+                    font-family: 'Inter', system-ui, sans-serif;
+                    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+                }
+
+                .staff-scope .comm-header {
+                    display: flex;
+                    align-items: center;
+                    padding: 1rem 1.5rem;
+                    border-bottom: 1px solid #e2e8f0;
+                    background: #f8fafc;
+                    gap: 1rem;
+                }
+
+                .staff-scope .search-bar-global {
+                    flex: 1;
+                    max-width: 600px;
+                    display: flex;
+                    align-items: center;
+                    background: white;
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 0 1rem;
+                    transition: all 0.2s;
+                }
+                .search-bar-global:focus-within {
+                    border-color: #3b82f6;
+                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                }
+                .search-bar-global input {
+                    border: none;
+                    outline: none;
+                    padding: 0.75rem;
+                    width: 100%;
+                    font-size: 0.9rem;
+                    background: transparent;
+                }
+
+                .staff-scope .comm-body {
+                    display: flex;
+                    flex: 1;
+                    overflow: hidden;
+                    min-height: 0;
+                }
+
+                /* Sub Sidebar Profile (Left Panel) */
+                .staff-scope .sub-sidebar {
+                    width: 260px;
+                    background: #0f172a;
+                    display: flex;
+                    flex-direction: column;
+                    border-right: 1px solid #1e293b;
+                    flex-shrink: 0;
+                    overflow-y: auto;
+                }
+                .sub-sidebar::-webkit-scrollbar { width: 4px; }
+                .sub-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+                .staff-scope .sidebar-section {
+                    padding: 1.5rem 1rem 0.5rem;
+                }
+                .sidebar-section h3 {
+                    font-size: 0.75rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    font-weight: 700;
+                    margin: 0 0 0.5rem 0.75rem;
+                    color: #94a3b8;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .staff-scope .nav-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 0.5rem 0.75rem;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    color: #cbd5e1;
+                    margin-bottom: 2px;
+                    text-decoration: none;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                    position: relative;
+                }
+                .nav-item:hover {
+                    background: rgba(255,255,255,0.08);
+                    color: #f1f5f9;
+                }
+                .nav-item.active {
+                    background: #2563eb;
+                    color: white;
+                    font-weight: 600;
+                }
+                .nav-item .truncate {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    flex: 1;
+                }
+
+                .staff-scope .status-dot-wrapper {
+                    position: absolute;
+                    bottom: -2px;
+                    right: -2px;
+                    border: 2px solid #0f172a;
+                    border-radius: 50%;
+                    background: #0f172a;
+                }
+                .nav-item:hover .status-dot-wrapper {
+                    border-color: #1e293b;
+                }
+                .nav-item.active .status-dot-wrapper {
+                    border-color: #2563eb;
+                    background: #2563eb;
+                }
+
+                .staff-scope .unread-pill {
+                    background: white;
+                    color: #0f172a;
+                    font-size: 0.7rem;
+                    font-weight: 900;
+                    padding: 2px 8px;
+                    border-radius: 20px;
+                    min-width: 20px;
+                    text-align: center;
+                }
+                .nav-item.active .unread-pill {
+                    background: white;
+                    color: #2563eb;
+                }
+
+                .staff-scope .badge {
+                    background: #ef4444;
+                    color: white;
+                    font-size: 0.72rem;
+                    font-weight: 800;
+                    padding: 2px 8px;
+                    border-radius: 20px;
+                    margin-left: auto;
+                    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+                    animation: pulse 2s infinite;
+                }
+
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.1); }
+                    100% { transform: scale(1); }
+                }
+
+                /* Main Chat Area */
+                .staff-scope .chat-area {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    background: white;
+                    min-width: 0;
+                    min-height: 0;
+                    position: relative;
+                }
+
+                /* Right Sidebar */
+                .staff-scope .right-sidebar {
+                    width: 300px;
+                    background: #f8fafc;
+                    border-left: 1px solid #e2e8f0;
+                    display: flex;
+                    flex-direction: column;
+                    flex-shrink: 0;
+                    overflow-y: auto;
+                }
+                .right-sidebar h3 {
+                    margin: 0;
+                    font-weight: 800;
+                    color: #0f172a;
+                    font-size: 1rem;
+                }
+                .staff-scope .right-sidebar-section {
+                    padding: 1.5rem;
+                    border-bottom: 1px solid #e2e8f0;
+                }
+
+                .staff-scope .chat-header {
+                    padding: 1rem 1.5rem;
+                    border-bottom: 1px solid #e2e8f0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: white;
+                }
+                .staff-scope .chat-header-title {
+                    font-weight: 800;
+                    font-size: 1.1rem;
+                    color: #0f172a;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .staff-scope .chat-messages {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 1.5rem;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 0;
+                }
+
+                .staff-scope .date-divider {
+                    display: flex;
+                    align-items: center;
+                    text-align: center;
+                    margin: 2rem 0;
+                }
+                .date-divider::before, .date-divider::after {
+                    content: '';
+                    flex: 1;
+                    border-bottom: 1px solid #e2e8f0;
+                }
+                .date-divider span {
+                    padding: 0 1rem;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    color: #64748b;
+                    text-transform: uppercase;
+                }
+
+                .staff-scope .message-item {
+                    display: flex;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+                .message-item:hover {
+                    background: #f8fafc;
+                    border-radius: 8px;
+                }
+                .staff-scope .message-avatar {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 10px;
+                    background: #3b82f6;
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 800;
+                    font-size: 1.1rem;
+                    flex-shrink: 0;
+                }
+                .staff-scope .message-content {
+                    flex: 1;
+                }
+                .staff-scope .message-header {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 8px;
+                    margin-bottom: 4px;
+                }
+                .staff-scope .message-user {
+                    font-weight: 800;
+                    color: #0f172a;
+                    font-size: 0.95rem;
+                }
+                .staff-scope .message-time {
+                    font-size: 0.75rem;
+                    color: #94a3b8;
+                    font-weight: 600;
+                }
+                .staff-scope .message-text {
+                    color: #334155;
+                    font-size: 0.95rem;
+                    line-height: 1.5;
+                    white-space: pre-wrap;
+                }
+
+                .staff-scope .instructor-message {
+                    background: #f8fafc;
+                    padding: 0.75rem;
+                    border-radius: 12px;
+                    border-left: 3px solid #0f172a;
+                    margin-left: -0.75rem;
+                    margin-right: -0.75rem;
+                }
+
+                .staff-scope .announcement-message {
+                    border: 1px solid #fee2e2;
+                    background: #fffafa;
+                    border-left: 4px solid #ef4444;
+                }
+
+                .announcement-message .message-user {
+                    color: #b91c1c;
+                }
+
+
+                /* File Attachment display */
+                .staff-scope .file-attachment {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    padding: 1rem;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    margin-top: 0.5rem;
+                    background: #f8fafc;
+                    max-width: 400px;
+                    transition: all 0.2s;
+                }
+                .file-attachment:hover {
+                    border-color: #cbd5e1;
+                    background: white;
+                }
+                .staff-scope .file-icon-box {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 8px;
+                    background: #eff6ff;
+                    color: #3b82f6;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                /* Input Area */
+                .staff-scope .chat-input-container {
+                    padding: 0 1.5rem 1.5rem;
+                    background: white;
+                }
+                .staff-scope .chat-input-wrapper {
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 16px;
+                    background: #fcfdfe;
+                    padding: 0.5rem;
+                    transition: all 0.2s;
+                }
+                .chat-input-wrapper:focus-within {
+                    border-color: #3b82f6;
+                    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+                    background: white;
+                }
+                .staff-scope .file-preview-strip {
+                    padding: 0.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    border-bottom: 1px solid #e2e8f0;
+                }
+
+                /* Responsiveness Overrides */
+                @media (max-width: 1024px) {
+                    .staff-scope .right-sidebar {
+                        position: fixed;
+                        top: 0;
+                        right: 0;
+                        height: 100%;
+                        z-index: 2000;
+                        box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+                        width: 280px;
+                        display: ${isRightSidebarOpen ? 'flex' : 'none'};
+                    }
+                    .staff-scope .comm-module {
+                        height: calc(100vh - 120px);
+                        border-radius: 0;
+                        border: none;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .staff-scope .comm-header {
+                        padding: 0.75rem 1rem;
+                    }
+                    .staff-scope .search-bar-global {
+                        display: none;
+                    }
+                    .staff-scope .sub-sidebar {
+                        width: 100%;
+                        display: ${activeChannel ? 'none' : 'flex'};
+                    }
+                    .staff-scope .chat-area {
+                        width: 100%;
+                        display: ${activeChannel ? 'flex' : 'none'};
+                    }
+                    .staff-scope .comm-module {
+                        height: calc(100vh - 120px);
+                    }
+                    .staff-scope .nav-item {
+                        padding: 1rem;
+                        font-size: 1.1rem;
+                    }
+                    .staff-scope .chat-header {
+                        padding: 0.75rem 1rem;
+                    }
+                    .staff-scope .chat-messages {
+                        padding: 1rem;
+                    }
+                    .staff-scope .chat-input-container {
+                        padding: 0 0.75rem 0.75rem;
+                    }
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                @keyframes slideUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
+
+            {/* Global Top Search Bar */}
+            <div className="comm-header">
+                {activeChannel && (
+                    <button 
+                        className="md:hidden" 
+                        onClick={() => setActiveChannel(null)}
+                        style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center' }}
+                    >
+                        <Search size={20} className="md:hidden" style={{ marginRight: '8px' }} />
+                        Back
+                    </button>
+                )}
+                <div className="search-bar-global">
+                    <Search size={18} color="#94a3b8" />
+                    <input 
+                        type="text" 
+                        placeholder="Search messages, files, and channels..." 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <Filter size={18} color="#94a3b8" style={{ cursor: 'pointer' }} />
+                </div>
+            </div>
+
+            <div className="comm-body">
+                {/* Left Panel (Internal Sidebar) */}
+                <div className="sub-sidebar">
+                    <div className="sidebar-section">
+                        <h3>Channels <Plus size={16} style={{ cursor: 'pointer', color: '#64748b', background: '#e2e8f0', borderRadius: '4px', padding: '2px' }} onClick={() => setIsCreateChannelModalOpen(true)} /></h3>
+                        {channels.map(channel => (
+                            <div 
+                                key={channel.id} 
+                                className={`nav-item ${activeChannel?.id === channel.id && activeChannel?.type === 'channel' ? 'active' : ''}`}
+                                onClick={() => handleChannelSelect(channel)}
+                            >
+                                <Hash size={18} />
+                                <span className="truncate">{channel.title}</span>
+                                {channel.unread && channel.unread > 0 && !(activeChannel?.id === channel.id && activeChannel?.type === 'channel') && <span className="badge">{channel.unread}</span>}
                             </div>
-                            <h2 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Hub</h2>
-                        </div>
-                        <button onClick={fetchChannels} className="p-2 hover:bg-brand-beige dark:hover:bg-white/5 rounded-xl transition-all border-none cursor-pointer"><Settings size={18} className="text-brand-muted" /></button>
+                        ))}
                     </div>
 
-                    <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors" size={16} />
-                        <input 
-                            type="text" 
-                            placeholder="Find artifact..." 
-                            className="w-full h-12 pl-12 pr-4 bg-brand-beige/20 dark:bg-white/5 border border-brand-border rounded-xl focus:outline-none focus:border-brand-emerald focus:bg-white transition-all text-xs font-bold"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-10">
-                        {/* Channels */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between px-2">
-                                <span className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Communications</span>
-                                <button onClick={() => setIsCreateChannelModalOpen(true)} className="p-1 hover:text-brand-emerald transition-colors border-none cursor-pointer"><Plus size={16} /></button>
+                    {/* Direct Messages Section */}
+                    <div className="sidebar-section">
+                        <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            Direct Messages 
+                            <Plus 
+                                size={16} 
+                                style={{ cursor: 'pointer', color: '#64748b', background: '#e2e8f0', borderRadius: '4px', padding: '2px' }} 
+                                onClick={() => setIsUserSearchOpen(true)}
+                            />
+                        </h3>
+                        {dms.length === 0 && (
+                            <div style={{ padding: '0 0.75rem', fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                                No active chats. Click + to start.
                             </div>
-                            <div className="space-y-1">
-                                {channels.map(c => (
-                                    <button
-                                        key={c.id}
-                                        onClick={() => setActiveChannel(c)}
-                                        className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all border-none cursor-pointer ${activeChannel?.id === c.id ? 'bg-brand-emerald text-white shadow-lg shadow-brand-emerald/20' : 'text-brand-muted hover:bg-brand-beige/50 dark:hover:bg-white/5'}`}
+                        )}
+                        {dms.map(dm => (
+                            <div 
+                                key={dm.id} 
+                                className={`nav-item ${activeChannel?.id === dm.id && activeChannel?.type === 'dm' ? 'active' : ''}`}
+                                onClick={() => handleChannelSelect(dm)}
+                            >
+                                <div style={{ position: 'relative' }}>
+                                    <div style={{ width: '20px', height: '20px', borderRadius: '6px', background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 800 }}>
+                                        {dm.avatar || dm.title.charAt(0)}
+                                    </div>
+                                    <div className="status-dot-wrapper">
+                                        <StatusDot status={dm.status} />
+                                    </div>
+                                </div>
+                                <span className="truncate">{dm.title}</span>
+                                {dm.unread && dm.unread > 0 && !(activeChannel?.id === dm.id && activeChannel?.type === 'dm') && <span className="badge">{dm.unread}</span>}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Right Panel (Main Chat Interface) */}
+                {activeChannel ? (
+                    <>
+                    <div className="chat-area">
+                        {/* Chat Header */}
+                        <div className="chat-header">
+                            <div className="chat-header-title">
+                                {activeChannel.type === 'channel' ? <Hash size={20} color="#64748b" /> : <StatusDot status={activeChannel.status} />}
+                                {activeChannel.title}
+                            </div>
+                            <div style={{ display: 'flex', gap: '16px', color: '#64748b', alignItems: 'center' }}>
+                                <div 
+                                    onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+                                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', background: isRightSidebarOpen ? '#f1f5f9' : 'transparent', padding: '6px 12px', borderRadius: '8px', transition: 'all 0.2s' }}
+                                >
+                                    {activeChannel.type === 'channel' ? <Users size={18} /> : <Info size={18} />}
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Details</span>
+                                </div>
+                                {activeChannel.type === 'channel' && activeChannel.title !== 'general-discussion' && (
+                                    <button 
+                                        onClick={handleDeleteChannel}
+                                        style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '6px', borderRadius: '8px', transition: 'all 0.2s', marginLeft: '4px' }}
+                                        title="Delete Channel"
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <Hash size={16} className={activeChannel?.id === c.id ? 'text-white' : 'text-brand-emerald'} />
-                                            <span className="text-xs font-black uppercase tracking-tight truncate max-w-[120px]">{c.title}</span>
-                                        </div>
-                                        {c.unread ? <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div> : null}
+                                        <Trash2 size={16} />
                                     </button>
-                                ))}
+                                )}
                             </div>
                         </div>
 
-                        {/* Direct Messages */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between px-2">
-                                <span className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Direct Links</span>
-                                <button className="p-1 hover:text-brand-emerald transition-colors border-none cursor-pointer"><Users size={16} /></button>
+                        {/* Chat Messages */}
+                        {/* Chat Messages */}
+                        <div className="chat-messages" style={{ display: 'flex', flexDirection: 'column' }}>
+                            {messages.length === 0 ? (
+                                <div style={{ 
+                                    flex: 1, 
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    padding: '4rem 2rem',
+                                    textAlign: 'center',
+                                    backgroundColor: '#f8fafc'
+                                }}>
+                                    <div style={{ 
+                                        width: '80px', 
+                                        height: '80px', 
+                                        background: 'white', 
+                                        borderRadius: '24px', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center', 
+                                        marginBottom: '1.5rem',
+                                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                                        border: '1px solid #e2e8f0'
+                                    }}>
+                                        <Megaphone size={40} color="#3b82f6" />
+                                    </div>
+                                    <h2 style={{ margin: '0 0 0.5rem', fontWeight: 900, fontSize: '1.8rem', color: '#0f172a' }}>
+                                        Start the conversation
+                                    </h2>
+                                    <p style={{ margin: '0 0 2.5rem', fontSize: '1.05rem', color: '#64748b', maxWidth: '450px', lineHeight: 1.6 }}>
+                                        This channel is empty. As the instructor, you can kick things off by sharing a welcome message, uploading course materials, or posting an announcement.
+                                    </p>
+                                </div>
+                            ) : isLoadingMessages ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '4rem 2rem' }}>
+                                    <Loader2 size={48} className="animate-spin" style={{ color: '#0f172a', margin: '0 auto 1.5rem' }} />
+                                    <p style={{ margin: '0', fontSize: '1rem', color: '#64748b', fontWeight: 600 }}>Loading messages...</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {messages.map((msg, index) => {
+                                        const showDate = index === 0 || formatDateDivider(msg.timestamp) !== formatDateDivider(messages[index - 1].timestamp);
+                                        
+                                        const isMine = currentUser && String(msg.user.id) === String(currentUser.id);
+                                        const compact = !showDate && index > 0 && String(messages[index - 1].user.id) === String(msg.user.id) &&
+                                                        (new Date(msg.timestamp).getTime() - new Date(messages[index - 1].timestamp).getTime() < 5 * 60 * 1000);
+
+                                        const premiumMsg: Message = {
+                                            id: msg.id,
+                                            senderName: msg.user.name,
+                                            senderRole: msg.user.role || 'student',
+                                            type: msg.isAnnouncement ? 'announcement' : 'message',
+                                            content: msg.content,
+                                            attachmentUrl: msg.file?.url,
+                                            isDeleted: msg.isDeleted,
+                                            createdAt: formatTime(msg.timestamp)
+                                        };
+
+                                        return (
+                                            <React.Fragment key={msg.id}>
+                                                {showDate && (
+                                                    <div className="date-divider">
+                                                        <span>{formatDateDivider(msg.timestamp)}</span>
+                                                    </div>
+                                                )}
+                                                <MessageCard 
+                                                    message={premiumMsg} 
+                                                    viewerRole="instructor" 
+                                                    onDelete={() => handleDeleteMessage(msg.id)}
+                                                    onEdit={isMine ? (newContent) => handleEditMessage(msg.id, newContent) : undefined}
+                                                    isMine={isMine}
+                                                    compact={compact}
+                                                />
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                </>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="chat-input-container">
+                            <ChatInput 
+                                onSendMessage={handleSendMessage} 
+                                isSending={isSending}
+                                placeholder={activeChannel ? (activeChannel.type === 'channel' ? `Message #${activeChannel.title}` : `Message ${activeChannel.title}`) : 'Select a channel to send a message'}
+                            />
+                        </div>
+                    </div>
+                    {isRightSidebarOpen && (
+                        <div className="right-sidebar">
+                            <div className="right-sidebar-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <h3>Details</h3>
+                                <X size={20} style={{ cursor: 'pointer', color: '#64748b' }} onClick={() => setIsRightSidebarOpen(false)} />
                             </div>
-                            <div className="space-y-1">
-                                {dms.map(d => (
-                                    <button
-                                        key={d.id}
-                                        onClick={() => setActiveChannel({ ...d, type: 'dm' })}
-                                        className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border-none cursor-pointer ${activeChannel?.id === d.id ? 'bg-brand-charcoal text-white shadow-xl' : 'text-brand-muted hover:bg-brand-beige/50 dark:hover:bg-white/5'}`}
+                            <div className="right-sidebar-section">
+                                <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>About</h4>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {activeChannel?.type === 'channel' ? <Hash size={24} color="#64748b" /> : <Users size={24} color="#64748b" />}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 800, color: '#0f172a' }}>{activeChannel.title}</div>
+                                        {activeChannel.type === 'channel' && <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{activeChannel.participants || 'Instructor'} participants</div>}
+                                    </div>
+                                </div>
+                                <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', lineHeight: 1.5 }}>
+                                    {activeChannel.description || 'No description available for this channel.'}
+                                </p>
+                            </div>
+                            {activeChannel.type === 'channel' && (
+                                <div className="right-sidebar-section">
+                                    <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Files & Links</h4>
+                                    <div style={{ fontSize: '0.9rem', color: '#64748b', fontStyle: 'italic' }}>Shared files will appear here...</div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </>
+                ) : (
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', flexDirection: 'column', color: '#94a3b8', padding: '2rem', textAlign: 'center' }}>
+                        <div style={{ width: '80px', height: '80px', background: 'white', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                            <Hash size={40} color="#cbd5e1" />
+                        </div>
+                        <h3 style={{ margin: '0 0 0.5rem', fontWeight: 900, color: '#0f172a', fontSize: '1.5rem' }}>No Channel Selected</h3>
+                        <p style={{ marginTop: '0.5rem', fontSize: '1rem', color: '#64748b', maxWidth: '350px', lineHeight: 1.6 }}>
+                            {channels.length === 0 
+                                ? "You haven't been assigned to any courses yet. Once assigned, your class channels will appear in the sidebar." 
+                                : "Select a discussion channel or a direct message from the sidebar to begin communicating."}
+                        </p>
+                        {channels.length > 0 && (
+                            <button 
+                                onClick={() => setActiveChannel(channels[0])}
+                                style={{ marginTop: '1.5rem', background: '#3b82f6', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                Open General Channel
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>            {/* Announcement Modal */}
+            {isAnnouncementModalOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div style={{ background: 'white', width: '100%', maxWidth: '500px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+                        <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <h3 style={{ margin: 0, fontWeight: 800 }}>Post Announcement</h3>
+                            <X size={20} style={{ cursor: 'pointer' }} onClick={() => setIsAnnouncementModalOpen(false)} />
+                        </div>
+                        <div style={{ padding: '1.25rem' }}>
+                            <div style={{ marginBottom: '1.25rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>Title</label>
+                                <input 
+                                    type="text" 
+                                    value={announcementTitle}
+                                    onChange={(e) => setAnnouncementTitle(e.target.value)}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
+                            </div>
+                            <div style={{ marginBottom: '1.25rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>Content</label>
+                                <textarea 
+                                    value={announcementContent}
+                                    onChange={(e) => setAnnouncementContent(e.target.value)}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0', minHeight: '120px' }}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button onClick={() => setIsAnnouncementModalOpen(false)} style={{ flex: 1, border: 'none', background: '#f1f5f9', padding: '0.75rem', borderRadius: '10px' }}>Cancel</button>
+                                <button 
+                                    onClick={() => handleSendMessage(announcementTitle + ": " + announcementContent, null, 'announcement')}
+                                    style={{ flex: 2, border: 'none', background: '#3b82f6', color: 'white', padding: '0.75rem', borderRadius: '10px' }}
+                                >
+                                    Post
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* User Search Modal for DMs */}
+            {isUserSearchOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div style={{ background: 'white', width: '100%', maxWidth: '400px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+                        <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <h3 style={{ margin: 0, fontWeight: 800 }}>New Message</h3>
+                            <X size={20} style={{ cursor: 'pointer' }} onClick={() => setIsUserSearchOpen(false)} />
+                        </div>
+                        <div style={{ padding: '1.25rem' }}>
+                            <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+                                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search by name..."
+                                    value={userSearchQuery}
+                                    onChange={async (e) => {
+                                        setUserSearchQuery(e.target.value);
+                                        if (e.target.value.length >= 2) {
+                                            const token = localStorage.getItem('token');
+                                            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+                                            const res = await fetch(`${API_URL}/direct-messages/search?q=${e.target.value}`, {
+                                                headers: { 'Authorization': `Bearer ${token}` }
+                                            });
+                                            if (res.ok) setSearchResults(await res.json());
+                                        } else {
+                                            setSearchResults([]);
+                                        }
+                                    }}
+                                    style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
+                            </div>
+                            
+                            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                {searchResults.map(user => (
+                                    <div 
+                                        key={user.id}
+                                        onClick={() => {
+                                            setActiveChannel(user);
+                                            setDms(prev => prev.find(d => d.id === user.id) ? prev : [user, ...prev]);
+                                            setIsUserSearchOpen(false);
+                                            setUserSearchQuery('');
+                                            setSearchResults([]);
+                                        }}
+                                        style={{ padding: '0.75rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
                                     >
-                                        <div className="relative">
-                                            <div className="w-10 h-10 bg-brand-emerald text-white rounded-xl flex items-center justify-center font-black text-sm border-2 border-brand-border">
-                                                {d.title.charAt(0)}
-                                            </div>
-                                            <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-brand-charcoal ${d.status === 'online' ? 'bg-emerald-500' : 'bg-brand-muted'}`}></div>
+                                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                                            {user.title.charAt(0)}
                                         </div>
-                                        <span className="text-xs font-black uppercase tracking-tight truncate">{d.title}</span>
-                                    </button>
+                                        <div>
+                                            <p style={{ margin: 0, fontWeight: 700 }}>{user.title}</p>
+                                            <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>{user.type}</p>
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </div>
                     </div>
                 </div>
-            </aside>
-
-            {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col relative bg-brand-beige/10 dark:bg-white/5">
-                {!activeChannel ? (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-8 animate-fade-in">
-                        <div className="w-32 h-32 bg-brand-beige dark:bg-white/5 rounded-xl flex items-center justify-center text-brand-muted/30 shadow-inner">
-                            <Globe size={64} className="animate-pulse" />
-                        </div>
-                        <div className="space-y-2">
-                            <h3 className="text-2xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Select an Uplink</h3>
-                            <p className="text-brand-muted font-medium max-w-sm mx-auto">Choose a communication channel or contact to begin synchronization.</p>
-                        </div>
-                    </div>
-                ) : (
-                    <>
-                        {/* Chat Header */}
-                        <header className="h-24 px-10 border-b border-brand-border flex items-center justify-between bg-white dark:bg-brand-charcoal z-10">
-                            <div className="flex items-center gap-6">
-                                <button onClick={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} className="md:hidden p-2 hover:bg-brand-beige rounded-xl border-none cursor-pointer"><ArrowLeft size={20} /></button>
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-3">
-                                        {activeChannel.type === 'channel' ? <Hash className="text-brand-emerald" size={20} /> : <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>}
-                                        <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">{activeChannel.title}</h3>
-                                    </div>
-                                    <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">{activeChannel.description || 'Secure communication link active'}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <button onClick={() => setIsAnnouncementModalOpen(true)} className="h-10 px-6 bg-brand-emerald text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-all border-none cursor-pointer"><Megaphone size={14} /> Broadcast</button>
-                                <button onClick={handleDeleteChannel} className="w-10 h-10 flex items-center justify-center text-brand-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all border-none cursor-pointer"><Trash2 size={20} /></button>
-                                <button onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)} className={`p-2 rounded-xl transition-all border-none cursor-pointer ${isRightSidebarOpen ? 'bg-brand-emerald text-white' : 'hover:bg-brand-beige text-brand-muted'}`}><Info size={20} /></button>
-                            </div>
-                        </header>
-
-                        {/* Messages List */}
-                        <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
-                            {isLoadingMessages ? (
-                                <div className="h-full flex flex-col items-center justify-center gap-4">
-                                    <Loader2 className="animate-spin text-brand-emerald" size={32} />
-                                    <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Recovering Artifacts...</p>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="p-12 text-center border-b border-brand-border border-dashed space-y-4 mb-12">
-                                        <div className="w-20 h-20 bg-brand-emerald/10 text-brand-emerald rounded-[32px] flex items-center justify-center mx-auto">
-                                            <Sparkles size={32} />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <h4 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Channel Initialized</h4>
-                                            <p className="text-xs font-medium text-brand-muted">This is the origin of the #{activeChannel.title} stream.</p>
-                                        </div>
-                                    </div>
-
-                                    {messages.map((msg, i) => (
-                                        <div key={msg.id} className="animate-fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}>
-                                            <MessageCard 
-                                                message={msg as any} 
-                                                isMe={String(msg.user.id) === String(currentUser?.id)}
-                                                onDelete={() => {}} 
-                                                onEdit={() => {}}
-                                            />
-                                        </div>
-                                    ))}
-                                    <div ref={messagesEndRef} />
-                                </>
-                            )}
-                        </div>
-
-                        {/* Input Area */}
-                        <footer className="p-8 pt-0">
-                            <div className="max-w-4xl mx-auto">
-                                <ChatInput 
-                                    onSendMessage={(content, file) => handleSendMessage(content, file)} 
-                                    placeholder={`Secure transmission to #${activeChannel.title}...`}
-                                />
-                            </div>
-                        </footer>
-                    </>
-                )}
-            </main>
-
-            {/* Right Sidebar: Intel */}
-            {activeChannel && isRightSidebarOpen && (
-                <aside className="w-80 border-l border-brand-border bg-white dark:bg-brand-charcoal flex flex-col animate-slide-in">
-                    <div className="p-10 space-y-10">
-                        <div className="space-y-4">
-                            <h4 className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Intel Package</h4>
-                            <div className="bg-brand-beige/30 dark:bg-white/5 rounded-[32px] p-8 border border-brand-border space-y-6">
-                                <div className="w-16 h-16 bg-brand-emerald text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-brand-emerald/20">
-                                    {activeChannel.type === 'channel' ? <Hash size={32} /> : <div className="text-2xl font-black">{activeChannel.title.charAt(0)}</div>}
-                                </div>
-                                <div className="text-center space-y-1">
-                                    <h5 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">{activeChannel.title}</h5>
-                                    <p className="text-[10px] font-bold text-brand-emerald uppercase tracking-widest">{activeChannel.type === 'channel' ? 'Public Node' : 'Private Uplink'}</p>
-                                </div>
-                                <p className="text-xs text-brand-muted font-medium text-center leading-relaxed italic">"{activeChannel.description || 'Standard communication protocol established for academic synchronization.'}"</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h4 className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Active Nodes</h4>
-                                <span className="px-2 py-1 bg-brand-emerald/10 text-brand-emerald rounded-lg text-[10px] font-black">24</span>
-                            </div>
-                            <div className="space-y-4">
-                                {[1,2,3].map(i => (
-                                    <div key={i} className="flex items-center gap-4 group">
-                                        <div className="w-10 h-10 bg-brand-beige dark:bg-white/10 rounded-xl flex items-center justify-center font-black text-xs text-brand-charcoal border border-brand-border">JD</div>
-                                        <div className="flex-1">
-                                            <div className="text-xs font-black text-brand-charcoal dark:text-white uppercase truncate">John Doe</div>
-                                            <div className="text-[8px] font-bold text-brand-emerald uppercase tracking-widest">Active Now</div>
-                                        </div>
-                                    </div>
-                                ))}
-                                <button className="w-full h-12 border-2 border-brand-border border-dashed rounded-xl text-[10px] font-black text-brand-muted uppercase tracking-widest hover:text-brand-emerald hover:border-brand-emerald transition-all border-none cursor-pointer">Explore Roster</button>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            <h4 className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Shared Artifacts</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                                {[1,2,3,4].map(i => (
-                                    <div key={i} className="aspect-square bg-brand-beige dark:bg-white/10 rounded-2xl border border-brand-border flex items-center justify-center group overflow-hidden relative">
-                                        <Layers className="text-brand-muted group-hover:scale-110 transition-transform" size={24} />
-                                        <div className="absolute inset-0 bg-brand-emerald/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"><ChevronRight className="text-white" /></div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </aside>
             )}
 
-            {/* Modals */}
+            {/* Create Channel Modal */}
             {isCreateChannelModalOpen && (
-                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6">
-                    <div className="absolute inset-0 bg-brand-charcoal/90 backdrop-blur-2xl animate-fade-in" onClick={() => setIsCreateChannelModalOpen(false)}></div>
-                    <div className="relative w-full max-w-lg bg-white dark:bg-brand-charcoal rounded-[48px] p-12 space-y-10 shadow-2xl animate-scale-up">
-                        <div className="space-y-2">
-                            <h3 className="text-3xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Initialize Channel</h3>
-                            <p className="text-brand-muted font-medium">Define the parameters for a new communication node.</p>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', animation: 'fadeIn 0.2s ease-out' }}>
+                    <div style={{ background: 'white', width: '100%', maxWidth: '480px', borderRadius: '24px', padding: '2.5rem', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', animation: 'slideUp 0.3s ease-out' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <div>
+                                <h2 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem', color: '#0f172a' }}>Create Channel</h2>
+                                <p style={{ margin: '0.25rem 0 0', color: '#64748b', fontSize: '0.9rem' }}>Set up a new space for discussion.</p>
+                            </div>
+                            <button 
+                                onClick={() => setIsCreateChannelModalOpen(false)}
+                                style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.2s' }}
+                            >
+                                <X size={20} color="#64748b" />
+                            </button>
                         </div>
-                        <div className="space-y-8">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Identifier</label>
+                        
+                        <div style={{ marginBottom: '1.75rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Channel Name <span style={{ color: '#ef4444' }}>*</span></label>
+                            <div style={{ position: 'relative' }}>
+                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                                    <Hash size={18} />
+                                </div>
                                 <input 
                                     type="text" 
-                                    className="w-full h-16 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald font-bold" 
-                                    placeholder="e.g. project-x-dev"
+                                    placeholder="e.g. assignment-help"
                                     value={newChannelName}
-                                    onChange={(e) => setNewChannelName(e.target.value)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Mission Description</label>
-                                <textarea 
-                                    className="w-full p-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[32px] focus:outline-none focus:border-brand-emerald font-bold h-32 resize-none" 
-                                    placeholder="Brief summary of channel objective..."
-                                    value={newChannelDesc}
-                                    onChange={(e) => setNewChannelDesc(e.target.value)}
+                                    onChange={(e) => setNewChannelName(e.target.value.toLowerCase().replace(/\\s+/g, '-'))}
+                                    style={{ width: '100%', padding: '0.875rem 1rem 0.875rem 2.5rem', borderRadius: '12px', border: '2px solid #e2e8f0', fontSize: '0.95rem', background: '#f8fafc', fontWeight: 600, color: '#0f172a', transition: 'all 0.2s', outline: 'none' }}
+                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = 'white'; }}
+                                    onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
                                 />
                             </div>
                         </div>
-                        <div className="flex gap-4">
-                            <button onClick={() => setIsCreateChannelModalOpen(false)} className="flex-1 h-14 rounded-2xl font-black text-xs uppercase tracking-widest text-brand-muted hover:bg-brand-beige transition-all border-none cursor-pointer">Abort</button>
-                            <button onClick={handleCreateChannel} disabled={isCreatingChannel} className="flex-1 h-14 bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-brand-emerald/20 hover:scale-105 transition-all border-none cursor-pointer">
-                                {isCreatingChannel ? <Loader2 className="animate-spin" /> : 'Confirm Protocol'}
+
+                        <div style={{ marginBottom: '1.75rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description (Optional)</label>
+                            <textarea 
+                                placeholder="What is this channel about?"
+                                value={newChannelDesc}
+                                onChange={(e) => setNewChannelDesc(e.target.value)}
+                                style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', fontSize: '0.95rem', background: '#f8fafc', minHeight: '100px', resize: 'none', transition: 'all 0.2s', outline: 'none' }}
+                                onFocus={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = 'white'; }}
+                                onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: '2.5rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Course Association</label>
+                            <select 
+                                value={targetCourseId}
+                                onChange={(e) => setTargetCourseId(e.target.value)}
+                                style={{ width: '100%', padding: '0.875rem 1rem', borderRadius: '12px', border: '2px solid #e2e8f0', fontSize: '0.95rem', background: '#f8fafc', fontWeight: 600, color: '#0f172a', cursor: 'pointer', outline: 'none', appearance: 'none' }}
+                                onFocus={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = 'white'; }}
+                                onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                            >
+                                <option value="general">Global (Visible to Everyone)</option>
+                                {instructorCourses.map(course => (
+                                    <option key={course.id} value={course.id}>{course.title}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button 
+                                onClick={() => setIsCreateChannelModalOpen(false)} 
+                                disabled={isCreatingChannel}
+                                style={{ flex: 1, border: 'none', background: '#f1f5f9', color: '#475569', padding: '1rem', borderRadius: '12px', fontWeight: 800, cursor: isCreatingChannel ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleCreateChannel}
+                                disabled={isCreatingChannel || !newChannelName.trim()}
+                                style={{ flex: 2, border: 'none', background: (!newChannelName.trim() || isCreatingChannel) ? '#94a3b8' : '#3b82f6', color: 'white', padding: '1rem', borderRadius: '12px', fontWeight: 800, cursor: (!newChannelName.trim() || isCreatingChannel) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s', boxShadow: (!newChannelName.trim() || isCreatingChannel) ? 'none' : '0 10px 15px -3px rgba(59, 130, 246, 0.3)' }}
+                            >
+                                {isCreatingChannel ? (
+                                    <>
+                                        <Loader2 size={18} className="animate-spin" /> Creating...
+                                    </>
+                                ) : (
+                                    'Create Channel'
+                                )}
                             </button>
                         </div>
                     </div>

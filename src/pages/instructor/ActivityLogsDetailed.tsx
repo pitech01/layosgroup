@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, Loader2, Activity, Search, Filter, ShieldCheck, Database, Layout, Sparkles, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { Clock, Loader2, Activity, Search } from 'lucide-react';
 
 export default function ActivityLogsDetailed() {
     const [activities, setActivities] = useState<any[]>([]);
@@ -12,14 +12,17 @@ export default function ActivityLogsDetailed() {
         const fetchLogs = async () => {
             try {
                 const response = await fetch(`${API_URL}/instructor/activity-logs`, {
-                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
                 });
                 if (response.ok) {
                     const data = await response.json();
                     setActivities(data);
                 }
             } catch (err) {
-                console.error("Failed to synchronize with system manifest:", err);
+                console.error("Failed to fetch activity logs:", err);
             } finally {
                 setLoading(false);
             }
@@ -35,132 +38,109 @@ export default function ActivityLogsDetailed() {
 
     if (loading) {
         return (
-            <div className="h-[70vh] flex flex-col items-center justify-center gap-6 animate-pulse">
-                <Loader2 className="animate-spin text-brand-emerald" size={48} />
-                <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em]">Synchronizing Operational Logs...</p>
+            <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+                <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
+                <p style={{ fontWeight: 800, color: '#64748b' }}>Loading Activity Logs...</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-12 pb-32 max-w-7xl mx-auto px-6 md:px-0">
-            {/* Header Section */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 animate-fade-in-up">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-brand-emerald/10 rounded-lg">
-                            <Activity className="text-brand-emerald" size={18} />
-                        </div>
-                        <span className="text-brand-emerald font-black text-[10px] uppercase tracking-[0.3em]">System Intelligence</span>
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-black text-brand-charcoal dark:text-white tracking-tight leading-none uppercase">Activity <span className="text-brand-emerald">Manifest</span></h1>
-                    <p className="text-brand-muted font-medium text-lg max-w-2xl leading-relaxed">Detailed chronological tracking of academic interactions, system modifications, and student engagement artifacts.</p>
+        <div className="animate-fade-in-up" style={{ padding: '0 1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                    <h2 style={{ fontSize: '1.75rem', fontWeight: 950, color: '#0f172a', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Activity size={28} color="#1a4d3e" /> Thorough Activity Logs
+                    </h2>
+                    <p style={{ color: '#64748b', margin: 0, fontWeight: 600, fontSize: '1.05rem' }}>
+                        Detailed historical tracking of all student engagement and system events.
+                    </p>
                 </div>
-                <div className="flex items-center gap-4 p-6 bg-brand-beige/20 dark:bg-white/5 rounded-[32px] border border-brand-border">
-                    <div className="w-12 h-12 bg-brand-charcoal text-white rounded-xl flex items-center justify-center font-black text-xs shadow-xl">{filteredActivities.length}</div>
-                    <div className="space-y-0.5">
-                        <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Total Records</div>
-                        <div className="text-xs font-black text-brand-charcoal dark:text-white uppercase">Operational Cycles</div>
-                    </div>
-                </div>
-            </header>
-
-            {/* Controls Bar */}
-            <div className="flex flex-col md:flex-row gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <div className="flex-1 relative group">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors" size={20} />
-                    <input 
-                        type="text" 
-                        placeholder="Search system archives..." 
-                        className="w-full h-16 pl-16 pr-6 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white transition-all text-sm font-bold text-brand-charcoal dark:text-white"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-                <button className="h-16 px-10 bg-brand-beige dark:bg-white/5 border border-brand-border rounded-2xl flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all border-none cursor-pointer">
-                    Live Feed <Sparkles size={16} />
-                </button>
             </div>
 
-            {/* Logs Table */}
-            <div className="bg-white dark:bg-brand-charcoal rounded-[48px] border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <div className="overflow-x-auto custom-scrollbar">
-                    <table className="w-full border-collapse">
+            <div style={{ background: 'white', borderRadius: '24px', border: '1px solid rgba(226, 232, 240, 0.8)', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.02)', overflow: 'hidden' }}>
+                <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                    <div style={{ position: 'relative', width: '300px' }}>
+                        <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+                        <input
+                            type="text"
+                            placeholder="Search logs..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '0.95rem', fontWeight: 600, color: '#0f172a', outline: 'none', transition: 'border-color 0.2s', background: 'white' }}
+                            onFocus={(e) => e.target.style.borderColor = '#1a4d3e'}
+                            onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                        />
+                    </div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#64748b', background: '#e2e8f0', padding: '6px 14px', borderRadius: '100px' }}>
+                        {filteredActivities.length} Records
+                    </div>
+                </div>
+
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
-                            <tr className="bg-brand-beige/20 dark:bg-white/5">
-                                <th className="px-10 py-8 text-left text-[10px] font-black text-brand-muted uppercase tracking-[0.2em] border-b border-brand-border">Subject Node</th>
-                                <th className="px-10 py-8 text-left text-[10px] font-black text-brand-muted uppercase tracking-[0.2em] border-b border-brand-border">Action Protocol</th>
-                                <th className="px-10 py-8 text-left text-[10px] font-black text-brand-muted uppercase tracking-[0.2em] border-b border-brand-border w-1/2">Operational Intelligence</th>
-                                <th className="px-10 py-8 text-right text-[10px] font-black text-brand-muted uppercase tracking-[0.2em] border-b border-brand-border">Timestamp</th>
+                            <tr style={{ background: 'white', borderBottom: '2px solid #f1f5f9' }}>
+                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</th>
+                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Action Type</th>
+                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</th>
+                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Timestamp</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredActivities.length > 0 ? filteredActivities.map((activity, idx) => (
-                                <tr key={idx} className={`group hover:bg-brand-beige/10 dark:hover:bg-white/5 transition-colors ${idx !== filteredActivities.length - 1 ? 'border-b border-brand-border' : ''}`}>
-                                    <td className="px-10 py-8 whitespace-nowrap">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-brand-charcoal dark:bg-brand-emerald/10 text-white dark:text-brand-emerald rounded-xl flex items-center justify-center font-black text-base shadow-inner group-hover:scale-110 transition-transform">
+                                <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s', background: idx % 2 === 0 ? 'white' : '#fcfdfe' }} onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'} onMouseOut={(e) => e.currentTarget.style.background = idx % 2 === 0 ? 'white' : '#fcfdfe'}>
+                                    <td style={{ padding: '1.25rem 2rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f0fdf4', color: '#1a4d3e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem' }}>
                                                 {activity.user?.name ? activity.user.name.charAt(0) : '-'}
                                             </div>
-                                            <div className="space-y-1">
-                                                <div className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-tight">{activity.user?.name || 'System Core'}</div>
-                                                <div className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">{activity.user?.role || 'Operational Node'}</div>
+                                            <div>
+                                                <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.95rem' }}>{activity.user?.name || 'System / Unassigned'}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-10 py-8 whitespace-nowrap">
-                                        <div className="inline-flex items-center px-4 py-1.5 bg-brand-beige dark:bg-white/10 text-brand-muted rounded-xl text-[10px] font-black uppercase tracking-widest border border-brand-border group-hover:border-brand-emerald transition-colors">
+                                    <td style={{ padding: '1.25rem 2rem' }}>
+                                        <span style={{ padding: '6px 12px', background: '#f1f5f9', color: '#475569', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'capitalize' }}>
                                             {activity.action.replace('_', ' ')}
-                                        </div>
+                                        </span>
                                     </td>
-                                    <td className="px-10 py-8">
-                                        <div className="space-y-4">
-                                            <p className="text-sm font-bold text-brand-charcoal dark:text-white leading-relaxed">{activity.description}</p>
-                                            {(() => {
-                                                if (!activity.metadata) return null;
-                                                let parsed = {};
-                                                try {
-                                                    parsed = typeof activity.metadata === 'string' ? JSON.parse(activity.metadata) : activity.metadata;
-                                                } catch (e) { return null; }
-                                                if (Object.keys(parsed).length === 0) return null;
-                                                return (
-                                                    <div className="p-6 bg-brand-beige/30 dark:bg-white/5 rounded-2xl border border-brand-border space-y-3">
-                                                        <div className="flex items-center gap-2 text-[8px] font-black text-brand-muted uppercase tracking-widest mb-2">
-                                                            <Database size={10} className="text-brand-emerald" /> Intel Snippet
+                                    <td style={{ padding: '1.25rem 2rem' }}>
+                                        <div style={{ fontWeight: 600, color: '#334155', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                            {activity.description}
+                                        </div>
+                                        {(() => {
+                                            if (!activity.metadata) return null;
+                                            let parsed = {};
+                                            try {
+                                                parsed = typeof activity.metadata === 'string' ? JSON.parse(activity.metadata) : activity.metadata;
+                                            } catch (e) {
+                                                return null;
+                                            }
+                                            if (Object.keys(parsed).length === 0) return null;
+                                            return (
+                                                <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                    {Object.entries(parsed).map(([key, value]) => (
+                                                        <div key={key} style={{ display: 'flex' }}>
+                                                            <span style={{ fontWeight: 800, minWidth: '80px', textTransform: 'capitalize' }}>{key.replace('_', ' ')}:</span>
+                                                            <span style={{ fontFamily: 'monospace', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#0f172a' }}>{String(value)}</span>
                                                         </div>
-                                                        {Object.entries(parsed).map(([key, value]) => (
-                                                            <div key={key} className="flex items-start gap-4 text-xs">
-                                                                <span className="font-black text-brand-muted uppercase tracking-widest min-w-[100px] shrink-0">{key.replace('_', ' ')}:</span>
-                                                                <span className="font-mono text-brand-emerald break-all">{String(value)}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                );
-                                            })()}
-                                        </div>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })()}
                                     </td>
-                                    <td className="px-10 py-8 text-right whitespace-nowrap">
-                                        <div className="flex flex-col items-end gap-1">
-                                            <div className="flex items-center gap-2 text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-widest">
-                                                <Clock size={12} className="text-brand-emerald" />
-                                                {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
-                                            <div className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">
-                                                {new Date(activity.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
-                                            </div>
+                                    <td style={{ padding: '1.25rem 2rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
+                                            <Clock size={14} /> 
+                                            {new Date(activity.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                                         </div>
                                     </td>
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan={4} className="px-10 py-32 text-center space-y-8">
-                                        <div className="w-24 h-24 bg-brand-beige dark:bg-white/5 rounded-xl flex items-center justify-center mx-auto text-brand-muted/30 shadow-inner">
-                                            <Database size={48} className="animate-pulse" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <h3 className="text-2xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Archives Idle</h3>
-                                            <p className="text-brand-muted font-medium text-sm">No operational records matched the current filtering parameters.</p>
-                                        </div>
+                                    <td colSpan={4} style={{ padding: '4rem 2rem', textAlign: 'center', color: '#94a3b8', fontWeight: 600 }}>
+                                        No matching activity logs found.
                                     </td>
                                 </tr>
                             )}

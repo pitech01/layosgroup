@@ -11,10 +11,7 @@ import {
     Filter,
     ShieldAlert,
     Loader2,
-    AlertCircle,
-    ArrowRight,
-    Sparkles,
-    Briefcase
+    AlertCircle
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -48,6 +45,7 @@ export default function CohortsPage() {
 
             const data = await response.json();
             if (response.ok) {
+                // Filter by instructor_id to be extra safe (though backend now handles this)
                 const filtered = data.filter((c: any) => String(c.instructor_id) === String(user?.id));
                 setCohorts(filtered);
             } else {
@@ -86,18 +84,17 @@ export default function CohortsPage() {
             });
             if (response.ok) {
                 setCohorts(cohorts.filter(c => c.id !== id));
-                toast.success('Cohort decommissioned');
             } else {
-                toast.error('Action failed. Active enrollments detected.');
+                alert('Action failed. The cohort might have active enrollments.');
             }
         } catch (err) {
-            toast.error('Network timeout');
+            alert('Connection timeout. Please check your network.');
         }
     };
 
     const stats = [
-        { label: 'Active Cohorts', count: cohorts.length, icon: CheckCircle2, color: 'text-brand-emerald', bg: 'bg-brand-emerald/10' },
-        { label: 'Total Enrollment', count: cohorts.reduce((acc, c) => acc + (c.students?.length || 0), 0), icon: Users, color: 'text-brand-charcoal', bg: 'bg-brand-beige' },
+        { label: 'Active Cohorts', count: cohorts.length, trend: 'Updated', isUp: true, color: '#1a4d3e', icon: CheckCircle2 },
+        { label: 'Total Enrollment', count: cohorts.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Real-time', isUp: true, color: '#64748b', icon: Users },
     ];
 
     const filteredCohorts = cohorts.filter(c =>
@@ -106,177 +103,415 @@ export default function CohortsPage() {
     );
 
     return (
-        <div className="space-y-12 pb-12">
-            {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in-up">
-                <div className="max-w-2xl space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-brand-emerald/10 rounded-lg">
-                            <Briefcase className="text-brand-emerald" size={18} />
-                        </div>
-                        <span className="text-brand-emerald font-black text-xs uppercase tracking-widest">Faculty Administration</span>
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-black text-brand-charcoal dark:text-white tracking-tight">
-                        Cohort <span className="text-brand-emerald">Ecosystem</span>
-                    </h1>
-                    <p className="text-brand-muted font-medium text-lg leading-relaxed">
-                        Orchestrate and monitor your active learning groups, track class timelines, and manage student enrollment flows.
-                    </p>
+        <div className="cohorts-inventory-container">
+            <style>{`
+                .staff-scope .inventory-header-premium {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 3.5rem;
+                }
+
+                .staff-scope .inventory-header-premium h1 {
+                    font-size: 2.5rem;
+                    font-weight: 950;
+                    color: #0f172a;
+                    letter-spacing: -0.04em;
+                    margin: 0;
+                }
+
+                .staff-scope .inventory-header-premium p {
+                    color: #64748b;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    margin: 0.5rem 0 0 0;
+                }
+
+                .staff-scope .stats-grid-inventory {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 2rem;
+                    margin-bottom: 3.5rem;
+                }
+
+                .staff-scope .stat-card-premium-inventory {
+                    background: white;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 28px;
+                    padding: 2rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02);
+                }
+
+                .staff-scope .icon-box-inventory {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 18px;
+                    background: #f0fdf4;
+                    color: #1a4d3e;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .staff-scope .search-filter-belt {
+                    display: flex;
+                    gap: 1.5rem;
+                    margin-bottom: 3rem;
+                }
+
+                .staff-scope .cohort-table-card {
+                    background: white;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 32px;
+                    overflow: hidden;
+                    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
+                }
+
+                .staff-scope .cohort-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+
+                .staff-scope .cohort-table th {
+                    text-align: left;
+                    padding: 1.75rem 2rem;
+                    background: #f8fafc;
+                    color: #64748b;
+                    font-size: 0.85rem;
+                    font-weight: 850;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+
+                .staff-scope .cohort-table td {
+                    padding: 2rem;
+                    border-bottom: 1px solid #f8fafc;
+                    vertical-align: middle;
+                }
+
+                .staff-scope .status-badge-inventory {
+                    padding: 6px 14px;
+                    border-radius: 10px;
+                    font-size: 0.75rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    display: inline-block;
+                }
+
+                .staff-scope .status-active { background: #f0fdf4; color: #16a34a; }
+                .staff-scope .status-upcoming { background: #eff6ff; color: #2563eb; }
+                .staff-scope .status-completed { background: #f8fafc; color: #64748b; border: 1px solid #f1f5f9; }
+
+                .staff-scope .blueprint-tag {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 0.95rem;
+                    font-weight: 850;
+                    color: #0f172a;
+                }
+
+                .staff-scope .blueprint-empty {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 0.9rem;
+                    font-weight: 700;
+                    color: #ef4444;
+                    background: #fef2f2;
+                    padding: 4px 12px;
+                    border-radius: 8px;
+                    width: fit-content;
+                }
+
+                .staff-scope .btn-create-shell {
+                    height: 60px;
+                    background: #1a4d3e;
+                    color: white;
+                    border: none;
+                    border-radius: 18px;
+                    padding: 0 2.5rem;
+                    font-weight: 950;
+                    font-size: 1rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    cursor: pointer;
+                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    transition: all 0.3s;
+                    text-decoration: none;
+                }
+
+                .staff-scope .action-fab-inventory {
+                    width: 44px;
+                    height: 44px;
+                    background: #fcfdfe;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #64748b;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    text-decoration: none;
+                }
+
+                .staff-scope .action-fab-inventory:hover {
+                    background: #1a4d3e;
+                    color: white;
+                    border-color: #1a4d3e;
+                }
+
+                .staff-scope .btn-manage-text {
+                    background: #f8fafc;
+                    border: 1.5px solid #e2e8f0;
+                    color: #1a4d3e;
+                    padding: 0.6rem 1rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    font-size: 0.8rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    text-decoration: none;
+                }
+
+                .staff-scope .btn-manage-text:hover {
+                    background: #1a4d3e;
+                    color: white;
+                    border-color: #1a4d3e;
+                }
+
+                .staff-scope .btn-delete-text {
+                    background: #fef2f2;
+                    border: 1.5px solid #fee2e2;
+                    color: #ef4444;
+                    padding: 0.6rem 1rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    font-size: 0.8rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .staff-scope .btn-delete-text:hover {
+                    background: #ef4444;
+                    color: white;
+                    border-color: #ef4444;
+                }
+
+                .staff-scope .table-responsive-wrapper {
+                    width: 100%;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                @media (max-width: 1024px) {
+                    .staff-scope .inventory-header-premium h1 { font-size: 2rem; }
+                    .staff-scope .stats-grid-inventory { grid-template-columns: 1fr 1fr; }
+                }
+
+                @media (max-width: 768px) {
+                    .staff-scope .inventory-header-premium {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 1.5rem;
+                        margin-bottom: 2.5rem;
+                    }
+
+                    .staff-scope .inventory-header-premium h1 {
+                        font-size: 1.75rem;
+                    }
+                    
+                    .staff-scope .btn-create-shell {
+                        width: 100%;
+                        justify-content: center;
+                        height: 52px;
+                        border-radius: 14px;
+                    }
+
+                    .staff-scope .stats-grid-inventory {
+                        grid-template-columns: 1fr;
+                        gap: 1rem;
+                    }
+
+                    .staff-scope .stat-card-premium-inventory {
+                        padding: 1.5rem;
+                        border-radius: 20px;
+                    }
+
+                    .staff-scope .icon-box-inventory {
+                        width: 48px;
+                        height: 48px;
+                    }
+
+                    .staff-scope .search-filter-belt {
+                        flex-direction: column;
+                        gap: 1rem;
+                    }
+
+                    .staff-scope .filter-pill-premium {
+                        width: 100%;
+                    }
+
+                   .staff-scope  .cohort-table th, .cohort-table td {
+                        padding: 1.25rem 1rem;
+                    }
+
+                   .staff-scope  .cohort-table {
+                        min-width: 800px;
+                    }
+
+                    .staff-scope .cohort-table-card {
+                        border-radius: 24px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                   .staff-scope  .inventory-header-premium h1 {
+                        font-size: 1.5rem;
+                    }
+                   .staff-scope  .inventory-header-premium p {
+                        font-size: 0.95rem;
+                    }
+                }
+            `}</style>
+
+            <div className="inventory-header-premium">
+                <div>
+                    <h1>Cohort Management</h1>
+                    <p>Track and manage your active learning groups and class schedules.</p>
                 </div>
-
-                <Link 
-                    to="/instructor/cohorts/create" 
-                    className="h-14 px-8 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 transition-all hover:scale-105 active:scale-95 no-underline border-none cursor-pointer"
-                >
-                    <Plus size={20} /> Create New Batch
+                <Link to="/instructor/cohorts/create" className="btn-create-shell">
+                    <Plus size={20} /> Create New Cohort
                 </Link>
-            </header>
+            </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <div className="stats-grid-inventory">
                 {stats.map((stat, i) => (
-                    <div key={i} className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border p-10 flex items-center gap-8 group hover:shadow-2xl transition-all duration-500">
-                        <div className={`w-20 h-20 rounded-3xl ${stat.bg} ${stat.color} flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500`}>
-                            <stat.icon size={40} />
+                    <div key={i} className="stat-card-premium-inventory shadow-premium">
+                        <div className="icon-box-inventory">
+                            <stat.icon size={32} />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em] mb-1">{stat.label}</p>
-                            <h3 className="text-4xl font-black text-brand-charcoal dark:text-white tracking-tight">{stat.count}</h3>
+                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase' }}>{stat.label}</p>
+                            <h3 style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: 950, color: '#0f172a' }}>{stat.count}</h3>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Controls */}
-            <div className="flex flex-col md:flex-row gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <div className="flex-1 relative group">
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors">
-                        <Search size={22} />
-                    </div>
+            <div className="search-filter-belt">
+                <div style={{ flex: 1, height: '56px', background: 'white', border: '2px solid #f1f5f9', borderRadius: '18px', display: 'flex', alignItems: 'center', padding: '0 1.5rem', gap: '12px' }}>
+                    <Search size={22} color="#94a3b8" />
                     <input
-                        type="text"
-                        placeholder="Search archives by name or unique ID..."
-                        className="w-full h-16 pl-16 pr-6 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold"
+                        style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontWeight: 600 }}
+                        placeholder="Search cohorts or batches..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="h-16 px-10 bg-brand-beige dark:bg-white/5 border border-brand-border rounded-2xl flex items-center justify-center gap-3 font-black text-xs uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all border-none cursor-pointer">
-                    Live Status <Filter size={18} />
-                </button>
+                <div style={{ height: '56px', background: 'white', border: '2px solid #f1f5f9', borderRadius: '18px', display: 'flex', alignItems: 'center', padding: '0 1.5rem', gap: '12px', fontWeight: 800, color: '#475569', cursor: 'pointer' }}>
+                    <span>Live Status</span>
+                    <Filter size={18} />
+                </div>
             </div>
 
-            {/* Content Area */}
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-32 gap-6 bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border border-dashed">
-                        <Loader2 className="animate-spin text-brand-emerald" size={64} />
-                        <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Syncing Cohort Data...</p>
-                    </div>
-                ) : error ? (
-                    <div className="bg-red-50 dark:bg-red-500/10 border-2 border-red-100 dark:border-red-500/20 rounded-xl p-16 text-center space-y-6">
-                        <div className="w-20 h-20 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-3xl flex items-center justify-center mx-auto shadow-sm">
-                            <AlertCircle size={40} />
-                        </div>
-                        <div className="space-y-2">
-                            <h3 className="text-2xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Sync Protocol Failure</h3>
-                            <p className="text-brand-muted font-medium max-w-md mx-auto">{error}</p>
-                        </div>
-                        <button onClick={fetchCohorts} className="h-12 px-8 bg-red-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all border-none cursor-pointer shadow-lg shadow-red-600/20">
-                            Re-initialize Connection
-                        </button>
-                    </div>
-                ) : (
-                    <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto custom-scrollbar">
-                            <table className="w-full border-collapse">
-                                <thead>
-                                    <tr className="bg-brand-beige/50 dark:bg-white/5">
-                                        <th className="text-left px-10 py-8 text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Class Artifact</th>
-                                        <th className="text-left px-10 py-8 text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Live Status</th>
-                                        <th className="text-left px-10 py-8 text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Assigned Curriculum</th>
-                                        <th className="text-left px-10 py-8 text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Deployment Timeline</th>
-                                        <th className="text-left px-10 py-8 text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Cadets</th>
-                                        <th className="text-right px-10 py-8 text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Protocols</th>
+            {loading ? (
+                <div style={{ padding: '5rem', textAlign: 'center' }}>
+                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#64748b' }}>Loading cohort records...</p>
+                </div>
+            ) : error ? (
+                <div style={{ padding: '3rem', background: '#fff1f2', borderRadius: '24px', border: '1.5px solid #ffe4e6', textAlign: 'center', marginBottom: '3rem' }}>
+                    <AlertCircle size={40} color="#e11d48" style={{ margin: '0 auto 1rem' }} />
+                    <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 900 }}>Connection Interrupted</h3>
+                    <p style={{ color: '#64748b', fontWeight: 600, margin: '8px 0 2rem' }}>{error}</p>
+                    <button onClick={fetchCohorts} className="btn-primary-forest" style={{ margin: '0 auto' }}>Try Connecting Again</button>
+                </div>
+            ) : (
+                <div className="cohort-table-card shadow-premium">
+                    <div className="table-responsive-wrapper">
+                        <table className="cohort-table">
+                            <thead>
+                                <tr>
+                                    <th style={{ minWidth: '250px' }}>Class / Batch</th>
+                                    <th style={{ minWidth: '150px' }}>Status</th>
+                                    <th style={{ minWidth: '200px' }}>Course Title</th>
+                                    <th style={{ minWidth: '250px' }}>Semester Timeline</th>
+                                    <th style={{ minWidth: '150px' }}>Enrollment</th>
+                                    <th style={{ textAlign: 'right', minWidth: '220px' }}>Management</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredCohorts.length > 0 ? filteredCohorts.map(cohort => (
+                                    <tr key={cohort.id}>
+                                        <td>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#1a4d3e' }}>ID: {cohort.id}</span>
+                                                <span style={{ fontWeight: 900, fontSize: '1.1rem', color: '#0f172a', marginTop: '4px' }}>{cohort.name}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className={`status-badge-inventory status-${(cohort.status || 'Active').toLowerCase()}`}>{cohort.status || 'Active'}</div>
+                                        </td>
+                                        <td>
+                                            {cohort.course ? (
+                                                <div className="blueprint-tag">
+                                                    <Layers size={18} color="#1a4d3e" />
+                                                    {cohort.course.title}
+                                                </div>
+                                            ) : (
+                                                <div className="blueprint-empty">
+                                                    <ShieldAlert size={16} />
+                                                    Course Not Assigned
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#475569', fontSize: '0.9rem' }}>
+                                                <Calendar size={16} /> {new Date(cohort.start_date).toLocaleDateString()} — {new Date(cohort.end_date).toLocaleDateString()}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <Users size={18} color="#94a3b8" />
+                                                <span style={{ fontWeight: 950, color: '#0f172a' }}>{cohort.students?.length || 0}</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                                                <Link to={`/instructor/cohorts/${cohort.id}`} className="btn-manage-text">
+                                                    <Eye size={16} /> Dashboard
+                                                </Link>
+                                                <button className="btn-delete-text" onClick={() => handleDeleteCohort(cohort.id)}>
+                                                    <Trash2 size={16} /> Delete
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredCohorts.length > 0 ? filteredCohorts.map((cohort, idx) => (
-                                        <tr key={cohort.id} className={`group hover:bg-brand-beige/20 dark:hover:bg-white/5 transition-colors ${idx !== filteredCohorts.length - 1 ? 'border-b border-brand-border' : ''}`}>
-                                            <td className="px-10 py-8 whitespace-nowrap">
-                                                <div className="space-y-1">
-                                                    <span className="text-[10px] font-black text-brand-emerald uppercase tracking-widest">ID: {cohort.id.substring(0, 8)}</span>
-                                                    <h4 className="text-base font-black text-brand-charcoal dark:text-white uppercase tracking-tight group-hover:text-brand-emerald transition-colors">{cohort.name}</h4>
-                                                </div>
-                                            </td>
-                                            <td className="px-10 py-8 whitespace-nowrap">
-                                                <div className={`
-                                                    inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border
-                                                    ${(cohort.status || 'Active').toLowerCase() === 'active' 
-                                                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
-                                                        : 'bg-brand-beige dark:bg-white/10 text-brand-muted border-brand-border'}
-                                                `}>
-                                                    {(cohort.status || 'Active')}
-                                                </div>
-                                            </td>
-                                            <td className="px-10 py-8 whitespace-nowrap">
-                                                {cohort.course ? (
-                                                    <div className="flex items-center gap-3 text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-tight">
-                                                        <Layers size={18} className="text-brand-emerald" />
-                                                        {cohort.course.title}
-                                                    </div>
-                                                ) : (
-                                                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-500/20">
-                                                        <ShieldAlert size={14} /> Unassigned
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="px-10 py-8 whitespace-nowrap">
-                                                <div className="flex items-center gap-3 text-xs font-bold text-brand-muted uppercase tracking-widest">
-                                                    <Calendar size={16} className="text-brand-emerald" /> 
-                                                    <span>{new Date(cohort.start_date).toLocaleDateString()}</span>
-                                                    <ArrowRight size={12} />
-                                                    <span>{new Date(cohort.end_date).toLocaleDateString()}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-10 py-8 whitespace-nowrap">
-                                                <div className="flex items-center gap-3 bg-brand-beige dark:bg-white/10 w-fit px-4 py-2 rounded-2xl border border-brand-border">
-                                                    <Users size={18} className="text-brand-emerald" />
-                                                    <span className="font-black text-brand-charcoal dark:text-white">{cohort.students?.length || 0}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-10 py-8 text-right whitespace-nowrap">
-                                                <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <Link to={`/instructor/cohorts/${cohort.id}`} className="h-12 px-6 bg-white dark:bg-white/10 text-brand-charcoal dark:text-white border-2 border-brand-border rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-brand-charcoal hover:text-white dark:hover:bg-brand-emerald transition-all no-underline shadow-sm">
-                                                        <Eye size={16} /> Console
-                                                    </Link>
-                                                    <button onClick={() => handleDeleteCohort(cohort.id)} className="h-12 w-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer">
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )) : (
-                                        <tr>
-                                            <td colSpan={6} className="px-10 py-32 text-center">
-                                                <div className="space-y-6">
-                                                    <div className="w-20 h-20 bg-brand-beige dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto text-brand-muted/30 border border-brand-border border-dashed">
-                                                        <Sparkles size={40} />
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">No Cohorts Matched</h3>
-                                                        <p className="text-brand-muted font-medium">Refine your search parameters or initiate a new batch.</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                )) : (
+                                    <tr>
+                                        <td colSpan={6} style={{ textAlign: 'center', padding: '5rem', color: '#64748b', fontWeight: 800 }}>
+                                            No cohorts found matching your current search.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 }

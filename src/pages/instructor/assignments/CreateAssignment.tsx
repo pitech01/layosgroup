@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
     ClipboardList,
@@ -9,14 +9,7 @@ import {
     BookOpen,
     Upload,
     FileText,
-    X,
-    ChevronRight,
-    Zap,
-    ShieldCheck,
-    Sparkles,
-    CalendarDays,
-    Info,
-    Plus
+    X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -25,58 +18,88 @@ export default function CreateAssignment() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [cohorts, setCohorts] = useState<any[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [formData, setFormData] = useState({ title: '', description: '', cohort_id: '', due_date: '', due_time: '23:59' });
+
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        cohort_id: '',
+        due_date: '',
+        due_time: '23:59'
+    });
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
     const fetchCohorts = async () => {
         try {
             const response = await fetch(`${API_URL}/cohorts`, {
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             const data = await response.json();
-            if (response.ok) setCohorts(data);
+            if (response.ok) {
+                setCohorts(data);
+            }
         } catch (err) {
             console.error("Error fetching cohorts", err);
         }
     };
 
-    useEffect(() => { fetchCohorts(); }, []);
+    useEffect(() => {
+        fetchCohorts();
+    }, []);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+
             if (file.size > 50 * 1024 * 1024) {
                 toast.error("File size exceeds 50MB limit.");
                 return;
             }
+
             setSelectedFile(file);
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.cohort_id) { toast.error("Select authorization cohort"); return; }
+
+        if (!formData.cohort_id) {
+            toast.error("Please select a cohort.");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const combinedDateTime = `${formData.due_date}T${formData.due_time}:00`;
+
             const data = new FormData();
             data.append('title', formData.title);
             data.append('description', formData.description);
             data.append('cohort_id', formData.cohort_id);
             data.append('due_date', combinedDateTime);
-            if (selectedFile) data.append('assignment_file', selectedFile);
+            if (selectedFile) {
+                data.append('assignment_file', selectedFile);
+            }
 
             const response = await fetch(`${API_URL}/instructor/assignments`, {
                 method: 'POST',
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: data
             });
 
             if (response.ok) {
-                toast.success("Assignment published");
+                toast.success("Assignment published successfully!");
                 navigate('/instructor/assignments');
-            } else throw new Error('Initialization failure.');
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Operation failed.');
+            }
         } catch (err: any) {
             toast.error(err.message);
         } finally {
@@ -85,185 +108,361 @@ export default function CreateAssignment() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-12 pb-32 px-6 md:px-0">
-            {/* Header / Breadcrumb */}
-            <div className="flex items-center justify-between animate-fade-in-up">
-                <Link to="/instructor/assignments" className="group flex items-center gap-4 text-[10px] font-black text-brand-muted hover:text-brand-emerald uppercase tracking-[0.3em] transition-all no-underline">
-                    <ArrowLeft size={18} className="group-hover:-translate-x-2 transition-transform" /> Back to Evaluation
-                </Link>
-            </div>
+        <div className="create-assignment-container">
+            <style>{`
+                .staff-scope .create-assignment-container {
+                    max-width: 1000px;
+                    margin: 0 auto;
+                    font-family: 'Inter', sans-serif;
+                    padding: 2rem;
+                }
 
-            <header className="space-y-6 animate-fade-in-up">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-brand-emerald/10 rounded-xl">
-                        <ClipboardList className="text-brand-emerald" size={18} />
-                    </div>
-                    <span className="text-brand-emerald font-black text-[10px] uppercase tracking-[0.4em]">Protocol Initialization</span>
-                </div>
-                <div className="space-y-4">
-                    <h1 className="text-5xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none uppercase">Create <span className="text-brand-emerald">Assessment</span></h1>
-                    <p className="text-brand-muted font-medium text-xl max-w-2xl leading-relaxed">Configure evaluation parameters and distribute instructional artifacts.</p>
-                </div>
-            </header>
+                .staff-scope .back-link {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #64748b;
+                    text-decoration: none;
+                    font-weight: 800;
+                    font-size: 0.9rem;
+                    margin-bottom: 2rem;
+                    transition: all 0.3s;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 0;
+                }
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 items-start animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <form className="xl:col-span-8 bg-white dark:bg-brand-charcoal rounded-[60px] border border-brand-border p-10 md:p-16 space-y-12 shadow-2xl shadow-brand-charcoal/5" onSubmit={handleSubmit}>
-                    {/* Core Parameters */}
-                    <div className="space-y-10">
-                        <div className="flex items-center gap-4 border-b border-brand-border pb-6">
-                            <ShieldCheck className="text-brand-emerald" size={20} />
-                            <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Core Parameters</h3>
-                        </div>
+                .back-link:hover {
+                    color: #0f172a;
+                    transform: translateX(-4px);
+                }
 
-                        <div className="space-y-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Assessment Title</label>
+                .staff-scope .registration-layout {
+                    display: grid;
+                    grid-template-columns: 1fr 320px;
+                    gap: 3rem;
+                }
+
+                @media (max-width: 968px) {
+                    .staff-scope .registration-layout {
+                        grid-template-columns: 1fr;
+                    }
+                }
+
+                .staff-scope .form-card-premium {
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 32px;
+                    padding: 3rem;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                }
+
+                .staff-scope .section-title {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 2.5rem;
+                }
+
+                .staff-scope .icon-box {
+                    background: #f1f5f9;
+                    padding: 12px;
+                    border-radius: 12px;
+                    color: #1a4d3e;
+                }
+
+                .section-title h2 {
+                    margin: 0;
+                    font-size: 1.75rem;
+                    font-weight: 900;
+                    color: #0f172a;
+                    letter-spacing: -0.04em;
+                }
+
+                .staff-scope .form-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    margin-bottom: 2rem;
+                }
+
+                .form-group label {
+                    font-weight: 800;
+                    color: #334155;
+                    font-size: 0.95rem;
+                }
+
+                .staff-scope .premium-input {
+                    width: 100%;
+                    padding: 1rem 1.25rem;
+                    background: #f8fafc;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 16px;
+                    font-family: inherit;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                    color: #0f172a;
+                }
+
+                .staff-scope .premium-input:focus {
+                    outline: none;
+                    border-color: #1a4d3e;
+                    background: white;
+                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                }
+
+                .staff-scope .premium-textarea {
+                    min-height: 180px;
+                    resize: vertical;
+                }
+
+                .staff-scope .file-upload-zone {
+                    border: 2px dashed #e2e8f0;
+                    border-radius: 20px;
+                    padding: 2.5rem;
+                    text-align: center;
+                    transition: all 0.3s;
+                    background: #f8fafc;
+                    cursor: pointer;
+                    position: relative;
+                }
+
+                .staff-scope .file-upload-zone:hover {
+                    border-color: #1a4d3e;
+                    background: #f0f7f4;
+                }
+
+                .staff-scope .file-selected-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    background: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 16px;
+                    border: 1px solid #e2e8f0;
+                    margin-top: 1rem;
+                }
+
+                .staff-scope .remove-file {
+                    margin-left: auto;
+                    color: #ef4444;
+                    cursor: pointer;
+                    padding: 4px;
+                    border-radius: 8px;
+                    transition: background 0.2s;
+                }
+
+                .staff-scope .remove-file:hover {
+                    background: #fee2e2;
+                }
+
+                .staff-scope .btn-submit {
+                    background: #1a4d3e;
+                    color: white;
+                    border: none;
+                    padding: 1.25rem;
+                    border-radius: 20px;
+                    font-weight: 900;
+                    font-size: 1.1rem;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    transition: all 0.3s;
+                    width: 100%;
+                    margin-top: 1rem;
+                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.3);
+                }
+
+                .staff-scope .btn-submit:hover {
+                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.4);
+                    transform: translateY(-2px);
+                }
+
+                .staff-scope .btn-submit:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+
+               .staff-scope  .staff-scope .info-sidebar {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                }
+
+                .staff-scope .info-card {
+                    background: white;
+                    border-radius: 24px;
+                    padding: 2rem;
+                    border: 1px solid #e2e8f0;
+                }
+
+                .staff-scope .info-card h4 {
+                    margin: 0 0 1rem 0;
+                    font-size: 1.1rem;
+                    font-weight: 900;
+                    color: #0f172a;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .staff-scope .info-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+
+               .staff-scope  .info-list li {
+                    display: flex;
+                    gap: 10px;
+                    color: #64748b;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    line-height: 1.5;
+                }
+            `}</style>
+
+            <button onClick={() => navigate(-1)} className="back-link">
+                <ArrowLeft size={20} /> Back to Assignments
+            </button>
+
+            <div className="registration-layout">
+                <main>
+                    <div className="form-card-premium">
+                        <form onSubmit={handleSubmit}>
+                            <div className="section-title">
+                                <div className="icon-box"><ClipboardList size={24} /></div>
+                                <h2>Create Assignment</h2>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Assignment Title</label>
                                 <input
-                                    type="text"
-                                    className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-base focus:border-brand-emerald transition-all placeholder:text-brand-muted/30"
-                                    placeholder="e.g. Q4 Technical Evaluation"
+                                    className="premium-input"
+                                    placeholder="e.g. Q1 Technical Performance Analysis"
                                     required
                                     value={formData.title}
-                                    onChange={e => setFormData({ ...formData, title: e.target.value })}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                 />
                             </div>
 
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Target Authorization Cohort</label>
+                            <div className="form-group">
+                                <label>Target Cohort</label>
                                 <select
-                                    className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all appearance-none"
+                                    className="premium-input"
                                     required
                                     value={formData.cohort_id}
-                                    onChange={e => setFormData({ ...formData, cohort_id: e.target.value })}
+                                    onChange={(e) => setFormData({ ...formData, cohort_id: e.target.value })}
                                 >
-                                    <option value="">Select Recipient Cohort</option>
-                                    {cohorts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    <option value="">Select recipient cohort...</option>
+                                    {cohorts.map(c => (
+                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
                                 </select>
                             </div>
 
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Instructional Description</label>
+                            <div className="form-group">
+                                <label>Instructions & Description</label>
                                 <textarea
-                                    className="w-full min-h-[200px] p-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[32px] text-brand-charcoal dark:text-white outline-none font-bold text-base focus:border-brand-emerald transition-all placeholder:text-brand-muted/30 resize-none"
-                                    placeholder="Detail the expectations and requirements for this evaluation..."
+                                    className="premium-input premium-textarea"
+                                    placeholder="Paste your assignment requirements and expectations here..."
                                     required
                                     value={formData.description}
-                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 />
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Deadline & Artifact Section */}
-                    <div className="space-y-10">
-                        <div className="flex items-center gap-4 border-b border-brand-border pb-6">
-                            <Zap className="text-brand-emerald" size={20} />
-                            <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Timeline & Artifacts</h3>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Termination Date</label>
-                                <div className="relative">
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                <div className="form-group">
+                                    <label>Due Date</label>
                                     <input
                                         type="date"
-                                        className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
+                                        className="premium-input"
                                         required
                                         value={formData.due_date}
-                                        onChange={e => setFormData({ ...formData, due_date: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
                                     />
-                                    <CalendarDays className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
                                 </div>
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Termination Time</label>
-                                <div className="relative">
+                                <div className="form-group">
+                                    <label>Due Time</label>
                                     <input
                                         type="time"
-                                        className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
+                                        className="premium-input"
                                         required
                                         value={formData.due_time}
-                                        onChange={e => setFormData({ ...formData, due_time: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, due_time: e.target.value })}
                                     />
-                                    <Clock className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Instructional Artifact (Optional)</label>
-                            {!selectedFile ? (
-                                <div onClick={() => document.getElementById('file-input')?.click()} className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-6 group-hover:border-brand-emerald transition-all cursor-pointer">
-                                    <input type="file" id="file-input" hidden onChange={handleFileChange} accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip" />
-                                    <div className="w-20 h-20 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[24px] flex items-center justify-center mx-auto text-brand-muted group-hover:text-brand-emerald group-hover:scale-110 transition-all shadow-sm"><Upload size={40} /></div>
-                                    <div className="space-y-1">
-                                        <p className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Attach Protocol</p>
-                                        <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest leading-relaxed">PDF, DOCX, ZIP (Max 50MB)</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="p-8 bg-brand-emerald/10 border-2 border-brand-emerald/20 rounded-xl flex items-center justify-between gap-6 shadow-xl shadow-brand-emerald/5">
-                                    <div className="flex items-center gap-6 min-w-0">
-                                        <div className="w-16 h-16 bg-brand-emerald text-white rounded-[20px] flex items-center justify-center shrink-0 shadow-lg shadow-brand-emerald/20"><FileText size={32} /></div>
-                                        <div className="space-y-1 truncate">
-                                            <div className="text-sm font-black text-brand-emerald uppercase tracking-tight truncate">{selectedFile.name}</div>
-                                            <div className="text-[9px] font-bold text-brand-emerald/60 uppercase tracking-widest">Target Synchronized</div>
+                            <div className="form-group">
+                                <label>Assignment Resource (Optional)</label>
+                                {!selectedFile ? (
+                                    <div className="file-upload-zone" onClick={() => document.getElementById('file-input')?.click()}>
+                                        <input
+                                            type="file"
+                                            id="file-input"
+                                            hidden
+                                            onChange={handleFileChange}
+                                            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip"
+                                        />
+                                        <Upload size={32} color="#1a4d3e" style={{ marginBottom: '1rem' }} />
+                                        <div style={{ fontWeight: 800, color: '#0f172a' }}>Click to upload instruction file</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
+                                            PDF, DOCX, PPT, Excel or ZIP (Max 50MB)
                                         </div>
                                     </div>
-                                    <button onClick={() => setSelectedFile(null)} className="w-12 h-12 flex items-center justify-center hover:bg-red-500 hover:text-white text-brand-muted rounded-xl transition-all border-none bg-transparent cursor-pointer"><X size={20} /></button>
-                                </div>
-                            )}
-                        </div>
+                                ) : (
+                                    <div className="file-selected-card">
+                                        <FileText size={20} color="#1a4d3e" />
+                                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{selectedFile.name}</div>
+                                        <div className="remove-file" onClick={() => setSelectedFile(null)}>
+                                            <X size={18} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <button className="btn-submit" disabled={isSubmitting}>
+                                {isSubmitting ? (
+                                    <><Loader2 className="animate-spin" size={20} /> Processing...</>
+                                ) : (
+                                    <CheckCircle size={20} />
+                                )} Publish Assignment
+                            </button>
+                        </form>
+                    </div>
+                </main>
+
+                <aside className="info-sidebar">
+                    <div className="info-card">
+                        <h4><BookOpen size={20} color="#1a4d3e" /> Guidelines</h4>
+                        <ul className="info-list">
+                            <li>
+                                <div style={{ height: '6px', width: '6px', borderRadius: '50%', background: '#1a4d3e', marginTop: '7px', flexShrink: 0 }} />
+                                Assignments are visible to students immediately upon publication.
+                            </li>
+                            <li>
+                                <div style={{ height: '6px', width: '6px', borderRadius: '50%', background: '#1a4d3e', marginTop: '7px', flexShrink: 0 }} />
+                                You can upload a reference document (PDF, DOCX, ZIP etc.) as part of the instructions.
+                            </li>
+                        </ul>
                     </div>
 
-                    <div className="pt-8">
-                        <button 
-                            type="submit" 
-                            disabled={isSubmitting}
-                            className="w-full h-20 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[28px] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4 border-none cursor-pointer"
-                        >
-                            {isSubmitting ? <Loader2 className="animate-spin" size={24} /> : <>Initialize Assessment <ChevronRight size={24} /></>}
-                        </button>
-                    </div>
-                </form>
-
-                {/* Sidebar: Intelligence */}
-                <div className="xl:col-span-4 space-y-8 sticky top-32">
-                    <div className="bg-brand-emerald p-10 rounded-[48px] text-white space-y-10 shadow-2xl shadow-brand-emerald/20">
-                        <div className="flex items-center gap-4">
-                            <div className="p-2 bg-white/10 rounded-xl">
-                                <BookOpen size={20} />
-                            </div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em]">Protocol Guidelines</h4>
-                        </div>
-                        <div className="space-y-8">
-                            <div className="flex gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 font-black text-xs">01</div>
-                                <p className="text-xs font-medium leading-relaxed opacity-80">Assessments are visible to students immediately upon publication protocol completion.</p>
-                            </div>
-                            <div className="flex gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 font-black text-xs">02</div>
-                                <p className="text-xs font-medium leading-relaxed opacity-80">One instructional artifact can be synchronized per evaluation protocol.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="p-10 bg-white dark:bg-brand-charcoal rounded-[48px] border border-brand-border space-y-8 shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <div className="p-2 bg-brand-beige/50 dark:bg-white/10 rounded-xl text-brand-emerald">
-                                <Clock size={18} />
-                            </div>
-                            <h4 className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">Termination Logic</h4>
-                        </div>
-                        <p className="text-xs font-medium text-brand-muted leading-relaxed">
-                            Terminal deadlines are absolute. Late submissions will be flagged in the evaluation panel with a time-divergence indicator.
+                    <div className="info-card">
+                        <h4><Clock size={20} color="#0f172a" /> Deadlines</h4>
+                        <p style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600, margin: 0 }}>
+                            Students will see the remaining time relative to the due date provided. Late submissions are marked accordingly in your review panel.
                         </p>
                     </div>
-
-                    <div className="flex items-center justify-center gap-4 text-brand-muted text-[10px] font-black uppercase tracking-widest px-4">
-                        <Sparkles size={14} className="text-brand-emerald" /> Evaluator Grid Synchronized
-                    </div>
-                </div>
+                </aside>
             </div>
         </div>
     );

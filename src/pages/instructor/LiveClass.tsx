@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Plus,
     Calendar,
@@ -13,17 +13,8 @@ import {
     Save,
     FileVideo,
     Edit,
-    Trash2,
-    Loader2,
-    Search,
-    Filter,
-    ChevronRight,
-    Zap,
-    Sparkles,
-    ArrowUpRight,
-    ArrowRight
+    Trash2
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 
 interface LiveSession {
     id: number;
@@ -46,6 +37,7 @@ export default function LiveClass() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<"all" | "upcoming" | "live" | "ended">("all");
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
     const [recordingModal, setRecordingModal] = useState<{ show: boolean, sessionId: number | null }>({ show: false, sessionId: null });
     const [savingRecording, setSavingRecording] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -69,10 +61,15 @@ export default function LiveClass() {
     const fetchSessions = async () => {
         try {
             const response = await fetch(`${API_URL}/live-sessions`, {
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             const data = await response.json();
-            if (response.ok) setSessions(data);
+            if (response.ok) {
+                setSessions(data);
+            }
         } catch (err) {
             console.error("Fetch Sessions Error:", err);
         } finally {
@@ -83,10 +80,15 @@ export default function LiveClass() {
     const fetchCourses = async () => {
         try {
             const response = await fetch(`${API_URL}/courses`, {
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             const data = await response.json();
-            if (response.ok) setCourses(data);
+            if (response.ok) {
+                setCourses(data);
+            }
         } catch (err) {
             console.error("Fetch Courses Error:", err);
         }
@@ -117,16 +119,25 @@ export default function LiveClass() {
         try {
             const response = await fetch(`${API_URL}/live-sessions/${editModal.session.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(editForm)
             });
+            const data = await response.json();
             if (response.ok) {
-                toast.success('Session updated');
-                fetchSessions();
+                setSessions(sessions.map(s => s.id === data.id ? { ...data, course: courses.find(c => c.id === parseInt(editForm.course_id)) } : s));
                 setEditModal({ show: false, session: null });
-            } else throw new Error('Modification failure.');
-        } catch (err: any) {
-            toast.error(err.message);
+                // We should refetch or update state carefully. data might not have the full course object loaded.
+                fetchSessions(); // Simpler to refetch
+            } else {
+                alert(data.message || 'Update failed');
+            }
+        } catch (err) {
+            console.error("Update Session Error:", err);
+            alert('A network error occurred.');
         } finally {
             setUpdating(false);
         }
@@ -137,19 +148,39 @@ export default function LiveClass() {
         try {
             const response = await fetch(`${API_URL}/live-sessions/${id}`, {
                 method: 'DELETE',
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             if (response.ok) {
                 setSessions(sessions.filter(s => s.id !== id));
-                toast.success('Session terminated');
+            } else {
+                alert('Deletion failed. Retry later.');
             }
         } catch (err) {
-            toast.error('Network failure');
+            alert('A network error occurred.');
         }
     };
 
+    // Show success toast if redirected from creation page
     useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+        if (location.state?.success) {
+            setShowSuccessToast(true);
+            const timer = setTimeout(() => {
+                setShowSuccessToast(false);
+                // Clear state to avoid toast on refresh
+                window.history.replaceState({}, document.title);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [location]);
+
+    // Update time every minute to refresh status logic
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 60000);
         return () => clearInterval(timer);
     }, []);
 
@@ -157,6 +188,7 @@ export default function LiveClass() {
         const now = new Date();
         const start = new Date(`${session.scheduled_date}T${session.start_time}`);
         const end = new Date(`${session.scheduled_date}T${session.end_time}`);
+
         if (now >= start && now <= end) return 'live';
         if (now < start) return 'upcoming';
         return 'ended';
@@ -168,10 +200,40 @@ export default function LiveClass() {
         return status === filter;
     });
 
+    const getStatusStyles = (status: string) => {
+        switch (status) {
+            case 'live':
+                return { bg: '#ecfdf5', color: '#10b981', label: 'LIVE NOW' };
+            case 'upcoming':
+                return { bg: '#eff6ff', color: '#3b82f6', label: 'UPCOMING' };
+            case 'ended':
+                return { bg: '#f1f5f9', color: '#64748b', label: 'ENDED' };
+            default:
+                return { bg: '#f1f5f9', color: '#64748b', label: status.toUpperCase() };
+        }
+    };
+
+    const handleGoLive = (link: string) => {
+        if (link) {
+            window.open(link, '_blank');
+        }
+    };
+
+    const handleOpenRecordingModal = (session: LiveSession) => {
+        setRecordingModal({
+            show: true,
+            sessionId: session.id,
+        });
+        setUploadedUrl(session.recording_link || '');
+        setUploadProgress(0);
+        setUploading(false);
+    };
+
     const handleFileUpload = async (file: File) => {
         const token = localStorage.getItem('token');
         setUploading(true);
         setUploadProgress(0);
+
         const formData = new FormData();
         formData.append('video', file);
 
@@ -182,13 +244,20 @@ export default function LiveClass() {
             if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
             xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) setUploadProgress(Math.round((event.loaded / event.total) * 100));
+                if (event.lengthComputable) {
+                    setUploadProgress(Math.round((event.loaded / event.total) * 100));
+                }
             };
 
             const response: any = await new Promise((resolve, reject) => {
                 xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText));
-                    else reject(new Error('Upload failed'));
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            resolve(JSON.parse(xhr.responseText));
+                        } catch { reject(new Error('Invalid response')); }
+                    } else {
+                        reject(new Error('Upload failed'));
+                    }
                 };
                 xhr.onerror = () => reject(new Error('Network error'));
                 xhr.send(formData);
@@ -196,11 +265,14 @@ export default function LiveClass() {
 
             if (response.success) {
                 setUploadedUrl(response.video_url);
-                if (editModal.show) setEditForm(prev => ({ ...prev, recording_link: response.video_url }));
-                toast.success('Video sync complete');
-            } else throw new Error(response.message);
+                if (editModal.show) {
+                    setEditForm(prev => ({ ...prev, recording_link: response.video_url }));
+                }
+            } else {
+                alert(response.message || 'Upload failed');
+            }
         } catch (err: any) {
-            toast.error(err.message);
+            alert(err.message || 'An error occurred during upload');
         } finally {
             setUploading(false);
         }
@@ -209,19 +281,27 @@ export default function LiveClass() {
     const handleDeleteVideo = async () => {
         if (!window.confirm('Delete this recording permanently?')) return;
         const token = localStorage.getItem('token');
+
         try {
             const response = await fetch(`${API_URL}/delete-video`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ video_url: uploadedUrl })
             });
+
             if (response.ok) {
                 setUploadedUrl('');
-                if (editModal.show) setEditForm(prev => ({ ...prev, recording_link: '' }));
-                toast.success('Asset redacted');
+                if (editModal.show) {
+                    setEditForm(prev => ({ ...prev, recording_link: '' }));
+                }
+            } else {
+                alert('Failed to delete video');
             }
         } catch (err) {
-            toast.error('Deletion failure');
+            alert('An error occurred during deletion');
         }
     };
 
@@ -231,292 +311,566 @@ export default function LiveClass() {
         try {
             const response = await fetch(`${API_URL}/live-sessions/${recordingModal.sessionId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ recording_link: uploadedUrl })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    recording_link: uploadedUrl
+                })
             });
+
             if (response.ok) {
-                toast.success('Recording archived');
-                fetchSessions();
+                await fetchSessions();
                 setRecordingModal({ show: false, sessionId: null });
                 setUploadedUrl('');
-            } else throw new Error('Save failure.');
-        } catch (err: any) {
-            toast.error(err.message);
+            } else {
+                const data = await response.json();
+                alert(data.message || 'Failed to save recording link');
+            }
+        } catch (err) {
+            console.error("Save Recording Error:", err);
+            alert('A network error occurred.');
         } finally {
             setSavingRecording(false);
         }
     };
 
     return (
-        <div className="space-y-12 pb-32 max-w-7xl mx-auto px-6 md:px-0">
-            {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 animate-fade-in-up">
-                <div className="space-y-6 flex-1">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-brand-emerald/10 rounded-xl">
-                            <Video className="text-brand-emerald" size={18} />
-                        </div>
-                        <span className="text-brand-emerald font-black text-[10px] uppercase tracking-[0.4em]">Broadcast Operations</span>
-                    </div>
-                    <div className="space-y-4">
-                        <h1 className="text-5xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none uppercase">Live <span className="text-brand-emerald">Classes</span></h1>
-                        <p className="text-brand-muted font-medium text-xl max-w-2xl leading-relaxed">Orchestrate real-time academic engagements and manage instructional archives.</p>
-                    </div>
+        <div className="animate-fade-in-up">
+            <style>{`
+                .staff-scope .live-header-section {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-end;
+                    margin-bottom: 3rem;
+                    gap: 2rem;
+                    flex-wrap: wrap;
+                }
+
+                .staff-scope .filter-tabs {
+                    display: flex;
+                    gap: 0.5rem;
+                    background: #f1f5f9;
+                    padding: 0.4rem;
+                    border-radius: 14px;
+                    width: fit-content;
+                    max-width: 100%;
+                    overflow-x: auto;
+                    scrollbar-width: none;
+                }
+                .staff-scope .filter-tabs::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .staff-scope .filter-btn {
+                    padding: 0.6rem 1.25rem;
+                    border: none;
+                    background: transparent;
+                    color: #64748b;
+                    font-weight: 700;
+                    font-size: 0.85rem;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .staff-scope .filter-btn.active {
+                    background: white;
+                    color: #020617;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                }
+
+                .staff-scope .sessions-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: 1.5rem;
+                }
+
+                .staff-scope .live-session-card {
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 20px;
+                    padding: 1.75rem;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .staff-scope .live-session-card:hover {
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+                    border-color: #cbd5e1;
+                    transform: translateY(-4px);
+                }
+
+                .staff-scope .session-status-badge {
+                    padding: 0.4rem 0.75rem;
+                    border-radius: 8px;
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    letter-spacing: 0.05em;
+                    width: fit-content;
+                    margin-bottom: 1.25rem;
+                }
+
+                .staff-scope .success-toast {
+                    position: fixed;
+                    bottom: 2rem;
+                    right: 2rem;
+                    background: #10b981;
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                    z-index: 3000;
+                    animation: slideUp 0.3s ease-out;
+                }
+
+                @keyframes slideUp {
+                    from { transform: translateY(100%); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+
+                .staff-scope .btn-go-live {
+                    width: 100%;
+                    height: 52px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.75rem;
+                    background: #020617;
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .btn-go-live:hover:not(:disabled) {
+                    background: #0f172a;
+                    box-shadow: 0 10px 15px -3px rgba(2, 6, 23, 0.2);
+                }
+
+                .btn-go-live:disabled {
+                    background: #f1f5f9;
+                    color: #94a3b8;
+                    cursor: not-allowed;
+                }
+
+                .staff-scope .warning-badge {
+                    background: #fff7ed;
+                    color: #c2410c;
+                    padding: 0.75rem;
+                    border-radius: 10px;
+                    font-size: 0.8rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    border: 1px solid #ffedd5;
+                }
+
+                .staff-scope .empty-state-container {
+                    padding: 8rem 2rem;
+                    text-align: center;
+                    background: white;
+                    border: 2px dashed #e2e8f0;
+                    border-radius: 32px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .staff-scope .modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(15, 23, 42, 0.4);
+                    backdrop-filter: blur(8px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 2000;
+                    animation: fadeIn 0.3s ease;
+                }
+
+                .staff-scope .recording-modal {
+                    background: white;
+                    width: 100%;
+                    max-width: 450px;
+                    border-radius: 20px;
+                    padding: 2rem;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                }
+
+                .staff-scope .modal-title {
+                    font-size: 1.25rem;
+                    font-weight: 800;
+                    margin-bottom: 1.5rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                @media (max-width: 640px) {
+                    .staff-scope .sessions-grid {
+                        grid-template-columns: 1fr;
+                        gap: 1rem;
+                    }
+                    .staff-scope .live-header-section {
+                        flex-direction: column;
+                        align-items: stretch;
+                        text-align: center;
+                        margin-bottom: 2rem;
+                    }
+                   .staff-scope  .live-header-section div {
+                        margin-bottom: 1rem;
+                    }
+                   .staff-scope  .live-header-section button {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                   .staff-scope  .staff-scope .filter-tabs {
+                        width: 100%;
+                        justify-content: flex-start;
+                        margin-bottom: 1.5rem !important;
+                    }
+                    .staff-scope .live-session-card {
+                        padding: 1.25rem;
+                    }
+                    .staff-scope .recording-modal {
+                        padding: 1.5rem;
+                        margin: 1rem;
+                        border-radius: 16px;
+                    }
+                    .staff-scope .empty-state-container {
+                        padding: 4rem 1.5rem;
+                    }
+                }
+            `}</style>
+
+            <div className="live-header-section">
+                <div>
+                    <h1 className="dashboard-header-title" style={{ marginBottom: '0.5rem' }}>Live Sessions</h1>
+                    <p style={{ color: '#64748b', fontSize: '1rem' }}>Manage and host your upcoming live classes.</p>
                 </div>
 
                 <button
+                    className="btn-standard"
+                    style={{ background: '#020617', padding: '0.85rem 1.75rem', borderRadius: '12px' }}
                     onClick={() => navigate('/instructor/live/create')}
-                    className="h-20 px-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[32px] font-black text-xs uppercase tracking-[0.3em] flex items-center gap-4 shadow-2xl shadow-brand-charcoal/20 transition-all hover:scale-105 active:scale-95 group border-none cursor-pointer"
                 >
-                    <Plus size={24} className="group-hover:rotate-90 transition-transform" /> Initialize Session
+                    <Plus size={20} /> Schedule Session
                 </button>
-            </header>
+            </div>
 
-            {/* Hub Bar */}
-            <div className="flex flex-col xl:flex-row gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <div className="flex-1 flex gap-2 p-2 bg-brand-beige/20 dark:bg-white/5 rounded-[28px] border border-brand-border">
-                    {(['all', 'upcoming', 'live', 'ended'] as const).map(f => (
-                        <button
-                            key={f}
-                            onClick={() => setFilter(f)}
-                            className={`flex-1 h-14 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${filter === f ? 'bg-white dark:bg-brand-emerald text-brand-charcoal dark:text-white shadow-xl shadow-brand-charcoal/5' : 'text-brand-muted hover:text-brand-charcoal dark:hover:text-white'}`}
-                        >
-                            {f}
-                        </button>
-                    ))}
-                </div>
-                <div className="flex gap-4">
-                    <div className="relative group">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors" size={20} />
-                        <input
-                            type="text"
-                            placeholder="Filter sessions..."
-                            className="h-18 pl-14 pr-6 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[24px] focus:outline-none focus:border-brand-emerald transition-all text-xs font-bold text-brand-charcoal dark:text-white"
-                        />
-                    </div>
-                    <button className="h-18 px-8 bg-white dark:bg-white/5 border-2 border-brand-border rounded-[24px] flex items-center gap-4 font-black text-[10px] uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all border-none cursor-pointer">
-                        <Filter size={18} /> Protocol
+            <div className="filter-tabs" style={{ marginBottom: '2rem' }}>
+                {(['all', 'upcoming', 'live', 'ended'] as const).map(f => (
+                    <button
+                        key={f}
+                        className={`filter-btn ${filter === f ? 'active' : ''}`}
+                        onClick={() => setFilter(f)}
+                    >
+                        {f.charAt(0).toUpperCase() + f.slice(1)}
                     </button>
-                </div>
+                ))}
             </div>
 
-            {/* Grid */}
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                {loading ? (
-                    <div className="py-40 flex flex-col items-center justify-center gap-8 bg-brand-beige/20 dark:bg-white/5 rounded-[60px] border-2 border-brand-border border-dashed">
-                        <Loader2 className="animate-spin text-brand-emerald" size={64} />
-                        <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em] animate-pulse">Syncing Session Grid...</p>
-                    </div>
-                ) : filteredSessions.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        {filteredSessions.map((session, idx) => {
-                            const status = getSessionStatus(session);
-                            const isLive = status === 'live';
-                            const isUpcoming = status === 'upcoming';
-                            const isEnded = status === 'ended';
-                            
-                            return (
-                                <div key={session.id} className="group bg-white dark:bg-brand-charcoal rounded-[56px] border border-brand-border p-10 flex flex-col hover:shadow-[0_40px_80px_-20px_rgba(26,77,62,0.15)] transition-all duration-700 relative overflow-hidden animate-fade-in-up" style={{ animationDelay: `${0.1 * idx}s` }}>
-                                    <div className="absolute top-0 right-0 p-8 flex gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                                        <button onClick={() => handleEdit(session)} className="w-10 h-10 flex items-center justify-center bg-white dark:bg-white/10 border-2 border-brand-border rounded-xl text-brand-muted hover:text-brand-emerald transition-colors cursor-pointer"><Edit size={16} /></button>
-                                        <button onClick={() => handleDeleteSession(session.id)} className="w-10 h-10 flex items-center justify-center bg-red-500/10 border-2 border-red-500/20 rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all cursor-pointer"><Trash2 size={16} /></button>
+            {loading ? (
+                <div style={{ padding: '8rem 2rem', textAlign: 'center' }}>Loading sessions...</div>
+            ) : filteredSessions.length > 0 ? (
+                <div className="sessions-grid">
+                    {filteredSessions.map(session => {
+                        const status = getSessionStatus(session);
+                        const style = getStatusStyles(status);
+                        const hasLink = !!session.meeting_link;
+
+                        const scheduledStartTime = new Date(`${session.scheduled_date}T${session.start_time}`);
+                        const isTimeToGoLive = currentTime >= scheduledStartTime;
+                        const isUpcoming = status === 'upcoming';
+                        const isEnded = status === 'ended';
+
+                        return (
+                            <div key={session.id} className="live-session-card">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                                    <div className="session-status-badge" style={{ background: style.bg, color: style.color, margin: 0 }}>
+                                        {style.label}
                                     </div>
-
-                                    <div className="flex-1 space-y-10">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border flex items-center gap-2 ${
-                                                isLive ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                                                isUpcoming ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                                'bg-brand-beige dark:bg-white/10 text-brand-muted border-brand-border'
-                                            }`}>
-                                                {isLive && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>}
-                                                {status}
-                                            </div>
-                                            <div className="text-[9px] font-black text-brand-muted uppercase tracking-[0.2em]">{session.course?.title}</div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <h3 className="text-3xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none group-hover:text-brand-emerald transition-colors line-clamp-2 uppercase">
-                                                {session.title}
-                                            </h3>
-                                            <div className="flex flex-wrap gap-6">
-                                                <div className="flex items-center gap-2 text-brand-muted font-bold text-xs">
-                                                    <Calendar size={14} className="text-brand-emerald" /> {new Date(session.scheduled_date).toLocaleDateString()}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-brand-muted font-bold text-xs">
-                                                    <Clock size={14} className="text-brand-emerald" /> {session.start_time.substring(0, 5)} - {session.end_time.substring(0, 5)}
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button 
+                                            onClick={() => handleEdit(session)}
+                                            style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer' }}
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDeleteSession(session.id)}
+                                            style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer' }}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
+                                </div>
 
-                                    <div className="mt-12 pt-10 border-t border-brand-border space-y-4">
-                                        {isEnded ? (
-                                            <div className="space-y-4">
-                                                <button onClick={() => handleOpenRecordingModal(session)} className={`w-full h-16 rounded-[24px] font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all border-none cursor-pointer ${session.recording_link ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/20' : 'bg-brand-charcoal dark:bg-brand-emerald text-white'}`}>
-                                                    {session.recording_link ? <><FileVideo size={18} /> Review Artifact</> : <><Plus size={18} /> Archival Sync Required</>}
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <button 
-                                                disabled={!session.meeting_link}
-                                                onClick={() => session.meeting_link && window.open(session.meeting_link, '_blank')}
-                                                className="w-full h-18 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[24px] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-4 shadow-xl shadow-brand-charcoal/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30 border-none cursor-pointer"
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>{session.title}</h3>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                                    <Video size={16} />
+                                    <span>{session.course?.title}</span>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                                    <Calendar size={16} />
+                                    <span>{new Date(session.scheduled_date).toLocaleDateString()}</span>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                                    <Clock size={16} />
+                                    <span>{session.start_time.substring(0, 5)} - {session.end_time.substring(0, 5)}</span>
+                                </div>
+
+                                <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
+                                    {!hasLink && !isEnded && (
+                                        <div className="warning-badge" style={{ marginBottom: '1rem' }}>
+                                            <AlertCircle size={16} /> No meeting link added
+                                        </div>
+                                    )}
+
+                                    {isEnded ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                            <button className="btn-go-live" disabled style={{ background: '#f8fafc', color: '#94a3b8' }}>Session Ended</button>
+                                            <button
+                                                className="btn-standard"
+                                                style={{ width: '100%', justifyContent: 'center', background: session.recording_link ? '#020617' : '#3b82f6' }}
+                                                onClick={() => handleOpenRecordingModal(session)}
                                             >
-                                                <Play size={20} fill="currentColor" /> Initiate Broadcast
+                                                {session.recording_link ? 'Update Recording Link' : 'Add Recording Link'}
                                             </button>
-                                        )}
-                                        {!session.meeting_link && !isEnded && (
-                                            <div className="flex items-center justify-center gap-2 text-amber-500 font-black text-[9px] uppercase tracking-widest">
-                                                <AlertCircle size={14} /> Protocol Incomplete: Missing Link
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <div className="bg-white dark:bg-brand-charcoal py-40 text-center rounded-[60px] border-2 border-brand-border border-dashed shadow-sm space-y-10">
-                        <div className="w-32 h-32 bg-brand-beige dark:bg-white/5 rounded-[48px] flex items-center justify-center mx-auto text-brand-muted/30 group relative overflow-hidden">
-                            <Inbox size={64} className="group-hover:scale-125 transition-transform duration-1000" />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-4xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Operational Silence</h3>
-                            <p className="text-brand-muted font-medium text-lg max-w-md mx-auto">No instructional broadcasts are currently scheduled in the master timeline.</p>
-                        </div>
-                        <button onClick={() => navigate('/instructor/live/create')} className="inline-flex h-18 px-12 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[32px] font-black text-xs uppercase tracking-[0.4em] items-center gap-4 shadow-2xl shadow-brand-charcoal/20 no-underline hover:scale-105 transition-all border-none cursor-pointer">
-                            Schedule First Link <ArrowRight size={20} />
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            {/* Modals */}
-            {recordingModal.show && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-12">
-                    <div className="absolute inset-0 bg-brand-charcoal/80 backdrop-blur-xl animate-fade-in" onClick={() => setRecordingModal({ show: false, sessionId: null })}></div>
-                    <div className="relative w-full max-w-2xl bg-white dark:bg-brand-charcoal rounded-[60px] border border-brand-border p-12 md:p-16 space-y-12 shadow-2xl animate-fade-in-up">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <FileVideo className="text-brand-emerald" size={24} />
-                                    <h2 className="text-4xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Archival <span className="text-brand-emerald">Sync</span></h2>
-                                </div>
-                                <p className="text-brand-muted font-medium">Synchronize the instructional broadcast recording with the master archive.</p>
-                            </div>
-                            <button onClick={() => setRecordingModal({ show: false, sessionId: null })} className="w-14 h-14 flex items-center justify-center bg-brand-beige/50 dark:bg-white/5 border-2 border-brand-border rounded-[20px] text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all cursor-pointer"><X size={24} /></button>
-                        </div>
-
-                        <div className="space-y-10">
-                            {uploading ? (
-                                <div className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-8">
-                                    <div className="relative w-32 h-32 mx-auto">
-                                        <svg className="w-full h-full transform -rotate-90">
-                                            <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-brand-border" />
-                                            <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray="377" strokeDashoffset={377 - (377 * uploadProgress) / 100} className="text-brand-emerald transition-all duration-500" />
-                                        </svg>
-                                        <div className="absolute inset-0 flex items-center justify-center font-black text-xl text-brand-charcoal dark:text-white">{uploadProgress}%</div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em] animate-pulse">Uplink in Progress</p>
-                                        <p className="text-xs font-bold text-brand-muted">Streaming data to secure archive node...</p>
-                                    </div>
-                                </div>
-                            ) : uploadedUrl ? (
-                                <div className="p-12 bg-brand-emerald/10 rounded-xl border-2 border-brand-emerald/20 flex flex-col items-center gap-8 text-center">
-                                    <div className="w-20 h-20 bg-brand-emerald text-white rounded-[24px] flex items-center justify-center shadow-xl shadow-brand-emerald/20"><CheckCircle2 size={40} /></div>
-                                    <div className="space-y-2">
-                                        <h4 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Sync Established</h4>
-                                        <p className="text-brand-muted font-medium text-xs truncate max-w-[300px]">{uploadedUrl}</p>
-                                    </div>
-                                    <button onClick={handleDeleteVideo} className="px-8 h-12 bg-red-500/10 text-red-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer">Redact Artifact</button>
-                                </div>
-                            ) : (
-                                <div className="relative group">
-                                    <input
-                                        type="file"
-                                        accept="video/*"
-                                        onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    />
-                                    <div className="p-16 bg-brand-beige/20 dark:bg-white/5 rounded-xl border-2 border-brand-border border-dashed text-center space-y-6 group-hover:border-brand-emerald group-hover:bg-brand-emerald/5 transition-all">
-                                        <div className="w-20 h-20 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[24px] flex items-center justify-center mx-auto text-brand-muted group-hover:text-brand-emerald group-hover:scale-110 transition-all"><Plus size={40} /></div>
-                                        <div className="space-y-2">
-                                            <p className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Select Artifact</p>
-                                            <p className="text-brand-muted font-medium text-xs">Recommended: MP4/WebM High Fidelity (Max 500MB)</p>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <button
+                                            className="btn-go-live"
+                                            disabled={!hasLink || (isUpcoming && !isTimeToGoLive)}
+                                            onClick={() => handleGoLive(session.meeting_link)}
+                                        >
+                                            {isUpcoming && !isTimeToGoLive ? `Starts at ${session.start_time.substring(0, 5)}` : <><Play size={18} fill="currentColor" /> Go Live</>}
+                                        </button>
+                                    )}
                                 </div>
-                            )}
-
-                            <div className="pt-8 flex gap-6">
-                                <button onClick={() => setRecordingModal({ show: false, sessionId: null })} className="flex-1 h-20 bg-brand-beige dark:bg-white/5 text-brand-charcoal dark:text-white rounded-[28px] font-black text-xs uppercase tracking-widest hover:bg-brand-charcoal hover:text-white transition-all border-none cursor-pointer">Cancel</button>
-                                <button 
-                                    disabled={!uploadedUrl || savingRecording} 
-                                    onClick={handleSaveRecording}
-                                    className="flex-[2] h-20 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[28px] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 border-none cursor-pointer"
-                                >
-                                    {savingRecording ? <Loader2 className="animate-spin mx-auto" /> : <>Commit to Archive <ChevronRight size={20} /></>}
-                                </button>
                             </div>
-                        </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="empty-state-container">
+                    <div style={{ padding: '2.5rem', background: '#f8fafc', borderRadius: '40px', marginBottom: '2rem' }}>
+                        <Inbox size={64} color="#cbd5e1" strokeWidth={1.5} />
                     </div>
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1e293b', marginBottom: '1rem' }}>
+                        No live sessions scheduled
+                    </h2>
+                    <p style={{ color: '#64748b', maxWidth: '300px', margin: '0 0 2rem 0' }}>When you schedule sessions, they will appear here for management.</p>
+                    <button className="btn-standard" style={{ background: '#020617' }} onClick={() => navigate('/instructor/live/create')}>Schedule Your First Live Session</button>
                 </div>
             )}
 
-            {editModal.show && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-12">
-                    <div className="absolute inset-0 bg-brand-charcoal/80 backdrop-blur-xl animate-fade-in" onClick={() => setEditModal({ show: false, session: null })}></div>
-                    <div className="relative w-full max-w-4xl bg-white dark:bg-brand-charcoal rounded-[60px] border border-brand-border p-12 md:p-16 space-y-12 shadow-2xl animate-fade-in-up overflow-y-auto max-h-[90vh]">
-                        <div className="flex items-center justify-between border-b border-brand-border pb-10">
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <Settings className="text-brand-emerald" size={24} />
-                                    <h2 className="text-4xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Session <span className="text-brand-emerald">Config</span></h2>
-                                </div>
-                                <p className="text-brand-muted font-medium">Modify operational parameters for this instructional broadcast.</p>
-                            </div>
-                            <button onClick={() => setEditModal({ show: false, session: null })} className="w-14 h-14 flex items-center justify-center bg-brand-beige/50 dark:bg-white/5 border-2 border-brand-border rounded-[20px] text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all cursor-pointer"><X size={24} /></button>
-                        </div>
+            {showSuccessToast && (
+                <div className="success-toast">
+                    <CheckCircle2 size={20} />
+                    <span>Live session created successfully</span>
+                </div>
+            )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                            <div className="md:col-span-2 space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Session Title</label>
-                                <input type="text" className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-base focus:border-brand-emerald transition-all" value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} />
+            {recordingModal.show && (
+                <div className="modal-overlay">
+                    <div className="recording-modal">
+                        <div className="modal-title">
+                            Add Session Recording
+                            <button
+                                onClick={() => setRecordingModal({ ...recordingModal, show: false })}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                            Upload the video file for this session. Recommended formats: MP4, WebM.
+                        </p>
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                                <FileVideo size={16} /> Choose Video File
+                            </label>
+                            
+                            {uploading ? (
+                                <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '14px', textAlign: 'center' }}>
+                                    <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '0.85rem' }}>Uploading... {uploadProgress}%</div>
+                                    <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                                        <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                                    </div>
+                                </div>
+                            ) : uploadedUrl ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f0fdf4', padding: '0.85rem', borderRadius: '12px', border: '1px solid #bcf0da' }}>
+                                    <CheckCircle2 size={16} color="#10b981" />
+                                    <div style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#1a4d3e', wordBreak: 'break-all' }}>Recording Uploaded</div>
+                                    <button type="button" onClick={handleDeleteVideo} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800 }}>Delete</button>
+                                </div>
+                            ) : (
+                                <input
+                                    type="file"
+                                    accept="video/*"
+                                    onChange={(e) => {
+                                        if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                                        e.target.value = '';
+                                    }}
+                                    style={{ width: '100%', marginBottom: 0, padding: '0.6rem' }}
+                                    className="custom-input-modern"
+                                />
+                            )}
+                        </div>
+                        <button
+                            className="btn-standard"
+                            style={{ width: '100%', justifyContent: 'center' }}
+                            onClick={handleSaveRecording}
+                            disabled={savingRecording}
+                        >
+                            {savingRecording ? 'Saving...' : <><Save size={18} /> Save Recording</>}
+                        </button>
+                    </div>
+                </div>
+            )}
+            {editModal.show && (
+                <div className="modal-overlay">
+                    <div className="recording-modal" style={{ maxWidth: '600px' }}>
+                        <div className="modal-title">
+                            Edit Live Session
+                            <button
+                                onClick={() => setEditModal({ show: false, session: null })}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Session Title</label>
+                                <input 
+                                    className="form-input"
+                                    type="text"
+                                    value={editForm.title}
+                                    onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Academic Course</label>
-                                <select className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all appearance-none" value={editForm.course_id} onChange={e => setEditForm({...editForm, course_id: e.target.value})}>
+
+                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Course</label>
+                                <select 
+                                    className="form-input"
+                                    value={editForm.course_id}
+                                    onChange={(e) => setEditForm({...editForm, course_id: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                >
                                     {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                                 </select>
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Broadcast Date</label>
-                                <input type="date" className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all" value={editForm.scheduled_date} onChange={e => setEditForm({...editForm, scheduled_date: e.target.value})} />
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Date</label>
+                                <input 
+                                    className="form-input"
+                                    type="date"
+                                    value={editForm.scheduled_date}
+                                    onChange={(e) => setEditForm({...editForm, scheduled_date: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Start Time</label>
-                                <input type="time" className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all" value={editForm.start_time} onChange={e => setEditForm({...editForm, start_time: e.target.value})} />
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Meeting Link</label>
+                                <input 
+                                    className="form-input"
+                                    type="url"
+                                    value={editForm.meeting_link}
+                                    onChange={(e) => setEditForm({...editForm, meeting_link: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">End Time</label>
-                                <input type="time" className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all" value={editForm.end_time} onChange={e => setEditForm({...editForm, end_time: e.target.value})} />
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Start Time</label>
+                                <input 
+                                    className="form-input"
+                                    type="time"
+                                    value={editForm.start_time}
+                                    onChange={(e) => setEditForm({...editForm, start_time: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
                             </div>
-                            <div className="md:col-span-2 space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Broadcast Link (URL)</label>
-                                <input type="url" className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all" placeholder="https://zoom.us/j/..." value={editForm.meeting_link} onChange={e => setEditForm({...editForm, meeting_link: e.target.value})} />
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>End Time</label>
+                                <input 
+                                    className="form-input"
+                                    type="time"
+                                    value={editForm.end_time}
+                                    onChange={(e) => setEditForm({...editForm, end_time: e.target.value})}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                />
+                            </div>
+
+                            <div className="form-group" style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
+                                <label style={{ display: 'block', fontWeight: 700, marginBottom: '0.75rem', fontSize: '0.9rem' }}>
+                                    <FileVideo size={16} /> Pre-recorded Video (Optional)
+                                </label>
+                                
+                                {uploading ? (
+                                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '14px', textAlign: 'center' }}>
+                                        <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '0.85rem' }}>Uploading... {uploadProgress}%</div>
+                                        <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                                            <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                                        </div>
+                                    </div>
+                                ) : editForm.recording_link ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f0fdf4', padding: '0.85rem', borderRadius: '12px', border: '1px solid #bcf0da' }}>
+                                        <CheckCircle2 size={16} color="#10b981" />
+                                        <div style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#1a4d3e', wordBreak: 'break-all' }}>Video Ready</div>
+                                        <button type="button" onClick={handleDeleteVideo} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800 }}>Remove</button>
+                                    </div>
+                                ) : (
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={(e) => {
+                                            if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
+                                            e.target.value = '';
+                                        }}
+                                        style={{ width: '100%', padding: '0.6rem', border: '1px solid #e2e8f0', borderRadius: '10px' }}
+                                    />
+                                )}
                             </div>
                         </div>
 
-                        <div className="pt-8 flex gap-6">
-                            <button onClick={() => setEditModal({ show: false, session: null })} className="flex-1 h-20 bg-brand-beige dark:bg-white/5 text-brand-charcoal dark:text-white rounded-[28px] font-black text-xs uppercase tracking-widest transition-all border-none cursor-pointer">Discard</button>
+                        <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
                             <button 
-                                disabled={updating} 
-                                onClick={handleUpdateSession}
-                                className="flex-[2] h-20 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[28px] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 border-none cursor-pointer"
+                                className="btn-standard" 
+                                style={{ flex: 1, background: '#f1f5f9', color: '#64748b' }}
+                                onClick={() => setEditModal({ show: false, session: null })}
                             >
-                                {updating ? <Loader2 className="animate-spin mx-auto" /> : <>Save Modifications <ChevronRight size={20} /></>}
+                                Cancel
+                            </button>
+                            <button 
+                                className="btn-standard" 
+                                style={{ flex: 2, background: '#020617' }}
+                                onClick={handleUpdateSession}
+                                disabled={updating}
+                            >
+                                {updating ? 'Updating...' : 'Save Changes'}
                             </button>
                         </div>
                     </div>

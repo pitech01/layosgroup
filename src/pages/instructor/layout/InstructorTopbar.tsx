@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Menu, ChevronDown, Clock, Search, ShieldCheck, Sparkles, User, LogOut, Settings as SettingsIcon } from 'lucide-react';
+import { Bell, Menu, ChevronDown, Clock } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import ThemeToggle from '../../../components/common/ThemeToggle';
 
 interface InstructorTopbarProps {
     collapsed: boolean;
@@ -20,10 +19,12 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
     const profileBtnRef = useRef<HTMLDivElement>(null);
     const profileMenuRef = useRef<HTMLDivElement>(null);
 
+    // Dynamic user data
     const userName = user?.name || "Instructor Hub";
     const userRole = user?.role === 'instructor' ? "Lead Instructor" : "Administrator";
     const userInitial = user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : "I";
 
+    // Mock notifications
     const notifications = [
         { id: 1, title: 'New Student Enrolled', desc: 'Alex Johnson joined "Frontend Dev Bootcamp".', time: '5m ago', unread: true },
         { id: 2, title: 'Live Class Reminder', desc: 'Your session "Advanced React" starts in 30 mins.', time: '1h ago', unread: true },
@@ -57,116 +58,123 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
     }, []);
 
     return (
-        <header className="h-28 bg-white/80 dark:bg-black/80 backdrop-blur-3xl border-b border-brand-border px-8 flex items-center justify-between sticky top-0 z-[40]">
-            {/* Left Section */}
-            <div className="flex items-center gap-8">
+        <header className="top-nav-bar instructor-top-nav">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1 }}>
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="p-3 bg-brand-beige/50 dark:bg-white/5 text-brand-muted hover:text-brand-emerald hover:bg-brand-emerald/10 rounded-2xl transition-all border-none cursor-pointer group"
+                    className="sidebar-toggle-btn instructor-toggle"
+                    title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
                 >
-                    <Menu size={24} className="group-hover:scale-110 transition-transform" />
+                    <Menu size={24} strokeWidth={2} />
                 </button>
-
-                <div className="hidden lg:flex relative group">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors" size={20} />
-                    <input 
-                        type="text" 
-                        placeholder="Search operational data..."
-                        className="h-14 w-80 pl-14 pr-6 bg-brand-beige/20 dark:bg-white/5 border border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal transition-all text-xs font-black uppercase tracking-widest text-brand-charcoal dark:text-white"
-                    />
-                </div>
+                <div style={{ flex: 1 }}></div>
             </div>
 
-            {/* Right Section */}
-            <div className="flex items-center gap-6">
-                <ThemeToggle />
-                
-                {/* Notifications */}
-                <div className="relative">
+            <div className="top-nav-actions">
+                <div style={{ position: 'relative' }}>
                     <button
                         ref={bellBtnRef}
+                        className={`notifications-btn instructor-notif ${showNotifications ? 'active' : ''}`}
                         onClick={() => setShowNotifications(!showNotifications)}
-                        className={`p-3.5 rounded-2xl transition-all border-none cursor-pointer relative group ${showNotifications ? 'bg-brand-emerald text-white shadow-lg shadow-brand-emerald/20' : 'bg-brand-beige/50 dark:bg-white/5 text-brand-muted hover:text-brand-charcoal dark:hover:text-white'}`}
                     >
-                        <Bell size={22} className="group-hover:rotate-12 transition-transform" />
-                        {unreadCount > 0 && (
-                            <span className="absolute top-2.5 right-2.5 w-3 h-3 bg-red-500 border-2 border-white dark:border-brand-charcoal rounded-full"></span>
-                        )}
+                        <Bell size={20} />
+                        {unreadCount > 0 && <div className="notification-dot active"></div>}
                     </button>
 
                     {showNotifications && (
-                        <div ref={notificationRef} className="absolute top-full right-0 mt-6 w-[400px] bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border shadow-2xl animate-fade-in-up overflow-hidden z-[50]">
-                            <div className="p-8 border-b border-brand-border flex items-center justify-between bg-brand-beige/10 dark:bg-white/5">
-                                <div className="flex items-center gap-3">
-                                    <Sparkles className="text-brand-emerald" size={18} />
-                                    <h4 className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-widest">Protocol Alerts</h4>
-                                </div>
-                                <span className="text-[10px] font-black text-brand-emerald uppercase tracking-widest cursor-pointer hover:underline">Clear Manifest</span>
+                        <div className="notifications-dropdown" ref={notificationRef}>
+                            <div className="notification-header">
+                                <span style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a' }}>Notifications</span>
+                                <button style={{ fontSize: '0.75rem', color: '#8b5cf6', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
+                                    Mark all read
+                                </button>
                             </div>
-                            <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-                                {notifications.map(notif => (
-                                    <div key={notif.id} className="p-8 hover:bg-brand-beige/20 dark:hover:bg-white/5 transition-all border-b border-brand-border last:border-none group">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h5 className="text-xs font-black text-brand-charcoal dark:text-white uppercase tracking-tight group-hover:text-brand-emerald transition-colors">{notif.title}</h5>
-                                            <span className="text-[9px] font-black text-brand-muted uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> {notif.time}</span>
+                            <div className="notification-list">
+                                {notifications.map(notification => (
+                                    <div key={notification.id} className={`notification-item ${notification.unread ? 'unread' : ''}`}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                            <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', margin: 0 }}>{notification.title}</h4>
+                                            <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <Clock size={10} /> {notification.time}
+                                            </span>
                                         </div>
-                                        <p className="text-[11px] font-medium text-brand-muted leading-relaxed">{notif.desc}</p>
+                                        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: '1.4' }}>{notification.desc}</p>
                                     </div>
                                 ))}
-                            </div>
-                            <div className="p-6 text-center bg-brand-beige/10 dark:bg-white/5">
-                                <button className="text-[10px] font-black text-brand-muted hover:text-brand-emerald uppercase tracking-[0.3em] transition-all border-none bg-transparent cursor-pointer">View All Transmissions</button>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Profile Pill */}
-                <div className="relative">
+                <div style={{ position: 'relative' }}>
                     <div
-                        ref={profileBtnRef}
+                        className="user-pill instructor-profile-pill"
                         onClick={() => setShowProfileMenu(!showProfileMenu)}
-                        className={`flex items-center gap-4 pl-3 pr-5 py-2.5 rounded-2xl transition-all cursor-pointer group ${showProfileMenu ? 'bg-brand-charcoal text-white shadow-xl shadow-brand-charcoal/20' : 'bg-brand-beige/50 dark:bg-white/5 border border-brand-border hover:border-brand-emerald'}`}
+                        ref={profileBtnRef}
+                        style={{ cursor: 'pointer' }}
                     >
-                        <div className="w-12 h-12 bg-brand-emerald rounded-xl flex items-center justify-center font-black text-white text-lg shadow-inner group-hover:scale-105 transition-transform">
+                        <div className="user-avatar-small" style={{ background: '#1a4d3e' }}>
                             {userInitial}
                         </div>
-                        <div className="hidden md:block">
-                            <div className={`text-[11px] font-black uppercase tracking-tight leading-none mb-1 ${showProfileMenu ? 'text-white' : 'text-brand-charcoal dark:text-white'}`}>{userName}</div>
-                            <div className={`text-[9px] font-black uppercase tracking-widest ${showProfileMenu ? 'text-brand-emerald' : 'text-brand-muted'}`}>{userRole}</div>
+                        <div className="user-info-text">
+                            <span className="user-name">{userName}</span>
+                            <span className="user-role">{userRole}</span>
                         </div>
-                        <ChevronDown size={14} className={`transition-transform duration-300 ${showProfileMenu ? 'rotate-180 text-brand-emerald' : 'text-brand-muted'}`} />
+                        <ChevronDown size={14} color="#94a3b8" style={{ transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
                     </div>
 
                     {showProfileMenu && (
-                        <div ref={profileMenuRef} className="absolute top-full right-0 mt-6 w-72 bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border shadow-2xl animate-fade-in-up overflow-hidden z-[50]">
-                            <div className="p-10 text-center border-b border-brand-border bg-brand-beige/10 dark:bg-white/5">
-                                <div className="w-20 h-20 bg-brand-emerald rounded-[28px] flex items-center justify-center font-black text-white text-3xl mx-auto mb-4 shadow-xl shadow-brand-emerald/20">
-                                    {userInitial}
-                                </div>
-                                <h5 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">{userName}</h5>
-                                <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest mt-1">{userRole}</p>
+                        <div className="profile-dropdown shadow-premium" ref={profileMenuRef} style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 12px)',
+                            right: 0,
+                            width: '200px',
+                            background: 'white',
+                            borderRadius: '16px',
+                            padding: '0.75rem',
+                            border: '1.5px solid #f1f5f9',
+                            zIndex: 1000
+                        }}>
+                            <div
+                                onClick={() => { navigate('/instructor/settings'); setShowProfileMenu(false); }}
+                                style={{
+                                    padding: '0.75rem 1rem',
+                                    borderRadius: '10px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    color: '#475569',
+                                    fontWeight: 700,
+                                    fontSize: '0.9rem',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+                                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1a4d3e' }}></span>
+                                My Profile
                             </div>
-                            <div className="p-4 space-y-2">
-                                <button 
-                                    onClick={() => { navigate('/instructor/settings'); setShowProfileMenu(false); }}
-                                    className="w-full h-14 px-6 flex items-center gap-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-brand-muted hover:bg-brand-emerald hover:text-white transition-all border-none cursor-pointer group"
-                                >
-                                    <User size={18} className="text-brand-emerald group-hover:text-white transition-colors" /> Operational Profile
-                                </button>
-                                <button 
-                                    onClick={() => { navigate('/instructor/settings'); setShowProfileMenu(false); }}
-                                    className="w-full h-14 px-6 flex items-center gap-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-brand-muted hover:bg-brand-emerald hover:text-white transition-all border-none cursor-pointer group"
-                                >
-                                    <SettingsIcon size={18} className="text-brand-emerald group-hover:text-white transition-colors" /> Security Config
-                                </button>
-                                <div className="h-[1px] bg-brand-border mx-4 my-2"></div>
-                                <button 
-                                    onClick={() => { logout(); navigate('/instructor-login'); }}
-                                    className="w-full h-14 px-6 flex items-center gap-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-red-500 hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer group"
-                                >
-                                    <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" /> Close Terminal
-                                </button>
+                            <div style={{ height: '1px', background: '#f1f5f9', margin: '0.5rem 0' }}></div>
+                            <div
+                                onClick={() => logout()}
+                                style={{
+                                    padding: '0.75rem 1rem',
+                                    borderRadius: '10px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    color: '#ef4444',
+                                    fontWeight: 700,
+                                    fontSize: '0.9rem',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.background = '#fef2f2'}
+                                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }}></span>
+                                Sign Out
                             </div>
                         </div>
                     )}

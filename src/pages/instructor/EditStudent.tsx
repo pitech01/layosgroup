@@ -7,14 +7,9 @@ import {
     ShieldCheck,
     CheckCircle,
     AlertCircle,
-    Loader2,
-    X,
-    ChevronRight,
-    Lock,
-    Settings,
-    Sparkles
+    Loader2
 } from 'lucide-react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export default function EditStudent() {
     const navigate = useNavigate();
@@ -30,6 +25,7 @@ export default function EditStudent() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isSuccess, setIsSuccess] = useState(false);
+
     const [cohorts, setCohorts] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
 
@@ -39,34 +35,52 @@ export default function EditStudent() {
         const loadInitialData = async () => {
             setIsLoading(true);
             try {
-                const token = localStorage.getItem('token');
-                const [cohortsRes, studentRes] = await Promise.all([
-                    fetch(`${API_URL}/cohorts`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } }),
-                    fetch(`${API_URL}/students/${id}`, { headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` } })
-                ]);
+                // Fetch Cohorts
+                const cohortsRes = await fetch(`${API_URL}/cohorts`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (cohortsRes.ok) {
+                    const cohortsData = await cohortsRes.json();
+                    setCohorts(cohortsData);
+                }
+
+                // Fetch Student Data
+                const studentRes = await fetch(`${API_URL}/students/${id}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
                 
-                if (cohortsRes.ok) setCohorts(await cohortsRes.json());
-                if (studentRes.ok) {
-                    const studentData = await studentRes.json();
-                    setFormData({
-                        name: studentData.name || '',
-                        email: studentData.email || '',
-                        password: '',
-                        cohorts: studentData.cohorts?.map((c: any) => c.id) || []
-                    });
-                } else throw new Error('Retrieval failure.');
+                if (!studentRes.ok) {
+                    throw new Error('Failed to load student details.');
+                }
+                
+                const studentData = await studentRes.json();
+                setFormData({
+                    name: studentData.name || '',
+                    email: studentData.email || '',
+                    password: '',
+                    cohorts: studentData.cohorts?.map((c: any) => c.id) || []
+                });
             } catch (err: any) {
-                setError(err.message);
+                setError(err.message || 'An error occurred while loading data.');
             } finally {
                 setIsLoading(false);
             }
         };
+
         loadInitialData();
     }, [id]);
 
     const toggleCohort = (cohortId: string) => {
         setFormData(prev => {
-            const selected = prev.cohorts.includes(cohortId) ? prev.cohorts.filter(c => c !== cohortId) : [...prev.cohorts, cohortId];
+            const selected = prev.cohorts.includes(cohortId)
+                ? prev.cohorts.filter(c => c !== cohortId)
+                : [...prev.cohorts, cohortId];
             return { ...prev, cohorts: selected };
         });
     };
@@ -75,16 +89,28 @@ export default function EditStudent() {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
+
         try {
             const response = await fetch(`${API_URL}/students/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(formData)
             });
+
+            const data = await response.json();
+
             if (response.ok) {
                 setIsSuccess(true);
-                setTimeout(() => navigate('/instructor/students'), 2000);
-            } else throw new Error('Modification rejected.');
+                setTimeout(() => {
+                    navigate('/instructor/students');
+                }, 2000);
+            } else {
+                throw new Error(data.message || 'Failed to update student profile.');
+            }
         } catch (err: any) {
             setError(err.message);
             setIsSubmitting(false);
@@ -93,159 +119,335 @@ export default function EditStudent() {
 
     if (isLoading) {
         return (
-            <div className="h-[70vh] flex flex-col items-center justify-center gap-6 animate-pulse">
-                <Loader2 className="animate-spin text-brand-emerald" size={48} />
-                <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em]">Synchronizing Identity Data...</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+                <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
+                <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#64748b' }}>Loading student data...</p>
             </div>
         );
     }
 
     if (isSuccess) {
         return (
-            <div className="h-[70vh] flex flex-col items-center justify-center text-center space-y-8 animate-fade-in">
-                <div className="w-32 h-32 bg-brand-emerald/10 text-brand-emerald rounded-xl flex items-center justify-center shadow-inner animate-bounce">
-                    <CheckCircle size={64} />
-                </div>
-                <div className="space-y-2">
-                    <h2 className="text-4xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Profile Updated</h2>
-                    <p className="text-brand-muted font-medium text-lg">Modifications synchronized successfully.</p>
+            <div className="add-student-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
+                <div style={{ textAlign: 'center', animation: 'scaleIn 0.5s ease-out' }}>
+                    <div style={{ width: '100px', height: '100px', background: '#f0fdf4', borderRadius: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem', color: '#1a4d3e' }}>
+                        <CheckCircle size={50} />
+                    </div>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', margin: '0 0 1rem 0' }}>Profile Updated</h2>
+                    <p style={{ color: '#64748b', fontSize: '1.2rem', fontWeight: 600 }}>The student record has been successfully updated.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-12 pb-32 px-6 md:px-0">
-            {/* Header / Breadcrumb */}
-            <div className="flex items-center justify-between animate-fade-in-up">
-                <Link to="/instructor/students" className="group flex items-center gap-4 text-[10px] font-black text-brand-muted hover:text-brand-emerald uppercase tracking-[0.3em] transition-all no-underline">
-                    <ArrowLeft size={18} className="group-hover:-translate-x-2 transition-transform" /> Back to Directory
-                </Link>
-            </div>
+        <div className="add-student-container">
+            <style>{`
+                .staff-scope .add-student-container {
+                    max-width: 900px;
+                    margin: 0 auto;
+                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                }
 
-            <header className="space-y-6 animate-fade-in-up">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-brand-emerald/10 rounded-xl">
-                        <Settings className="text-brand-emerald" size={18} />
-                    </div>
-                    <span className="text-brand-emerald font-black text-[10px] uppercase tracking-[0.4em]">Profile Modification</span>
-                </div>
-                <div className="space-y-4">
-                    <h1 className="text-5xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none uppercase">Edit <span className="text-brand-emerald">Student</span></h1>
-                    <p className="text-brand-muted font-medium text-xl max-w-2xl leading-relaxed">Adjust identity parameters and cohort access for <strong>{formData.name}</strong>.</p>
-                </div>
-            </header>
+                .staff-scope .back-link {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #64748b;
+                    text-decoration: none;
+                    font-weight: 800;
+                    font-size: 0.9rem;
+                    margin-bottom: 2.5rem;
+                    transition: color 0.3s;
+                }
+
+                .back-link:hover {
+                    color: #0f172a;
+                }
+
+                .staff-scope .form-card-premium {
+                    background: white;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 32px;
+                    padding: 3rem;
+                    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02);
+                }
+
+                .staff-scope .section-title {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 2.5rem;
+                }
+
+                .staff-scope .icon-box {
+                    background: #f8fafc;
+                    padding: 10px;
+                    border-radius: 12px;
+                    color: #0f172a;
+                }
+
+                .section-title h2 {
+                    margin: 0;
+                    font-size: 1.5rem;
+                    font-weight: 950;
+                    color: #0f172a;
+                }
+
+                .staff-scope .form-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.5rem;
+                    margin-bottom: 2rem;
+                }
+
+                .staff-scope .form-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .form-group.full-width {
+                    grid-column: 1 / -1;
+                }
+
+                .form-group label {
+                    font-weight: 850;
+                    color: #0f172a;
+                    font-size: 0.9rem;
+                    letter-spacing: -0.01em;
+                }
+
+                .staff-scope .input-wrapper {
+                    position: relative;
+                }
+
+                .staff-scope .input-icon {
+                    position: absolute;
+                    left: 16px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #94a3b8;
+                }
+
+                .staff-scope .premium-input {
+                    width: 100%;
+                    padding: 0.85rem 1.25rem 0.85rem 3rem;
+                    background: #fcfdfe;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 16px;
+                    font-family: inherit;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    transition: all 0.3s;
+                    color: #0f172a;
+                }
+
+                .premium-input:focus {
+                    outline: none;
+                    border-color: #1a4d3e;
+                    background: white;
+                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                }
+
+                .staff-scope .cohort-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                }
+
+                @media (max-width: 768px) {
+                    .staff-scope .cohort-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .staff-scope .form-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+
+                .staff-scope .cohort-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 1rem;
+                    background: #fcfdfe;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 16px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .cohort-item:hover {
+                    border-color: #1a4d3e;
+                    background: #f8fafc;
+                }
+
+                .cohort-item.selected {
+                    background: #f0fdf4;
+                    border-color: #1a4d3e;
+                }
+
+                .staff-scope .cohort-checkbox {
+                    width: 20px;
+                    height: 20px;
+                    accent-color: #1a4d3e;
+                }
+
+                .staff-scope .cohort-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .staff-scope .cohort-name {
+                    font-weight: 850;
+                    color: #0f172a;
+                    font-size: 0.9rem;
+                }
+
+                .staff-scope .cohort-course {
+                    font-size: 0.75rem;
+                    color: #64748b;
+                    font-weight: 600;
+                }
+
+                .staff-scope .btn-submit {
+                    background: #1a4d3e;
+                    color: white;
+                    border: none;
+                    padding: 1rem 2rem;
+                    border-radius: 18px;
+                    font-weight: 950;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    transition: all 0.3s;
+                    width: 100%;
+                    margin-top: 1rem;
+                }
+
+                .btn-submit:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 20px -5px rgba(26, 77, 62, 0.3);
+                }
+
+                .btn-submit:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                    transform: none;
+                }
+
+                @keyframes scaleIn {
+                    from { opacity: 0; transform: scale(0.9); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+            `}</style>
+
+            <button onClick={() => navigate('/instructor/students')} className="back-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <ArrowLeft size={18} /> Back to Students
+            </button>
 
             {error && (
-                <div className="p-6 bg-red-50 dark:bg-red-500/10 border-2 border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 rounded-[32px] animate-in slide-in-from-top-4 duration-500 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <AlertCircle size={24} />
-                        <span className="font-black text-xs uppercase tracking-widest">{error}</span>
-                    </div>
-                    <button onClick={() => setError(null)} className="p-2 hover:bg-white/20 rounded-xl border-none bg-transparent cursor-pointer"><X size={18} /></button>
+                <div style={{ padding: '1.25rem', background: '#fff1f2', border: '1.5px solid #ffe4e6', borderRadius: '18px', color: '#e11d48', fontWeight: 700, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <AlertCircle size={20} />
+                    {error}
                 </div>
             )}
 
-            <form className="bg-white dark:bg-brand-charcoal rounded-[60px] border border-brand-border p-12 md:p-16 space-y-12 shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up" style={{ animationDelay: '0.1s' }} onSubmit={handleSubmit}>
-                {/* Identity Section */}
-                <div className="space-y-10">
-                    <div className="flex items-center gap-4 border-b border-brand-border pb-6">
-                        <UserCircle className="text-brand-emerald" size={20} />
-                        <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Identity Hub</h3>
+            <div className="form-card-premium">
+                <form onSubmit={handleSubmit}>
+                    <div className="section-title">
+                        <div className="icon-box"><UserCircle size={22} color="#0f172a" /></div>
+                        <h2>Edit Student Profile</h2>
                     </div>
 
-                    <div className="space-y-8">
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Full Identity Name</label>
-                            <input
-                                type="text"
-                                className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-base focus:border-brand-emerald transition-all"
-                                required
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Endpoint Email</label>
-                                <div className="relative">
-                                    <input
-                                        type="email"
-                                        className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
-                                        required
-                                        value={formData.email}
-                                        onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                    />
-                                    <Mail className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-brand-charcoal dark:text-white uppercase tracking-[0.2em] ml-2">Secure Passcode Override</label>
-                                <div className="relative">
-                                    <input
-                                        type="password"
-                                        className="w-full h-18 px-8 bg-brand-beige/20 dark:bg-white/5 border-2 border-brand-border rounded-[24px] text-brand-charcoal dark:text-white outline-none font-bold text-sm focus:border-brand-emerald transition-all"
-                                        placeholder="Leave blank to maintain current"
-                                        value={formData.password}
-                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                    />
-                                    <Lock className="absolute right-6 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" size={18} />
-                                </div>
+                    <div className="form-grid">
+                        <div className="form-group full-width">
+                            <label>Full Name</label>
+                            <div className="input-wrapper">
+                                <UserCircle className="input-icon" size={18} />
+                                <input
+                                    type="text"
+                                    className="premium-input"
+                                    placeholder="e.g. John Doe"
+                                    required
+                                    value={formData.name}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                />
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                {/* Cohort Access Section */}
-                <div className="space-y-10">
-                    <div className="flex items-center gap-4 border-b border-brand-border pb-6">
-                        <Layers className="text-brand-emerald" size={20} />
-                        <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Cohort Authorization</h3>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {cohorts.map(c => (
-                            <div
-                                key={c.id}
-                                onClick={() => toggleCohort(c.id)}
-                                className={`p-6 rounded-[32px] border-2 transition-all cursor-pointer flex items-center justify-between group ${formData.cohorts.includes(c.id) ? 'bg-brand-emerald/10 border-brand-emerald' : 'bg-brand-beige/10 dark:bg-white/5 border-brand-border hover:border-brand-emerald/50'}`}
-                            >
-                                <div className="space-y-1">
-                                    <div className={`text-sm font-black uppercase tracking-tight transition-colors ${formData.cohorts.includes(c.id) ? 'text-brand-emerald' : 'text-brand-charcoal dark:text-white'}`}>{c.name}</div>
-                                    <div className="text-[9px] font-bold text-brand-muted uppercase tracking-widest truncate max-w-[150px]">{c.course?.title || 'General Curriculum'}</div>
-                                </div>
-                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${formData.cohorts.includes(c.id) ? 'bg-brand-emerald text-white' : 'bg-white dark:bg-brand-charcoal border-2 border-brand-border text-brand-muted'}`}>
-                                    {formData.cohorts.includes(c.id) && <CheckCircle size={18} />}
-                                </div>
+                        <div className="form-group">
+                            <label>Email Address</label>
+                            <div className="input-wrapper">
+                                <Mail className="input-icon" size={18} />
+                                <input
+                                    type="email"
+                                    className="premium-input"
+                                    placeholder="student@example.com"
+                                    required
+                                    value={formData.email}
+                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                />
                             </div>
-                        ))}
-                    </div>
-                </div>
+                        </div>
 
-                <div className="pt-8">
-                    <button 
-                        type="submit" 
-                        disabled={isSubmitting}
-                        className="w-full h-20 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[28px] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4 border-none cursor-pointer"
-                    >
+                        <div className="form-group">
+                            <label>New Password (Optional)</label>
+                            <div className="input-wrapper">
+                                <ShieldCheck className="input-icon" size={18} />
+                                <input
+                                    type="password"
+                                    className="premium-input"
+                                    placeholder="Current password active"
+                                    value={formData.password}
+                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="section-title" style={{ marginTop: '2rem' }}>
+                        <div className="icon-box"><Layers size={22} color="#0f172a" /></div>
+                        <h2>Assigned Cohorts</h2>
+                    </div>
+
+                    <div className="cohort-grid" style={{ marginBottom: '2.5rem' }}>
+                        {cohorts.length > 0 ? (
+                            cohorts.map(c => (
+                                <div
+                                    key={c.id}
+                                    className={`cohort-item ${formData.cohorts.includes(c.id) ? 'selected' : ''}`}
+                                    onClick={() => toggleCohort(c.id)}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        className="cohort-checkbox"
+                                        checked={formData.cohorts.includes(c.id)}
+                                        readOnly
+                                    />
+                                    <div className="cohort-info">
+                                        <span className="cohort-name">{c.name}</span>
+                                        <span className="cohort-course">{c.course?.title || 'No Course Attached'}</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p style={{ color: '#64748b', fontSize: '0.9rem', gridColumn: '1 / -1' }}>No cohorts available.</p>
+                        )}
+                    </div>
+
+                    <button type="submit" className="btn-submit" disabled={isSubmitting}>
                         {isSubmitting ? (
                             <>
-                                <Loader2 className="animate-spin" size={24} />
-                                <span>Syncing Modifications...</span>
+                                <Loader2 size={18} className="animate-spin" />
+                                Applying Changes...
                             </>
-                        ) : (
-                            <>
-                                Commit Changes <ChevronRight size={24} />
-                            </>
-                        )}
+                        ) : 'Save Modifications'}
                     </button>
-                </div>
-            </form>
-
-            <div className="flex items-center justify-center gap-6 p-10 bg-brand-beige/10 dark:bg-white/5 rounded-xl border border-brand-border border-dashed text-brand-muted text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <Sparkles size={16} className="text-brand-emerald" />
-                All identity modifications are logged and synchronized across the central academic grid.
+                </form>
             </div>
         </div>
     );

@@ -10,11 +10,7 @@ import {
     AlertCircle,
     CheckCircle,
     Monitor,
-    Globe,
-    Sparkles,
-    Fingerprint,
-    Smartphone,
-    UserCircle
+    Globe
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -93,7 +89,6 @@ const Settings = () => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         setError(null);
-        setSuccess(null);
     };
 
     const handleSaveProfile = async () => {
@@ -118,7 +113,7 @@ const Settings = () => {
 
             const data = await response.json();
             if (response.ok) {
-                toast.success('Identity profile updated');
+                setSuccess('Profile updated successfully.');
                 if (updateUserInfo) updateUserInfo(data.user);
             } else {
                 throw new Error(data.message || 'Profile update failed.');
@@ -157,7 +152,7 @@ const Settings = () => {
 
             const data = await response.json();
             if (response.ok) {
-                toast.success('Security protocols updated');
+                setSuccess('Password updated successfully.');
                 setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
             } else {
                 throw new Error(data.message || 'Password update failed.');
@@ -175,281 +170,577 @@ const Settings = () => {
     };
 
     return (
-        <div className="space-y-12 pb-12">
-            {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in-up">
-                <div className="max-w-2xl space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-brand-emerald/10 rounded-lg">
-                            <Fingerprint className="text-brand-emerald" size={18} />
-                        </div>
-                        <span className="text-brand-emerald font-black text-xs uppercase tracking-widest">Administrative Control</span>
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-black text-brand-charcoal dark:text-white tracking-tight">
-                        Account <span className="text-brand-emerald">Protocols</span>
-                    </h1>
-                    <p className="text-brand-muted font-medium text-lg leading-relaxed">
-                        Configure your professional identity, manage security credentials, and monitor active administrative sessions.
-                    </p>
-                </div>
+        <div className="animate-fade-in-up instructor-settings-container">
+            <style>{`
+                .staff-scope .instructor-settings-container {
+                    max-width: 1000px;
+                    margin: 0 auto;
+                }
+
+                .staff-scope .settings-header {
+                    margin-bottom: 2.5rem;
+                }
+
+                .settings-header h1 {
+                    font-size: 2.25rem;
+                    font-weight: 950;
+                    color: #0f172a;
+                    margin: 0;
+                    letter-spacing: -0.03em;
+                }
+
+                .staff-scope .settings-card {
+                    background: white;
+                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border-radius: 32px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02);
+                }
+
+                .staff-scope .settings-tabs-nav {
+                    display: flex;
+                    padding: 1.5rem 2rem;
+                    background: #f8fafc;
+                    border-bottom: 1px solid #f1f5f9;
+                    gap: 1rem;
+                    overflow-x: auto;
+                }
+
+                .staff-scope .settings-tab-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 0.75rem 1.25rem;
+                    border-radius: 14px;
+                    border: none;
+                    background: transparent;
+                    color: #64748b;
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    white-space: nowrap;
+                }
+
+                .settings-tab-btn:hover {
+                    background: #f1f5f9;
+                    color: #0f172a;
+                }
+
+                .settings-tab-btn.active {
+                    background: white;
+                    color: #1a4d3e;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+                }
+
+                .staff-scope .settings-content-body {
+                    padding: 3rem;
+                }
+
+                .staff-scope .profile-setup-grid {
+                    display: flex;
+                    gap: 4rem;
+                }
+
+                @media (max-width: 900px) {
+                    .staff-scope .profile-setup-grid {
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 3rem;
+                    }
+                    .staff-scope .settings-content-body {
+                        padding: 1.5rem;
+                    }
+                    .settings-header h1 {
+                        font-size: 1.75rem;
+                    }
+                }
+
+                @media (max-width: 640px) {
+                    .staff-scope .settings-tabs-nav {
+                        padding: 1rem;
+                    }
+                    .staff-scope .settings-tab-btn {
+                        padding: 0.6rem 1rem;
+                        font-size: 0.85rem;
+                        flex: 1;
+                        justify-content: center;
+                    }
+                    .staff-scope .settings-action-row {
+                        flex-direction: column;
+                        align-items: stretch;
+                        margin-top: 2rem;
+                    }
+                    .staff-scope .btn-premium-save {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
+
+                .staff-scope .avatar-editor-col {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 1.5rem;
+                }
+
+                .staff-scope .instructor-avatar-large {
+                    width: 160px;
+                    height: 160px;
+                    border-radius: 40px;
+                    background: #f1f5f9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 3rem;
+                    font-weight: 950;
+                    color: #1a4d3e;
+                    position: relative;
+                    border: 4px solid white;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+                }
+
+                .staff-scope .avatar-update-badge {
+                    position: absolute;
+                    bottom: -10px;
+                    right: -10px;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 14px;
+                    background: #1a4d3e;
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    border: 4px solid white;
+                    transition: all 0.2s;
+                }
+
+                .avatar-update-badge:hover {
+                    transform: scale(1.1);
+                }
+
+                .staff-scope .settings-form-col {
+                    flex: 1;
+                }
+
+                .staff-scope .input-field-group {
+                    margin-bottom: 1.75rem;
+                }
+
+                .input-field-group label {
+                    display: block;
+                    font-size: 0.85rem;
+                    font-weight: 800;
+                    color: #0f172a;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    margin-bottom: 0.75rem;
+                }
+
+                .staff-scope .premium-input-wrapper {
+                    position: relative;
+                }
+
+                .staff-scope .premium-input-icon {
+                    position: absolute;
+                    left: 1.25rem;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #94a3b8;
+                }
+
+                .staff-scope .premium-text-input {
+                    width: 100%;
+                    height: 56px;
+                    padding: 0 1.25rem 0 3.5rem;
+                    background: #f8fafc;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 16px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: #0f172a;
+                    transition: all 0.2s;
+                }
+
+                .premium-text-input:focus {
+                    background: white;
+                    border-color: #1a4d3e;
+                    outline: none;
+                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                }
+
+                .staff-scope .premium-textarea {
+                    width: 100%;
+                    padding: 1.25rem;
+                    background: #f8fafc;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 16px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: #0f172a;
+                    min-height: 120px;
+                    resize: vertical;
+                    transition: all 0.2s;
+                }
+
+                .premium-textarea:focus {
+                    background: white;
+                    border-color: #1a4d3e;
+                    outline: none;
+                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                }
+
+                .staff-scope .settings-action-row {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 1rem;
+                    margin-top: 3rem;
+                    padding-top: 2rem;
+                    border-top: 1px solid #f1f5f9;
+                }
+
+                .staff-scope .btn-premium-save {
+                    height: 52px;
+                    padding: 0 2.5rem;
+                    background: #1a4d3e;
+                    color: white;
+                    border: none;
+                    border-radius: 16px;
+                    font-size: 0.95rem;
+                    font-weight: 800;
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                }
+
+                .btn-premium-save:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 15px 20px -5px rgba(26, 77, 62, 0.3);
+                    filter: brightness(1.1);
+                }
+
+                .staff-scope .security-status-box {
+                    background: #f0fdf4;
+                    border: 1.5px solid #dcfce7;
+                    border-radius: 20px;
+                    padding: 1.5rem;
+                    display: flex;
+                    gap: 1.25rem;
+                    align-items: center;
+                    margin-bottom: 2.5rem;
+                }
+
+                .staff-scope .status-icon-glow {
+                    width: 52px;
+                    height: 52px;
+                    background: #16a34a;
+                    color: white;
+                    border-radius: 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 8px 15px rgba(22, 163, 74, 0.2);
+                }
+
+                .staff-scope .session-management-section {
+                    margin-top: 4rem;
+                }
+
+                .staff-scope .session-card-premium {
+                    background: #f8fafc;
+                    border: 1px solid #f1f5f9;
+                    border-radius: 20px;
+                    padding: 1.25rem 2rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .staff-scope .btn-outline-danger-premium {
+                    background: transparent;
+                    border: 2px solid #fee2e2;
+                    color: #ef4444;
+                    padding: 0.6rem 1.25rem;
+                    border-radius: 12px;
+                    font-weight: 800;
+                    font-size: 0.85rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .btn-outline-danger-premium:hover {
+                    background: #fef2f2;
+                    border-color: #fecaca;
+                }
+
+                @media (max-width: 640px) {
+                    .staff-scope .security-status-box {
+                        flex-direction: column;
+                        text-align: center;
+                        gap: 1rem;
+                        padding: 1.25rem;
+                    }
+                    .staff-scope .password-grid-premium {
+                        grid-template-columns: 1fr !important;
+                        gap: 1rem !important;
+                    }
+                    .staff-scope .session-card-premium {
+                        flex-direction: column;
+                        gap: 1.5rem;
+                        text-align: center;
+                        padding: 1.5rem;
+                    }
+                    .session-card-premium div {
+                        flex-direction: column;
+                    }
+                    .staff-scope .btn-outline-danger-premium {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
+            `}</style>
+
+            <header className="settings-header">
+                <h1>Setting</h1>
+                <p style={{ color: '#64748b', fontWeight: 600, marginTop: '0.5rem' }}>Manage your profile and security settings.</p>
             </header>
 
-            {/* Content Container */}
-            <div className="bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                {/* Tabs Navigation */}
-                <nav className="flex px-6 md:px-10 pt-8 gap-2 border-b border-brand-border bg-brand-beige/20 dark:bg-white/5 backdrop-blur-xl shrink-0 overflow-x-auto custom-scrollbar">
+            <div className="settings-card">
+                <nav className="settings-tabs-nav">
                     <button
                         onClick={() => setActiveTab('profile')}
-                        className={`flex items-center gap-3 px-8 py-5 rounded-t-3xl font-black text-[10px] uppercase tracking-widest transition-all border-none cursor-pointer ${
-                            activeTab === 'profile' 
-                            ? 'bg-white dark:bg-brand-charcoal text-brand-emerald border-t border-x border-brand-border' 
-                            : 'text-brand-muted hover:text-brand-charcoal dark:hover:text-white'
-                        }`}
+                        className={`settings-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
                     >
-                        <UserCircle size={18} /> Identity Profile
+                        <User size={20} /> Profile
                     </button>
                     <button
                         onClick={() => setActiveTab('security')}
-                        className={`flex items-center gap-3 px-8 py-5 rounded-t-3xl font-black text-[10px] uppercase tracking-widest transition-all border-none cursor-pointer ${
-                            activeTab === 'security' 
-                            ? 'bg-white dark:bg-brand-charcoal text-brand-emerald border-t border-x border-brand-border' 
-                            : 'text-brand-muted hover:text-brand-charcoal dark:hover:text-white'
-                        }`}
+                        className={`settings-tab-btn ${activeTab === 'security' ? 'active' : ''}`}
                     >
-                        <Shield size={18} /> Security Guard
+                        <Shield size={20} /> Security
                     </button>
                 </nav>
 
-                <div className="p-8 md:p-16">
+                <div className="settings-content-body">
                     {activeTab === 'profile' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 animate-fade-in-up">
-                            {/* Avatar Section */}
-                            <div className="lg:col-span-4 flex flex-col items-center gap-8">
-                                <div className="relative group">
-                                    <div className="w-48 h-48 rounded-[56px] bg-brand-beige dark:bg-white/5 flex items-center justify-center text-5xl font-black text-brand-emerald border-4 border-white dark:border-brand-charcoal shadow-2xl shadow-brand-charcoal/10 group-hover:scale-105 transition-transform duration-500 overflow-hidden">
+                        <div className="animate-fade-in-up">
+                            <div className="profile-setup-grid">
+                                <div className="avatar-editor-col">
+                                    <div className="instructor-avatar-large">
                                         {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'UI'}
+                                        <div className="avatar-update-badge" title="Upload Profile Picture">
+                                            <Camera size={20} />
+                                        </div>
                                     </div>
-                                    <button className="absolute -bottom-4 -right-4 w-14 h-14 bg-brand-emerald text-white rounded-2xl flex items-center justify-center border-4 border-white dark:border-brand-charcoal shadow-lg hover:scale-110 active:scale-95 transition-all border-none cursor-pointer">
-                                        <Camera size={24} />
-                                    </button>
-                                </div>
-                                <div className="text-center space-y-2">
-                                    <h4 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">{user?.name}</h4>
-                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-emerald/10 text-brand-emerald rounded-full text-[10px] font-black uppercase tracking-widest border border-brand-emerald/20">
-                                        <Sparkles size={12} /> Faculty Member
+                                    <div style={{ textAlign: 'center' }}>
+                                        <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>{user?.name}</h4>
+                                        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>ID: INS-{user?.id.toString().padStart(4, '0')}</p>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Form Section */}
-                            <div className="lg:col-span-8 space-y-10">
-                                {error && (
-                                    <div className="flex items-center gap-4 p-6 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-3xl text-red-600 dark:text-red-400 font-bold text-sm">
-                                        <AlertCircle size={20} /> {error}
-                                    </div>
-                                )}
+                                <div className="settings-form-col">
+                                    {error && (
+                                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '1rem', borderRadius: '16px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                            <AlertCircle size={18} /> {error}
+                                        </div>
+                                    )}
+                                    {success && (
+                                        <div style={{ background: '#f0fdf4', border: '1px solid #dcfce7', padding: '1rem', borderRadius: '16px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                            <CheckCircle size={18} /> {success}
+                                        </div>
+                                    )}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Full Identity Name</label>
-                                        <div className="relative group">
-                                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors">
-                                                <User size={20} />
-                                            </div>
+                                    <div className="input-field-group">
+                                        <label>Full Name</label>
+                                        <div className="premium-input-wrapper">
+                                            <User size={20} className="premium-input-icon" />
                                             <input
                                                 type="text"
                                                 name="name"
-                                                className="w-full h-14 pl-14 pr-6 bg-brand-beige/30 dark:bg-white/5 border border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold"
+                                                className="premium-text-input"
                                                 value={formData.name}
                                                 onChange={handleInputChange}
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Communication Endpoint</label>
-                                        <div className="relative group">
-                                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors">
-                                                <Mail size={20} />
-                                            </div>
+                                    <div className="input-field-group">
+                                        <label>Email Address</label>
+                                        <div className="premium-input-wrapper">
+                                            <Mail size={20} className="premium-input-icon" />
                                             <input
                                                 type="email"
                                                 name="email"
-                                                className="w-full h-14 pl-14 pr-6 bg-brand-beige/30 dark:bg-white/5 border border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold"
+                                                className="premium-text-input"
                                                 value={formData.email}
                                                 onChange={handleInputChange}
                                             />
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Professional Narrative</label>
-                                    <textarea
-                                        name="bio"
-                                        className="w-full p-6 bg-brand-beige/30 dark:bg-white/5 border border-brand-border rounded-3xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold min-h-[160px] resize-none"
-                                        placeholder="Articulate your educational philosophy and professional journey..."
-                                        value={formData.bio}
-                                        onChange={handleInputChange}
-                                    ></textarea>
-                                </div>
+                                    <div className="input-field-group">
+                                        <label>Professional Biography</label>
+                                        <textarea
+                                            name="bio"
+                                            className="premium-textarea"
+                                            placeholder="Outline your professional background and teaching philosophy..."
+                                            value={formData.bio}
+                                            onChange={handleInputChange}
+                                        ></textarea>
+                                    </div>
 
-                                <div className="pt-6 border-t border-brand-border flex justify-end">
-                                    <button
-                                        onClick={handleSaveProfile}
-                                        disabled={isSaving}
-                                        className="h-14 px-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-105 active:scale-95 disabled:opacity-50 transition-all border-none cursor-pointer"
-                                    >
-                                        {isSaving ? <Loader2 className="animate-spin" size={18} /> : null}
-                                        {isSaving ? 'Synchronizing...' : 'Save Profile Changes'}
-                                    </button>
+                                    <div className="settings-action-row">
+                                        <button
+                                            className="btn-premium-save"
+                                            onClick={handleSaveProfile}
+                                            disabled={isSaving}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                                        >
+                                            {isSaving ? <Loader2 className="animate-spin" size={18} /> : null}
+                                            {isSaving ? 'Saving...' : 'Save Profile'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'security' && (
-                        <div className="max-w-4xl mx-auto space-y-16 animate-fade-in-up">
-                            {/* Security Status */}
-                            <div className="flex items-center gap-8 p-10 bg-emerald-500/10 border border-emerald-500/20 rounded-xl group">
-                                <div className="w-20 h-20 rounded-3xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-500">
-                                    <Shield size={40} />
+                        <div className="animate-fade-in-up">
+                            <div className="security-status-box">
+                                <div className="status-icon-glow">
+                                    <Shield size={24} />
                                 </div>
-                                <div className="space-y-1">
-                                    <h4 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">Encryption Active</h4>
-                                    <p className="text-emerald-600/70 font-medium text-sm">Your administrative terminal is currently protected by industry-standard security protocols.</p>
+                                <div>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#065f46' }}>Security Status: Secure</h4>
+                                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#047857', fontWeight: 600 }}>Your account is protected by industry-standard encryption.</p>
                                 </div>
                             </div>
 
-                            {/* Password Form */}
-                            <div className="space-y-10">
-                                <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Access Credentials</h3>
+                            <div className="settings-form-col" style={{ maxWidth: '600px' }}>
                                 {error && (
-                                    <div className="flex items-center gap-4 p-6 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-3xl text-red-600 dark:text-red-400 font-bold text-sm">
-                                        <AlertCircle size={20} /> {error}
+                                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '1rem', borderRadius: '16px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                        <AlertCircle size={18} /> {error}
                                     </div>
                                 )}
-                                
-                                <div className="grid grid-cols-1 gap-8">
-                                    <div className="space-y-3 max-w-md">
-                                        <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Current Security Key</label>
-                                        <div className="relative group">
-                                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors">
-                                                <Lock size={20} />
-                                            </div>
+                                {success && (
+                                    <div style={{ background: '#f0fdf4', border: '1px solid #dcfce7', padding: '1rem', borderRadius: '16px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                        <CheckCircle size={18} /> {success}
+                                    </div>
+                                )}
+
+                                <div className="input-field-group">
+                                    <label>Current Password</label>
+                                    <div className="premium-input-wrapper">
+                                        <Lock size={20} className="premium-input-icon" />
+                                        <input
+                                            type="password"
+                                            name="currentPassword"
+                                            className="premium-text-input"
+                                            placeholder="••••••••••••"
+                                            value={formData.currentPassword}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="password-grid-premium" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '2.5rem' }}>
+                                    <div className="input-field-group">
+                                        <label>New Password</label>
+                                        <div className="premium-input-wrapper">
+                                            <Lock size={20} className="premium-input-icon" />
                                             <input
                                                 type="password"
-                                                name="currentPassword"
-                                                className="w-full h-14 pl-14 pr-6 bg-brand-beige/30 dark:bg-white/5 border border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold"
-                                                placeholder="••••••••••••"
-                                                value={formData.currentPassword}
+                                                name="newPassword"
+                                                className="premium-text-input"
+                                                placeholder="Enter"
+                                                value={formData.newPassword}
                                                 onChange={handleInputChange}
                                             />
                                         </div>
                                     </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-brand-border">
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">New Security Key</label>
-                                            <div className="relative group">
-                                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors">
-                                                    <Lock size={20} />
-                                                </div>
-                                                <input
-                                                    type="password"
-                                                    name="newPassword"
-                                                    className="w-full h-14 pl-14 pr-6 bg-brand-beige/30 dark:bg-white/5 border border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold"
-                                                    placeholder="Minimum 8 characters"
-                                                    value={formData.newPassword}
-                                                    onChange={handleInputChange}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Verify New Key</label>
-                                            <div className="relative group">
-                                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors">
-                                                    <Lock size={20} />
-                                                </div>
-                                                <input
-                                                    type="password"
-                                                    name="confirmPassword"
-                                                    className="w-full h-14 pl-14 pr-6 bg-brand-beige/30 dark:bg-white/5 border border-brand-border rounded-2xl focus:outline-none focus:border-brand-emerald focus:bg-white dark:focus:bg-brand-charcoal/50 transition-all text-brand-charcoal dark:text-white font-bold"
-                                                    placeholder="Re-enter for verification"
-                                                    value={formData.confirmPassword}
-                                                    onChange={handleInputChange}
-                                                />
-                                            </div>
+                                    <div className="input-field-group">
+                                        <label>Confirm Password</label>
+                                        <div className="premium-input-wrapper">
+                                            <Lock size={20} className="premium-input-icon" />
+                                            <input
+                                                type="password"
+                                                name="confirmPassword"
+                                                className="premium-text-input"
+                                                placeholder="Confirm"
+                                                value={formData.confirmPassword}
+                                                onChange={handleInputChange}
+                                            />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex justify-end">
+                                <div className="settings-action-row">
                                     <button
+                                        className="btn-premium-save"
+                                        style={{ background: '#3b82f6', boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.2)', display: 'flex', alignItems: 'center', gap: '8px' }}
                                         onClick={handleUpdatePassword}
                                         disabled={isSaving}
-                                        className="h-14 px-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-105 active:scale-95 disabled:opacity-50 transition-all border-none cursor-pointer"
                                     >
                                         {isSaving ? <Loader2 className="animate-spin" size={18} /> : null}
-                                        {isSaving ? 'Updating...' : 'Update Credentials'}
+                                        {isSaving ? 'Updating...' : 'Update Password'}
                                     </button>
                                 </div>
-                            </div>
 
-                            {/* Session Management */}
-                            <div className="space-y-10 pt-16 border-t border-brand-border">
-                                <div className="flex justify-between items-end">
-                                    <div className="space-y-1">
-                                        <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Active Transmissions</h3>
-                                        <p className="text-brand-muted font-medium text-sm leading-relaxed">Manage devices currently synchronized with your administrative profile.</p>
-                                    </div>
-                                </div>
-
-                                {isLoadingSessions ? (
-                                    <div className="flex flex-col items-center justify-center py-16 gap-4 bg-brand-beige/20 dark:bg-white/5 rounded-xl border border-brand-border border-dashed">
-                                        <Loader2 size={32} className="animate-spin text-brand-emerald" />
-                                        <p className="font-black text-[10px] text-brand-muted uppercase tracking-widest">Scanning Network Sessions...</p>
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 gap-4">
-                                        {sessions.map((session) => (
-                                            <div key={session.id} className={`flex flex-col md:flex-row items-center justify-between p-8 rounded-[32px] border transition-all ${session.is_current ? 'bg-white dark:bg-brand-charcoal border-brand-emerald shadow-lg shadow-brand-emerald/5' : 'bg-brand-beige/10 dark:bg-white/5 border-brand-border opacity-70'}`}>
-                                                <div className="flex items-center gap-6 mb-6 md:mb-0">
-                                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${session.is_current ? 'bg-brand-emerald text-white' : 'bg-brand-beige dark:bg-white/10 text-brand-muted'} shadow-inner`}>
-                                                        {session.device_type === 'mobile' ? <Smartphone size={32} /> : <Monitor size={32} />}
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-3">
-                                                            <h5 className="text-base font-black text-brand-charcoal dark:text-white uppercase tracking-tight">{session.name || 'Administrative Terminal'}</h5>
-                                                            {session.is_current && (
-                                                                <span className="px-2 py-0.5 bg-brand-emerald/10 text-brand-emerald rounded text-[8px] font-black uppercase tracking-widest border border-brand-emerald/20">Current Path</span>
-                                                            )}
+                                <div className="session-management-section">
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1.5rem' }}>Active Sessions</h3>
+                                    
+                                    {isLoadingSessions ? (
+                                        <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                                            <Loader2 size={24} className="animate-spin" color="#1a4d3e" />
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            {sessions.map((session) => (
+                                                <div key={session.id} className="session-card-premium" style={{ opacity: session.is_current ? 1 : 0.8 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                                                        <div style={{ 
+                                                            width: '44px', 
+                                                            height: '44px', 
+                                                            borderRadius: '14px', 
+                                                            background: session.is_current ? '#ecfdf5' : '#f1f5f9', 
+                                                            display: 'flex', 
+                                                            alignItems: 'center', 
+                                                            justifyContent: 'center', 
+                                                            color: session.is_current ? '#16a34a' : '#64748b' 
+                                                        }}>
+                                                            <Monitor size={22} />
                                                         </div>
-                                                        <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest flex items-center gap-2">
-                                                            <Globe size={12} /> {session.ip_address || 'Unspecified Endpoint'} • {session.is_current ? 'Active Synchronization' : `Last signal: ${session.last_used_at}`} 
-                                                        </p>
+                                                        <div>
+                                                            <h5 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>{session.name}</h5>
+                                                            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                <Globe size={12} /> {session.is_current ? 'Current Device • Active Now' : `Last active ${session.last_used_at}`} 
+                                                            </p>
+                                                        </div>
                                                     </div>
+                                                    {!session.is_current ? (
+                                                        <button 
+                                                            className="btn-outline-danger-premium" 
+                                                            onClick={() => handleTerminateSession(session.id)}
+                                                            style={{ padding: '0.5rem 1rem' }}
+                                                        >
+                                                            Terminate
+                                                        </button>
+                                                    ) : (
+                                                        <button className="btn-outline-danger-premium" onClick={handleLogout} style={{ border: 'none', background: '#fef2f2' }}>
+                                                            <LogOut size={16} /> Sign Out
+                                                        </button>
+                                                    )}
                                                 </div>
-                                                
-                                                {!session.is_current ? (
-                                                    <button 
-                                                        onClick={() => handleTerminateSession(session.id)}
-                                                        className="h-11 px-6 bg-red-500/10 text-red-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer"
-                                                    >
-                                                        Terminate Connection
-                                                    </button>
-                                                ) : (
-                                                    <button 
-                                                        onClick={handleLogout}
-                                                        className="h-11 px-6 bg-brand-charcoal dark:bg-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-600 transition-all flex items-center gap-2 border-none cursor-pointer"
-                                                    >
-                                                        <LogOut size={16} /> Close Terminal
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

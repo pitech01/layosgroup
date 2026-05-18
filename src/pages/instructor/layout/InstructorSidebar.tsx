@@ -11,9 +11,7 @@ import {
     Video,
     MessageCircle,
     ClipboardList,
-    Activity,
-    ChevronRight,
-    Zap
+    Activity
 } from 'lucide-react';
 
 interface InstructorSidebarProps {
@@ -33,9 +31,9 @@ const InstructorSidebar = ({ collapsed, mobileOpen }: InstructorSidebarProps) =>
 
     const isActive = (path: string) => {
         if (path === '/instructor-dashboard') {
-            return location.pathname === path;
+            return location.pathname === path ? 'active' : '';
         }
-        return location.pathname.startsWith(path);
+        return location.pathname.startsWith(path) ? 'active' : '';
     };
 
     const navItems = [
@@ -52,65 +50,45 @@ const InstructorSidebar = ({ collapsed, mobileOpen }: InstructorSidebarProps) =>
     ];
 
     return (
-        <aside className={`
-            ${collapsed ? 'w-20' : 'w-80'}
-            ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            fixed lg:relative z-50 h-screen transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)
-            bg-brand-charcoal dark:bg-black border-r border-white/5 flex flex-col shadow-2xl
-        `}>
-            {/* Header: Logo */}
-            <div className={`flex items-center h-28 px-8 ${collapsed ? 'justify-center' : 'justify-between gap-4'}`}>
-                <div className={`flex items-center gap-4 transition-all duration-500 ${collapsed ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}`}>
-                    <div className="w-10 h-10 bg-brand-emerald rounded-xl flex items-center justify-center shadow-lg shadow-brand-emerald/20">
-                        <Zap className="text-white fill-current" size={20} />
-                    </div>
-                    <span className="font-black text-white text-xl tracking-tighter uppercase">Layos<span className="text-brand-emerald">.</span></span>
-                </div>
+        <aside className={`sidebar-modern instructor-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`} style={{ overflowY: 'auto' }}>
+            <div className="sidebar-header">
+                <img
+                    src="/logo.png"
+                    alt="Logo"
+                    className="sidebar-logo"
+                    style={{
+                        height: '32px',
+                        width: 'auto',
+                        opacity: collapsed ? 0 : 1,
+                        transition: 'opacity 0.2s',
+                        padding: '0 0.5rem'
+                    }}
+                />
             </div>
 
-            {/* Nav Menu */}
-            <nav className="flex-1 overflow-y-auto py-8 px-6 space-y-3 custom-scrollbar">
-                {navItems.map(({ icon: Icon, label, path }) => {
-                    const active = isActive(path);
-                    return (
-                        <Link
-                            key={path}
-                            to={path}
-                            className={`
-                                group relative flex items-center gap-4 px-5 py-4 rounded-[22px]
-                                font-black text-[11px] uppercase tracking-widest transition-all duration-300
-                                ${active
-                                    ? 'bg-brand-emerald text-white shadow-xl shadow-brand-emerald/20 translate-x-2'
-                                    : 'text-brand-muted hover:bg-white/5 hover:text-white'
-                                }
-                                ${collapsed ? 'justify-center px-0' : ''}
-                            `}
-                        >
-                            <Icon size={20} strokeWidth={active ? 3 : 2} className={`flex-shrink-0 transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`} />
-                            {!collapsed && (
-                                <span className="flex-1">{label}</span>
-                            )}
-                            {active && !collapsed && (
-                                <div className="absolute right-4 w-1.5 h-1.5 bg-white rounded-full"></div>
-                            )}
-                        </Link>
-                    );
-                })}
+            <nav className="nav-menu">
+                {navItems.map((item) => (
+                    <Link
+                        key={item.path}
+                        to={item.path}
+                        className={`nav-item instructor-nav-item ${isActive(item.path)}`}
+                        title={collapsed ? item.label : ""}
+                    >
+                        <div className="nav-item-indicator instructor-indicator" />
+                        <item.icon size={22} style={{ flexShrink: 0 }} />
+                        <span>{item.label}</span>
+                    </Link>
+                ))}
             </nav>
 
-            {/* Footer / Logout */}
-            <div className="p-8 mt-auto border-t border-white/5">
+            <div className="sidebar-footer">
                 <button
                     onClick={handleLogout}
-                    className={`
-                        group w-full flex items-center gap-4 px-5 py-4 rounded-[22px]
-                        text-[11px] font-black uppercase tracking-widest text-brand-muted hover:bg-red-500/10 hover:text-red-500
-                        transition-all duration-300 border-none cursor-pointer
-                        ${collapsed ? 'justify-center px-0' : ''}
-                    `}
+                    className="logout-btn instructor-logout"
+                    title={collapsed ? "Logout" : ""}
                 >
-                    <LogOut size={20} strokeWidth={2.5} className="flex-shrink-0 group-hover:-translate-x-1 transition-transform" />
-                    {!collapsed && <span>System Logout</span>}
+                    <LogOut size={22} style={{ flexShrink: 0 }} />
+                    <span>Logout</span>
                 </button>
             </div>
         </aside>

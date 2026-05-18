@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Download, FileAudio, Eye, X, FileText, Trash2, Bold, Italic, Underline, Edit2 } from 'lucide-react';
+import { Download, FileAudio, Eye, X, FileText, Trash2, Bold, Italic, Underline } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -47,6 +47,7 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
     useEffect(() => {
         if (isEditing && editorRef.current) {
             editorRef.current.innerHTML = message.content;
+            // Set cursor to end
             const range = document.createRange();
             const sel = window.getSelection();
             range.selectNodeContents(editorRef.current);
@@ -65,194 +66,483 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
     };
 
     return (
-        <div className={`flex flex-col w-full mb-4 px-2 md:px-4 ${isMine ? 'items-end' : 'items-start'} ${compact ? 'mt-1' : 'mt-4'}`}>
-            {!compact && (
-                <div className={`flex items-center gap-2 mb-1 px-1 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-brand-muted">
-                        {message.senderName} {isInstructor && '• Instructor'}
-                    </span>
-                    <span className="text-[10px] font-medium text-brand-muted/60">
-                        {message.createdAt}
-                    </span>
-                </div>
-            )}
+        <div className={`slack-message-row ${compact ? 'compact' : ''} ${message.type === 'announcement' ? 'is-announcement' : ''} ${isMine ? 'is-mine' : ''}`}>
+            <style>{`
+                .slack-message-row {
+                    display: flex;
+                    gap: 12px;
+                    padding: ${compact ? '4px 24px' : '8px 24px'};
+                    position: relative;
+                    margin-top: ${compact ? '0' : '8px'};
+                    background: transparent;
+                }
+                .slack-message-row:hover {
+                    background-color: #f8fafc;
+                }
+                
+                .message-avatar-sidebar {
+                    width: 44px;
+                    flex-shrink: 0;
+                    display: flex;
+                    justify-content: center;
+                    position: relative;
+                }
+                
+                @media (max-width: 640px) {
+                    .slack-message-row {
+                        padding: ${compact ? '4px 12px' : '8px 12px'};
+                    }
+                    .message-avatar-sidebar {
+                        width: 36px;
+                    }
+                    .avatar-img-circle {
+                        width: 36px;
+                        height: 36px;
+                    }
+                }
 
-            <div className={`group relative max-w-[85%] md:max-w-[70%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                {/* Message Bubble */}
-                <div className={`
-                    relative px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200
-                    ${isMine 
-                        ? 'bg-brand-emerald text-white rounded-tr-none' 
-                        : isInstructor 
-                            ? 'bg-brand-charcoal text-white rounded-tl-none' 
-                            : 'bg-white text-brand-charcoal border border-brand-border rounded-tl-none'}
-                    ${message.isDeleted ? 'opacity-60 italic' : ''}
-                    ${message.type === 'announcement' ? 'border-2 border-red-500/30' : ''}
-                `}>
-                    {message.isDeleted ? (
-                        <span>This message was deleted</span>
-                    ) : isEditing ? (
-                        <div className="min-w-[200px] md:min-w-[300px]">
-                            <div className="flex gap-1 mb-2 pb-2 border-b border-white/20">
-                                <button onMouseDown={(e) => { e.preventDefault(); handleFormat('bold'); }} className="p-1 hover:bg-white/10 rounded transition-colors" title="Bold">
-                                    <Bold size={14} />
-                                </button>
-                                <button onMouseDown={(e) => { e.preventDefault(); handleFormat('italic'); }} className="p-1 hover:bg-white/10 rounded transition-colors" title="Italic">
-                                    <Italic size={14} />
-                                </button>
-                                <button onMouseDown={(e) => { e.preventDefault(); handleFormat('underline'); }} className="p-1 hover:bg-white/10 rounded transition-colors" title="Underline">
-                                    <Underline size={14} />
-                                </button>
-                            </div>
-                            <div 
-                                ref={editorRef}
-                                contentEditable
-                                onInput={(e) => setEditContent(e.currentTarget.innerHTML)}
-                                className="outline-none min-h-[40px] text-white overflow-y-auto"
-                            />
-                            <div className="flex justify-end gap-2 mt-3">
-                                <button 
-                                    onClick={() => { setIsEditing(false); setEditContent(message.content); }}
-                                    className="px-2 py-1 text-[10px] font-bold border border-white/30 rounded hover:bg-white/10 transition-colors"
-                                    disabled={isSaving}
-                                >
-                                    Cancel
-                                </button>
-                                <button 
-                                    onClick={async () => {
-                                        if(onEdit) {
-                                            setIsSaving(true);
-                                            await onEdit(editContent);
-                                            setIsSaving(false);
-                                            setIsEditing(false);
-                                        }
-                                    }}
-                                    className="px-2 py-1 text-[10px] font-bold bg-white text-brand-emerald rounded hover:bg-opacity-90 transition-colors"
-                                    disabled={isSaving || (editContent === message.content)}
-                                >
-                                    {isSaving ? 'Saving...' : 'Save'}
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="prose prose-sm prose-invert max-w-none break-words overflow-hidden">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                                {message.content}
-                            </ReactMarkdown>
-                        </div>
-                    )}
+                .avatar-img-circle {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 800;
+                    color: white;
+                    font-size: 1rem;
+                    background: ${isInstructor ? '#1e1b4b' : '#334155'};
+                }
 
-                    {/* Announcement Badge */}
-                    {message.type === 'announcement' && !message.isDeleted && (
-                        <div className="absolute -top-3 -right-2 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter shadow-lg ring-2 ring-white">
-                            Alert
-                        </div>
-                    )}
-                </div>
+                .avatar-timestamp-on-hover {
+                    position: absolute;
+                    font-size: 0.65rem;
+                    color: #94a3b8;
+                    opacity: 0;
+                    width: 100%;
+                    text-align: right;
+                    right: 0;
+                    top: 2px;
+                    user-select: none;
+                }
+                .slack-message-row:hover .avatar-timestamp-on-hover {
+                    opacity: 1;
+                }
 
-                {/* Attachments */}
-                {message.attachmentUrl && !message.isDeleted && (
-                    <div className={`mt-2 w-full max-w-[320px] ${isMine ? 'ml-auto' : 'mr-auto'}`}>
+                .message-main-content {
+                    flex: 1;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+
+                .message-upper-meta {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 8px;
+                    margin-bottom: 2px;
+                    flex-wrap: wrap;
+                }
+
+                .sender-displayName {
+                    font-weight: 900;
+                    color: #1e293b;
+                    font-size: 0.95rem;
+                }
+                .instructor-badge-premium {
+                    background: #eff6ff;
+                    color: #2563eb;
+                    font-size: 0.65rem;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    flex-shrink: 0;
+                }
+
+                .timestamp-minimal {
+                    font-size: 0.75rem;
+                    color: #64748b;
+                    font-weight: 500;
+                }
+
+                .message-body-text {
+                    font-size: 0.95rem;
+                    color: #334155;
+                    line-height: 1.5;
+                    word-wrap: break-word;
+                    width: 100%;
+                }
+                
+                .message-body-text p {
+                    margin-top: 0;
+                    margin-bottom: 8px;
+                }
+                .message-body-text p:last-child {
+                    margin-bottom: 0;
+                }
+                .message-body-text a {
+                    color: #2563eb;
+                    text-decoration: none;
+                }
+                .message-body-text a:hover {
+                    text-decoration: underline;
+                }
+                .message-body-text ul, .message-body-text ol {
+                    margin-top: 4px;
+                    margin-bottom: 8px;
+                    padding-left: 20px;
+                }
+                .message-body-text blockquote {
+                    border-left: 3px solid #cbd5e1;
+                    margin: 4px 0 8px 0;
+                    padding-left: 12px;
+                    color: #475569;
+                    font-style: italic;
+                }
+                .message-body-text code {
+                    background: #f1f5f9;
+                    padding: 2px 4px;
+                    border-radius: 4px;
+                    font-size: 0.85em;
+                    font-family: monospace;
+                    color: #ef4444;
+                }
+                .message-body-text pre {
+                    background: #0f172a;
+                    padding: 12px;
+                    border-radius: 6px;
+                    overflow-x: auto;
+                    margin: 8px 0;
+                }
+                .message-body-text pre code {
+                    background: transparent;
+                    color: #f8fafc;
+                    padding: 0;
+                }
+                
+                .is-announcement .message-body-text {
+                    padding: 8px 12px;
+                    background: #fffafa;
+                    border-left: 4px solid #ef4444;
+                    border-radius: 4px;
+                    color: #7f1d1d;
+                }
+
+                .message-attachment-container {
+                    margin-top: 8px;
+                    max-width: 100%;
+                }
+                .image-attachment-preview img {
+                    max-width: 360px;
+                    max-height: 240px;
+                    border-radius: 8px;
+                    object-fit: cover;
+                    border: 1px solid #e2e8f0;
+                }
+
+                .audio-attachment-pill {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    padding: 8px 16px;
+                    border-radius: 30px;
+                    max-width: fit-content;
+                }
+                
+                .generic-file-attachment {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    padding: 12px;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    color: #0f172a;
+                    max-width: 100%;
+                    width: 100%;
+                    transition: all 0.2s;
+                    box-sizing: border-box;
+                    overflow: hidden;
+                }
+
+                .generic-file-attachment:hover {
+                    background: #f1f5f9;
+                    border-color: #cbd5e1;
+                }
+
+                .message-actions-hover {
+                    position: absolute;
+                    right: 24px;
+                    top: -12px;
+                    opacity: 0;
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+                    transition: opacity 0.15s;
+                    z-index: 10;
+                }
+                .slack-message-row:hover .message-actions-hover {
+                    opacity: 1;
+                }
+                .action-btn {
+                    padding: 6px 8px;
+                    background: transparent;
+                    border: none;
+                    color: #64748b;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .action-btn:hover {
+                    background: #f1f5f9;
+                    color: #0f172a;
+                }
+                .action-btn.delete:hover {
+                    color: #ef4444;
+                    background: #fef2f2;
+                }
+                
+                .format-tool-btn {
+                    padding: 6px;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    color: #64748b;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                }
+                .format-tool-btn:hover {
+                    background: #f1f5f9;
+                    color: #0f172a;
+                }
+            `}</style>
+            
+            <div className="message-avatar-sidebar">
+                {!compact ? (
+                    <div className="avatar-img-circle">
+                        {message.senderName.charAt(0)}
+                    </div>
+                ) : (
+                    <div className="avatar-timestamp-on-hover">
+                        {message.createdAt.replace(/ AM| PM/, "").split(':')[0] + ':' + message.createdAt.split(':')[1]}
+                    </div>
+                )}
+            </div>
+            
+            <div className="message-main-content">
+                {!compact && (
+                    <div className="message-upper-meta">
+                        <span className="sender-displayName">{message.senderName}</span>
+                        {isInstructor && <span className="instructor-badge-premium">Instructor</span>}
+                        {message.type === 'announcement' && <span className="instructor-badge-premium" style={{background:'#fee2e2', color:'#b91c1c'}}>Announcement</span>}
+                        <span className="timestamp-minimal">{message.createdAt}</span>
+                    </div>
+                )}
+
+                {message.isDeleted ? (
+                    <div className="message-body-text deleted" style={{ fontStyle: 'italic', color: '#94a3b8' }}>
+                        This message has been deleted.
+                    </div>
+                ) : isEditing ? (
+                    <div style={{ width: '100%', marginTop: '4px' }}>
+                        <div style={{ display: 'flex', gap: '2px', marginBottom: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
+                            <button onMouseDown={(e) => { e.preventDefault(); handleFormat('bold'); }} className="format-tool-btn" title="Bold">
+                                <Bold size={18} />
+                            </button>
+                            <button onMouseDown={(e) => { e.preventDefault(); handleFormat('italic'); }} className="format-tool-btn" title="Italic">
+                                <Italic size={18} />
+                            </button>
+                            <button onMouseDown={(e) => { e.preventDefault(); handleFormat('underline'); }} className="format-tool-btn" title="Underline">
+                                <Underline size={18} />
+                            </button>
+                        </div>
+                        <div 
+                            ref={editorRef}
+                            contentEditable
+                            onInput={(e) => setEditContent(e.currentTarget.innerHTML)}
+                            style={{
+                                width: '100%',
+                                minHeight: '60px',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.95rem',
+                                color: '#1e293b',
+                                outline: 'none',
+                                overflowY: 'auto',
+                                background: 'white'
+                            }}
+                        />
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                            <button 
+                                onClick={() => { setIsEditing(false); setEditContent(message.content); }}
+                                style={{ padding: '4px 12px', borderRadius: '4px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                                disabled={isSaving}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={async () => {
+                                    if(onEdit) {
+                                        setIsSaving(true);
+                                        await onEdit(editContent);
+                                        setIsSaving(false);
+                                        setIsEditing(false);
+                                    }
+                                }}
+                                style={{ padding: '4px 12px', borderRadius: '4px', border: 'none', background: '#2563eb', color: 'white', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                                disabled={isSaving || (editContent === message.content)}
+                            >
+                                {isSaving ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="message-body-text" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                            {message.content}
+                        </ReactMarkdown>
+                    </div>
+                )}
+
+                {message.attachmentUrl && !message.isDeleted && (message.type === 'message' || message.type === 'announcement') && (
+                    <div className="message-attachment-container">
                         {/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(message.attachmentUrl.split('?')[0]) ? (
-                            <div className="relative group/img rounded-xl overflow-hidden border border-brand-border shadow-sm">
-                                <img src={message.attachmentUrl} alt="Attachment" loading="lazy" className="w-full h-auto max-h-[200px] object-cover transition-transform duration-300 group-hover/img:scale-105" />
-                                <a href={message.attachmentUrl} target="_blank" rel="noreferrer" className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity">
-                                    <div className="bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/30 text-white">
-                                        <Eye size={20} />
-                                    </div>
+                            <div className="image-attachment-preview" style={{position: 'relative', display: 'inline-block'}}>
+                                <img src={message.attachmentUrl} alt="Attachment" loading="lazy" />
+                                <a href={message.attachmentUrl} target="_blank" rel="noreferrer" style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '6px 12px', borderRadius: '4px', fontSize: '0.75rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', backdropFilter: 'blur(4px)', fontWeight: 600 }}>
+                                    <Eye size={14}/> View Full
                                 </a>
                             </div>
                         ) : /\.(mp3|wav|ogg|webm|m4a)(\?.*)?$/i.test(message.attachmentUrl.split('?')[0]) ? (
-                            <div className="bg-white border border-brand-border p-2 rounded-xl flex items-center gap-2 shadow-sm">
-                                <FileAudio size={18} className="text-brand-emerald" />
-                                <audio controls src={message.attachmentUrl} className="h-8 flex-1" />
+                            <div className="audio-attachment-pill">
+                                <FileAudio size={20} color="#64748b" />
+                                <audio controls src={message.attachmentUrl} style={{ height: '32px' }} />
                             </div>
                         ) : (
                             <a
                                 href={message.attachmentUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex items-center gap-3 p-3 bg-white border border-brand-border rounded-xl hover:bg-brand-beige transition-all shadow-sm no-underline group/file"
+                                className="generic-file-attachment"
                                 onClick={(e) => handleViewPdf(e, message.attachmentUrl!, 'Attachment')}
                             >
-                                <div className="bg-brand-beige p-2 rounded-lg text-brand-emerald group-hover/file:bg-brand-emerald group-hover/file:text-white transition-colors">
-                                    <Download size={18} />
+                                <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Download size={20} color="#3b82f6" />
                                 </div>
-                                <div className="flex flex-col min-w-0">
-                                    <span className="text-xs font-bold text-brand-charcoal truncate max-w-[180px]">
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '220px' }}>
                                         {message.attachmentUrl.split('/').pop()?.split('?')[0] || 'Attachment'}
                                     </span>
-                                    <span className="text-[10px] text-brand-muted font-medium">
-                                        {viewerRole === 'student' && isPdf(message.attachmentUrl) ? 'Secure PDF' : 'Download'}
+                                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
+                                        {viewerRole === 'student' && isPdf(message.attachmentUrl) ? 'Secure PDF Document' : 'Click to download'}
                                     </span>
                                 </div>
                             </a>
                         )}
                     </div>
                 )}
-
-                {/* Actions (Hover) */}
-                {!message.isDeleted && !isEditing && (
-                    <div className={`
-                        absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 bg-white border border-brand-border rounded-lg shadow-md p-1 z-10
-                        ${isMine ? 'right-full mr-2' : 'left-full ml-2'}
-                    `}>
-                        {onEdit && (
-                            <button 
-                                className="p-1.5 hover:bg-brand-beige text-brand-muted hover:text-brand-charcoal rounded transition-colors"
-                                onClick={() => setIsEditing(true)}
-                                title="Edit"
-                            >
-                                <Edit2 size={14} />
-                            </button>
-                        )}
-                        {onDelete && (
-                            <button 
-                                className="p-1.5 hover:bg-red-50 text-brand-muted hover:text-red-500 rounded transition-colors"
-                                onClick={() => onDelete()}
-                                title="Delete"
-                            >
-                                <Trash2 size={14} />
-                            </button>
-                        )}
-                    </div>
-                )}
             </div>
+            
+            {!message.isDeleted && (
+                <div className="message-actions-hover">
+                    {onEdit && (
+                        <button 
+                            className="action-btn"
+                            onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+                            title="Edit Message"
+                        >
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button 
+                            className="action-btn delete"
+                            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                            title="Delete Message"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    )}
+                </div>
+            )}
 
-            {/* Secure PDF Viewer Modal */}
+            {/* Secure PDF Viewer Modal for Messaging */}
             {viewingPdf && (
-                <div className="fixed inset-0 z-[5000] flex items-center justify-center p-4 md:p-8 bg-black/80 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white w-full max-w-5xl h-[90vh] rounded-[2rem] overflow-hidden flex flex-col shadow-2xl relative">
-                        <div className="flex items-center justify-between p-4 md:p-6 border-b border-brand-border bg-white">
-                            <div className="flex items-center gap-4">
-                                <div className="p-2.5 bg-emerald-50 rounded-xl text-emerald-600">
-                                    <FileText size={20} />
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '2rem',
+                    background: 'rgba(2, 6, 23, 0.9)',
+                    backdropFilter: 'blur(10px)'
+                }}>
+                    <div style={{
+                        background: 'white',
+                        overflow: 'hidden',
+                        width: '100%',
+                        maxWidth: '1000px',
+                        maxHeight: '92vh',
+                        position: 'relative',
+                        borderRadius: '32px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        boxShadow: '0 40px 100px rgba(0,0,0,0.4)'
+                    }}>
+                        <div style={{
+                            padding: '1.5rem 2.5rem',
+                            borderBottom: '1.5px solid #f1f5f9',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            background: '#fcfdfe'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
+                                    <FileText size={22} color="#1a4d3e" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm md:text-base font-black text-brand-charcoal truncate max-w-[200px] md:max-w-md">{viewingPdf?.title}</h3>
-                                    <p className="text-[10px] text-brand-muted font-bold uppercase tracking-wider">Secure Viewer • Read Only</p>
+                                    <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>{viewingPdf?.title}</h3>
+                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure PDF Viewer • Download Disabled</p>
                                 </div>
                             </div>
                             <button
-                                onClick={() => setViewingPdf(null)}
-                                className="p-2 hover:bg-brand-beige text-brand-muted hover:text-brand-charcoal rounded-xl transition-colors"
+                                onClick={(e) => { e.stopPropagation(); setViewingPdf(null); }}
+                                style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer' }}
                             >
-                                <X size={24} />
+                                <X size={22} />
                             </button>
                         </div>
 
-                        <div className="flex-1 bg-brand-beige relative overflow-hidden" onContextMenu={(e) => e.preventDefault()}>
+                        <div
+                            style={{ flex: 1, background: '#f8fafc', overflow: 'hidden', position: 'relative' }}
+                            onContextMenu={(e) => e.preventDefault()}
+                        >
                             <iframe
-                                src={`${viewingPdf.url}#toolbar=0&navpanes=0`}
-                                className="w-full h-full border-none"
+                                src={viewingPdf ? `${viewingPdf.url}#toolbar=0&navpanes=0` : ''}
+                                style={{ width: '100%', height: '70vh', border: 'none' }}
                                 title="Secure PDF Viewer"
                             />
-                            {/* Protection Overlay */}
-                            <div className="absolute inset-0 bg-transparent pointer-events-none" />
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'transparent' }}></div>
                         </div>
 
-                        <div className="p-3 text-center border-t border-brand-border bg-white">
-                            <p className="text-[10px] text-brand-muted font-bold tracking-widest uppercase italic">Protected by Layos Security Protocol</p>
+                        <div style={{ padding: '1rem 2.5rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Protected by Layos Group Security Protocol</p>
                         </div>
                     </div>
                 </div>

@@ -1,8 +1,18 @@
 import { useState, useEffect } from 'react';
 import {
-    Plus, Layers, Search, Filter, Edit2, Trash2, Loader2, AlertCircle,
-    Video, Users, FileText, HelpCircle, UserCheck, Sparkles, BookOpen,
-    ArrowRight
+    Plus,
+    Layers,
+    Search,
+    Filter,
+    Edit2,
+    Trash2,
+    Loader2,
+    AlertCircle,
+    Video,
+    Users,
+    FileText,
+    HelpCircle,
+    UserCheck
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -11,7 +21,6 @@ import { toast } from 'react-hot-toast';
 export default function CourseLibrary() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    
     const [searchQuery, setSearchQuery] = useState('');
     const [courses, setCourses] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -23,9 +32,9 @@ export default function CourseLibrary() {
         setLoading(true);
         try {
             const response = await fetch(`${API_URL}/courses`, {
-                headers: { 
-                    'Accept': 'application/json', 
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
 
@@ -36,220 +45,456 @@ export default function CourseLibrary() {
             }
 
             const data = await response.json();
-            
             if (response.ok) {
+                // Filter by instructor
                 const filtered = data.filter((c: any) => String(c.instructor_id) === String(user?.id));
                 setCourses(filtered);
             } else {
-                throw new Error(data.message || 'Synchronization failure.');
+                throw new Error(data.message || 'Failed to retrieve course list.');
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error("Fetch Courses Error:", err);
+            if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+                toast.error('Connection failed. Redirecting to login...');
+                setTimeout(() => {
+                    logout();
+                    navigate('/instructor-login');
+                }, 2000);
+            } else {
+                setError(err.message);
+            }
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        if (user?.id) fetchCourses();
+        fetchCourses();
     }, [user?.id]);
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Confirm permanent redaction of this curriculum artifact?')) return;
-        
-        try {
-            const response = await fetch(`${API_URL}/courses/${id}`, {
-                method: 'DELETE',
-                headers: { 
-                    'Accept': 'application/json', 
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+        if (window.confirm('Are you sure you want to permanently delete this course? This action cannot be undone.')) {
+            try {
+                const response = await fetch(`${API_URL}/courses/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (response.ok) {
+                    setCourses(courses.filter(c => c.id !== id));
+                } else {
+                    alert('Action failed. The course might be in use and cannot be removed.');
                 }
-            });
-
-            if (response.ok) {
-                setCourses(courses.filter(c => c.id !== id));
-                toast.success('Artifact redacted');
-            } else {
-                toast.error('Failed to delete course');
+            } catch (err) {
+                alert('Connection error. Please check your network.');
             }
-        } catch (err) {
-            toast.error('Operation failed');
         }
     };
 
     const filteredCourses = courses.filter(c =>
-        c.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.category?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
-        <div className="space-y-12 pb-32 max-w-7xl mx-auto px-6 md:px-0">
-            {/* Header Section */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 animate-fade-in-up">
-                <div className="space-y-6 flex-1">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-brand-emerald/10 rounded-xl">
-                            <BookOpen className="text-brand-emerald" size={18} />
-                        </div>
-                        <span className="text-brand-emerald font-black text-[10px] uppercase tracking-[0.4em]">Syllabus Repository</span>
-                    </div>
-                    <div className="space-y-4">
-                        <h1 className="text-5xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none uppercase">
-                            Course <span className="text-brand-emerald">Library</span>
-                        </h1>
-                        <p className="text-brand-muted font-medium text-xl max-w-2xl leading-relaxed">
-                            Design and orchestrate your master instructional pathways and digital curriculum assets within a centralized framework.
-                        </p>
-                    </div>
+        <div className="course-library-container">
+            <style>{`
+                .staff-scope-2 .library-header-premium {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-end;
+                    margin-bottom: 3.5rem;
+                    gap: 1.5rem;
+                }
+
+                @media (max-width: 768px) {
+                    .staff-scope-2 .library-header-premium {
+                        flex-direction: column;
+                        align-items: stretch;
+                        text-align: center;
+                        margin-bottom: 2.5rem;
+                    }
+                }
+
+                .staff-scope-2 .library-header-premium h1 {
+                    font-size: 2.5rem;
+                    font-weight: 950;
+                    color: #0f172a;
+                    letter-spacing: -0.04em;
+                    margin: 0;
+                }
+
+                @media (max-width: 640px) {
+                    .staff-scope-2 .library-header-premium h1 {
+                        font-size: 2rem;
+                    }
+                }
+
+                .staff-scope-2 .library-header-premium p {
+                    color: #64748b;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    margin: 0.5rem 0 0 0;
+                }
+
+                .staff-scope-2 .search-filter-belt {
+                    display: flex;
+                    gap: 1.5rem;
+                    margin-bottom: 2.5rem;
+                }
+
+                @media (max-width: 1024px) {
+                    .staff-scope-2 .search-filter-belt {
+                        flex-direction: column;
+                        gap: 1rem;
+                    }
+                }
+
+                .staff-scope-2 .search-pill-premium {
+                    flex: 1;
+                    height: 56px;
+                    background: white;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 18px;
+                    padding: 0 1.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+                }
+
+               .staff-scope-2  .search-pill-premium input {
+                    border: none;
+                    background: transparent;
+                    outline: none;
+                    width: 100%;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: #0f172a;
+                }
+
+                .staff-scope-2 .filter-group {
+                    display: flex;
+                    gap: 1rem;
+                }
+
+                @media (max-width: 640px) {
+                    .staff-scope-2 .filter-group {
+                        flex-direction: column;
+                    }
+                    .staff-scope-2 .filter-pill-premium {
+                        width: 100% !important;
+                    }
+                }
+
+                .staff-scope-2 .filter-pill-premium {
+                    width: 180px;
+                    height: 56px;
+                    background: white;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 1.5rem;
+                    font-weight: 800;
+                    color: #475569;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    flex-shrink: 0;
+                }
+
+                .staff-scope-2 .filter-pill-premium:hover { border-color: #1a4d3e30; color: #1a4d3e; }
+
+                .staff-scope-2 .template-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+                    gap: 2rem;
+                }
+
+
+                @media (max-width: 640px) {
+                    .staff-scope-2 .template-grid {
+                        gap: 1.25rem;
+                    }
+                    .staff-scope-2 .template-card-premium {
+                        padding: 1.5rem !important;
+                    }
+                }
+
+                .staff-scope-2 .template-card-premium {
+                    background: white;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 28px;
+                    padding: 2rem;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .staff-scope-2 .template-card-premium:hover {
+                    transform: translateY(-8px);
+                    box-shadow: 0 20px 30px -10px rgba(0,0,0,0.05);
+                    border-color: #1a4d3e40;
+                }
+
+                .staff-scope-2 .category-badge-library {
+                    padding: 4px 10px;
+                    background: #f0fdf4;
+                    color: #1a4d3e;
+                    border-radius: 8px;
+                    font-size: 0.7rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    margin-bottom: 1.25rem;
+                    display: inline-block;
+                }
+
+                .staff-scope-2 .template-title-premium {
+                    font-size: 1.4rem;
+                    font-weight: 950;
+                    margin: 0 0 0.75rem 0;
+                    color: #0f172a;
+                    letter-spacing: -0.02em;
+                }
+
+                .staff-scope-2 .template-description-premium {
+                    font-size: 0.95rem;
+                    color: #64748b;
+                    font-weight: 500;
+                    line-height: 1.5;
+                    margin-bottom: 2rem;
+                    height: 48px;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+
+                .staff-scope-2 .template-meta-strip {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding-top: 1.5rem;
+                    border-top: 1.5px solid #f1f5f9;
+                }
+
+                .staff-scope-2 .meta-item-library {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #94a3b8;
+                    font-size: 0.8rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.02em;
+                }
+
+                .staff-scope-2 .action-fab-library {
+                    padding: 0 1rem;
+                    height: 44px;
+                    background: #f8fafc;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #64748b;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .staff-scope-2 .action-fab-library:hover {
+                    background: #1a4d3e;
+                    color: white;
+                    border-color: #1a4d3e;
+                }
+
+                .action-fab-library.delete-btn {
+                    color: #ef4444; 
+                    background: #fff1f2;
+                    border-color: #fee2e2;
+                }
+
+               .staff-scope-2  .action-fab-library.delete-btn:hover {
+                    background: #ef4444;
+                    color: white;
+                    border-color: #ef4444;
+                }
+
+               .staff-scope-2  .action-fab-library.edit-btn {
+                    color: #1a4d3e;
+                    background: #f0fdf4;
+                    border-color: #dcfce7;
+                }
+
+               .staff-scope-2 .action-fab-library.edit-btn:hover {
+                    background: #1a4d3e;
+                    color: white;
+                    border-color: #1a4d3e;
+                }
+
+                .staff-scope-2 .btn-create-master {
+                    height: 60px;
+                    background: #1a4d3e;
+                    color: white;
+                    border: none;
+                    border-radius: 18px;
+                    padding: 0 2rem;
+                    font-weight: 950;
+                    font-size: 1rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    cursor: pointer;
+                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    transition: all 0.3s;
+                }
+
+                @media (max-width: 640px) {
+                    .staff-scope-2 .btn-create-master {
+                        height: 52px;
+                        border-radius: 14px;
+                        font-size: 0.9rem;
+                    }
+                }
+
+               .staff-scope-2  .btn-create-master:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.25);
+                }
+
+                @media (max-width: 480px) {
+                    .staff-scope-2 .template-meta-strip {
+                        flex-direction: column;
+                        gap: 1.25rem;
+                    }
+                    .staff-scope-2 .action-buttons-group {
+                        flex-direction: column;
+                        width: 100%;
+                    }
+                    .staff-scope-2 .action-fab-library {
+                        width: 100% !important;
+                        justify-content: center;
+                    }
+                }
+
+            `}</style>
+
+            <div className="library-header-premium">
+                <div>
+                    <h1>Course Library</h1>
+                    <p>Manage and organize your learning materials and curriculums.</p>
                 </div>
-
-                <Link
-                    to="/instructor/course-library/create"
-                    className="h-20 px-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[32px] font-black text-xs uppercase tracking-[0.3em] flex items-center gap-4 shadow-2xl shadow-brand-charcoal/20 transition-all hover:scale-105 active:scale-95 group no-underline"
-                >
-                    <Plus size={24} className="group-hover:rotate-90 transition-transform" /> 
-                    Initialize Blueprint
+                <Link to="/instructor/course-library/create" className="btn-create-master" style={{ textDecoration: 'none' }}>
+                    <Plus size={20} /> Create New Course
                 </Link>
-            </header>
+            </div>
 
-            {/* Filter Hub */}
-            <div className="flex flex-col xl:flex-row gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <div className="flex-1 relative group">
-                    <Search className="absolute left-8 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors" size={24} />
+            <div className="search-filter-belt">
+                <div className="search-pill-premium shadow-premium">
+                    <Search size={22} color="#94a3b8" />
                     <input
-                        type="text"
-                        placeholder="Search instructional blueprints..."
-                        className="w-full h-20 pl-20 pr-8 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[28px] focus:outline-none focus:border-brand-emerald focus:bg-white transition-all text-sm font-bold text-brand-charcoal dark:text-white placeholder:text-brand-muted/50"
+                        placeholder="Search courses..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-
-                <div className="flex gap-4">
-                    <button className="h-20 px-10 bg-white dark:bg-white/5 border-2 border-brand-border rounded-[28px] flex items-center gap-6 font-black text-[10px] uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all">
-                        Proficiency <Filter size={20} />
-                    </button>
-                    <button className="h-20 px-10 bg-white dark:bg-white/5 border-2 border-brand-border rounded-[28px] flex items-center gap-6 font-black text-[10px] uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all">
-                        Sector <Filter size={20} />
-                    </button>
+                <div className="filter-group">
+                    <div className="filter-pill-premium shadow-premium">
+                        <span>Level</span>
+                        <Filter size={18} />
+                    </div>
+                    <div className="filter-pill-premium shadow-premium">
+                        <span>Category</span>
+                        <Filter size={18} />
+                    </div>
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                {loading ? (
-                    <div className="py-40 flex flex-col items-center justify-center gap-8 bg-brand-beige/20 dark:bg-white/5 rounded-[60px] border-2 border-brand-border border-dashed">
-                        <Loader2 className="animate-spin text-brand-emerald" size={64} />
-                        <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em] animate-pulse">Syncing Master Archive...</p>
-                    </div>
-                ) : error ? (
-                    <div className="bg-red-50 dark:bg-red-500/10 border-2 border-red-100 dark:border-red-500/20 rounded-[60px] p-20 text-center space-y-8 max-w-3xl mx-auto shadow-2xl">
-                        <div className="w-24 h-24 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center mx-auto shadow-sm">
-                            <AlertCircle size={48} />
-                        </div>
-                        <div className="space-y-3">
-                            <h3 className="text-3xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Uplink Interrupted</h3>
-                            <p className="text-brand-muted font-medium text-lg leading-relaxed">{error}</p>
-                        </div>
-                        <button 
-                            onClick={fetchCourses} 
-                            className="h-16 px-12 bg-red-600 text-white rounded-[24px] font-black text-[10px] uppercase tracking-[0.3em] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-red-600/20"
-                        >
-                            Re-establish Connection
-                        </button>
-                    </div>
-                ) : (
-                    <>
-                        {filteredCourses.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                                {filteredCourses.map((course, idx) => (
-                                    <div key={course.id} className="group bg-white dark:bg-brand-charcoal rounded-[56px] border border-brand-border p-10 flex flex-col hover:shadow-[0_40px_80px_-20px_rgba(26,77,62,0.15)] transition-all duration-700 relative overflow-hidden animate-fade-in-up" 
-                                         style={{ animationDelay: `${0.1 * idx}s` }}>
-                                        {/* ... your card content remains the same ... */}
-                                        <div className="absolute -top-12 -right-12 w-48 h-48 bg-brand-emerald/5 rounded-full blur-3xl group-hover:bg-brand-emerald/10 transition-colors"></div>
-                                       
-                                        <div className="relative z-10 flex-1 space-y-10">
-                                            {/* Category & Units */}
-                                            <div className="flex justify-between items-start">
-                                                <div className={`px-5 py-2 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-3 border shadow-sm ${
-                                                    course.category === 'live' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
-                                                    course.category === 'material' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
-                                                    course.category === 'quiz' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 
-                                                    'bg-brand-charcoal text-white border-transparent'
-                                                }`}>
-                                                    {course.category === 'live' ? <Users size={14} /> :
-                                                     course.category === 'material' ? <FileText size={14} /> :
-                                                     course.category === 'quiz' ? <HelpCircle size={14} /> : <Video size={14} />}
-                                                    {course.category || 'Standard'}
-                                                </div>
-                                                <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-beige/50 dark:bg-white/5 rounded-xl border border-brand-border text-[9px] font-black text-brand-muted uppercase tracking-widest group-hover:border-brand-emerald transition-colors">
-                                                    <Layers size={14} className="text-brand-emerald" /> 
-                                                    {course.modules?.length || 0} Units
-                                                </div>
-                                            </div>
+            {loading ? (
+                <div style={{ padding: '5rem', textAlign: 'center' }}>
+                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#64748b' }}>Opening Course Catalog...</p>
+                </div>
+            ) : error ? (
+                <div style={{ padding: '3rem', background: '#fff1f2', borderRadius: '24px', border: '1.5px solid #ffe4e6', textAlign: 'center' }}>
+                    <AlertCircle size={40} color="#e11d48" style={{ margin: '0 auto 1rem' }} />
+                    <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 900 }}>Database Connection Failed</h3>
+                    <p style={{ color: '#64748b', fontWeight: 600, margin: '8px 0 2rem' }}>{error}</p>
+                    <button onClick={fetchCourses} className="btn-primary-forest" style={{ margin: '0 auto' }}>Try Connecting Again</button>
+                </div>
+            ) : (
+                <div className="template-grid">
+                    {filteredCourses.length > 0 ? filteredCourses.map(course => (
+                        <div key={course.id} className="template-card-premium shadow-premium">
 
-                                            {/* Title & Description */}
-                                            <div className="space-y-4">
-                                                <h3 className="text-3xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none group-hover:text-brand-emerald transition-colors line-clamp-2 uppercase">
-                                                    {course.title}
-                                                </h3>
-                                                <p className="text-brand-muted font-medium text-sm leading-relaxed line-clamp-3">
-                                                    {course.description || 'Instructional design details currently processing for this curriculum artifact.'}
-                                                </p>
-                                            </div>
-
-                                            {/* Active Cohorts */}
-                                            <div className="flex items-center gap-6 pt-2">
-                                                <div className="flex -space-x-3">
-                                                    {[1,2,3].map(i => (
-                                                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-brand-charcoal bg-brand-beige dark:bg-white/10 flex items-center justify-center text-[10px] font-black text-brand-muted">
-                                                            {i}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                <span className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em]">Active Cohorts</span>
-                                            </div>
-                                        </div>
-
-                                        {/* Action Buttons */}
-                                        <div className="mt-12 pt-10 border-t border-brand-border grid grid-cols-3 gap-4 relative z-10">
-                                            <Link to={`/instructor/courses/${course.id}/edit`} className="h-14 flex items-center justify-center bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[20px] font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all no-underline shadow-xl shadow-brand-charcoal/20 group-hover:bg-brand-emerald">
-                                                <Edit2 size={18} />
-                                            </Link>
-                                            <Link to={`/instructor/courses/${course.id}/certificate-design`} className="h-14 flex items-center justify-center bg-brand-beige dark:bg-white/10 text-brand-charcoal dark:text-white border-2 border-brand-border rounded-[20px] font-black text-[10px] uppercase tracking-widest hover:bg-brand-charcoal hover:text-white transition-all no-underline">
-                                                <UserCheck size={18} />
-                                            </Link>
-                                            <button
-                                                onClick={() => handleDelete(course.id)}
-                                                className="h-14 flex items-center justify-center bg-red-500/10 text-red-500 rounded-[20px] hover:bg-red-500 hover:text-white transition-all border-none cursor-pointer"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
+                            <h3 className="template-title-premium">{course.title}</h3>
+                            <div style={{ marginBottom: '1.25rem' }}>
+                                <span style={{
+                                    fontSize: '0.65rem',
+                                    fontWeight: 900,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em',
+                                    padding: '4px 10px',
+                                    borderRadius: '8px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    background: course.category === 'live' ? '#fee2e2' :
+                                        course.category === 'material' ? '#ecfdf5' :
+                                            course.category === 'quiz' ? '#fff7ed' : '#eff6ff',
+                                    color: course.category === 'live' ? '#b91c1c' :
+                                        course.category === 'material' ? '#065f46' :
+                                            course.category === 'quiz' ? '#9a3412' : '#1d4ed8'
+                                }}>
+                                    {course.category === 'live' ? <Users size={12} /> :
+                                        course.category === 'material' ? <FileText size={12} /> :
+                                            course.category === 'quiz' ? <HelpCircle size={12} /> : <Video size={12} />}
+                                    {course.category || 'Video Course'}
+                                </span>
                             </div>
-                        ) : (
-                            <div className="bg-white dark:bg-brand-charcoal py-40 text-center rounded-[60px] border-2 border-brand-border border-dashed shadow-sm space-y-10">
-                                <div className="w-32 h-32 bg-brand-beige dark:bg-white/5 rounded-[48px] flex items-center justify-center mx-auto text-brand-muted/30 group relative overflow-hidden">
-                                    <Sparkles size={64} className="group-hover:scale-125 group-hover:rotate-12 transition-transform duration-1000" />
-                                    <div className="absolute inset-0 bg-brand-emerald/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <p className="template-description-premium">{course.description}</p>
+
+                            <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem' }}>
+                                <div className="meta-item-library">
+                                    <Layers size={16} /> {course.modules?.length || 0} Modules
                                 </div>
-                                <div className="space-y-4">
-                                    <h3 className="text-4xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">The Library is Empty</h3>
-                                    <p className="text-brand-muted font-medium text-lg max-w-md mx-auto">Your curriculum repository is waiting for its first instructional master-asset. Begin by initializing a new blueprint.</p>
-                                </div>
-                                <Link 
-                                    to="/instructor/course-library/create" 
-                                    className="inline-flex h-18 px-12 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[32px] font-black text-xs uppercase tracking-[0.4em] items-center gap-4 shadow-2xl shadow-brand-charcoal/20 no-underline hover:scale-105 transition-all"
-                                >
-                                    Initialize Master Course <ArrowRight size={20} />
-                                </Link>
                             </div>
-                        )}
-                    </>
-                )}
-            </div>
+
+                            <div className="template-meta-strip">
+                                <div className="action-buttons-group" style={{ display: 'flex', gap: '0.75rem', width: '100%', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                    <Link to={`/instructor/courses/${course.id}/edit`} className="action-fab-library edit-btn shadow-sm" title="Edit Course" style={{ textDecoration: 'none', flex: '1 1 auto', gap: '8px', minWidth: '100px' }}>
+                                        <Edit2 size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Edit</span>
+                                    </Link>
+                                    <Link to={`/instructor/courses/${course.id}/certificate-design`} className="action-fab-library shadow-sm" title="Certificate" style={{ textDecoration: 'none', flex: '1 1 auto', gap: '8px', minWidth: '100px', background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd' }}>
+                                        <UserCheck size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Cert</span>
+                                    </Link>
+                                    <button
+                                        className="action-fab-library delete-btn shadow-sm"
+                                        style={{ flex: '1 1 auto', gap: '8px', minWidth: '100px' }}
+                                        title="Delete Course"
+                                        onClick={() => handleDelete(course.id)}
+                                    >
+                                        <Trash2 size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Remove</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    )) : (
+                        <div style={{ gridColumn: '1 / -1', padding: '5rem', background: '#f8fafc', borderRadius: '32px', textAlign: 'center', border: '2px dashed #e2e8f0' }}>
+                            <Layers size={48} color="#cbd5e1" style={{ margin: '0 auto 1.5rem' }} />
+                            <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 900 }}>No Courses Found</h3>
+                            <p style={{ color: '#64748b', fontWeight: 600, marginTop: '8px' }}>Your course library is currently empty. Create your first course syllabus to get started.</p>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

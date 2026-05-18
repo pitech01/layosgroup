@@ -6,7 +6,7 @@ interface TopbarRightProps {
 
 const TopbarRight = ({ role }: TopbarRightProps) => {
     return (
-        <div className="top-nav-right">
+        <div className="flex items-center gap-4">
             <ProfileDropdown role={role} />
         </div>
     );

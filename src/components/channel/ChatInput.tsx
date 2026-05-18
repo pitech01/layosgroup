@@ -1,8 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { 
-    Bold, Italic, Underline, Link, List, ListOrdered, Quote, Code, 
-    Paperclip, AtSign, X, Send, Plus, Hash, RefreshCw
-} from 'lucide-react';
+    MdFormatBold, MdFormatItalic, MdFormatUnderlined, 
+    MdFormatStrikethrough, MdFormatListBulleted, 
+    MdFormatListNumbered, MdInsertLink, MdFormatQuote, 
+    MdCode, MdOutlineAttachFile,
+    MdAlternateEmail, MdClose, MdSend, MdKeyboardArrowDown,
+    MdAdd, MdTag, MdRefresh
+} from 'react-icons/md';
+// @ts-ignore
+import './ChatInput.css';
 
 interface ChatInputProps {
     onSendMessage: (content: string, attachment?: File) => void;
@@ -13,14 +19,17 @@ interface ChatInputProps {
 const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending = false }: ChatInputProps) => {
     const [message, setMessage] = useState('');
     const [file, setFile] = useState<File | null>(null);
+    
+    // Mention State
     const [showMentionMenu, setShowMentionMenu] = useState(false);
     const [mentionQuery, setMentionQuery] = useState('');
     const [mentionResults, setMentionResults] = useState<{id: string, name: string, role: string}[]>([]);
     const [isSearchingMentions, setIsSearchingMentions] = useState(false);
-    const [showToolbar, setShowToolbar] = useState(false);
     
+    // Use a contentEditable div instead of textarea to provide true WYSIWYG
     const editorRef = useRef<HTMLDivElement>(null);
 
+    // Live search for platform users
     useEffect(() => {
         if (mentionQuery.length >= 2) {
             setIsSearchingMentions(true);
@@ -49,6 +58,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
     const handleSubmit = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         
+        // Extract raw HTML to send formatted content
         const htmlContent = editorRef.current?.innerHTML || '';
         const rawText = editorRef.current?.textContent || '';
         
@@ -59,6 +69,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
             }
             onSendMessage(finalContent, file || undefined);
             
+            // Clear message correctly
             setMessage('');
             if (editorRef.current) {
                 editorRef.current.innerHTML = '';
@@ -69,12 +80,17 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
         }
     };
 
+    // Execute standard rich text browser commands
     const executeCommand = (command: string, arg?: string) => {
         if (editorRef.current) {
             editorRef.current.focus();
             document.execCommand(command, false, arg);
             setMessage(editorRef.current.innerHTML);
         }
+    };
+
+    const handleFormatBlockQuote = () => {
+        executeCommand('formatBlock', 'BLOCKQUOTE');
     };
 
     const handleFormatCode = () => {
@@ -84,14 +100,14 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
     };
 
     const handleLink = () => {
-        const url = prompt('Enter link URL:');
+        const url = prompt('Enter link URL (e.g. https://example.com):');
         if (url) {
             executeCommand('createLink', url);
         }
     };
 
     const insertMention = (name: string) => {
-        const mentionHTML = `<strong class="text-brand-charcoal bg-brand-emerald/10 px-1 rounded">@${name}</strong>&nbsp;`;
+        const mentionHTML = `<strong style="color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 4px; user-select: none;">@${name}</strong>&nbsp;`;
         executeCommand('insertHTML', mentionHTML);
         setShowMentionMenu(false);
         setMentionQuery('');
@@ -108,141 +124,157 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
         }
     };
 
+    const ICON_SIZE = 24;
+
+    const blackIconStyle = { color: '#000000', visibility: 'visible' as const, fill: 'currentColor', display: 'inline-block', position: 'relative' as const, zIndex: 100 };
+    const whiteIconStyle = { color: '#ffffff', visibility: 'visible' as const, fill: 'currentColor', display: 'inline-block', position: 'relative' as const, zIndex: 100 };
+
     return (
-        <div className="flex flex-col mx-2 md:mx-4 mb-4 bg-white border border-brand-border rounded-[24px] shadow-lg transition-all duration-300 focus-within:shadow-xl focus-within:border-brand-emerald/30  relative">
+        <div className="mega-pro-composer" style={{ position: 'relative' }}>
+            <style>{`
+                .mention-item-menu {
+                    transition: all 0.2s;
+                }
+                .mention-item-menu:hover {
+                    background: #eff6ff;
+                }
+            `}</style>
             
-            {/* Mention Menu */}
-            {showMentionMenu && (
-                <div className="absolute bottom-full left-4 mb-2 w-72 bg-white border border-brand-border rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in slide-in-from-bottom-2">
-                    <div className="p-3 bg-brand-beige/50 border-b border-brand-border">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-brand-muted">Mention User</span>
-                            <button onClick={() => setShowMentionMenu(false)} className="text-brand-muted hover:text-brand-charcoal">
-                                <X size={14} />
-                            </button>
-                        </div>
-                        <input 
-                            autoFocus
-                            type="text"
-                            value={mentionQuery}
-                            onChange={(e) => setMentionQuery(e.target.value)}
-                            placeholder="Search by name..."
-                            className="w-full px-3 py-2 text-xs bg-white border border-brand-border rounded-lg outline-none focus:border-brand-emerald"
-                        />
-                    </div>
-                    <div className="max-h-48 overflow-y-auto p-1">
-                        {mentionQuery.length < 2 ? (
-                            <div className="p-4 text-center text-xs text-brand-muted font-medium">Type to search...</div>
-                        ) : isSearchingMentions ? (
-                            <div className="p-4 text-center text-xs text-brand-emerald font-bold animate-pulse">Searching...</div>
-                        ) : mentionResults.length === 0 ? (
-                            <div className="p-4 text-center text-xs text-red-500 font-medium">No results</div>
-                        ) : (
-                            mentionResults.map(user => (
-                                <button 
-                                    key={user.id} 
-                                    onMouseDown={(e) => { e.preventDefault(); insertMention(user.name); }}
-                                    className="w-full flex flex-col items-start gap-0.5 px-3 py-2 hover:bg-brand-beige rounded-xl transition-colors text-left"
-                                >
-                                    <span className="text-sm font-bold text-brand-charcoal">@{user.name}</span>
-                                    <span className="text-[10px] font-black uppercase text-brand-muted">{user.role}</span>
-                                </button>
-                            ))
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Formatting Toolbar (Collapsible on Mobile) */}
-            {(showToolbar || (typeof window !== 'undefined' && window.innerWidth > 768)) && (
-                <div className="flex items-center gap-1 p-2 bg-brand-beige/30 border-b border-brand-border overflow-x-auto no-scrollbar">
-                    {[
-                        { icon: Bold, cmd: 'bold', label: 'Bold' },
-                        { icon: Italic, cmd: 'italic', label: 'Italic' },
-                        { icon: Underline, cmd: 'underline', label: 'Underline' },
-                        { icon: ListOrdered, cmd: 'insertOrderedList', label: 'List' },
-                        { icon: List, cmd: 'insertUnorderedList', label: 'Bullets' },
-                        { icon: Quote, cmd: 'formatBlock', arg: 'BLOCKQUOTE', label: 'Quote' },
-                        { icon: Code, click: handleFormatCode, label: 'Code' },
-                        { icon: Link, click: handleLink, label: 'Link' },
-                    ].map((btn, i) => (
-                        <button
-                            key={i}
-                            type="button"
-                            onClick={() => btn.click ? btn.click() : executeCommand(btn.cmd!, btn.arg)}
-                            className="p-2 hover:bg-white rounded-lg text-brand-muted hover:text-brand-emerald transition-colors shrink-0"
-                            title={btn.label}
-                        >
-                            <btn.icon size={16} />
-                        </button>
-                    ))}
-                </div>
-            )}
-
-            {/* File Chip */}
-            {file && (
-                <div className="flex items-center gap-2 m-3 p-2 pr-3 bg-brand-beige rounded-xl border border-brand-border w-fit animate-in slide-in-from-left-2">
-                    <div className="bg-white p-1.5 rounded-lg text-brand-emerald shadow-sm">
-                        <Paperclip size={14} />
-                    </div>
-                    <span className="text-xs font-bold text-brand-charcoal max-w-[200px] truncate">{file.name}</span>
-                    <button onClick={() => setFile(null)} className="ml-1 text-red-500 hover:text-red-600 transition-colors">
-                        <X size={14} />
-                    </button>
-                </div>
-            )}
-
-            {/* Composer Area */}
-            <div className="flex items-end gap-2 p-3 min-h-[56px]">
-                <button 
-                    type="button"
-                    onClick={() => document.getElementById('chat-file-input')?.click()}
-                    className="p-2.5 bg-brand-beige hover:bg-brand-border text-brand-muted hover:text-brand-charcoal rounded-full transition-all duration-200 shrink-0"
-                >
-                    <Plus size={20} />
-                    <input type="file" id="chat-file-input" className="hidden" onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
+            {/* Top Toolbar */}
+            <div className="mp-toolbar-top">
+                <button type="button" className="mp-tool-icon" title="Bold" onMouseDown={(e) => { e.preventDefault(); executeCommand('bold'); }}>
+                    <div><MdFormatBold size={ICON_SIZE} style={blackIconStyle} /></div>
                 </button>
+                <button type="button" className="mp-tool-icon" title="Italic" onMouseDown={(e) => { e.preventDefault(); executeCommand('italic'); }}>
+                    <div><MdFormatItalic size={ICON_SIZE} style={blackIconStyle} /></div>
+                </button>
+                <button type="button" className="mp-tool-icon" title="Underline" onMouseDown={(e) => { e.preventDefault(); executeCommand('underline'); }}>
+                    <div><MdFormatUnderlined size={ICON_SIZE} style={blackIconStyle} /></div>
+                </button>
+                <button type="button" className="mp-tool-icon" title="Strikethrough" onMouseDown={(e) => { e.preventDefault(); executeCommand('strikeThrough'); }}>
+                    <div><MdFormatStrikethrough size={ICON_SIZE} style={blackIconStyle} /></div>
+                </button>
+                <div className="mp-sep" />
+                <button type="button" className="mp-tool-icon" title="Link" onMouseDown={(e) => { e.preventDefault(); handleLink(); }}>
+                    <div><MdInsertLink size={ICON_SIZE} style={blackIconStyle} /></div>
+                </button>
+                <button type="button" className="mp-tool-icon" title="Numbered List" onMouseDown={(e) => { e.preventDefault(); executeCommand('insertOrderedList'); }}>
+                    <div><MdFormatListNumbered size={ICON_SIZE} style={blackIconStyle} /></div>
+                </button>
+                <button type="button" className="mp-tool-icon" title="Bulleted List" onMouseDown={(e) => { e.preventDefault(); executeCommand('insertUnorderedList'); }}>
+                    <div><MdFormatListBulleted size={ICON_SIZE} style={blackIconStyle} /></div>
+                </button>
+                <div className="mp-sep" />
+                <button type="button" className="mp-tool-icon" title="Quote" onMouseDown={(e) => { e.preventDefault(); handleFormatBlockQuote(); }}>
+                    <div><MdFormatQuote size={ICON_SIZE} style={blackIconStyle} /></div>
+                </button>
+                <button type="button" className="mp-tool-icon" title="Code" onMouseDown={(e) => { e.preventDefault(); handleFormatCode(); }}>
+                    <div><MdCode size={ICON_SIZE} style={blackIconStyle} /></div>
+                </button>
+            </div>
 
-                <div className="flex-1 min-w-0 py-2">
-                    <div 
-                        ref={editorRef}
-                        contentEditable
-                        onInput={handleInput}
-                        onKeyDown={handleKeyDown}
-                        data-placeholder={placeholder}
-                        className="w-full max-h-48 overflow-y-auto outline-none text-sm text-brand-charcoal font-medium leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-brand-muted/60 empty:before:pointer-events-none"
-                    />
+            {/* File Review Chip */}
+            {file && (
+                <div className="mp-file-chip">
+                    <div><MdOutlineAttachFile size={20} style={{ color: '#000000', visibility: 'visible', display: 'inline-block', position: 'relative', zIndex: 100 }} /></div>
+                    <span style={{ fontWeight: 600 }}>{file.name}</span>
+                    <div style={{ cursor: 'pointer', display: 'flex' }} onClick={() => setFile(null)}>
+                        <MdClose size={20} style={{ color: '#ef4444', visibility: 'visible', display: 'inline-block', position: 'relative', zIndex: 100 }} />
+                    </div>
+                </div>
+            )}
+
+            {/* Input Area (WYSIWYG) */}
+            <div className="mp-input-area">
+                <div 
+                    ref={editorRef}
+                    contentEditable
+                    className="mp-textarea"
+                    data-placeholder={placeholder}
+                    onInput={handleInput}
+                    onKeyDown={handleKeyDown}
+                    style={{ whiteSpace: 'pre-wrap' }}
+                />
+            </div>
+
+            {/* Bottom Toolbar & Pickers */}
+            <div className="mp-toolbar-bottom" style={{ position: 'relative' }}>
+                
+                {/* Mention Dropdown Popover */}
+                {showMentionMenu && (
+                    <div style={{ position: 'absolute', bottom: '100%', left: '100px', marginBottom: '8px', zIndex: 9999, background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', width: '280px', overflow: 'hidden' }}>
+                        <div 
+                            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 }} 
+                            onClick={(_) => { setShowMentionMenu(false); editorRef.current?.focus(); }} 
+                        />
+                        <div style={{ padding: '12px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 800, color: '#64748b', marginBottom: '8px' }}>Tag a User</div>
+                            <input 
+                                autoFocus
+                                type="text"
+                                value={mentionQuery}
+                                onChange={(e) => setMentionQuery(e.target.value)}
+                                placeholder="Search by name..."
+                                style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '0.9rem', color: '#0f172a', fontWeight: 500 }}
+                            />
+                        </div>
+                        <div style={{ maxHeight: '200px', overflowY: 'auto', padding: '8px' }}>
+                            {mentionQuery.length < 2 ? (
+                                <div style={{ padding: '12px', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>Type at least 2 characters to search...</div>
+                            ) : isSearchingMentions ? (
+                                <div style={{ padding: '12px', textAlign: 'center', color: '#2563eb', fontSize: '0.85rem', fontWeight: 700 }}>Searching platform...</div>
+                            ) : mentionResults.length === 0 ? (
+                                <div style={{ padding: '12px', textAlign: 'center', color: '#dc2626', fontSize: '0.85rem', fontWeight: 700 }}>No users found for "{mentionQuery}"</div>
+                            ) : (
+                                mentionResults.map(user => (
+                                    <div key={user.id} className="mention-item-menu" onMouseDown={(e) => { e.preventDefault(); insertMention(user.name); }} style={{ display: 'flex', flexDirection: 'column', gap: '2px', padding: '8px 12px', cursor: 'pointer', borderRadius: '6px' }}>
+                                        <span style={{ fontWeight: 800, color: '#0f172a' }}>@{user.name}</span>
+                                        <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{user.role}</span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                <div className="mp-tools-left">
+                    <button 
+                        type="button" 
+                        className="mp-action-btn"
+                        onClick={() => document.getElementById('mp-file-input')?.click()}
+                        title="Upload File"
+                        style={{ border: 'none', background: 'transparent' }}
+                    >
+                        <div className="mp-plus-btn">
+                            <MdAdd size={ICON_SIZE} style={blackIconStyle} />
+                        </div>
+                        <input type="file" id="mp-file-input" style={{ display: 'none' }} onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
+                    </button>
+                    <button 
+                        type="button" 
+                        className="mp-action-btn" 
+                        title="Mention" 
+                        onMouseDown={(e) => { e.preventDefault(); setShowMentionMenu(prev => !prev); setMentionQuery(''); }}
+                    >
+                        <div><MdAlternateEmail size={ICON_SIZE + 4} style={blackIconStyle} /></div>
+                    </button>
+                    <div className="mp-sep" />
+                    <button type="button" className="mp-action-btn" title="Tags" onMouseDown={(e) => { e.preventDefault(); executeCommand('insertHTML', '#'); }}>
+                        <div><MdTag size={ICON_SIZE + 4} style={blackIconStyle} /></div>
+                    </button>
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                <div className={`mp-send-group ${(!message.trim() && !file) || isSending ? 'disabled' : ''}`}>
                     <button 
-                        type="button"
-                        onClick={() => setShowToolbar(!showToolbar)}
-                        className={`md:hidden p-2.5 rounded-full transition-colors ${showToolbar ? 'text-brand-emerald bg-brand-emerald/10' : 'text-brand-muted hover:bg-brand-beige'}`}
-                    >
-                        <Hash size={20} />
-                    </button>
-                    
-                    <button 
-                        type="button"
-                        onClick={() => setShowMentionMenu(!showMentionMenu)}
-                        className="p-2.5 text-brand-muted hover:bg-brand-beige rounded-full transition-colors"
-                    >
-                        <AtSign size={20} />
-                    </button>
-
-                    <button 
-                        type="button"
-                        onClick={handleSubmit}
+                        type="button" 
+                        className="mp-send-btn" 
                         disabled={(!message.trim() && !file) || isSending}
-                        className={`
-                            p-2.5 rounded-full transition-all duration-300 shadow-md
-                            ${(!message.trim() && !file) || isSending 
-                                ? 'bg-brand-beige text-brand-muted shadow-none cursor-not-allowed' 
-                                : 'bg-brand-emerald text-white hover:scale-105 active:scale-95 shadow-[0_4px_12px_rgba(5,150,105,0.3)]'}
-                        `}
+                        onClick={() => handleSubmit()}
                     >
-                        {isSending ? <RefreshCw size={20} className="animate-spin" /> : <Send size={20} />}
+                        {isSending ? <div><MdRefresh size={ICON_SIZE} className="p-spinner" style={whiteIconStyle} /></div> : <><span>Send</span><div><MdSend size={ICON_SIZE} style={whiteIconStyle} /></div></>}
+                    </button>
+                    <button type="button" className="mp-send-drop" disabled={(!message.trim() && !file) || isSending}>
+                        <div><MdKeyboardArrowDown size={ICON_SIZE + 4} style={whiteIconStyle} /></div>
                     </button>
                 </div>
             </div>

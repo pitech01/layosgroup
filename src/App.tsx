@@ -36,7 +36,7 @@ import SubmitAssignment from './pages/student/assignments/SubmitAssignment.tsx';
 import NotFound from './pages/NotFound';
 import AdminLayout from './components/layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
-import Preloader from './components/Preloader';
+import Preloader from './components/StudentPreloader.tsx';
 import InstructorChannelsPage from './pages/instructor/InstructorChannelsPage';
 import InstructorChannelPage from './pages/instructor/InstructorChannelPage';
 import InstructorSettings from './pages/instructor/Settings';

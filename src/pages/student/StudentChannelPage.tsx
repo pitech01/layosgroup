@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ChevronLeft, Loader2 } from 'lucide-react';
-import ChannelHeader from '../../components/channel/ChannelHeader';
-import ChannelFeed from '../../components/channel/ChannelFeed';
-import ChatInput from '../../components/channel/ChatInput';
-import type { Message } from '../../components/channel/MessageCard';
+import ChannelHeader from '../../components/student_channel/ChannelHeader';
+import ChannelFeed from '../../components/student_channel/ChannelFeed';
+import ChatInput from '../../components/student_channel/ChatInput';
+import type { Message } from '../../components/student_channel/MessageCard';
 import { toast } from 'react-hot-toast';
 
 const StudentChannelPage = () => {

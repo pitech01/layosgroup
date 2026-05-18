@@ -1,17 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { 
-    ChevronLeft, 
-    Loader2, 
-    MessageSquare, 
-    Zap, 
-    Sparkles, 
-    ShieldCheck, 
-    Info,
-    Hash,
-    MoreVertical,
-    Plus
-} from 'lucide-react';
+import { ChevronLeft, Loader2 } from 'lucide-react';
 import ChannelHeader from '../../components/channel/ChannelHeader';
 import ChannelFeed from '../../components/channel/ChannelFeed';
 import CreatePostModal from '../../components/channel/CreatePostModal';
@@ -126,131 +115,69 @@ const InstructorChannelPage = () => {
 
     if (loading) {
         return (
-            <div className="h-[70vh] flex flex-col items-center justify-center gap-6 animate-pulse">
-                <Loader2 className="animate-spin text-brand-emerald" size={48} />
-                <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em]">Establishing Uplink...</p>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                <Loader2 size={40} className="animate-spin text-blue-500" />
             </div>
         );
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8 pb-12 animate-fade-in-up">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                <div className="space-y-4">
-                    <Link 
-                        to="/instructor/channels" 
-                        className="group flex items-center gap-3 text-[10px] font-black text-brand-muted hover:text-brand-emerald uppercase tracking-[0.3em] transition-all no-underline"
-                    >
-                        <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Communications
-                    </Link>
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-brand-emerald/10 rounded-lg text-brand-emerald">
-                            <MessageSquare size={18} />
-                        </div>
-                        <h1 className="text-3xl md:text-4xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">
-                            Course <span className="text-brand-emerald">Channel</span>
-                        </h1>
-                    </div>
-                </div>
+        <div className="animate-fade-in-up instructor-channel-container">
+            <style>{`
+                .staff-scope .instructor-channel-container {
+                    display: flex;
+                    flex-direction: column;
+                    height: calc(100vh - 120px);
+                    background: white;
+                    border-radius: 24px;
+                    border: 1.5px solid #e2e8f0;
+                    overflow: hidden;
+                    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+                    padding: 2rem;
+                }
 
-                <div className="flex items-center gap-4 p-4 bg-brand-beige/20 dark:bg-white/5 rounded-[24px] border border-brand-border">
-                    <div className="w-10 h-10 bg-brand-emerald text-white rounded-xl flex items-center justify-center shadow-lg shadow-brand-emerald/20">
-                        <ShieldCheck size={20} />
-                    </div>
-                    <div className="space-y-0.5 pr-4">
-                        <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest leading-none">Security Status</div>
-                        <div className="text-xs font-black text-brand-charcoal dark:text-white uppercase">Encrypted Link</div>
-                    </div>
-                </div>
+                @media (max-width: 1024px) {
+                    .staff-scope .instructor-channel-container {
+                        height: calc(100dvh - 100px);
+                        padding: 1rem;
+                        border-radius: 0;
+                        border: none;
+                    }
+                    .staff-scope .channel-breadcrumb {
+                        margin-bottom: 1rem !important;
+                    }
+                }
+            `}</style>
+
+            <Link to="/instructor/channels" className="channel-breadcrumb" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: '#64748b',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                marginBottom: '1.5rem'
+            }}>
+                <ChevronLeft size={16} />
+                Back to Channels
+            </Link>
+
+            <div style={{ padding: '0 10px', flex: 'none' }}>
+                <ChannelHeader
+                    courseTitle={courseTitle}
+                    showPostButton={true}
+                    onNewPost={() => setIsModalOpen(true)}
+                />
             </div>
 
-            {/* Main Chat Container */}
-            <div className="bg-white dark:bg-brand-charcoal rounded-[48px] border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5 flex flex-col h-[calc(100vh-280px)]">
-                {/* Chat Sub-header */}
-                <div className="px-10 py-6 border-b border-brand-border bg-brand-beige/10 dark:bg-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white dark:bg-brand-charcoal border border-brand-border rounded-2xl flex items-center justify-center text-brand-emerald shadow-sm">
-                            <Hash size={24} />
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">{courseTitle}</h3>
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                                <span className="text-[10px] font-black text-brand-muted uppercase tracking-widest">Active Stream</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <button 
-                            onClick={() => setIsModalOpen(true)}
-                            className="h-12 px-6 bg-brand-emerald text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-emerald/20 border-none cursor-pointer"
-                        >
-                            <Plus size={16} /> Broadcast Artifact
-                        </button>
-                        <button className="w-12 h-12 flex items-center justify-center text-brand-muted hover:bg-brand-beige dark:hover:bg-white/5 rounded-xl transition-all border-none cursor-pointer">
-                            <MoreVertical size={20} />
-                        </button>
-                    </div>
-                </div>
-
-                {/* Messages Feed */}
-                <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
-                    <div className="py-20 text-center space-y-6">
-                        <div className="w-20 h-20 bg-brand-beige dark:bg-white/5 rounded-[32px] flex items-center justify-center mx-auto text-brand-muted/30 border border-brand-border border-dashed">
-                            <Sparkles size={40} />
-                        </div>
-                        <div className="space-y-2">
-                            <h4 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Channel Origin</h4>
-                            <p className="text-brand-muted font-medium text-sm max-w-xs mx-auto italic">"Synchronize instruction and foster academic collaboration within this secure curriculum node."</p>
-                        </div>
-                    </div>
-
-                    <ChannelFeed messages={messages} userRole="instructor" />
-                    <div ref={feedEndRef} />
-                </div>
-
-                {/* Chat Input */}
-                <div className="p-8 border-t border-brand-border bg-brand-beige/5 dark:bg-white/5">
-                    <div className="max-w-4xl mx-auto">
-                        <ChatInput 
-                            onSendMessage={handleSendMessage} 
-                            isSending={isSending} 
-                            placeholder="Message channel (use '+' button for announcements)" 
-                        />
-                    </div>
-                </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 1.5rem', display: 'flex', flexDirection: 'column' }}>
+                <ChannelFeed messages={messages} userRole="instructor" />
+                <div ref={feedEndRef} />
             </div>
 
-            {/* Intelligence Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <div className="p-8 bg-brand-emerald text-white rounded-xl shadow-xl shadow-brand-emerald/20 flex items-center gap-6 group hover:-translate-y-1 transition-all">
-                    <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Zap size={24} />
-                    </div>
-                    <div className="space-y-1">
-                        <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70">Real-time</div>
-                        <div className="text-sm font-black uppercase tracking-tight leading-none">Instant Delivery</div>
-                    </div>
-                </div>
-                <div className="p-8 bg-white dark:bg-brand-charcoal border border-brand-border rounded-xl shadow-sm flex items-center gap-6 group hover:-translate-y-1 transition-all">
-                    <div className="w-14 h-14 bg-brand-beige dark:bg-white/5 rounded-2xl flex items-center justify-center text-brand-emerald group-hover:scale-110 transition-transform">
-                        <Info size={24} />
-                    </div>
-                    <div className="space-y-1">
-                        <div className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">Protocol</div>
-                        <div className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Archived Feed</div>
-                    </div>
-                </div>
-                <div className="p-8 bg-white dark:bg-brand-charcoal border border-brand-border rounded-xl shadow-sm flex items-center gap-6 group hover:-translate-y-1 transition-all">
-                    <div className="w-14 h-14 bg-brand-beige dark:bg-white/5 rounded-2xl flex items-center justify-center text-brand-emerald group-hover:scale-110 transition-transform">
-                        <Sparkles size={24} />
-                    </div>
-                    <div className="space-y-1">
-                        <div className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">Interaction</div>
-                        <div className="text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-tight leading-none">Global Roster</div>
-                    </div>
-                </div>
+            <div style={{ flex: 'none' }}>
+                <ChatInput onSendMessage={handleSendMessage} isSending={isSending} placeholder="Message channel (use '+' button for announcements)" />
             </div>
 
             <CreatePostModal
@@ -263,4 +190,3 @@ const InstructorChannelPage = () => {
 };
 
 export default InstructorChannelPage;
-

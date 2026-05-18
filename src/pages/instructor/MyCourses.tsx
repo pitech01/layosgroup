@@ -6,18 +6,10 @@ import {
     Eye,
     Clock,
     Loader2,
-    Search,
-    ChevronRight,
-    Sparkles,
-    ShieldCheck,
-    Globe,
-    Zap,
-    Filter,
-    Activity
+    Search
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 interface Cohort {
     id: string | number;
@@ -31,7 +23,6 @@ interface Cohort {
 }
 
 export default function MyCourses() {
-    const navigate = useNavigate();
     const [cohortsList, setCohortsList] = useState<Cohort[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -52,7 +43,6 @@ export default function MyCourses() {
             }
         } catch (err) {
             console.error("Fetch Cohorts Error:", err);
-            toast.error("Failed to sync cohort records");
         } finally {
             setLoading(false);
         }
@@ -73,13 +63,12 @@ export default function MyCourses() {
                 });
                 if (response.ok) {
                     setCohortsList(cohortsList.filter(c => c.id !== id));
-                    toast.success("Cohort record redacted");
                 } else {
-                    toast.error("Failed to delete cohort");
+                    alert('Failed to delete cohort.');
                 }
             } catch (err) {
                 console.error("Delete Cohort Error:", err);
-                toast.error("Operational failure during deletion");
+                alert('An error occurred.');
             }
         }
     };
@@ -90,179 +79,287 @@ export default function MyCourses() {
     );
 
     const stats = [
-        { label: 'Active Operational Cycles', count: cohortsList.length, trend: 'Managed', color: 'text-brand-emerald', bg: 'bg-brand-emerald/10', icon: Globe },
-        { label: 'Synchronized Student Body', count: cohortsList.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Enrolled', color: 'text-blue-500', bg: 'bg-blue-500/10', icon: Users },
+        { label: 'Active Cohorts', count: cohortsList.length, trend: 'Managed', color: '#1a4d3e', icon: CheckCircle2 },
+        { label: 'Student Body', count: cohortsList.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Enrolled', color: '#64748b', icon: Users },
     ];
 
     if (loading) {
         return (
-            <div className="h-[70vh] flex flex-col items-center justify-center gap-8 animate-pulse">
-                <div className="w-20 h-20 bg-brand-emerald/10 rounded-[32px] flex items-center justify-center">
-                    <Loader2 className="animate-spin text-brand-emerald" size={40} />
-                </div>
-                <p className="font-black text-[10px] text-brand-muted uppercase tracking-[0.4em]">Synchronizing Registry Manifest...</p>
+            <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+                <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
+                <p style={{ fontWeight: 800, color: '#64748b' }}>Loading Records...</p>
             </div>
         );
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-12 pb-32">
-            {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 animate-fade-in-up">
-                <div className="space-y-6 flex-1">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-brand-emerald/10 rounded-xl">
-                            <ShieldCheck className="text-brand-emerald" size={18} />
-                        </div>
-                        <span className="text-brand-emerald font-black text-[10px] uppercase tracking-[0.4em]">Academic Operations</span>
-                    </div>
-                    <div className="space-y-4">
-                        <h1 className="text-5xl md:text-6xl font-black text-brand-charcoal dark:text-white tracking-tighter leading-none uppercase">Cohort <span className="text-brand-emerald">Registry</span></h1>
-                        <p className="text-brand-muted font-medium text-xl max-w-2xl leading-relaxed">Oversee active instructional cycles, manage student allocations, and track curriculum synchronization.</p>
-                    </div>
-                </div>
+        <div className="instructor-courses-page animate-fade-in-up">
+            <style>{`
+                .staff-scope .courses-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 3.5rem;
+                }
 
+                .courses-header h2 {
+                    font-size: 1.75rem;
+                    font-weight: 950;
+                    color: #0f172a;
+                    margin: 0;
+                    letter-spacing: -0.02em;
+                }
+
+                .staff-scope .courses-stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 2rem;
+                    margin-bottom: 3.5rem;
+                }
+
+                .staff-scope .stat-card-premium {
+                    background: white;
+                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border-radius: 24px;
+                    padding: 2rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+                }
+
+                .staff-scope .filter-section {
+                    display: flex;
+                    gap: 1.5rem;
+                    margin-bottom: 2.5rem;
+                    flex-wrap: wrap;
+                }
+
+                .staff-scope .search-pill-container {
+                    position: relative;
+                    flex: 2;
+                    min-width: 350px;
+                }
+
+                .staff-scope .search-pill-input {
+                    height: 56px;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 18px;
+                    background: white;
+                    color: #1e293b;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    padding: 0 1.5rem 0 3.5rem;
+                    width: 100%;
+                    outline: none;
+                    transition: all 0.3s ease;
+                }
+
+                .search-pill-input:focus {
+                    border-color: #1a4d3e;
+                    box-shadow: 0 0 0 5px rgba(26, 77, 62, 0.05);
+                }
+
+                .staff-scope .filter-pill-premium {
+                    height: 56px;
+                    border: 2px solid #f1f5f9;
+                    border-radius: 18px;
+                    background: white;
+                    color: #475569;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    padding: 0 1.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    min-width: 200px;
+                }
+
+                .staff-scope .course-table-card-premium {
+                    background: white;
+                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border-radius: 32px;
+                    overflow: hidden;
+                    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
+                }
+
+                .staff-scope .course-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+
+                .course-table th {
+                    text-align: left;
+                    padding: 1.5rem 2rem;
+                    background: #f8fafc;
+                    color: #64748b;
+                    font-size: 0.85rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    border-bottom: 1px solid #f1f5f9;
+                }
+
+                .course-table td {
+                    padding: 1.75rem 2rem;
+                    border-bottom: 1px solid #f8fafc;
+                    vertical-align: middle;
+                }
+
+                .staff-scope .action-btn-circle {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 14px;
+                    background: #f8fafc;
+                    border: 1.5px solid #f1f5f9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #64748b;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    text-decoration: none;
+                }
+
+                .action-btn-circle:hover {
+                    background: #1a4d3e;
+                    color: white;
+                    border-color: #1a4d3e;
+                    transform: translateY(-2px);
+                }
+
+                .staff-scope .btn-standard {
+                    height: 52px;
+                    padding: 0 2rem;
+                    border-radius: 16px;
+                    font-size: 0.95rem;
+                    font-weight: 800;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                    transition: all 0.3s;
+                    cursor: pointer;
+                    border: none;
+                    color: white;
+                    text-decoration: none;
+                }
+            `}</style>
+
+            <div className="courses-header">
+                <div>
+                    <h2>Cohort Roster</h2>
+                    <p style={{ color: '#64748b', margin: '0.5rem 0 0 0', fontWeight: 600 }}>Overview of active learning sessions and cohort registrations.</p>
+                </div>
                 <Link
                     to="/instructor/cohorts/create"
-                    className="h-20 px-10 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-[32px] font-black text-xs uppercase tracking-[0.3em] flex items-center gap-4 shadow-2xl shadow-brand-charcoal/20 transition-all hover:scale-105 active:scale-95 group no-underline"
+                    className="btn-standard"
+                    style={{ background: '#1a4d3e', boxShadow: '0 10px 15px rgba(26, 77, 62, 0.15)' }}
                 >
-                    <Plus size={24} className="group-hover:rotate-90 transition-transform" /> Initialize Cycle
+                    <Plus size={20} /> New Cohort
                 </Link>
-            </header>
+            </div>
 
-            {/* Metrics Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                {stats.map(({ label, count, trend, color, bg, icon: Icon }, i) => (
-                    <div key={i} className="bg-white dark:bg-brand-charcoal p-10 rounded-[48px] border border-brand-border flex items-center gap-10 group hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-emerald/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-brand-emerald/10 transition-colors"></div>
-                        <div className={`w-20 h-20 ${bg} ${color} rounded-[32px] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500`}>
-                            <Icon size={40} />
+            <div className="courses-stats-grid">
+                {stats.map((stat: any, i: number) => (
+                    <div key={i} className="stat-card-premium">
+                        <div style={{
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '18px',
+                            background: `${stat.color}10`,
+                            color: stat.color,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                        }}>
+                            <stat.icon size={32} />
                         </div>
-                        <div className="relative z-10 flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                                <p className="text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">{label}</p>
-                                <span className={`px-2 py-0.5 rounded-lg ${bg} ${color} text-[8px] font-black uppercase tracking-widest`}>{trend}</span>
-                            </div>
-                            <h3 className="text-4xl font-black text-brand-charcoal dark:text-white tracking-tight leading-none group-hover:text-brand-emerald transition-colors">{count}</h3>
+                        <div>
+                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</p>
+                            <h3 style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: 950, color: '#0f172a' }}>{stat.count}</h3>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Hub Bar */}
-            <div className="flex flex-col xl:flex-row gap-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <div className="flex-1 relative group">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-muted group-focus-within:text-brand-emerald transition-colors" size={24} />
+            <div className="filter-section" style={{ marginBottom: '2rem' }}>
+                <div className="search-pill-container" style={{ flex: 1 }}>
+                    <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                     <input
                         type="text"
-                        placeholder="Filter registry by cycle name or ID..."
-                        className="w-full h-20 pl-16 pr-8 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[32px] focus:outline-none focus:border-brand-emerald transition-all text-sm font-bold text-brand-charcoal dark:text-white shadow-sm"
+                        placeholder="Search sessions..."
+                        className="search-pill-input"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="flex gap-4">
-                    <button className="h-20 px-8 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[32px] flex items-center gap-4 font-black text-[10px] uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all border-none cursor-pointer">
-                        <Filter size={20} /> Protocol
-                    </button>
-                    <button className="h-20 px-8 bg-white dark:bg-brand-charcoal border-2 border-brand-border rounded-[32px] flex items-center gap-4 font-black text-[10px] uppercase tracking-widest text-brand-muted hover:text-brand-charcoal dark:hover:text-white transition-all border-none cursor-pointer">
-                        <Activity size={20} /> Analytics
-                    </button>
-                </div>
             </div>
 
-            {/* Registry List */}
-            <div className="bg-white dark:bg-brand-charcoal rounded-[60px] border border-brand-border overflow-hidden shadow-2xl shadow-brand-charcoal/5 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                <div className="p-10 border-b border-brand-border flex items-center justify-between bg-brand-beige/10 dark:bg-white/5">
-                    <div className="flex items-center gap-4">
-                        <div className="p-2.5 bg-brand-charcoal text-white rounded-xl">
-                            <Zap size={20} />
-                        </div>
-                        <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Active Transmissions</h3>
-                    </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+            <div className="course-table-card-premium">
+                <div style={{ overflowX: 'auto' }}>
+                    <table className="course-table">
                         <thead>
-                            <tr className="bg-brand-beige/5 dark:bg-white/5 border-b border-brand-border">
-                                <th className="text-left py-8 px-10 text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">Session Identity</th>
-                                <th className="text-left py-8 px-10 text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">Operational Data</th>
-                                <th className="text-left py-8 px-10 text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">Population</th>
-                                <th className="text-right py-8 px-10 text-[10px] font-black text-brand-muted uppercase tracking-[0.3em]">Management</th>
+                            <tr>
+                                <th>Session Identity</th>
+                                <th>Operational Data</th>
+                                <th>Population</th>
+                                <th style={{ textAlign: 'right' }}>Management</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-brand-border">
-                            {filteredCohorts.length > 0 ? filteredCohorts.map((cohort, idx) => (
-                                <tr key={cohort.id} className="group hover:bg-brand-beige/20 dark:hover:bg-white/5 transition-all">
-                                    <td className="py-10 px-10">
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-16 h-16 rounded-2xl bg-brand-charcoal dark:bg-brand-emerald text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-brand-charcoal/10 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                        <tbody>
+                            {filteredCohorts.map(cohort => (
+                                <tr key={cohort.id}>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                                            <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a4d3e', fontWeight: 950 }}>
                                                 {cohort.name.charAt(0)}
                                             </div>
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-[10px] font-black text-brand-emerald bg-brand-emerald/10 px-2 py-0.5 rounded-lg uppercase tracking-widest">{cohort.id}</span>
-                                                    <h4 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight group-hover:text-brand-emerald transition-colors">{cohort.name}</h4>
-                                                </div>
-                                                <p className="text-xs font-bold text-brand-muted">{cohort.course?.title || 'General Curriculum'}</p>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '2px 8px', borderRadius: '6px', width: 'fit-content' }}>{cohort.id}</span>
+                                                <span style={{ fontWeight: 900, color: '#0f172a', fontSize: '1rem' }}>{cohort.name}</span>
+                                                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>{cohort.course?.title || 'No Curriculum Linked'}</span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="py-10 px-10">
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-3 text-sm font-black text-brand-charcoal dark:text-white uppercase tracking-tight">
-                                                <Clock size={16} className="text-brand-emerald" /> 
-                                                {new Date(cohort.start_date).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })}
+                                    <td>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 800, color: '#475569' }}>
+                                                <Clock size={14} /> {new Date(cohort.start_date).toLocaleDateString()}
                                             </div>
-                                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                                Operational
-                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Session Active</div>
                                         </div>
                                     </td>
-                                    <td className="py-10 px-10">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-brand-beige/50 dark:bg-white/10 rounded-xl flex items-center justify-center text-brand-muted group-hover:text-brand-emerald transition-colors">
-                                                <Users size={20} />
-                                            </div>
-                                            <span className="text-xl font-black text-brand-charcoal dark:text-white tracking-tight">{cohort.students?.length || 0}</span>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Users size={18} color="#94a3b8" />
+                                            <span style={{ fontWeight: 950, fontSize: '1rem', color: '#0f172a' }}>{cohort.students?.length || 0}</span>
                                         </div>
                                     </td>
-                                    <td className="py-10 px-10 text-right">
-                                        <div className="flex justify-end gap-4 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
-                                            <Link 
-                                                to={`/instructor/cohorts/${cohort.id}`} 
-                                                className="h-14 px-8 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 no-underline shadow-lg shadow-brand-charcoal/20 transition-all hover:scale-105 active:scale-95"
-                                            >
-                                                <Eye size={18} /> Manage
+                                    <td style={{ textAlign: 'right' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                                            <Link to={`/instructor/cohorts/${cohort.id}`} className="action-btn-circle" style={{ width: 'auto', padding: '0 1.25rem', gap: '8px' }}>
+                                                <Eye size={18} /> <span style={{ fontSize: '0.8rem', fontWeight: 900 }}>Manage</span>
                                             </Link>
                                             <button
+                                                className="action-btn-circle"
+                                                title="Delete"
                                                 onClick={() => handleDeleteCohort(cohort.id)}
-                                                className="w-14 h-14 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center transition-all hover:bg-red-500 hover:text-white border-none cursor-pointer group/del"
+                                                style={{ color: '#ef4444' }}
                                             >
-                                                <Trash2 size={20} className="group-hover/del:rotate-12 transition-transform" />
+                                                <Trash2 size={18} />
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan={4} className="py-40 text-center space-y-10">
-                                        <div className="w-32 h-32 bg-brand-beige dark:bg-white/5 rounded-[48px] flex items-center justify-center mx-auto text-brand-muted/30 shadow-inner">
-                                            <Sparkles size={64} className="animate-pulse" />
-                                        </div>
-                                        <div className="space-y-4">
-                                            <h3 className="text-3xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">No Records Found</h3>
-                                            <p className="text-brand-muted font-medium text-lg max-w-md mx-auto">The registry manifest is currently empty. Initialize a new cycle to begin operational tracking.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
+                            ))}
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
