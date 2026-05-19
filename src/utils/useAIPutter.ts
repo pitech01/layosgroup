@@ -1,8 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { loadPdf, extractPdfPageText } from './pdfTextExtractor';
 
-const GITHUB_TOKEN = import.meta.env.GITHUB_TOKEN;
-const GITHUB_ENDPOINT = "https://models.inference.ai.azure.com/chat/completions";
+const SERVERLESS_FUNCTION_ENDPOINT = "/api/chat";
 const MODEL_NAME = "gpt-4o-mini";
 
 export type AIState = 'idle' | 'extracting' | 'summarizing' | 'ready' | 'speaking' | 'paused' | 'error';
@@ -130,11 +129,7 @@ export const useAIPutter = () => {
         stop();
         setState('extracting');
         setError(null);
-        if (!GITHUB_TOKEN) {
-            setError('Integration Error: VITE_GITHUB_TOKEN missing in .env');
-            setState('error');
-            return;
-        }
+  
 
         try {
             const pdf = await loadPdf(pdfUrl);
@@ -166,11 +161,10 @@ export const useAIPutter = () => {
                 Document Content (Pages ${startPage}-${endPage}):
                 ${chunkText}`;
 
-                const response = await fetch(GITHUB_ENDPOINT, {
+                const response = await fetch(SERVERLESS_FUNCTION_ENDPOINT, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${GITHUB_TOKEN}`
                     },
                     body: JSON.stringify({
                         model: MODEL_NAME,
@@ -217,11 +211,12 @@ export const useAIPutter = () => {
 
     const askQuestion = async (question: string) => {
         try {
-            const response = await fetch(GITHUB_ENDPOINT, {
+
+            
+            const response = await fetch(SERVERLESS_FUNCTION_ENDPOINT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${GITHUB_TOKEN}`
                 },
                 body: JSON.stringify({
                     model: MODEL_NAME,
