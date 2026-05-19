@@ -66,12 +66,6 @@ const pdfProxyPlugin = () => ({
 export default defineConfig({
   plugins: [react(), tailwindcss(), pdfProxyPlugin()],
   server: {
-     proxy: {
-      '/api': {
-        target: 'http://localhost:5173',
-        changeOrigin: true
-      }
-    },
     port: 5173, // or your desired port
     host: '127.0.0.1', 
     
