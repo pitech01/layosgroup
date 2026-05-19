@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { loadPdf, extractPdfPageText } from './pdfTextExtractor';
 
-const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
+const GITHUB_TOKEN = import.meta.env.GITHUB_TOKEN;
 const GITHUB_ENDPOINT = "https://models.inference.ai.azure.com/chat/completions";
 const MODEL_NAME = "gpt-4o-mini";
 
