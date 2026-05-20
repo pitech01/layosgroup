@@ -3,6 +3,7 @@ import { User, Lock, Shield, LogOut, Loader2, Monitor, Globe, Mail, Fingerprint,
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { SkeletonRow } from '../../../components/common/SkeletonLoader';
 
 const Account = () => {
     const { user, logout, updateUserInfo } = useAuth();
@@ -25,6 +26,8 @@ const Account = () => {
     
     const [sessions, setSessions] = useState<any[]>([]);
     const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+
+
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
     const token = localStorage.getItem('token');
@@ -324,9 +327,7 @@ const Account = () => {
                                     </div>
                                     
                                     {isLoadingSessions ? (
-                                        <div className="flex justify-center py-12">
-                                            <Loader2 size={32} className="animate-spin text-brand-emerald" />
-                                        </div>
+                                     <SkeletonRow/>
                                     ) : (
                                         <div className="space-y-4">
                                             {sessions.map((session) => (

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
+import {SkeletonDashboard} from '../../components/common/SkeletonLoader';
 
 export default function StudentDashboard() {
     const { user, logout } = useAuth();
@@ -167,10 +168,7 @@ export default function StudentDashboard() {
 
     if (loading) {
         return (
-            <div className="flex flex-col justify-center items-center h-[60vh] gap-4">
-                <Loader2 size={40} className="animate-spin text-brand-emerald" />
-                <p className="text-brand-muted font-black text-xs uppercase tracking-widest animate-pulse">Syncing Dashboard...</p>
-            </div>
+            <SkeletonDashboard />
         );
     }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { PlayCircle, FileText, CheckCircle, ChevronLeft, Clock, Loader2, Video, Calendar, ShieldCheck, BookOpen, Star, Trophy, Download, RefreshCw } from 'lucide-react';
+import { SkeletonCourseDetails} from '../../../components/common/SkeletonLoader';
 
 const CourseDetails = () => {
     const { courseId } = useParams();
@@ -102,16 +103,13 @@ const CourseDetails = () => {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-                <Loader2 className="animate-spin text-brand-emerald" size={40} />
-                <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Launching Curriculum...</p>
-            </div>
+            <SkeletonCourseDetails/>
         );
     }
 
     if (!course) {
         return (
-            <div className="py-24 px-4 text-center bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border">
+            <div className="py-24 px-4 text-center bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border scrollbar">
                 <div className="w-20 h-20 bg-red-50 dark:bg-red-900/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
                     <ShieldCheck size={40} />
                 </div>

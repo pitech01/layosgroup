@@ -22,6 +22,7 @@ import {
 import { toast } from 'react-hot-toast';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
+import { SkeletonAssignmentList } from '../../../components/common/SkeletonLoader';
 
 export default function StudentAssignments() {
     const { logout } = useAuth();
@@ -149,10 +150,7 @@ export default function StudentAssignments() {
 
             {/* Content States */}
             {loading ? (
-                <div className="flex flex-col items-center justify-center py-24 md:py-32 gap-3">
-                    <Loader2 className="animate-spin text-[#1A4D3E]" size={40} />
-                    <p className="text-[10px] font-bold text-[#7A827E] uppercase tracking-widest animate-pulse">Syncing Workspace...</p>
-                </div>
+                <SkeletonAssignmentList />
             ) : error ? (
                 <div className="bg-white p-6 sm:p-10 rounded-[24px] border border-red-100 text-center max-w-xl mx-auto space-y-4 shadow-sm">
                     <div className="w-12 h-12 sm:w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto text-red-500">

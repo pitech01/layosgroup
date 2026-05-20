@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles, Maximize2, Minimize2, Trophy, Download, RefreshCw, Calendar, Clock, BookOpen, Activity } from 'lucide-react';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
+import { SkeletonLessonView } from '../../../components/common/SkeletonLoader';
 
 const LessonView = () => {
     const { courseId, lessonId } = useParams();
@@ -111,10 +112,7 @@ const LessonView = () => {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-                <Loader2 className="animate-spin text-brand-emerald" size={40} />
-                <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Streaming Intelligence...</p>
-            </div>
+           <SkeletonLessonView/>
         );
     }
 
@@ -198,14 +196,7 @@ const LessonView = () => {
 
     return (
         <div className="flex flex-col h-[calc(100vh-80px)] overflow-hidden">
-            <div className="flex-1 overflow-y-auto scrollbar 
-            
-            [&::-webkit-scrollbar]:w-2
-  [&::-webkit-scrollbar-track]:bg-slate-100
-  [&::-webkit-scrollbar-thumb]:bg-brand-emerald/40
-  active:[&::-webkit-scrollbar-thumb]:bg-brand-emerald
-  [&::-webkit-scrollbar-thumb:hover]:bg-brand-emerald
-  [&::-webkit-scrollbar-thumb]:rounded-full">
+            <div className="flex-1 overflow-y-auto scrollbar ">
 
                 <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
                     {/* Navigation Header */}
@@ -404,7 +395,7 @@ const LessonView = () => {
                                                 </div>
 
                                                 {/* Quiz Question Area */}
-                                                <div className="flex-1 overflow-y-auto px-8 pb-8 scrollbar-none">
+                                                <div className="flex-1 overflow-y-auto px-8 pb-8 ">
                                                     <div className="max-w-4xl mx-auto py-12 space-y-12 animate-fade-in-up">
                                                         <h3 className="text-3xl md:text-4xl font-black text-white text-center leading-tight tracking-tight">
                                                             {lesson.quiz_data.questions[currentQuestionIndex].question}
@@ -790,7 +781,7 @@ const LessonView = () => {
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-8 md:p-12 scrollbar-none space-y-12">
+                        <div className="flex-1 overflow-y-auto p-8 md:p-12  space-y-12">
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                                 <div className="bg-brand-beige/50 dark:bg-white/5 p-8 rounded-[32px] border border-brand-border">
                                     <div className="text-[10px] font-black text-brand-muted uppercase tracking-widest mb-2">Proficiency Ratio</div>

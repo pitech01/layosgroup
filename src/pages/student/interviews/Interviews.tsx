@@ -15,6 +15,7 @@ import {
     PlayCircle
 } from 'lucide-react';
 import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
+import { SkeletonCourseGrid } from '../../../components/common/SkeletonLoader';
 
 export default function StudentInterviews() {
     const [interviews, setInterviews] = useState<any[]>([]);
@@ -86,10 +87,7 @@ export default function StudentInterviews() {
             </div>
 
             {loading ? (
-                <div className="flex flex-col items-center justify-center py-32 gap-4">
-                    <Loader2 className="animate-spin text-brand-emerald" size={48} />
-                    <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Syncing Resource Library...</p>
-                </div>
+                <SkeletonCourseGrid/>
             ) : error ? (
                 <div className="bg-white dark:bg-brand-charcoal p-12 rounded-xl border border-red-100 dark:border-red-900/30 text-center space-y-6 shadow-xl shadow-red-500/5">
                     <div className="w-20 h-20 bg-red-50 dark:bg-red-900/10 rounded-full flex items-center justify-center mx-auto text-red-500">

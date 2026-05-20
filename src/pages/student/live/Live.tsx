@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, Video, User, Inbox, FileVideo, X, Maximize2, PlayCircle, Filter, ArrowRight, Activity, Sparkles } from 'lucide-react';
+import { SkeletonAssignmentList } from '../../../components/common/SkeletonLoader';
 
 interface LiveSession {
     id: number;
@@ -155,10 +156,7 @@ const Live = () => {
                 </div>
 
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-24 gap-4 bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border border-dashed">
-                        {/* <Loader2 className="animate-spin text-brand-emerald" size={40} /> */}
-                        <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Syncing Broadcast Feed...</p>
-                    </div>
+                    <SkeletonAssignmentList/>
                 ) : upcomingSessions.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {upcomingSessions.map((session: LiveSession) => {
@@ -206,13 +204,13 @@ const Live = () => {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className={`
-                                            mt-8 w-full h-14 flex items-center justify-center gap-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 no-underline border-none cursor-pointer
+                                            mt-8 w-full h-14 flex items-center justify-center gap-2 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 no-underline border-none cursor-pointer
                                             ${status === 'live' 
-                                                ? 'bg-red-500 text-white shadow-xl shadow-red-500/20' 
-                                                : 'bg-brand-charcoal dark:bg-brand-emerald text-white shadow-xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-105'}
+                                                ? 'bg-red-500 text-white shadow-md shadow-red-500/20' 
+                                                : 'bg-brand-charcoal dark:bg-brand-emerald text-white shadow-md shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:scale-105'}
                                         `}
                                     >
-                                        {status === 'live' ? <><Activity size={18} /> Join Broadcast</> : 'Secure Connection'}
+                                        {status === 'live' ? <><Activity size={18} /> Enter Live Room</> : 'View Session Details'}
                                     </a>
                                 </div>
                             );

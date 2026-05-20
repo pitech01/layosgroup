@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Users, BookOpen, ArrowLeft, Layers, Loader2, Sparkles, LayoutGrid, Search } from 'lucide-react';
+import { SkeletonCourseGrid } from '../../../components/common/SkeletonLoader';
 
 const Courses = () => {
     const [cohorts, setCohorts] = useState<any[]>([]);
@@ -73,10 +74,7 @@ const Courses = () => {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-                <Loader2 className="animate-spin text-brand-emerald" size={40} />
-                <p className="font-black text-xs text-brand-muted uppercase tracking-[0.2em] animate-pulse">Syncing Curriculums...</p>
-            </div>
+            <SkeletonCourseGrid/>
         );
     }
 
