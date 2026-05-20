@@ -242,7 +242,7 @@ const CourseDetails = () => {
                                                             : 'bg-brand-emerald text-white hover:bg-brand-emerald/90 hover:shadow-xl hover:shadow-brand-emerald/20'
                                                     }`}
                                                 >
-                                                    {isCompleted ? 'Recap' : 'Start'}
+                                                    {isCompleted ? 'Review' : 'Start'}
                                                 </Link>
                                             </div>
                                         )

@@ -43,7 +43,7 @@ const Courses = () => {
                                 instructor: c.instructor?.name || 'Assigned Instructor',
                                 thumbnail: c.course.thumbnail || 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
                                 progress: c.pivot.progress || 0,
-                                totalLessons: effectiveLessons.length,
+                                totalLessons: allCourseLessons.length,
                                 completedLessons: completedLessonsInCourseCount,
                             }] : []
                         };
@@ -223,9 +223,11 @@ const Courses = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredCourses.length > 0 ? (
                     filteredCourses.map((course: any) => {
+                        console.log(course);
                         const progress = course.progress || 0;
                         const isCompleted = progress === 100;
                         const isStarted = progress > 0;
+
 
                         return (
                             <div 
@@ -276,11 +278,11 @@ const Courses = () => {
                                         to={`/student/courses/${course.id}?cohortId=${selectedCohort.id}`}
                                         className="flex items-center justify-center gap-4 bg-brand-charcoal dark:bg-brand-emerald text-white py-5 px-8 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 transition-all hover:-translate-y-1 active:scale-95 group-hover:shadow-2xl"
                                     >
-                                        {isStarted ? 'Continue Learning' : 'Begin Module'}
+                                        {isStarted ? 'Continue Learning' : 'Start Learning'}
                                         <ChevronRight size={18} strokeWidth={3} className="transition-transform group-hover:translate-x-1" />
                                     </Link>
                                 </div>
-                            </div>
+                            </div> 
                         );
                     })
                 ) : (

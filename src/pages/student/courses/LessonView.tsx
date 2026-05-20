@@ -565,7 +565,7 @@ const LessonView = () => {
                                                     }}
                                                     className="bg-brand-emerald text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-brand-emerald/40 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer flex items-center gap-3"
                                                 >
-                                                    <Eye size={20} /> Open Secure Workspace
+                                                    <Eye size={20} /> View Lesson Guide
                                                 </button>
                                             </div>
                                         );
