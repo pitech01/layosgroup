@@ -1,9 +1,176 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles, Maximize2, Minimize2, Trophy, Download, RefreshCw, Calendar, Clock, BookOpen, Activity } from 'lucide-react';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
 import { SkeletonLessonView } from '../../../components/common/SkeletonLoader';
+
+
+
+// ==========================================
+// AUDIO VISUALIZER SUB-COMPONENT
+// ==========================================
+let globalAudioContext: AudioContext | null = null;
+
+// ==========================================
+// AUDIO VISUALIZER SUB-COMPONENT
+// ==========================================
+const VideoAudioVisualizer = ({ video }: { video: HTMLVideoElement | null }) => {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+    const animationRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!video || !canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let analyser = analyserRef.current;
+        
+        if (!globalAudioContext) {
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            globalAudioContext = new AudioContextClass();
+        }
+        
+        const audioContext = globalAudioContext;
+
+        if (!analyser) {
+            analyser = audioContext.createAnalyser();
+            analyserRef.current = analyser;
+        }
+
+        try {
+            let source = (video as any).__audioSourceNode;
+            if (!source) {
+                source = audioContext.createMediaElementSource(video);
+                (video as any).__audioSourceNode = source;
+            }
+            
+            sourceRef.current = source;
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+        } catch (err) {
+            console.error("AudioContext source connection failed:", err);
+        }
+
+        analyser.fftSize = 128;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        const draw = () => {
+            animationRef.current = requestAnimationFrame(draw);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.fillStyle = '#111827'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = (canvas.width / bufferLength) * 2.0;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = (dataArray[i] / 255) * canvas.height * 0.7;
+                
+                // Color match with green emerald brand colors
+                ctx.fillStyle = `rgb(16, ${185 + barHeight}, 129)`;
+                ctx.fillRect(x, (canvas.height - barHeight) / 2, barWidth - 3, barHeight);
+                x += barWidth;
+            }
+        };
+
+        const resumeContext = () => {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        };
+
+        // Try to resume immediately if the video is already playing
+        if (!video.paused) {
+            resumeContext();
+        }
+
+        const handleInteraction = () => {
+            resumeContext();
+            document.removeEventListener('click', handleInteraction);
+        };
+        document.addEventListener('click', handleInteraction);
+
+        video.addEventListener('play', resumeContext);
+        video.addEventListener('playing', resumeContext);
+        draw();
+
+        return () => {
+            if (animationRef.current) cancelAnimationFrame(animationRef.current);
+            video.removeEventListener('play', resumeContext);
+            video.removeEventListener('playing', resumeContext);
+            document.removeEventListener('click', handleInteraction);
+            
+            try {
+                if (sourceRef.current) {
+                    sourceRef.current.disconnect();
+                }
+            } catch (e) {}
+        };
+    }, [video]);
+
+    return (
+        <div className="relative w-full h-full bg-gray-900 rounded-xl overflow-hidden flex flex-col items-center justify-center border border-brand-border">
+            <canvas ref={canvasRef} width={800} height={360} className="w-full h-full block" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-gradient-to-t from-gray-950/80 via-transparent to-transparent">
+                <div className="p-4 bg-brand-charcoal/60 backdrop-blur-md rounded-full mb-3 border border-white/10 animate-pulse">
+                    <Activity className="text-brand-emerald h-8 w-8" />
+                </div>
+                <p className="text-white font-black text-sm uppercase tracking-widest">Audio Track Active</p>
+                <p className="text-gray-400 text-xs mt-1 sm:text-sm text-center">This video lesson contains an audio stream without a video channel.</p>
+            </div>
+        </div>
+    );
+};
+
+// ==========================================
+// CORE STATE TRACKER HOOK
+// ==========================================
+const useVideoTrackDetector = (
+    video: HTMLVideoElement | null, 
+    callback: (results: { isAudioOnly: boolean; hasAudio: boolean; hasVideo: boolean }) => void
+) => {
+    useEffect(() => {
+        if (!video || !callback) return;
+
+        const checkTracks = () => {
+            const isMetadataLoaded = video.readyState >= 1;
+            const hasVideo = video.videoWidth > 0 && video.videoHeight > 0;
+            const isAudioOnly = isMetadataLoaded && !hasVideo;
+
+            callback({
+                isAudioOnly,
+                hasAudio: isAudioOnly,
+                hasVideo
+            });
+        };
+
+        // Attach listeners across all data delivery checkpoints
+        video.addEventListener('loadedmetadata', checkTracks);
+        video.addEventListener('loadeddata', checkTracks);
+        video.addEventListener('canplay', checkTracks);
+        video.addEventListener('timeupdate', checkTracks);
+        video.addEventListener('play', checkTracks);
+
+        // Run an immediate check in case metadata is already loaded
+        checkTracks();
+
+        return () => {
+            video.removeEventListener('loadedmetadata', checkTracks);
+            video.removeEventListener('loadeddata', checkTracks);
+            video.removeEventListener('canplay', checkTracks);
+            video.removeEventListener('timeupdate', checkTracks);
+            video.removeEventListener('play', checkTracks);
+        };
+    }, [video, callback]);
+};
+
 
 const LessonView = () => {
     const { courseId, lessonId } = useParams();
@@ -30,9 +197,21 @@ const LessonView = () => {
 
     const API_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
+    // Track state additions
+    const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+    const [trackInfo, setTrackInfo] = useState({ isAudioOnly: false, hasAudio: true, hasVideo: true });
+
+    const handleTrackAnalysis = useCallback((results: { isAudioOnly: boolean; hasAudio: boolean; hasVideo: boolean }) => {
+        setTrackInfo(results);
+    }, []);
+
+     // Invoke track hook tracking ref configurations
+    useVideoTrackDetector(videoElement, handleTrackAnalysis);
+
     useEffect(() => {
         const fetchLessonData = async () => {
             setLoading(true);
+            setTrackInfo({ isAudioOnly: false, hasAudio: true, hasVideo: true });
             setIsCompleted(false);
             setQuizStarted(false);
             setCurrentQuestionIndex(0);
@@ -115,7 +294,6 @@ const LessonView = () => {
            <SkeletonLessonView/>
         );
     }
-
     if (!lesson) {
         return (
             <div className="py-24 px-4 text-center bg-white dark:bg-brand-charcoal rounded-xl border border-brand-border ">
@@ -502,14 +680,24 @@ const LessonView = () => {
 
                                     if (isVideo) {
                                         return (
-                                            <video
-                                                controls
-                                                src={cleanUrl}
-                                                autoPlay
-                                                className="w-full h-full border-none rounded-sm  object-contain"
-                                                controlsList="nodownload"
-                                                onContextMenu={(e: any) => e.preventDefault()}
-                                            />
+                                            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900">
+                                                {trackInfo.isAudioOnly && (
+                                                    <div className="w-full flex-1 flex items-center justify-center min-h-0">
+                                                        <VideoAudioVisualizer video={videoElement} />
+                                                    </div>
+                                                )}
+                                                <video
+                                                    key={lesson.id}
+                                                    ref={setVideoElement}
+                                                    controls
+                                                    src={cleanUrl}
+                                                    autoPlay
+                                                    className={trackInfo.isAudioOnly ? "w-full h-14 bg-black shrink-0" : "w-full h-full border-none rounded-sm object-contain"}
+                                                    controlsList="nodownload"
+                                                    crossOrigin="anonymous"
+                                                    onContextMenu={(e: any) => e.preventDefault()}
+                                                />
+                                            </div>
                                         );
                                     }
 
@@ -616,7 +804,7 @@ const LessonView = () => {
                                         const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
                                         if (quizData && quizData.questions && quizData.questions.length > 0 && !isCompleted) {
                                             setQuizStarted(true);
-                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
                                         } else {
                                             handleCompleteLesson();
                                         }
@@ -744,13 +932,23 @@ const LessonView = () => {
                         allowFullScreen={true}
                     />
                 ) : (
-                    <video
-                        controls
-                        src={previewAsset.url}
-                        className="w-full h-full object-contain max-h-screen"
-                        controlsList="nodownload"
-                        onContextMenu={(e: any) => e.preventDefault()}
-                    />
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900">
+                        {trackInfo.isAudioOnly && (
+                            <div className="w-full flex-1 flex items-center justify-center min-h-0">
+                                <VideoAudioVisualizer video={videoElement} />
+                            </div>
+                        )}
+                        <video
+                            key={previewAsset.url}
+                            ref={setVideoElement}
+                            controls
+                            src={previewAsset.url}
+                            className={trackInfo.isAudioOnly ? "w-full h-14 bg-black shrink-0" : "w-full h-full object-contain max-h-screen"}
+                            controlsList="nodownload"
+                            crossOrigin="anonymous"
+                            onContextMenu={(e: any) => e.preventDefault()}
+                        />
+                    </div>
                 )
             ) : (
                 <img
