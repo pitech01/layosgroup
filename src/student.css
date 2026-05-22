@@ -44,15 +44,15 @@
 @layer base {
   /* 1. Standard Properties for Modern Browsers (Firefox & Future-proofing) */
   * {
-    scrollbar-width: thin;
+    scrollbar-width: thin; /* Thinner scrollbar */
     /* Format: scrollbar-color: thumb_color track_color */
     scrollbar-color: color-mix(in srgb, var(--color-brand-emerald) 40%, transparent) #f1f5f9;
   }
 
   /* 2. WebKit Browsers (Chrome, Safari, Edge) */
   ::-webkit-scrollbar {
-    width: 10px; /* Marginally wider to accommodate internal padding */
-    height: 10px; /* For horizontal scrollbars */
+    width: 20px; /* Marginally wider to accommodate internal padding */
+    height: 20px; /* For horizontal scrollbars */
   }
 
   ::-webkit-scrollbar-track {

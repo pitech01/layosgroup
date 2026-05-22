@@ -32,7 +32,9 @@ const StudentLayout = () => {
                     }}
                 />
 
-                <main className="flex-1 overflow-y-auto  p-4 md:p-8">
+                <main className="flex-1 overflow-y-auto  p-4 md:p-8  sm:[&::-webkit-scrollbar]:w-2
+                md:[&::-webkit-scrollbar]:w-2
+">
                     <div className="animate-fade-in-up">
                         <Outlet />
                     </div>

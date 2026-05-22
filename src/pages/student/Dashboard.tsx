@@ -384,7 +384,8 @@ export default function StudentDashboard() {
 
                                         <h6 className="font-black text-brand-charcoal dark:text-white mb-2 leading-snug line-clamp-2">{session.title}</h6>
 
-                                        <p className="text-xs font-bold text-brand-muted mb-6">{session.course?.title}                                        <span className="px-1 py-1 m-1 bg-gray-100  text-gray-400 rounded-md font-black text-[10px] uppercase transition-all items-center  disabled:opacity-50">ENDED</span>
+                                        <p className="text-xs font-bold text-brand-muted mb-6">{session.course?.title}                                        
+                                           {status === 'ended' ? ( <span className="px-1 py-1 m-1 bg-gray-100  text-gray-400 rounded-md font-black text-[10px] uppercase transition-all items-center  disabled:opacity-50">ENDED</span>) : null}
                                         </p>
 
                                         {status === 'ended' ? (
