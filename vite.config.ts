@@ -1,4 +1,4 @@
-import { defineConfig, type ViteDevServer } from 'vite'
+import { defineConfig, loadEnv, type ViteDevServer } from 'vite'
 import react from '@vitejs/plugin-react'
 import https from 'https'
 import http from 'http'
@@ -61,10 +61,20 @@ const pdfProxyPlugin = () => ({
 })
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), pdfProxyPlugin()],
-  build: {
-    sourcemap: false, // Prevents original source code from being exposed in browser devtools
-    chunkSizeWarningLimit: 1000,
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
+    plugins: [react(), pdfProxyPlugin()],
+    define: {
+      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(
+        env.VITE_API_BASE_URL || 
+        process.env.VITE_API_BASE_URL || 
+        'https://layos.atlascapitaledge.com/api'
+      )
+    },
+    build: {
+      sourcemap: false, // Prevents original source code from being exposed in browser devtools
+      chunkSizeWarningLimit: 1000,
+    }
   }
 })
