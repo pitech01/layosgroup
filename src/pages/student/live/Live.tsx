@@ -392,8 +392,10 @@ const Live = () => {
                                         src={cleanUrl}
                                         controls
                                         autoPlay
-                                        style={{ width: '100%', height: '100%' }}
-                                        controlsList="nodownload"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        controlsList="nodownload noremoteplayback noplaybackrate"
+                                        disablePictureInPicture
+                                        disableRemotePlayback
                                         onContextMenu={(e: any) => e.preventDefault()}
                                     />
                                 );

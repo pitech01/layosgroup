@@ -804,7 +804,6 @@ const LessonView = () => {
                                                     height: '100%', 
                                                     flex: 1,
                                                     alignSelf: 'stretch',
-                                                    borderRadius: isMaximized ? '0' : '16px',
                                                     display: 'block'
                                                 }}
                                                 allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
@@ -819,8 +818,10 @@ const LessonView = () => {
                                                 controls
                                                 src={cleanUrl}
                                                 autoPlay
-                                                style={{ width: '100%', height: '100%', borderRadius: '16px', objectFit: 'contain' }}
-                                                controlsList="nodownload"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                controlsList="nodownload noremoteplayback noplaybackrate"
+                                                disablePictureInPicture
+                                                disableRemotePlayback
                                                 onContextMenu={(e: any) => e.preventDefault()}
                                             />
                                         );
@@ -1075,8 +1076,10 @@ const LessonView = () => {
                                         <video
                                             controls
                                             src={previewAsset.url}
-                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                            controlsList="nodownload"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            controlsList="nodownload noremoteplayback noplaybackrate"
+                                            disablePictureInPicture
+                                            disableRemotePlayback
                                             onContextMenu={(e: any) => e.preventDefault()}
                                         />
                                     )

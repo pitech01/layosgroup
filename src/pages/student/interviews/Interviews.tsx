@@ -349,9 +349,11 @@ export default function StudentInterviews() {
                                         <video 
                                             src={cleanUrl} 
                                             controls 
-                                            controlsList="nodownload" 
+                                            controlsList="nodownload noremoteplayback noplaybackrate" 
+                                            disablePictureInPicture
+                                            disableRemotePlayback
                                             autoPlay 
-                                            style={{ maxWidth: '100%', maxHeight: '100%', background: 'black' }} 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', background: 'black' }} 
                                             onContextMenu={e => e.preventDefault()} 
                                         />
                                     );
