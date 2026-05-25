@@ -11,9 +11,10 @@ interface SecurePDFViewerProps {
     onLoadSuccess?: () => void;
     currentPage?: number;
     hideToolbar?: boolean;
+    onReachedEnd?: () => void;
 }
 
-const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, currentPage, hideToolbar = false }) => {
+const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, currentPage, hideToolbar = false, onReachedEnd }) => {
     const [numPages, setNumPages] = useState<number | null>(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [scale, setScale] = useState(0.9);
@@ -23,6 +24,12 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
 
     const [loadProgress, setLoadProgress] = useState(0);
     const [documentLoaded, setDocumentLoaded] = useState(false);
+
+    useEffect(() => {
+        if (onReachedEnd && numPages !== null && pageNumber === numPages) {
+            onReachedEnd();
+        }
+    }, [pageNumber, numPages, onReachedEnd]);
 
     useEffect(() => {
         if (currentPage && currentPage !== pageNumber) {

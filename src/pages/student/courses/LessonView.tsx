@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles, Maximize2, Minimize2, Trophy, Download, RefreshCw, Calendar, Clock, BookOpen, Activity } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles, Maximize2, Minimize2, Trophy, Download, RefreshCw, Calendar, Clock, BookOpen, Activity, AlertCircle } from 'lucide-react';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
 import { SkeletonLessonView } from '../../../components/common/SkeletonLoader';
@@ -171,6 +171,7 @@ const useVideoTrackDetector = (
     }, [video, callback]);
 };
 
+// mediaErrorFeedback is now handled in state within LessonView
 
 const LessonView = () => {
     const { courseId, lessonId } = useParams();
@@ -200,6 +201,10 @@ const LessonView = () => {
     // Track state additions
     const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
     const [trackInfo, setTrackInfo] = useState({ isAudioOnly: false, hasAudio: true, hasVideo: true });
+    const [mediaError, setMediaError] = useState<boolean>(false);
+    const bunnyIframeRef = useRef<HTMLIFrameElement | null>(null);
+    // Tracks whether auto-complete was already triggered for this lesson to avoid double calls
+    const autoCompletedRef = useRef<boolean>(false);
 
     const handleTrackAnalysis = useCallback((results: { isAudioOnly: boolean; hasAudio: boolean; hasVideo: boolean }) => {
         setTrackInfo(results);
@@ -207,6 +212,64 @@ const LessonView = () => {
 
      // Invoke track hook tracking ref configurations
     useVideoTrackDetector(videoElement, handleTrackAnalysis);
+
+    const mediaErrorFeedback = useCallback((e: any) => {
+        console.error("Media resource failed to load:", e);
+        setMediaError(true);
+    }, []);
+
+    // Called when media (video/audio) ends — auto-completes if no quiz is attached
+    const handleAutoCompleteAfterMedia = useCallback(() => {
+        if (autoCompletedRef.current || isCompleted) return;
+        const quizData = lesson?.quiz_data
+            ? (typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data)
+            : null;
+        const hasQuiz = quizData?.questions?.length > 0;
+        if (!hasQuiz) {
+            autoCompletedRef.current = true;
+            handleCompleteLesson();
+        }
+    }, [isCompleted, lesson]);
+
+    // Called when PDF reaches the last page — starts quiz if attached, else auto-completes
+    const handlePDFReachedEnd = useCallback(() => {
+        if (autoCompletedRef.current || isCompleted) return;
+        const quizData = lesson?.quiz_data
+            ? (typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data)
+            : null;
+        const hasQuiz = quizData?.questions?.length > 0;
+        if (hasQuiz) {
+            // Close the preview and launch the quiz
+            setPreviewAsset(null);
+            setQuizStarted(true);
+            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        } else {
+            autoCompletedRef.current = true;
+            handleCompleteLesson();
+        }
+    }, [isCompleted, lesson]);
+
+    // Listen for Bunny Stream player "ended" event via postMessage
+    useEffect(() => {
+        const handleBunnyMessage = (event: MessageEvent) => {
+            const trustedOrigins = ['mediadelivery.net', 'iframe.mediadelivery.net', 'player.mediadelivery.net'];
+            const isFromBunny = trustedOrigins.some(o => event.origin.includes(o));
+            if (!isFromBunny) return;
+            try {
+                const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+                if (data?.event === 'ended' || data?.type === 'ended') {
+                    handleAutoCompleteAfterMedia();
+                }
+            } catch { /* ignore parse errors */ }
+        };
+        window.addEventListener('message', handleBunnyMessage);
+        return () => window.removeEventListener('message', handleBunnyMessage);
+    }, [handleAutoCompleteAfterMedia]);
+
+    // Reset the auto-complete guard when the lesson changes
+    useEffect(() => {
+        autoCompletedRef.current = false;
+    }, [lessonId]);
 
     useEffect(() => {
         const fetchLessonData = async () => {
@@ -636,7 +699,13 @@ const LessonView = () => {
                                                                     });
                                                                     const score = Math.round((correctCount / lesson.quiz_data.questions.length) * 100);
                                                                     const passMark = lesson.quiz_data.pass_mark || 80;
-                                                                    setQuizResult({ score, passed: score >= passMark });
+                                                                    const passed = score >= passMark;
+                                                                    setQuizResult({ score, passed });
+                                                                    // Auto-complete lesson when quiz is passed
+                                                                    if (passed && !isCompleted && !autoCompletedRef.current) {
+                                                                        autoCompletedRef.current = true;
+                                                                        handleCompleteLesson({ score, answers: selectedAnswers, forceComplete: true });
+                                                                    }
                                                                 }}
                                                                 disabled={selectedAnswers[currentQuestionIndex] === undefined}
                                                                 className="bg-brand-emerald text-white px-12 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-brand-emerald/30 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 border-none cursor-pointer"
@@ -669,11 +738,13 @@ const LessonView = () => {
                                     if (isBunny) {
                                         return (
                                             <iframe
+                                                ref={bunnyIframeRef}
                                                 src={cleanUrl}
                                                 loading="lazy"
                                                 className="w-full h-full border-none rounded-xl "
                                                 allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
                                                 allowFullScreen={true}
+                                                onError={mediaErrorFeedback}
                                             />
                                         );
                                     }
@@ -696,6 +767,8 @@ const LessonView = () => {
                                                     controlsList="nodownload"
                                                     crossOrigin="anonymous"
                                                     onContextMenu={(e: any) => e.preventDefault()}
+                                                    onError={mediaErrorFeedback}
+                                                    onEnded={handleAutoCompleteAfterMedia}
                                                 />
                                             </div>
                                         );
@@ -709,6 +782,7 @@ const LessonView = () => {
                                                     alt={lesson.title}
                                                     className="max-w-full max-h-full rounded-2xl md:rounded-xl shadow-2xl transition-transform duration-500 hover:scale-[1.02]"
                                                     onContextMenu={(e: any) => e.preventDefault()}
+                                                    onError={mediaErrorFeedback}
                                                 />
                                             </div>
                                         );
@@ -913,6 +987,7 @@ const LessonView = () => {
                     url={previewAsset.url}
                     onLoadSuccess={() => setIframeLoading(false)}
                     hideToolbar={false}
+                    onReachedEnd={handlePDFReachedEnd}
                 />
             ) : previewAsset.type === 'ppt' ? (
                 <iframe
@@ -930,6 +1005,7 @@ const LessonView = () => {
                         className="w-full h-full border-none"
                         allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
                         allowFullScreen={true}
+                        onError={mediaErrorFeedback}
                     />
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900">
@@ -947,6 +1023,8 @@ const LessonView = () => {
                             controlsList="nodownload"
                             crossOrigin="anonymous"
                             onContextMenu={(e: any) => e.preventDefault()}
+                            onError={mediaErrorFeedback}
+                            onEnded={handleAutoCompleteAfterMedia}
                         />
                     </div>
                 )
@@ -956,6 +1034,7 @@ const LessonView = () => {
                     className="max-w-full max-h-full object-contain select-none"
                     alt="Asset"
                     onContextMenu={(e: any) => e.preventDefault()}
+                    onError={mediaErrorFeedback}
                 />
             )}
         </div>
@@ -1054,6 +1133,39 @@ const LessonView = () => {
                     pdfUrl={previewAsset.url}
                     onClose={() => setShowAiInteraction(false)}
                 />
+            )}
+
+            {/* Media Error Notification Popup */}
+            {mediaError && (
+                <div className="fixed inset-0 z-[5000] bg-brand-charcoal/80 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="bg-white dark:bg-brand-charcoal w-full max-w-md rounded-[32px] p-8 flex flex-col items-center text-center shadow-2xl border border-brand-border animate-in zoom-in-95 duration-300 relative">
+                        <button 
+                            onClick={() => setMediaError(false)} 
+                            className="absolute top-6 right-6 w-10 h-10 rounded-xl bg-brand-beige dark:bg-white/10 text-brand-muted flex items-center justify-center hover:text-red-500 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer"
+                        >
+                            <X size={18} />
+                        </button>
+                        
+                        <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 mb-6 border border-amber-500/20 animate-pulse">
+                            <AlertCircle size={32} />
+                        </div>
+                        
+                        <h3 className="text-2xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight mb-3">
+                            Media Unavailable
+                        </h3>
+                        
+                        <p className="text-brand-muted text-sm font-medium leading-relaxed mb-6">
+                            This media file is currently unavailable. Kindly check back later.
+                        </p>
+                        
+                        <button
+                            onClick={() => setMediaError(false)}
+                            className="w-full py-4 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand-emerald/20 border-none cursor-pointer"
+                        >
+                            Understood
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
