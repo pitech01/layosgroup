@@ -21,7 +21,7 @@ const echo = new Echo({
     authorizer: (channel: any, _options: any) => {
         return {
             authorize: (socketId: any, callback: any) => {
-                fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/broadcasting/auth`, {
+                fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://layos.atlascapitaledge.com/api'}/broadcasting/auth`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
