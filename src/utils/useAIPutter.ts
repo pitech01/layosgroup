@@ -24,6 +24,7 @@ export const useAIPutter = () => {
     const currentSentenceIndexRef = useRef(0);
     const isChattingRef = useRef(false);
     const isSpeakingRef = useRef(false);
+    const currentRunIdRef = useRef(0);
 
     // Ensure voices are loaded for some browsers
     useEffect(() => {
@@ -129,26 +130,35 @@ export const useAIPutter = () => {
         stop();
         setState('extracting');
         setError(null);
-  
+
+        const runId = ++currentRunIdRef.current;
 
         try {
             const pdf = await loadPdf(pdfUrl);
+            if (runId !== currentRunIdRef.current) return;
             const totalPages = pdf.numPages;
-            const chunkSize = 10; // Process in manageable chunks to allow high detail
+            const chunkSize = 5; // Increased chunk size to speed up sync and avoid 429 errors
             let accumulatedFullText = '';
             let accumulatedExplanations: AIExplanation[] = [];
 
             setState('summarizing');
 
             for (let startPage = 1; startPage <= totalPages; startPage += chunkSize) {
+                if (runId !== currentRunIdRef.current) return;
+
                 const endPage = Math.min(startPage + chunkSize - 1, totalPages);
-                
-                let chunkText = '';
+
+                const pagePromises = [];
                 for (let i = startPage; i <= endPage; i++) {
-                    const pageText = await extractPdfPageText(pdf, i);
-                    const safeText = pageText.substring(0, 3000); // More text per page
-                    chunkText += `[PAGE ${i} START]\n${safeText}\n[PAGE ${i} END]\n\n`;
+                    pagePromises.push(
+                        extractPdfPageText(pdf, i).then(pageText => {
+                            const safeText = pageText.substring(0, 3000); // More text per page
+                            return `[PAGE ${i} START]\n${safeText}\n[PAGE ${i} END]\n\n`;
+                        })
+                    );
                 }
+                const pagesContent = await Promise.all(pagePromises);
+                const chunkText = pagesContent.join('');
                 accumulatedFullText += chunkText;
 
                 const prompt = `CRITICAL GOAL: You are a Virtual Tutor creating detailed lesson sections for pages ${startPage} to ${endPage} of a ${totalPages}-page document.
@@ -160,6 +170,7 @@ export const useAIPutter = () => {
                 
                 Document Content (Pages ${startPage}-${endPage}):
                 ${chunkText}`;
+
 
                 const response = await fetch(SERVERLESS_FUNCTION_ENDPOINT, {
                     method: 'POST',
@@ -174,8 +185,13 @@ export const useAIPutter = () => {
                     })
                 });
 
+                if (runId !== currentRunIdRef.current) return;
+
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
+                    if (response.status === 429) {
+                        throw new Error("AI intelligence is syncing. Please wait a moment.");
+                    }
                     throw new Error(`AI Intelligence Error (${response.status}): ${errorData.error?.message || 'Server busy'}`);
                 }
 
@@ -184,25 +200,42 @@ export const useAIPutter = () => {
 
                 const sections = rawResponse.split(/SECTION TITLE:/i).filter((s: string) => s.trim().length > 0);
                 const chunkExplanations: AIExplanation[] = sections.map((s: string) => {
-                    const parts = s.split('|');
+                    const parts = s.split(/\||CONTENT:/i);
                     const title = parts[0]?.trim() || 'Concept Summary';
-                    const pagePart = parts[1]?.toLowerCase().replace('page:', '').trim() || '1';
-                    const content = parts[2]?.replace('CONTENT:', '').trim() || s.trim();
+                    
+                    // Robustly extract the page number using regex
+                    const pageMatch = s.match(/PAGE\s*:?\s*(\d+)/i);
+                    let pageNum = startPage;
+                    if (pageMatch && pageMatch[1]) {
+                        pageNum = parseInt(pageMatch[1], 10);
+                    }
+                    
+                    // Robustly extract content
+                    let content = s;
+                    const contentMatch = s.match(/CONTENT:\s*([\s\S]*)/i);
+                    if (contentMatch && contentMatch[1]) {
+                        content = contentMatch[1].trim();
+                    } else if (parts.length > 1) {
+                        content = parts[parts.length - 1].trim();
+                    }
 
-                    return { title, content, page: parseInt(pagePart) || startPage };
+                    return { title, content, page: pageNum };
                 });
 
                 accumulatedExplanations = [...accumulatedExplanations, ...chunkExplanations];
-                
+
                 // Incremental update so the user sees progress and can start listening
                 setExplanations([...accumulatedExplanations]);
                 explanationsRef.current = [...accumulatedExplanations];
                 setFullText(accumulatedFullText);
             }
 
-            setState('ready');
+            if (runId === currentRunIdRef.current) {
+                setState('ready');
+            }
 
         } catch (err: any) {
+            if (runId !== currentRunIdRef.current) return;
             console.error('Core Intelligence failure:', err);
             setError(err.message || 'Brain connection lost.');
             setState('error');
@@ -212,7 +245,7 @@ export const useAIPutter = () => {
     const askQuestion = async (question: string) => {
         try {
 
-            
+
             const response = await fetch(SERVERLESS_FUNCTION_ENDPOINT, {
                 method: 'POST',
                 headers: {

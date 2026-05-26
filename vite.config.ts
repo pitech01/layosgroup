@@ -65,11 +65,21 @@ const pdfProxyPlugin = () => ({
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), pdfProxyPlugin()],
+  appType: 'spa', // 👈 Forces Vite to treat index.html purely as a single page application shell
   server: {
     port: 5173, // or your desired port
     host: '127.0.0.1', 
-    
+    fs: {
+      strict: false // Prevents asset restriction crashes on Windows machines
+    },    proxy: {
+      // Whenever React hits "/api/...", redirect it to our local node server
+      '/api': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: true,
+      }
+    }
   },
+
   build: {
     sourcemap: false, // Prevents original source code from being exposed in browser devtools
     chunkSizeWarningLimit: 1000,

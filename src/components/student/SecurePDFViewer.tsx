@@ -13,7 +13,7 @@ interface SecurePDFViewerProps {
     hideToolbar?: boolean;
     onReachedEnd?: () => void;
 }
-
+const isMobile = window.innerWidth < 768; // 768px is
 const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, currentPage, hideToolbar = false, onReachedEnd }) => {
     const [numPages, setNumPages] = useState<number | null>(null);
     const [pageNumber, setPageNumber] = useState(1);
@@ -40,6 +40,13 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
             }, 300);
         }
     }, [currentPage]);
+    useEffect(() => {
+        if (isMobile) {
+            setScale(0.3);
+        } else {
+            setScale(0.9);
+        }
+    }, [])
 
     useEffect(() => {
         setBlobUrl(buildProxyUrl(url));
@@ -54,7 +61,7 @@ const SecurePDFViewer: React.FC<SecurePDFViewerProps> = ({ url, onLoadSuccess, c
             setNumPages(numPages);
             setError(null);
             if (onLoadSuccess) onLoadSuccess();
-        }, 400); // Give a brief moment for the 100% animation to finish visually
+        }, 400); // Give a brief moment for the 100% animation to finish visually   
     }
 
     function onDocumentLoadError(err: Error) {

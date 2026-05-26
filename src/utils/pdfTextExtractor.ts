@@ -15,6 +15,7 @@ const isLocalhost = typeof window !== 'undefined' && (window.location.hostname =
  */
 export function buildProxyUrl(remoteUrl: string): string {
   if (!remoteUrl) return '';
+  if (remoteUrl.startsWith('blob:')) return remoteUrl;
   
   let finalUrl = remoteUrl;
   

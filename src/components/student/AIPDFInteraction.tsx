@@ -12,10 +12,10 @@ interface AIPDFInteractionProps {
 const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) => {
     const ai = useAIPutter();
     const [question, setQuestion] = useState('');
-    const [chat, setChat] = useState<{ role: 'user' | 'ai'; content: string }[]>([]);
+    const [chat, setChat] = useState<{role: 'user' | 'ai', content: string}[]>([]);
     const [isAsking, setIsAsking] = useState(false);
     const [showChat, setShowChat] = useState(false);
-
+    
     // Auto-scroll & Auto-focus refs
     const chatScrollRef = React.useRef<HTMLDivElement>(null);
     const inputRef = React.useRef<HTMLInputElement>(null);
@@ -41,79 +41,111 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
         if (!question.trim() || isAsking) return;
 
         const userQ = question.trim();
-        setChat((prev) => [...prev, { role: 'user', content: userQ }]);
+        setChat(prev => [...prev, { role: 'user', content: userQ }]);
         setQuestion('');
         setIsAsking(true);
         setShowChat(true);
 
         const answer = await ai.askQuestion(userQ);
-        setChat((prev) => [...prev, { role: 'ai', content: answer }]);
+        setChat(prev => [...prev, { role: 'ai', content: answer }]);
         setIsAsking(false);
-
+        
         // Speak the answer automatically
         ai.speakText(answer);
     };
 
     return (
-        <div className="fixed inset-0 z-[4000] flex flex-col bg-slate-950/95 text-white backdrop-blur-[20px] font-sans antialiased selection:bg-[#49BABA]/30">
-            
-            {/* Header */}
-            <div className="px-4 py-3 md:px-10 md:py-4 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 bg-slate-900/40 backdrop-blur-md">
+        <div className="fixed inset-0 z-[4000] flex flex-col bg-slate-950/95 text-white antialiased backdrop-blur-2xl selection:bg-teal-500/30 font-['Inter',_sans-serif]">
+            <style>{`
+                @keyframes slideInUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+                @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(73, 186, 186, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); } }
+                .ai-section-card {
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 16px;
+                    padding: 1rem;
+                    transition: all 0.3s ease;
+                }
+                .ai-section-card.active {
+                    background: rgba(73, 186, 186, 0.1);
+                    border-color: #49BABA;
+                    transform: scale(1.02);
+                }
+                .ai-chat-bubble {
+                    padding: 0.75rem 1rem;
+                    border-radius: 18px;
+                    max-width: 85%;
+                    font-size: 0.9rem;
+                    line-height: 1.5;
+                }
+                .user-bubble { background: #1e293b; align-self: flex-end; border-bottom-right-radius: 4px; }
+                .ai-bubble { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(73, 186, 186, 0.2); align-self: flex-start; border-bottom-left-radius: 4px; }
+                .premium-input {
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 12px;
+                    padding: 0.75rem 1rem;
+                    color: white;
+                    width: 100%;
+                    outline: none;
+                    transition: all 0.2s;
+                }
+                .premium-input:focus { border-color: #49BABA; background: rgba(255,255,255,0.08); }
                 
-                {/* Brand */}
-                <div className="flex items-center gap-3 min-w-full md:min-w-[240px] justify-between md:justify-start">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 md:w-[42px] md:h-[42px] rounded-xl bg-gradient-to-br from-[#49BABA] to-[#5bc4c4] flex items-center justify-center font-black text-sm md:text-2xl shadow-lg shadow-[#49BABA]/20">
-                            L
-                        </div>
-                        <div>
-                            <h2 className="m-0 text-sm md:text-lg font-black bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                                Layos Virtual Tutor
-                            </h2>
-                            <span className="block text-[10px] md:text-[11px] text-slate-400 font-bold tracking-wider uppercase">
-                                AI ANALYSIS ENGINE
-                            </span>
-                        </div>
+                /* Scoped Markdown styling for the AI bubble response */
+                .markdown-body p { margin-top: 0; margin-bottom: 0.5rem; line-height: 1.6; }
+                .markdown-body p:last-child { margin-bottom: 0; }
+                .markdown-body ul, .markdown-body ol { margin-top: 0.25rem; margin-bottom: 0.5rem; padding-left: 1.25rem; }
+                .markdown-body li { margin-bottom: 0.25rem; line-height: 1.5; }
+                .markdown-body strong { color: #fff; font-weight: 800; }
+            `}</style>
+
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 border-b border-white/5 bg-slate-900/40 px-4 md:px-10 py-4 backdrop-blur-md shrink-0">
+                <div className="flex items-center gap-4 w-full lg:w-auto lg:min-w-[240px]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#49BABA] to-[#5bc4c4] text-lg font-black text-white shadow-lg shadow-[#49BABA]/10">
+                        L
                     </div>
-                    {/* Small Close Button on Mobile Header if chat screen takes up screen */}
-                    <button 
-                        onClick={onClose}
-                        className="md:hidden bg-red-500 text-white px-3 py-1.5 rounded-lg font-black text-xs tracking-wider uppercase hover:bg-red-600 transition-colors"
-                    >
-                        Close
-                    </button>
+                    <div>
+                        <h2 className="bg-gradient-to-r from-white to-slate-400 bg-clip-text text-lg font-black text-transparent tracking-tight">
+                            Layos Virtual Tutor
+                        </h2>
+                        <span className="text-[10px] font-semibold tracking-wider text-slate-400 block mt-0.5">
+                            AI ANALYSIS ENGINE
+                        </span>
+                    </div>
                 </div>
 
                 {/* Central Controls */}
-                <div className="flex items-center gap-2 md:gap-4 w-full md:flex-1 justify-center">
+                <div className="flex flex-wrap items-center justify-center gap-3 w-full lg:flex-1">
                     {ai.state === 'idle' ? (
-                        <button
+                        <button 
                             onClick={handleStart}
-                            className="bg-gradient-to-br from-[#49BABA] to-[#3fa3a3] text-white px-4 py-2.5 md:px-6 md:py-2.5 rounded-xl font-black text-xs tracking-wider shadow-lg shadow-[#49BABA]/30 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase w-full md:w-auto text-center"
+                            className="w-full sm:w-auto bg-gradient-to-r from-[#49BABA] to-[#3fa3a3] text-white px-6 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase shadow-[0_10px_20px_-5px_rgba(73,186,186,0.3)] hover:opacity-90 active:scale-95 transition-all"
                         >
                             INITIALIZE VIRTUAL TUTOR
                         </button>
-                    ) : ai.state === 'speaking' || ai.state === 'paused' ? (
-                        <div className="flex items-center justify-between md:justify-center gap-3 w-full md:w-auto">
-                            <div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
-                                <button
+                    ) : (ai.state === 'speaking' || ai.state === 'paused') ? (
+                        <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+                            <div className="flex items-center gap-2 bg-white/5 p-1 rounded-2xl border border-white/5">
+                                <button 
                                     onClick={ai.state === 'speaking' ? ai.pause : ai.resume}
-                                    className="bg-white text-slate-900 px-3 md:px-4 h-9 rounded-lg font-black text-[10px] md:text-xs tracking-wider hover:bg-slate-100 transition-colors uppercase"
+                                    className="bg-white text-slate-900 px-4 h-9 rounded-xl font-black text-[10px] tracking-wider uppercase active:scale-95 transition-transform"
                                 >
                                     {ai.state === 'speaking' ? 'PAUSE' : 'RESUME'}
                                 </button>
-                                <button
+                                <button 
                                     onClick={ai.stop}
-                                    className="bg-white/10 text-white px-3 md:px-4 h-9 rounded-lg font-black text-[10px] md:text-xs tracking-wider hover:bg-white/20 transition-colors uppercase"
+                                    className="bg-white/10 text-white px-4 h-9 rounded-xl font-black text-[10px] tracking-wider uppercase hover:bg-white/20 active:scale-95 transition-all"
                                 >
                                     STOP
                                 </button>
                             </div>
 
-                            <div className="hidden md:block w-px h-6 bg-white/10 mx-2" />
+                            <div className="hidden sm:block w-px h-6 bg-white/10 mx-2" />
 
-                            <div className="flex flex-col min-w-0 max-w-[120px] md:max-w-[180px] md:min-w-[150px]">
-                                <span className="text-[9px] md:text-[10px] font-black text-[#67d9d9] uppercase tracking-widest truncate">
+                            <div className="flex flex-col min-w-[120px] max-w-[180px] text-center sm:text-left">
+                                <span className="text-[9px] font-black text-[#67d9d9] tracking-widest uppercase">
                                     {ai.isSpeaking ? 'NOW TEACHING' : 'PAUSED'}
                                 </span>
                                 <span className="text-xs font-bold text-slate-200 truncate">
@@ -121,29 +153,29 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                                 </span>
                             </div>
 
-                            <button
+                            <button 
                                 onClick={() => setShowChat(true)}
-                                className="bg-[#1399af]/15 text-[#67d9d9] border border-[#49BABA]/30 px-3 py-2 md:px-5 md:py-2 rounded-xl font-black text-[10px] md:text-xs tracking-wider hover:bg-[#49BABA]/20 transition-all uppercase"
+                                className="w-full sm:w-auto bg-purple-500/15 text-[#67d9d9] border border-[#49BABA]/30 px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase hover:bg-purple-500/20 active:scale-95 transition-all"
                             >
                                 ASK LAYOS
                             </button>
                         </div>
-                    ) : ai.state === 'ready' || ai.explanations.length > 0 ? (
-                        <div className="flex flex-wrap gap-2 items-center justify-center">
-                            <button
+                    ) : (ai.state === 'ready' || ai.explanations.length > 0) ? (
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                            <button 
                                 onClick={ai.startSpeaking}
-                                className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white px-4 py-2 md:px-6 md:py-2.5 rounded-xl font-black text-xs tracking-wider shadow-lg shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase"
+                                className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase shadow-[0_10px_20px_-5px_rgba(16,185,129,0.4)] hover:opacity-90 active:scale-95 transition-all"
                             >
-                                {ai.state === 'summarizing' ? 'START (ANALYZING...)' : 'START READING NOW'}
+                                {ai.state === 'summarizing' ? 'START READING (STILL ANALYZING...)' : 'START READING NOW'}
                             </button>
-                            <button
+                            <button 
                                 onClick={() => setShowChat(true)}
-                                className="bg-[#1399af]/15 text-[#67d9d9] border border-[#49BABA]/30 px-4 py-2 md:px-5 md:py-2.5 rounded-xl font-black text-xs tracking-wider hover:bg-[#49BABA]/20 transition-all uppercase"
+                                className="w-full sm:w-auto bg-purple-500/15 text-[#67d9d9] border border-[#49BABA]/30 px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase hover:bg-purple-500/20 active:scale-95 transition-all"
                             >
                                 ASK LAYOS
                             </button>
                             {ai.state === 'summarizing' && (
-                                <span className="text-[10px] text-[#49BABA] font-black animate-pulse w-full text-center md:w-auto md:text-left">
+                                <span className="text-[11px] text-[#49BABA] font-black animate-pulse whitespace-nowrap">
                                     ANALYZING MORE PAGES...
                                 </span>
                             )}
@@ -151,145 +183,140 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                     ) : null}
                 </div>
 
-                {/* Main Desktop Close Button Container */}
-                <div className="hidden md:flex min-w-[240px] justify-end">
-                    <button
+                <div className="w-full lg:w-auto lg:min-w-[240px] flex justify-center lg:justify-end">
+                    <button 
                         onClick={onClose}
-                        className="bg-red-500 text-white px-5 py-2.5 rounded-xl font-black text-xs tracking-wider hover:bg-red-600 active:scale-95 transition-all uppercase"
+                        className="w-full sm:w-auto bg-red-500 text-white px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase hover:bg-red-600 active:scale-95 transition-all"
                     >
                         CLOSE TUTOR
                     </button>
                 </div>
             </div>
 
-            {/* Main Layout */}
+            {/* Main Layout: Document-First Design */}
             <div className="flex-1 relative overflow-hidden bg-slate-950">
                 
-                {/* Background Layer: PDF Viewer */}
-                <div className="absolute inset-0 z-10 bg-slate-950">
-                    <AutoScrollPDFViewer
-                        url={pdfUrl}
+                {/* Background Layer: The Smart PDF Document with Auto-Scroll Tracking */}
+                <div className="absolute inset-0 z-10 w-full h-full bg-slate-950">
+                    <AutoScrollPDFViewer 
+                        url={pdfUrl} 
                         currentPage={ai.explanations[ai.currentExplanationIndex]?.page || 1}
                     />
                 </div>
 
-                {/* Processing Overlay */}
+                {/* Layer 2: Thinking/Processing Overlay */}
                 {(ai.state === 'extracting' || (ai.state === 'summarizing' && ai.explanations.length === 0)) && (
-                    <div className="absolute inset-0 z-[100] bg-slate-950/85 backdrop-blur-md flex items-center justify-center text-center p-6">
-                        <div className="max-w-md">
-                            <div className="w-12 h-12 border-4 border-[#49BABA]/20 border-top-[#49BABA] rounded-full animate-spin mx-auto mb-6" style={{ borderTopColor: '#49BABA' }} />
-                            <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-wide">
+                    <div className="absolute inset-0 z-[100] flex items-center justify-center bg-slate-950/85 px-6 text-center backdrop-blur-md">
+                        <div className="max-w-md py-12">
+                            <div className="css-loader mx-auto mb-8"></div>
+                            <style>{`
+                                .css-loader {
+                                    width: 50px;
+                                    height: 50px;
+                                    border: 4px solid rgba(73, 186, 186, 0.2);
+                                    border-top-color: #49BABA;
+                                    border-radius: 50%;
+                                    animation: spin 0.8s linear infinite;
+                                }
+                                @keyframes spin { to { transform: rotate(360deg); } }
+                            `}</style>
+                            <h3 className="text-2xl font-[950] tracking-wide text-white mb-4">
                                 {ai.state === 'extracting' ? 'Parsing Core Concepts...' : 'Synthesizing Knowledge...'}
                             </h3>
-                            <p className="text-slate-400 text-sm md:text-base leading-relaxed">
+                            <p className="text-sm md:text-base text-slate-400 leading-relaxed">
                                 Layos Virtual Tutor is orchestrating a personalized learning path based on your material.
                             </p>
                         </div>
                     </div>
                 )}
 
-                {/* AI Chat Drawer Layer */}
+                {/* Layer 4: AI Chat Intelligence (Floating Adaptive Panel) */}
                 {showChat && (
-                    <div className="absolute inset-0 w-full h-full md:inset-auto md:top-6 md:bottom-6 md:right-6 md:w-[440px] md:h-[calc(100%-3rem)] bg-slate-900/95 md:bg-slate-900/92 backdrop-blur-2xl md:rounded-[32px] md:border md:border-[#49BABA]/30 md:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8),0_0_40px_rgba(73, 186, 186, 0.1)] flex flex-col overflow-hidden z-[1000] animate-[slideInUp_0.4s_cubic-bezier(0.16,1,0.3,1)] md:animate-[chatSlideInUp_0.5s_cubic-bezier(0.16,1,0.3,1)]">
-                        
-                        {/* Custom Keyframe Animations (handled gracefully inside the template markup inline configuration fallback) */}
+                    <div className="absolute inset-0 sm:inset-y-6 sm:right-6 sm:left-auto w-full sm:w-[440px] bg-slate-900/95 sm:bg-slate-900/92 backdrop-blur-3xl sm:rounded-[32px] border-t sm:border border-[#49BABA]/30 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8),_0_0_40px_rgba(73,186,186,0.1)] flex flex-col overflow-hidden z-[1000] [animation:chatSlideInUp_0.4s_cubic-bezier(0.16,_1,_0.3,_1)]">
                         <style>{`
-                            @keyframes chatSlideInUp { from { opacity: 0; transform: translateX(40px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
-                            @keyframes slideInUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+                            @keyframes chatSlideInUp { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+                            @media (min-width: 640px) {
+                                @keyframes chatSlideInUp { from { opacity: 0; transform: translateX(40px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
+                            }
+                            .ai-chat-bubble.ai-bubble { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.1); align-self: flex-start; border-bottom-left-radius: 4px; color: #e2e8f0; }
+                            .ai-chat-bubble.user-bubble { background: linear-gradient(135deg, #49BABA 0%, #3fa3a3 100%); align-self: flex-end; border-bottom-right-radius: 4px; color: white; box-shadow: 0 10px 20px -5px rgba(73, 186, 186, 0.3); }
                         `}</style>
 
-                        {/* Sidebar Header */}
-                        <div className="p-4 md:p-5 bg-[#8b5cf6]/10 border-b border-[#49BABA]/20 flex justify-between items-center shrink-0">
-                            <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-[#49BABA] flex items-center justify-center font-black text-white text-base">
+                        {/* Chat Panel Header */}
+                        <div className="flex items-center justify-between gap-4 p-4 md:p-5 bg-purple-500/12 border-b border-[#49BABA]/20 shrink-0">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#49BABA] font-black text-white">
                                     L
                                 </div>
                                 <div className="min-w-0">
-                                    <h4 className="text-xs md:text-sm font-black text-white truncate uppercase tracking-wider">LAYOS VIRTUAL TUTOR</h4>
-                                    <span className="text-[9px] md:text-[10px] text-emerald-400 font-extrabold tracking-wider block">• ACTIVE ANALYSIS</span>
+                                    <h4 className="text-xs font-black tracking-wide text-white truncate">LAYOS VIRTUAL TUTOR</h4>
+                                    <span className="text-[10px] font-extrabold text-emerald-400 block truncate mt-0.5">• ACTIVE ANALYSIS</span>
                                 </div>
                             </div>
-                            <div className="flex gap-2 shrink-0">
-                                <button
-                                    onClick={() => (ai.state === 'paused' ? ai.resume() : ai.pause())}
-                                    className="bg-[#49BABA]/15 text-[#49BABA] border border-[#49BABA]/30 px-3 py-1.5 rounded-xl text-[10px] md:text-xs font-black tracking-wide uppercase hover:bg-[#49BABA]/25 transition-all"
+                            <div className="flex items-center gap-2 shrink-0">
+                                <button 
+                                    onClick={() => ai.state === 'paused' ? ai.resume() : ai.pause()}
+                                    className="bg-[#49BABA]/15 text-[#49BABA] border border-[#49BABA]/30 px-2.5 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black tracking-wider uppercase active:scale-95 transition-all whitespace-nowrap"
                                 >
-                                    {ai.state === 'paused' ? 'PLAY' : 'PAUSE'} <span className="hidden sm:inline">AUDIO</span>
+                                    {ai.state === 'paused' ? 'PLAY AUDIO' : 'PAUSE AUDIO'}
                                 </button>
-                                <button
-                                    onClick={() => setShowChat(false)}
-                                    className="bg-white/10 text-white px-3 py-1.5 rounded-xl text-[10px] md:text-xs font-black tracking-wide uppercase hover:bg-white/20 transition-all"
+                                <button 
+                                    onClick={() => setShowChat(false)} 
+                                    className="bg-white/10 text-white px-2.5 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black tracking-wider uppercase hover:bg-white/20 active:scale-95 transition-all"
                                 >
                                     CLOSE
                                 </button>
                             </div>
                         </div>
-
-                        {/* Messages Body */}
-                        <div 
-                            ref={chatScrollRef} 
-                            className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
-                        >
+                        
+                        {/* Chat History Container */}
+                        <div ref={chatScrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-5 scrollbar-thin scrollbar-thumb-white/10">
                             {chat.length === 0 && (
-                                <div className="text-center text-slate-500 my-auto p-4">
-                                    <div className="w-16 h-16 rounded-full bg-[#8b5cf6]/5 flex items-center justify-center mx-auto mb-4 font-black text-2xl text-[#49BABA]">
+                                <div className="text-center text-slate-500 my-auto py-12 px-4">
+                                    <div className="flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full bg-purple-500/5 text-2xl md:text-3xl font-black text-[#49BABA] mx-auto mb-4 md:mb-6">
                                         ?
                                     </div>
-                                    <h3 className="text-white text-base md:text-lg font-black mb-1">Direct Interaction</h3>
-                                    <p className="text-xs md:text-sm leading-relaxed max-w-xs mx-auto">
-                                        Consult the Virtual Tutor about any concept within this document.
-                                    </p>
+                                    <h3 className="text-base md:text-lg font-black text-white mb-2">Direct Interaction</h3>
+                                    <p className="text-xs md:text-sm leading-relaxed max-w-xs mx-auto text-slate-400">Consult the Virtual Tutor about any concept within this document.</p>
                                 </div>
                             )}
-
                             {chat.map((msg, idx) => (
-                                <div
-                                    key={idx}
-                                    className={`p-3 md:p-4 rounded-[18px] max-w-[85%] text-xs md:text-sm leading-relaxed ${
-                                        msg.role === 'user'
-                                            ? 'bg-gradient-to-br from-[#49BABA] to-[#3fa3a3] text-white self-end rounded-br-4px shadow-lg shadow-[#49BABA]/20'
-                                            : 'bg-slate-800/60 border border-slate-700/30 text-slate-200 self-flex-start rounded-bl-4px prose prose-invert prose-p:my-1 prose-strong:text-white prose-strong:font-extrabold prose-ul:list-disc prose-ol:list-decimal prose-li:my-0.5'
-                                    }`}
-                                >
+                                <div key={idx} className={`ai-chat-bubble ${msg.role === 'user' ? 'user-bubble' : 'ai-bubble'}`}>
                                     {msg.role === 'ai' ? (
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                            {msg.content}
-                                        </ReactMarkdown>
+                                        <div className="markdown-body">
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                {msg.content}
+                                            </ReactMarkdown>
+                                        </div>
                                     ) : (
                                         msg.content
                                     )}
                                 </div>
                             ))}
-
                             {isAsking && (
-                                <div className="bg-slate-800/60 border border-slate-700/30 self-flex-start rounded-bl-4px p-4 rounded-[18px] flex gap-1.5 items-center max-w-[85%]">
-                                    <div className="w-1.5 h-1.5 bg-[#49BABA] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                    <div className="w-1.5 h-1.5 bg-[#49BABA] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                    <div className="w-1.5 h-1.5 bg-[#49BABA] rounded-full animate-bounce" />
+                                <div className="ai-bubble ai-chat-bubble flex gap-1.5 p-4 items-center">
+                                    <div className="w-1.5 h-1.5 bg-[#49BABA] rounded-full animate-pulse" />
+                                    <div className="w-1.5 h-1.5 bg-[#49BABA] rounded-full animate-pulse [animation-delay:0.2s]" />
+                                    <div className="w-1.5 h-1.5 bg-[#49BABA] rounded-full animate-pulse [animation-delay:0.4s]" />
                                 </div>
                             )}
                         </div>
-
-                        {/* Input Container */}
-                        <div className="p-4 bg-black/30 border-t border-white/5 shrink-0 pb-safe">
-                            <form
-                                onSubmit={handleAsk}
-                                className="flex items-center bg-slate-900/60 rounded-2xl border border-white/10 p-1.5 focus-within:border-[#49BABA] transition-colors"
-                            >
-                                <input
+    
+                        {/* Chat Form Area */}
+                        <div className="p-4 md:p-6 bg-black/40 sm:bg-black/30 border-t border-white/5 shrink-0 pb-safe-bottom">
+                            <form onSubmit={handleAsk} className="relative flex items-center bg-slate-900/80 sm:bg-slate-900/60 rounded-2xl border border-white/10 p-1.5 focus-within:border-[#49BABA] transition-colors gap-1">
+                                <input 
                                     ref={inputRef}
-                                    className="flex-1 bg-transparent border-none text-white px-3 py-2 text-sm md:text-base outline-none placeholder-slate-500"
+                                    className="flex-1 bg-transparent border-none text-white px-3 md:px-4 py-2.5 md:py-3 text-sm outline-none placeholder:text-slate-500 min-w-0"
                                     placeholder="Query the Tutor..."
                                     value={question}
                                     onChange={(e) => setQuestion(e.target.value)}
                                 />
-                                <button
+                                <button 
                                     type="submit"
                                     disabled={!question.trim() || isAsking}
-                                    className={`px-4 h-10 rounded-xl font-black text-xs tracking-wider transition-all uppercase shrink-0 ${
-                                        question.trim() && !isAsking
-                                            ? 'bg-[#49BABA] text-white hover:bg-[#3fa3a3]'
-                                            : 'bg-white/5 text-slate-500 cursor-not-allowed'
+                                    className={`px-4 md:px-5 h-10 md:h-11 rounded-xl font-black text-xs tracking-wider uppercase transition-all shrink-0 flex items-center justify-center ${
+                                        question.trim() ? 'bg-[#49BABA] text-white active:scale-95' : 'bg-white/5 text-slate-500 cursor-not-allowed'
                                     }`}
                                 >
                                     {isAsking ? '...' : 'SEND'}

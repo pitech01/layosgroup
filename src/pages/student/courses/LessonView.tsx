@@ -4,7 +4,8 @@ import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Load
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
 import { SkeletonLessonView } from '../../../components/common/SkeletonLoader';
-
+import { useAIPutter } from '../../../utils/useAIPutter';
+import { buildProxyUrl } from '../../../utils/pdfTextExtractor';
 
 
 // ==========================================
@@ -195,6 +196,22 @@ const LessonView = () => {
     const [quizResult, setQuizResult] = useState<{ score: number, passed: boolean } | null>(null);
     const [showReview, setShowReview] = useState(false);
     const [showAiInteraction, setShowAiInteraction] = useState(false);
+
+    const aiTutor = useAIPutter();
+    const aiStartedUrlRef = useRef<string | null>(null);
+
+    // Start AI processing instantly in background
+    useEffect(() => {
+        if (lesson?.file_url) {
+            const url = lesson.file_url;
+            const isPdf = /\.pdf([?#]|$)/i.test(url) || (lesson.file_name && /\.pdf$/i.test(lesson.file_name));
+            
+            if (isPdf && aiStartedUrlRef.current !== url) {
+                aiStartedUrlRef.current = url;
+                aiTutor.startAIIntelligence(url);
+            }
+        }
+    }, [lesson?.file_url, lesson?.file_name]);
 
     const API_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -1132,6 +1149,7 @@ const LessonView = () => {
                 <AIPDFInteraction
                     pdfUrl={previewAsset.url}
                     onClose={() => setShowAiInteraction(false)}
+                    aiPutter={aiTutor}
                 />
             )}
 
