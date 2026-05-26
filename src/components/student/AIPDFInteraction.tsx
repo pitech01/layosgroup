@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useAIPutter } from '../../utils/useAIPutter';
@@ -7,17 +7,27 @@ import AutoScrollPDFViewer from './AutoScrollPDFViewer';
 interface AIPDFInteractionProps {
     pdfUrl: string;
     onClose: () => void;
+    onReachedEnd?: () => void;
+    aiPutter?: ReturnType<typeof useAIPutter>;
 }
 
-const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) => {
-    const ai = useAIPutter();
+const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, onReachedEnd, aiPutter }) => {
+    const localAi = useAIPutter();
+    const ai = aiPutter || localAi;
     const [question, setQuestion] = useState('');
     const [chat, setChat] = useState<{role: 'user' | 'ai', content: string}[]>([]);
     const [isAsking, setIsAsking] = useState(false);
     const [showChat, setShowChat] = useState(false);
     
     // Auto-scroll & Auto-focus refs
-    const chatScrollRef = React.useRef<HTMLDivElement>(null);
+    const chatScrollRef = useRef<HTMLDivElement>(null);
+
+    // Auto-complete trigger when AI finishes the document
+    useEffect(() => {
+        if (ai.state === 'idle' && ai.explanations.length > 0 && ai.currentExplanationIndex === ai.explanations.length - 1) {
+            onReachedEnd?.();
+        }
+    }, [ai.state, ai.currentExplanationIndex, ai.explanations.length, onReachedEnd]);
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     React.useEffect(() => {
@@ -180,12 +190,29 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                                 </span>
                             )}
                         </div>
+                    ) : ai.state === 'error' ? (
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-4 py-2.5 rounded-xl max-w-xs">
+                                <span className="text-[10px] font-black text-red-400 uppercase leading-tight">
+                                    {ai.error || 'CONNECTION FAILED'}
+                                </span>
+                            </div>
+                            <button 
+                                onClick={handleStart}
+                                className="w-full sm:w-auto bg-gradient-to-r from-[#49BABA] to-[#3fa3a3] text-white px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase shadow-[0_10px_20px_-5px_rgba(73,186,186,0.3)] hover:opacity-90 active:scale-95 transition-all"
+                            >
+                                RETRY
+                            </button>
+                        </div>
                     ) : null}
                 </div>
 
                 <div className="w-full lg:w-auto lg:min-w-[240px] flex justify-center lg:justify-end">
                     <button 
-                        onClick={onClose}
+                        onClick={() => {
+                            ai.stop();
+                            onClose();
+                        }}
                         className="w-full sm:w-auto bg-red-500 text-white px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase hover:bg-red-600 active:scale-95 transition-all"
                     >
                         CLOSE TUTOR
@@ -230,7 +257,43 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose }) 
                     </div>
                 )}
 
-                {/* Layer 4: AI Chat Intelligence (Floating Adaptive Panel) */}
+                {/* Layer 3: Error Overlay — shown when AI connection fails */}
+                {ai.state === 'error' && (
+                    <div className="absolute inset-0 z-[100] flex items-center justify-center bg-slate-950/90 px-6 text-center backdrop-blur-md">
+                        <div className="max-w-md py-12 space-y-6">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-red-500/10 border-2 border-red-500/40 flex items-center justify-center">
+                                <span className="text-3xl">⚠️</span>
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-[950] tracking-wide text-white mb-3">
+                                    Tutor Connection Failed
+                                </h3>
+                                <p className="text-sm text-red-400 font-bold mb-2 uppercase tracking-wider">
+                                    {ai.error?.includes('429') || ai.error?.toLowerCase().includes('too many')
+                                        ? 'Rate Limit Reached'
+                                        : ai.error?.includes('401') || ai.error?.toLowerCase().includes('key')
+                                        ? 'Unable to connect to your smart tutor at the moment'
+                                        : 'Connection Error'}
+                                </p>
+                                <p className="text-sm md:text-base text-slate-400 leading-relaxed">
+                                    {ai.error?.includes('429') || ai.error?.toLowerCase().includes('too many')
+                                        ? 'The AI tutor is currently handling too many requests. Please wait a moment and try again.'
+                                        : ai.error?.includes('401') || ai.error?.toLowerCase().includes('key')
+                                        ? 'The AI service could not authenticate. Please contact your administrator.'
+                                        : 'The Virtual Tutor could not connect to the AI service. Check your internet connection and try again.'}
+                                </p>
+                            </div>
+                            <button
+                                onClick={handleStart}
+                                className="bg-gradient-to-r from-[#49BABA] to-[#3fa3a3] text-white px-8 py-3 rounded-xl font-black text-xs tracking-wider uppercase shadow-[0_10px_20px_-5px_rgba(73,186,186,0.3)] hover:opacity-90 active:scale-95 transition-all"
+                            >
+                                Retry Connection
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+
                 {showChat && (
                     <div className="absolute inset-0 sm:inset-y-6 sm:right-6 sm:left-auto w-full sm:w-[440px] bg-slate-900/95 sm:bg-slate-900/92 backdrop-blur-3xl sm:rounded-[32px] border-t sm:border border-[#49BABA]/30 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8),_0_0_40px_rgba(73,186,186,0.1)] flex flex-col overflow-hidden z-[1000] [animation:chatSlideInUp_0.4s_cubic-bezier(0.16,_1,_0.3,_1)]">
                         <style>{`

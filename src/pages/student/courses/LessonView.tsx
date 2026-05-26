@@ -6,6 +6,7 @@ import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
 import { SkeletonLessonView } from '../../../components/common/SkeletonLoader';
 import { useAIPutter } from '../../../utils/useAIPutter';
 import { buildProxyUrl } from '../../../utils/pdfTextExtractor';
+import toast from 'react-hot-toast';
 
 
 // ==========================================
@@ -197,6 +198,19 @@ const LessonView = () => {
     const [showReview, setShowReview] = useState(false);
     const [showAiInteraction, setShowAiInteraction] = useState(false);
 
+    // Auto-complete lesson when quiz is passed
+    useEffect(() => {
+        if (quizResult?.passed && !isCompleted && !autoCompletedRef.current) {
+            autoCompletedRef.current = true;
+            toast.success('Congratulations,assessment passed! You have successfully completed this lesson.', {
+                style: { background: '#10B981', color: '#fff', fontWeight: 'bold' },
+                duration: 4000
+            });
+            handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers, forceComplete: true });
+        }
+    }, [quizResult]);
+
+
     const aiTutor = useAIPutter();
     const aiStartedUrlRef = useRef<string | null>(null);
 
@@ -211,6 +225,10 @@ const LessonView = () => {
                 aiTutor.startAIIntelligence(url);
             }
         }
+
+        return () => {
+            aiTutor.stop();
+        };
     }, [lesson?.file_url, lesson?.file_name]);
 
     const API_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -244,6 +262,9 @@ const LessonView = () => {
         const hasQuiz = quizData?.questions?.length > 0;
         if (!hasQuiz) {
             autoCompletedRef.current = true;
+            toast.success("Great job! Lesson automatically marked as complete.", {
+                style: { background: '#10B981', color: '#fff', fontWeight: 'bold' }
+            });
             handleCompleteLesson();
         }
     }, [isCompleted, lesson]);
@@ -262,6 +283,10 @@ const LessonView = () => {
             window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
         } else {
             autoCompletedRef.current = true;
+            toast.success("Great job! Lesson automatically marked as complete.", {
+                icon: '🎉',
+                style: { background: '#10B981', color: '#fff', fontWeight: 'bold' }
+            });
             handleCompleteLesson();
         }
     }, [isCompleted, lesson]);
@@ -1148,7 +1173,11 @@ const LessonView = () => {
             {showAiInteraction && previewAsset && (
                 <AIPDFInteraction
                     pdfUrl={previewAsset.url}
-                    onClose={() => setShowAiInteraction(false)}
+                    onClose={() => {
+                        aiTutor.stop();
+                        setShowAiInteraction(false);
+                    }}
+                    onReachedEnd={handlePDFReachedEnd}
                     aiPutter={aiTutor}
                 />
             )}

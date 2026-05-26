@@ -127,7 +127,7 @@ const StudentChannelsPage = () => {
                 const formattedChannels: Channel[] = dbChannels.map((c: any) => {
                     const channelIdStr = c.id.toString();
                     const lastReadId = lastReadMap[channelIdStr];
-                    const isUnread = c.latest_message_id && lastReadId !== c.latest_message_id;
+                    const isUnread = c.latest_message_id && String(lastReadId) !== String(c.latest_message_id);
 
                     return {
                         id: channelIdStr,
@@ -276,10 +276,10 @@ if (!activeChannel && formattedChannels.length > 0) {
                         const latestMsg = formattedMsgs[formattedMsgs.length - 1];
                         const lastReadMap = JSON.parse(localStorage.getItem('channels_last_read') || '{}');
                         let needsUpdate = false;
-                        if (activeChannel.type === 'channel' && lastReadMap[activeChannel.id] !== latestMsg.id) {
+                        if (activeChannel.type === 'channel' && String(lastReadMap[activeChannel.id]) !== String(latestMsg.id)) {
                             lastReadMap[activeChannel.id] = latestMsg.id;
                             needsUpdate = true;
-                        } else if (activeChannel.type === 'dm' && lastReadMap[`dm_${activeChannel.id}`] !== latestMsg.id) {
+                        } else if (activeChannel.type === 'dm' && String(lastReadMap[`dm_${activeChannel.id}`]) !== String(latestMsg.id)) {
                             lastReadMap[`dm_${activeChannel.id}`] = latestMsg.id;
                             needsUpdate = true;
                         }
