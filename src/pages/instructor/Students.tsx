@@ -502,8 +502,26 @@ export default function Students() {
                                                 <div className="avatar-circle" style={{ background: user.avatar || 'linear-gradient(135deg, #3b82f6, #93c5fd)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '0.8rem' }}>
                                                     {user.name.charAt(0)}
                                                 </div>
-                                                <span className="user-name">
+                                                <span className="user-name" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                                     {user.name} <ExternalLink size={14} style={{ color: '#94a3b8' }} />
+                                                    {user.payment_status === 'pending' && user.payment_method && (
+                                                        <span style={{
+                                                            fontSize: '0.65rem',
+                                                            fontWeight: 950,
+                                                            background: '#fffbeb',
+                                                            color: '#d97706',
+                                                            border: '1px solid #fde68a',
+                                                            padding: '2px 8px',
+                                                            borderRadius: '6px',
+                                                            textTransform: 'uppercase',
+                                                            letterSpacing: '0.025em',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            boxShadow: '0 2px 4px rgba(217, 119, 6, 0.05)'
+                                                        }}>
+                                                            Pending Approval
+                                                        </span>
+                                                    )}
                                                 </span>
                                             </div>
                                         </td>

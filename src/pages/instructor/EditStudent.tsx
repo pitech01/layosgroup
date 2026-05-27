@@ -28,6 +28,7 @@ export default function EditStudent() {
 
     const [cohorts, setCohorts] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -66,6 +67,7 @@ export default function EditStudent() {
                     password: '',
                     cohorts: studentData.cohorts?.map((c: any) => c.id) || []
                 });
+                setPaymentStatus(studentData.payment_status || null);
             } catch (err: any) {
                 setError(err.message || 'An error occurred while loading data.');
             } finally {
@@ -77,6 +79,10 @@ export default function EditStudent() {
     }, [id]);
 
     const toggleCohort = (cohortId: string) => {
+        if (paymentStatus === 'rejected') {
+            setError("Cohort assignments are locked because this student's payment has been declined/rejected.");
+            return;
+        }
         setFormData(prev => {
             const selected = prev.cohorts.includes(cohortId)
                 ? prev.cohorts.filter(c => c !== cohortId)
@@ -414,6 +420,25 @@ export default function EditStudent() {
                         <h2>Assigned Cohorts</h2>
                     </div>
 
+                    {paymentStatus === 'rejected' && (
+                        <div style={{
+                            padding: '1rem 1.25rem',
+                            background: '#fffbeb',
+                            border: '1.5px solid #fde68a',
+                            borderRadius: '16px',
+                            color: '#b45309',
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                            marginBottom: '1.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                        }}>
+                            <AlertCircle size={18} />
+                            <span>Payment Declined: Cohort assignments are currently locked for this student. You must verify and approve their payment first.</span>
+                        </div>
+                    )}
+ 
                     <div className="cohort-grid" style={{ marginBottom: '2.5rem' }}>
                         {cohorts.length > 0 ? (
                             cohorts.map(c => (
@@ -421,11 +446,13 @@ export default function EditStudent() {
                                     key={c.id}
                                     className={`cohort-item ${formData.cohorts.includes(c.id) ? 'selected' : ''}`}
                                     onClick={() => toggleCohort(c.id)}
+                                    style={paymentStatus === 'rejected' ? { opacity: 0.6, cursor: 'not-allowed', background: '#f8fafc' } : {}}
                                 >
                                     <input
                                         type="checkbox"
                                         className="cohort-checkbox"
                                         checked={formData.cohorts.includes(c.id)}
+                                        disabled={paymentStatus === 'rejected'}
                                         readOnly
                                     />
                                     <div className="cohort-info">

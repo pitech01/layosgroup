@@ -14,10 +14,14 @@ import {
     MapPin,
     Loader2,
     AlertCircle,
-    User,
     CheckCircle2,
     X,
-    HelpCircle
+    HelpCircle,
+    Eye,
+    Check,
+    Plus,
+    Layers,
+    Info
 } from 'lucide-react';
 
 export default function StudentDetails() {
@@ -32,7 +36,129 @@ export default function StudentDetails() {
     const [viewingQuizResult, setViewingQuizResult] = useState<any>(null);
     const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
+    // Zelle receipt preview & approval states
+    const [previewReceipt, setPreviewReceipt] = useState<string | null>(null);
+    const [approving, setApproving] = useState(false);
+    const [rejecting, setRejecting] = useState(false);
+    const [showApproveModal, setShowApproveModal] = useState(false);
+    const [showRejectModal, setShowRejectModal] = useState(false);
+
+    // Cohort Assignment states
+    const [showAssignCohortModal, setShowAssignCohortModal] = useState(false);
+    const [allCohorts, setAllCohorts] = useState<any[]>([]);
+    const [selectedCohortIds, setSelectedCohortIds] = useState<string[]>([]);
+    const [loadingCohorts, setLoadingCohorts] = useState(false);
+    const [assigningCohorts, setAssigningCohorts] = useState(false);
+
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    const handleApprovePayment = async () => {
+        setShowApproveModal(false);
+        setApproving(true);
+        try {
+            const response = await fetch(`${API_URL}/instructor/students/${id}/approve-payment`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({ type: 'success', message: data.message || 'Payment approved and welcome email sent!' });
+                fetchStudentData();
+            } else {
+                throw new Error(data.message || 'Failed to approve payment.');
+            }
+        } catch (err: any) {
+            setNotification({ type: 'error', message: err.message });
+        } finally {
+            setApproving(false);
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
+
+    const handleRejectPayment = async () => {
+        setShowRejectModal(false);
+        setRejecting(true);
+        try {
+            const response = await fetch(`${API_URL}/instructor/students/${id}/reject-payment`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({ type: 'success', message: data.message || 'Payment status updated to rejected.' });
+                fetchStudentData();
+            } else {
+                throw new Error(data.message || 'Failed to reject payment.');
+            }
+        } catch (err: any) {
+            setNotification({ type: 'error', message: err.message });
+        } finally {
+            setRejecting(false);
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
+
+    const fetchCohorts = async () => {
+        setLoadingCohorts(true);
+        try {
+            const response = await fetch(`${API_URL}/cohorts`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setAllCohorts(data);
+            } else {
+                throw new Error(data.message || 'Failed to load cohorts.');
+            }
+        } catch (err: any) {
+            console.error('Error fetching cohorts:', err);
+            setNotification({ type: 'error', message: err.message || 'Error loading available cohorts.' });
+            setTimeout(() => setNotification(null), 4000);
+        } finally {
+            setLoadingCohorts(false);
+        }
+    };
+
+    const handleAssignCohorts = async () => {
+        if (selectedCohortIds.length === 0) return;
+        setAssigningCohorts(true);
+        try {
+            const response = await fetch(`${API_URL}/instructor/students/${id}/assign-cohorts`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ cohorts: selectedCohortIds })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({ type: 'success', message: data.message || 'Cohorts assigned successfully!' });
+                fetchStudentData();
+                setShowAssignCohortModal(false);
+                setSelectedCohortIds([]);
+            } else {
+                throw new Error(data.message || 'Failed to assign cohorts.');
+            }
+        } catch (err: any) {
+            setNotification({ type: 'error', message: err.message });
+        } finally {
+            setAssigningCohorts(false);
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
 
     const fetchStudentData = async () => {
         setLoading(true);
@@ -151,6 +277,28 @@ export default function StudentDetails() {
     return (
         <div className="student-details-container">
             <style>{`
+                .receipt-thumbnail-hover:hover .receipt-overlay {
+                    opacity: 1 !important;
+                }
+                .receipt-thumbnail-hover:hover img {
+                    transform: scale(1.05);
+                }
+                .receipt-thumbnail-hover img {
+                    transition: transform 0.3s ease;
+                }
+                .approve-btn-premium:hover {
+                    transform: translateY(-2px);
+                    background: #059669 !important;
+                    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3) !important;
+                }
+                .approve-btn-premium:active {
+                    transform: translateY(0);
+                }
+                .reject-btn-premium:hover {
+                    background: #fef2f2 !important;
+                    border-color: #fca5a5 !important;
+                }
+
                 .staff-scope .student-details-container {
                     max-width: 1200px;
                     margin: 0 auto;
@@ -596,6 +744,18 @@ export default function StudentDetails() {
                             <div className="card-premium-records shadow-premium">
                                 <div className="card-title-records">
                                     <h3><BookOpen size={20} color="#1a4d3e" /> Academic Enrollments</h3>
+                                    {student?.payment_status !== 'rejected' && (
+                                        <button 
+                                            className="btn-secondary-outline" 
+                                            onClick={() => {
+                                                setShowAssignCohortModal(true);
+                                                fetchCohorts();
+                                            }}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#10b981', color: '#1a4d3e', background: '#f0fdf4' }}
+                                        >
+                                            <Plus size={16} /> Assign Cohort
+                                        </button>
+                                    )}
                                 </div>
 
                                 {student.cohorts && student.cohorts.length > 0 ? student.cohorts.map((cohort: any) => (
@@ -748,13 +908,186 @@ export default function StudentDetails() {
                         </div>
 
                         <div className="sidebar-records">
-                            <div className="card-premium-records shadow-premium" style={{ padding: '2rem' }}>
-                                <div className="card-title-records">
-                                    <h3><User size={20} color="#1a4d3e" /> Profile Note</h3>
+                            <div className="card-premium-records shadow-premium" style={{ padding: '2rem', marginBottom: '2rem' }}>
+                                <div className="card-title-records" style={{ marginBottom: '1.5rem' }}>
+                                    <h3>
+                                        <ShieldCheck size={20} color="#1a4d3e" />
+                                        Registration & Payment
+                                    </h3>
                                 </div>
-                                <p style={{ margin: 0, color: '#64748b', fontWeight: 600, lineHeight: 1.6 }}>
-                                    Standard student account with access to enrolled cohorts and assignments.
-                                </p>
+                                
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                    {/* Payment Status Badge */}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
+                                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#64748b' }}>Status</span>
+                                        <span style={{
+                                            fontSize: '0.8rem',
+                                            fontWeight: 950,
+                                            padding: '6px 14px',
+                                            borderRadius: '10px',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.025em',
+                                            ...(student.payment_status === 'approved' ? {
+                                                background: '#f0fdf4',
+                                                color: '#1a4d3e',
+                                                border: '1px solid #bbf7d0'
+                                            } : student.payment_status === 'rejected' ? {
+                                                background: '#fef2f2',
+                                                color: '#b91c1c',
+                                                border: '1px solid #fecaca'
+                                            } : {
+                                                background: '#fffbeb',
+                                                color: '#b45309',
+                                                border: '1px solid #fde68a'
+                                            })
+                                        }}>
+                                            {student.payment_status || 'Pending'}
+                                        </span>
+                                    </div>
+
+                                    {/* Selected Plan and Method */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                                        <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Plan</span>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 850, color: '#0f172a', textTransform: 'capitalize' }}>
+                                                {student.payment_plan ? student.payment_plan.replace('_', ' ') : 'N/A'}
+                                            </span>
+                                        </div>
+                                        <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Method</span>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 850, color: '#0f172a', textTransform: 'capitalize' }}>
+                                                {student.payment_method ? student.payment_method : 'N/A'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+
+
+
+
+                                    {/* Zelle Receipt Thumbnail */}
+                                    {student.receipt_url && (
+                                        <div style={{ marginTop: '0.5rem' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Zelle Payment Receipt</span>
+                                            <div 
+                                                onClick={() => setPreviewReceipt(student.receipt_url)}
+                                                style={{
+                                                    position: 'relative',
+                                                    borderRadius: '16px',
+                                                    overflow: 'hidden',
+                                                    cursor: 'pointer',
+                                                    border: '1.5px solid #e2e8f0',
+                                                    height: '140px',
+                                                    background: '#f8fafc',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    transition: 'all 0.3s'
+                                                }}
+                                                className="receipt-thumbnail-hover"
+                                            >
+                                                <img 
+                                                    src={student.receipt_url} 
+                                                    alt="Zelle Receipt" 
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                />
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    inset: 0,
+                                                    background: 'rgba(26, 77, 62, 0.4)',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: 'white',
+                                                    opacity: 0,
+                                                    transition: 'opacity 0.3s',
+                                                    fontWeight: 900,
+                                                    fontSize: '0.85rem',
+                                                    gap: '6px'
+                                                }} className="receipt-overlay">
+                                                    <Eye size={18} />
+                                                    <span>Inspect Receipt</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {/* Action Triggers */}
+                                    {(student.payment_status === 'pending' || student.payment_status === 'rejected') && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+                                            <button
+                                                onClick={() => setShowApproveModal(true)}
+                                                disabled={approving || rejecting}
+                                                style={{
+                                                    width: '100%',
+                                                    background: approving ? '#9ae6b4' : '#10b981',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '0.85rem 1.25rem',
+                                                    borderRadius: '16px',
+                                                    fontWeight: 900,
+                                                    fontSize: '0.9rem',
+                                                    cursor: approving || rejecting ? 'not-allowed' : 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '10px',
+                                                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)',
+                                                    transition: 'all 0.3s'
+                                                }}
+                                                className="approve-btn-premium"
+                                            >
+                                                {approving ? (
+                                                    <>
+                                                        <Loader2 className="animate-spin" size={18} />
+                                                        <span>Approving Payment...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Check size={18} />
+                                                        <span>Approve Payment & Send Email</span>
+                                                    </>
+                                                )}
+                                            </button>
+
+                                            {student.payment_status === 'pending' && (
+                                                <button
+                                                    onClick={() => setShowRejectModal(true)}
+                                                    disabled={approving || rejecting}
+                                                    style={{
+                                                        width: '100%',
+                                                        background: 'transparent',
+                                                        color: '#ef4444',
+                                                        border: '1.5px solid #fee2e2',
+                                                        padding: '0.85rem 1.25rem',
+                                                        borderRadius: '16px',
+                                                        fontWeight: 900,
+                                                        fontSize: '0.9rem',
+                                                        cursor: approving || rejecting ? 'not-allowed' : 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: '10px',
+                                                        transition: 'all 0.3s'
+                                                    }}
+                                                    className="reject-btn-premium"
+                                                >
+                                                    {rejecting ? (
+                                                        <>
+                                                            <Loader2 className="animate-spin" size={18} />
+                                                            <span>Rejecting...</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <X size={18} />
+                                                            <span>Reject Payment</span>
+                                                        </>
+                                                    )}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="card-premium-records shadow-premium" style={{ padding: '2rem' }}>
@@ -875,6 +1208,308 @@ export default function StudentDetails() {
                         <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', borderBottomLeftRadius: '28px', borderBottomRightRadius: '28px' }}>
                             <button onClick={() => setViewingQuizResult(null)} className="btn-confirm" style={{ background: '#0f172a' }}>Close Analysis</button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {previewReceipt && (
+                <div 
+                    className="modal-overlay" 
+                    style={{ zIndex: 1200 }}
+                    onClick={() => setPreviewReceipt(null)}
+                >
+                    <div 
+                        className="modal-box animate-fade-in-up" 
+                        style={{ 
+                            maxWidth: '700px', 
+                            maxHeight: '90vh', 
+                            overflow: 'hidden', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            padding: 0,
+                            background: 'transparent',
+                            boxShadow: 'none'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                            <button 
+                                onClick={() => setPreviewReceipt(null)} 
+                                style={{ 
+                                    background: 'rgba(15, 23, 42, 0.8)', 
+                                    border: 'none', 
+                                    color: 'white',
+                                    width: '40px', 
+                                    height: '40px', 
+                                    borderRadius: '50%', 
+                                    cursor: 'pointer', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ 
+                            flex: 1, 
+                            overflow: 'auto', 
+                            background: 'white', 
+                            borderRadius: '24px', 
+                            padding: '1rem',
+                            border: '1.5px solid #e2e8f0',
+                            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <img 
+                                src={previewReceipt} 
+                                alt="Zelle Payment Receipt Full" 
+                                style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '16px' }} 
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showApproveModal && (
+                <div className="modal-overlay" style={{ zIndex: 1150 }}>
+                    <div className="modal-box animate-fade-in-up" style={{ maxWidth: '480px' }}>
+                        <div style={{
+                            width: '56px',
+                            height: '56px',
+                            borderRadius: '16px',
+                            background: '#f0fdf4',
+                            color: '#1a4d3e',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '1.5rem',
+                            border: '1.5px solid #dcfce7'
+                        }}>
+                            <ShieldCheck size={28} />
+                        </div>
+                        <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.4rem', fontWeight: 950, color: '#0f172a' }}>
+                            Authorize Enrollment & Access
+                        </h3>
+                        <p style={{ color: '#64748b', fontWeight: 600, lineHeight: 1.5, marginBottom: '1.25rem', fontSize: '0.9rem' }}>
+                            You are about to approve <strong>{student.name}</strong>'s payment. This will activate their profile and automatically trigger the following onboarding steps:
+                        </p>
+                        <div style={{ 
+                            background: '#f8fafc', 
+                            padding: '1rem 1.25rem', 
+                            borderRadius: '16px', 
+                            border: '1px solid #f1f5f9', 
+                            marginBottom: '1.5rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.75rem'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: '#334155', fontWeight: 700 }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }}></div>
+                                <span>Update payment status to <strong>Approved</strong></span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: '#334155', fontWeight: 700 }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }}></div>
+                                <span>Generate secure login dashboard password</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: '#334155', fontWeight: 700 }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }}></div>
+                                <span>Send email containing credentials & WhatsApp link</span>
+                            </div>
+                        </div>
+                        <div className="modal-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <button className="btn-cancel" onClick={() => setShowApproveModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '48px', margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
+                                Cancel
+                            </button>
+                            <button className="btn-confirm" onClick={handleApprovePayment} style={{ background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '48px', margin: 0, fontSize: '0.9rem', fontWeight: 850, boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)' }}>
+                                Approve & Dispatch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showRejectModal && (
+                <div className="modal-overlay" style={{ zIndex: 1150 }}>
+                    <div className="modal-box animate-fade-in-up" style={{ maxWidth: '480px' }}>
+                        <div style={{
+                            width: '56px',
+                            height: '56px',
+                            borderRadius: '16px',
+                            background: '#fef2f2',
+                            color: '#ef4444',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '1.5rem',
+                            border: '1.5px solid #fee2e2'
+                        }}>
+                            <AlertCircle size={28} />
+                        </div>
+                        <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.4rem', fontWeight: 950, color: '#0f172a' }}>
+                            Reject Payment Receipt
+                        </h3>
+                        <p style={{ color: '#64748b', fontWeight: 600, lineHeight: 1.5, marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                            Are you sure you want to mark <strong>{student.name}</strong>'s payment as rejected? This restricts access immediately. You can review and re-verify their file later if a new Zelle screenshot is uploaded.
+                        </p>
+                        <div className="modal-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <button className="btn-cancel" onClick={() => setShowRejectModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '48px', margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
+                                Cancel
+                            </button>
+                            <button className="btn-confirm" onClick={handleRejectPayment} style={{ background: '#ef4444', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '48px', margin: 0, fontSize: '0.9rem', fontWeight: 850, boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)' }}>
+                                Yes, Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showAssignCohortModal && (
+                <div className="modal-overlay" style={{ zIndex: 1150 }}>
+                    <div className="modal-box animate-fade-in-up" style={{ maxWidth: '500px', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{
+                                    width: '42px',
+                                    height: '42px',
+                                    borderRadius: '12px',
+                                    background: '#f0fdf4',
+                                    color: '#1a4d3e',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '1.5px solid #dcfce7'
+                                }}>
+                                    <Layers size={20} />
+                                </div>
+                                <div>
+                                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 950, color: '#0f172a' }}>
+                                        Assign Academic Cohort
+                                    </h3>
+                                    <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
+                                        Enroll {student.name} in standard learning programs
+                                    </p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => {
+                                    setShowAssignCohortModal(false);
+                                    setSelectedCohortIds([]);
+                                }} 
+                                style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {loadingCohorts ? (
+                            <div style={{ padding: '3rem 0', textAlign: 'center' }}>
+                                <Loader2 className="animate-spin" size={32} color="#1a4d3e" style={{ margin: '0 auto' }} />
+                                <p style={{ marginTop: '1rem', fontWeight: 800, color: '#64748b', fontSize: '0.85rem' }}>Loading active cohorts...</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '4px', marginBottom: '1.5rem' }}>
+                                    {allCohorts.filter((c: any) => !(student.cohorts || []).some((sc: any) => sc.id === c.id)).length > 0 ? (
+                                        allCohorts.filter((c: any) => !(student.cohorts || []).some((sc: any) => sc.id === c.id)).map((cohort: any) => {
+                                            const isSelected = selectedCohortIds.includes(cohort.id);
+                                            return (
+                                                <div 
+                                                    key={cohort.id}
+                                                    onClick={() => {
+                                                        setSelectedCohortIds(prev => 
+                                                            isSelected ? prev.filter(id => id !== cohort.id) : [...prev, cohort.id]
+                                                        );
+                                                    }}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '12px',
+                                                        padding: '12px 16px',
+                                                        background: isSelected ? '#f0fdf4' : 'white',
+                                                        border: `1.5px solid ${isSelected ? '#10b981' : '#f1f5f9'}`,
+                                                        borderRadius: '16px',
+                                                        marginBottom: '8px',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    <div style={{
+                                                        width: '20px',
+                                                        height: '20px',
+                                                        borderRadius: '6px',
+                                                        border: `2px solid ${isSelected ? '#10b981' : '#cbd5e1'}`,
+                                                        background: isSelected ? '#10b981' : 'white',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        transition: 'all 0.2s'
+                                                    }}>
+                                                        {isSelected && <Check size={14} color="white" strokeWidth={3} />}
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ fontWeight: 850, color: '#0f172a', fontSize: '0.9rem' }}>{cohort.name}</div>
+                                                        <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 650 }}>
+                                                            {cohort.course?.title || 'General Curriculum'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <div style={{ textAlign: 'center', padding: '2.5rem 1.5rem', background: '#f8fafc', borderRadius: '20px', border: '1.5px dashed #e2e8f0' }}>
+                                            <Info size={24} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
+                                            <p style={{ color: '#64748b', fontWeight: 700, fontSize: '0.85rem', margin: 0 }}>No other cohorts available</p>
+                                            <p style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem', marginTop: '4px' }}>This student is already enrolled in all eligible cohorts.</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="modal-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    <button 
+                                        className="btn-cancel" 
+                                        onClick={() => {
+                                            setShowAssignCohortModal(false);
+                                            setSelectedCohortIds([]);
+                                        }} 
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '44px', margin: 0, fontSize: '0.85rem', fontWeight: 800 }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        className="btn-confirm" 
+                                        disabled={selectedCohortIds.length === 0 || assigningCohorts}
+                                        onClick={handleAssignCohorts} 
+                                        style={{ 
+                                            background: selectedCohortIds.length === 0 ? '#cbd5e1' : '#10b981', 
+                                            color: 'white', 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center', 
+                                            height: '44px', 
+                                            margin: 0, 
+                                            fontSize: '0.85rem', 
+                                            fontWeight: 850, 
+                                            boxShadow: selectedCohortIds.length === 0 ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.2)',
+                                            cursor: selectedCohortIds.length === 0 || assigningCohorts ? 'not-allowed' : 'pointer'
+                                        }}
+                                    >
+                                        {assigningCohorts ? (
+                                            <>
+                                                <Loader2 className="animate-spin" size={16} style={{ marginRight: '6px' }} />
+                                                <span>Assigning...</span>
+                                            </>
+                                        ) : (
+                                            <span>Confirm Assignment ({selectedCohortIds.length})</span>
+                                        )}
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

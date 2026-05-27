@@ -49,6 +49,8 @@ import StudentInterviews from './pages/student/interviews/Interviews';
 import CertificateTemplateManager from './pages/instructor/CertificateTemplateManager';
 import ActivityLogsDetailed from './pages/instructor/ActivityLogsDetailed';
 import CertificateVerification from './pages/CertificateVerification';
+import InstructorReviews from './pages/instructor/Reviews';
+import InstructorAnnouncements from './pages/instructor/Announcements';
 import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 
@@ -130,6 +132,8 @@ function App() {
                 <Route path="/instructor/interviews/create" element={<CreateInterview />} />
                 <Route path="/instructor/interviews/edit/:id" element={<EditInterview />} />
                 <Route path="/instructor/settings" element={<InstructorSettings />} />
+                <Route path="/instructor/reviews" element={<InstructorReviews />} />
+                <Route path="/instructor/announcements" element={<InstructorAnnouncements />} />
                 <Route path="/instructor/activity-logs" element={<ActivityLogsDetailed />} />
                 <Route path="/instructor/courses/:courseId/certificate-design" element={<CertificateTemplateManager />} />
               </Route>
