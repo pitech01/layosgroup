@@ -187,13 +187,6 @@ export const useAIPutter = () => {
 
                 if (runId !== currentRunIdRef.current) return;
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    if (response.status === 429) {
-                        throw new Error("AI intelligence is syncing. Please wait a moment.");
-                    }
-                    throw new Error(`AI Intelligence Error (${response.status}): ${errorData.error?.message || 'Server busy'}`);
-                }
 
                 const data = await response.json();
                 const rawResponse = data.choices[0].message.content;

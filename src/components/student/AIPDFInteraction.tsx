@@ -190,20 +190,6 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                                 </span>
                             )}
                         </div>
-                    ) : ai.state === 'error' ? (
-                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-4 py-2.5 rounded-xl max-w-xs">
-                                <span className="text-[10px] font-black text-red-400 uppercase leading-tight">
-                                    {ai.error || 'CONNECTION FAILED'}
-                                </span>
-                            </div>
-                            <button 
-                                onClick={handleStart}
-                                className="w-full sm:w-auto bg-gradient-to-r from-[#49BABA] to-[#3fa3a3] text-white px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase shadow-[0_10px_20px_-5px_rgba(73,186,186,0.3)] hover:opacity-90 active:scale-95 transition-all"
-                            >
-                                RETRY
-                            </button>
-                        </div>
                     ) : null}
                 </div>
 
