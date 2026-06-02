@@ -11,7 +11,8 @@ import {
     Loader2,
     AlertCircle,
     FileText,
-    Trash2
+    Trash2,
+    Pencil
 } from 'lucide-react';
 
 import { toast } from 'react-hot-toast';
@@ -334,6 +335,27 @@ export default function InstructorAssignments() {
                     box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.2);
                     border-color: #dc2626;
                 }
+
+                .staff-scope .btn-edit {
+                    background: #f8fafc;
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #475569;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border: 1px solid #e2e8f0;
+                    cursor: pointer;
+                    margin-left: 10px;
+                }
+
+                .staff-scope .btn-edit:hover {
+                    background: #e2e8f0;
+                    color: #0f172a;
+                    transform: scale(1.1);
+                }
             `}</style>
 
             <div className="page-header">
@@ -420,6 +442,9 @@ export default function InstructorAssignments() {
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <Link to={`/instructor/assignments/${assignment.id}/submissions`} className="btn-submissions" title="Review Submissions">
                                         <ChevronRight size={24} />
+                                    </Link>
+                                    <Link to={`/instructor/assignments/edit/${assignment.id}`} className="btn-edit" title="Edit Assignment">
+                                        <Pencil size={20} />
                                     </Link>
                                     <button
                                         onClick={() => handleDelete(assignment.id)}

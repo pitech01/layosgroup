@@ -31,6 +31,7 @@ import CreateLiveSession from './pages/instructor/CreateLiveSession';
 import InstructorAssignments from './pages/instructor/assignments/Assignments.tsx';
 import CreateAssignment from './pages/instructor/assignments/CreateAssignment.tsx';
 import AssignmentSubmissions from './pages/instructor/assignments/AssignmentSubmissions.tsx';
+import EditAssignment from "./pages/instructor/assignments/EditAssignment.tsx";
 import StudentAssignments from './pages/student/assignments/Assignments.tsx';
 import SubmitAssignment from './pages/student/assignments/SubmitAssignment.tsx';
 import NotFound from './pages/NotFound';
@@ -123,6 +124,7 @@ function App() {
                 <Route path="/instructor/students/:id/edit" element={<EditStudent />} />
                 <Route path="/instructor/assignments" element={<InstructorAssignments />} />
                 <Route path="/instructor/assignments/create" element={<CreateAssignment />} />
+                <Route path="/instructor/assignments/edit/:id" element={<EditAssignment />} />
                 <Route path="/instructor/assignments/:id/submissions" element={<AssignmentSubmissions />} />
                 <Route path="/instructor/live" element={<LiveClass />} />
                 <Route path="/instructor/live/create" element={<CreateLiveSession />} />
