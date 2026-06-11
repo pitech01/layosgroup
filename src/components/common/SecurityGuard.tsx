@@ -18,8 +18,7 @@ const SecurityGuard = ({ children }: { children: React.ReactNode }) => {
             // Access is now allowed on mobile and tablet devices.
 
 
-            // 2. 🚫 VPN / Proxy Shield (Frontend Detection Layer - Disabled to avoid CORS errors)
-            /*
+            // 2. 🚫 VPN / Proxy Shield (Frontend Detection Layer)
             try {
                 const res = await fetch('https://proxycheck.io/v2/?vpn=1&asn=1&time=1');
                 const data = await res.json();
@@ -31,7 +30,6 @@ const SecurityGuard = ({ children }: { children: React.ReactNode }) => {
             } catch (err) {
                 // Backend will handle this via CheckVpn middleware
             }
-            */
 
             setSecurity({ isChecking: false, error: null });
         };
