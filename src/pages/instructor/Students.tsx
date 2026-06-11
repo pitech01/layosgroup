@@ -18,6 +18,16 @@ export default function Students() {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [users.length]);
+
+    const totalPages = Math.ceil(users.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedUsers = users.slice(startIndex, startIndex + itemsPerPage);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -190,6 +200,12 @@ export default function Students() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                }
+
+                .staff-scope .pagination-btn:hover:not(:disabled) {
+                    background-color: #f8fafc !important;
+                    border-color: #cbd5e1 !important;
+                    color: #020617 !important;
                 }
 
                 .staff-scope .users-table {
@@ -481,7 +497,8 @@ export default function Students() {
                         <button onClick={fetchStudents} className="btn-export" style={{ margin: '0 auto' }}>Try Reconnecting</button>
                     </div>
                 ) : (
-                    <div style={{ overflowX: 'auto' }}>
+                    <>
+                        <div style={{ overflowX: 'auto' }}>
                         <table className="users-table">
                             <thead>
                                 <tr>
@@ -494,7 +511,7 @@ export default function Students() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.length > 0 ? users.map((user) => (
+                                {paginatedUsers.length > 0 ? paginatedUsers.map((user) => (
                                     <tr key={user.id}>
                                         <td className="user-id" data-label="ID">{user.id}</td>
                                         <td data-label="Student Name">
@@ -574,7 +591,93 @@ export default function Students() {
                             </tbody>
                         </table>
                     </div>
-                )}
+
+                    {/* Pagination Controls */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: '2rem',
+                        paddingTop: '1.5rem',
+                        borderTop: '1px solid #f1f5f9',
+                        flexWrap: 'wrap',
+                        gap: '1rem'
+                    }}>
+                        <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>
+                            Showing <span style={{ fontWeight: 800, color: '#0f172a' }}>{users.length > 0 ? startIndex + 1 : 0}</span> to <span style={{ fontWeight: 800, color: '#0f172a' }}>{Math.min(startIndex + itemsPerPage, users.length)}</span> of <span style={{ fontWeight: 800, color: '#0f172a' }}>{users.length}</span> students
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                className="pagination-btn"
+                                style={{
+                                    padding: '0.5rem 0.85rem',
+                                    borderRadius: '8px',
+                                    border: '1.5px solid #e2e8f0',
+                                    background: 'white',
+                                    color: currentPage === 1 ? '#cbd5e1' : '#475569',
+                                    fontWeight: 700,
+                                    fontSize: '0.85rem',
+                                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                Previous
+                            </button>
+                            
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => {
+                                const isClose = Math.abs(pageNum - currentPage) <= 1;
+                                const isEnd = pageNum === 1 || pageNum === totalPages;
+                                if (!isClose && !isEnd) {
+                                    if (pageNum === 2 || pageNum === totalPages - 1) {
+                                        return <span key={pageNum} style={{ padding: '0 0.5rem', color: '#94a3b8' }}>...</span>;
+                                    }
+                                    return null;
+                                }
+                                return (
+                                    <button
+                                        key={pageNum}
+                                        onClick={() => setCurrentPage(pageNum)}
+                                        style={{
+                                            padding: '0.5rem 0.85rem',
+                                            borderRadius: '8px',
+                                            border: '1.5px solid',
+                                            borderColor: currentPage === pageNum ? '#020617' : '#e2e8f0',
+                                            background: currentPage === pageNum ? '#020617' : 'white',
+                                            color: currentPage === pageNum ? 'white' : '#475569',
+                                            fontWeight: 800,
+                                            fontSize: '0.85rem',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                );
+                            })}
+
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages || totalPages === 0}
+                                className="pagination-btn"
+                                style={{
+                                    padding: '0.5rem 0.85rem',
+                                    borderRadius: '8px',
+                                    border: '1.5px solid #e2e8f0',
+                                    background: 'white',
+                                    color: (currentPage === totalPages || totalPages === 0) ? '#cbd5e1' : '#475569',
+                                    fontWeight: 700,
+                                    fontSize: '0.85rem',
+                                    cursor: (currentPage === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </>)}
             </div>
         </div>
     );

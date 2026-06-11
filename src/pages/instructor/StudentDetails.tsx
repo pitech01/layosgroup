@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { useAuth } from '../../context/AuthContext';
 import {
     ArrowLeft,
     Mail,
@@ -27,6 +29,7 @@ import {
 export default function StudentDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [student, setStudent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -34,7 +37,20 @@ export default function StudentDetails() {
     const [deactivateMessage, setDeactivateMessage] = useState('');
     const [pendingCohortId, setPendingCohortId] = useState<string | null>(null);
     const [viewingQuizResult, setViewingQuizResult] = useState<any>(null);
-    const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+    const [notification, _setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+    const setNotification = (notif: { type: 'success' | 'error', message: string } | null) => {
+        _setNotification(notif);
+        if (notif) {
+            Swal.fire({
+                icon: notif.type,
+                title: notif.type === 'success' ? 'Success' : 'Error',
+                text: notif.message,
+                confirmButtonColor: '#1a4d3e',
+                timer: notif.type === 'success' ? 2500 : undefined,
+                showConfirmButton: notif.type !== 'success'
+            });
+        }
+    };
 
     // Zelle receipt preview & approval states
     const [previewReceipt, setPreviewReceipt] = useState<string | null>(null);
@@ -49,6 +65,83 @@ export default function StudentDetails() {
     const [selectedCohortIds, setSelectedCohortIds] = useState<string[]>([]);
     const [loadingCohorts, setLoadingCohorts] = useState(false);
     const [assigningCohorts, setAssigningCohorts] = useState(false);
+
+    // Certificate generation states
+    const [certificates, setCertificates] = useState<any[]>([]);
+    const [showIssueCertModal, setShowIssueCertModal] = useState(false);
+    const [issuingCert, setIssuingCert] = useState(false);
+    const [selectedCohortForCert, setSelectedCohortForCert] = useState<any>(null);
+    const [certForm, setCertForm] = useState({
+        fullName: '',
+        courseTitle: '',
+        issuedAt: '',
+        issuedBy: ''
+    });
+
+    const fetchCertificates = async () => {
+        try {
+            const response = await fetch(`${API_URL}/certificates`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                const studentCerts = data.filter((c: any) => c.user_id === parseInt(id || ''));
+                setCertificates(studentCerts);
+            }
+        } catch (err) {
+            console.error("Error fetching certificates:", err);
+        }
+    };
+
+    const handleOpenIssueCertModal = (cohort: any) => {
+        setSelectedCohortForCert(cohort);
+        setCertForm({
+            fullName: student?.name || '',
+            courseTitle: cohort.course?.title || '',
+            issuedAt: new Date().toISOString().substring(0, 10),
+            issuedBy: user?.name || 'Instructor'
+        });
+        setShowIssueCertModal(true);
+    };
+
+    const handleIssueCertificate = async () => {
+        if (!selectedCohortForCert) return;
+        setIssuingCert(true);
+        try {
+            const response = await fetch(`${API_URL}/instructor/certificates/generate-manual`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    course_id: selectedCohortForCert.course_id || selectedCohortForCert.course?.id,
+                    user_id: student.id,
+                    full_name: certForm.fullName,
+                    course_title: certForm.courseTitle,
+                    issued_at: certForm.issuedAt,
+                    issued_by: certForm.issuedBy
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({ type: 'success', message: 'Certificate generated and issued successfully!' });
+                fetchCertificates();
+                setShowIssueCertModal(false);
+            } else {
+                throw new Error(data.message || 'Failed to issue certificate.');
+            }
+        } catch (err: any) {
+            setNotification({ type: 'error', message: err.message });
+        } finally {
+            setIssuingCert(false);
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -261,6 +354,7 @@ export default function StudentDetails() {
 
     useEffect(() => {
         fetchStudentData();
+        fetchCertificates();
     }, [id]);
 
     // Derived Metrics
@@ -758,81 +852,118 @@ export default function StudentDetails() {
                                     )}
                                 </div>
 
-                                {student.cohorts && student.cohorts.length > 0 ? student.cohorts.map((cohort: any) => (
-                                    <div key={cohort.id} style={{ marginBottom: '1rem' }}>
-                                        <div className="enrollment-row" style={{ marginBottom: 0, borderRadius: expandedCohortMap[cohort.id] ? '20px 20px 0 0' : '20px' }}>
-                                            <div className="progress-ring-mini">{Math.round(cohort.pivot?.progress || 0)}%</div>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontWeight: 950, color: '#0f172a', fontSize: '1.1rem' }}>{cohort.name}</div>
-                                                <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
-                                                    {cohort.course?.title || 'General Curriculum'} • Joined {new Date(cohort.pivot?.created_at).toLocaleDateString()}
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                                                    <div style={{
-                                                        fontSize: '0.75rem',
-                                                        fontWeight: 850,
-                                                        color: cohort.pivot?.status === 'inactive' ? '#ef4444' : '#10b981',
-                                                        background: cohort.pivot?.status === 'inactive' ? '#fef2f2' : '#f0fdf4',
-                                                        padding: '2px 8px',
-                                                        borderRadius: '4px'
-                                                    }}>
-                                                        {cohort.pivot?.status?.toUpperCase() || 'ENROLLED'}
+                                {student.cohorts && student.cohorts.length > 0 ? student.cohorts.map((cohort: any) => {
+                                    const matchingCert = certificates.find((c: any) => c.course_id === cohort.course?.id);
+                                    return (
+                                        <div key={cohort.id} style={{ marginBottom: '1rem' }}>
+                                            <div className="enrollment-row" style={{ marginBottom: 0, borderRadius: expandedCohortMap[cohort.id] ? '20px 20px 0 0' : '20px' }}>
+                                                <div className="progress-ring-mini">{Math.round(cohort.pivot?.progress || 0)}%</div>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: 950, color: '#0f172a', fontSize: '1.1rem' }}>{cohort.name}</div>
+                                                    <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
+                                                        {cohort.course?.title || 'General Curriculum'} • Joined {new Date(cohort.pivot?.created_at).toLocaleDateString()}
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '10px' }}>
-                                                <button className="btn-secondary-outline" onClick={() => setExpandedCohortMap(p => ({ ...p, [cohort.id]: !p[cohort.id] }))}>
-                                                    {expandedCohortMap[cohort.id] ? 'Hide Progress' : 'Manage Progress'}
-                                                </button>
-                                                <button
-                                                    className={cohort.pivot?.status === 'inactive' ? "btn-toggle-active" : "btn-toggle-inactive"}
-                                                    onClick={() => toggleActivation(cohort.id, cohort.pivot?.status)}
-                                                >
-                                                    {cohort.pivot?.status === 'inactive' ? 'Activate' : 'Deactivate'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        {expandedCohortMap[cohort.id] && (
-                                            <div className="animate-fade-in-up" style={{ padding: '2.5rem', background: '#fcfdfe', border: '1.5px solid #f1f5f9', borderTop: 'none', borderRadius: '0 0 20px 20px', boxShadow: 'inset 0 4px 6px -4px rgba(0,0,0,0.02)' }}>
-                                                <h4 style={{ margin: '0 0 1.5rem 0', color: '#0f172a', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <CheckCircle2 size={18} color="#1a4d3e" /> Curriculum Override Access
-                                                </h4>
-                                                <p style={{ margin: '0 0 2rem 0', color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>Toggle the checkboxes below to manually apply or revoke completion status for a specific resource. This persists immediately to the backend and adjusts percentages automatically.</p>
-                                                
-                                                {cohort.course?.modules?.map((mod: any) => (
-                                                    <div key={mod.id} style={{ marginBottom: '1.5rem', background: 'white', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
-                                                        <div style={{ fontWeight: 800, color: '#1a4d3e', padding: '1rem 1.5rem', background: '#f8fafc', fontSize: '0.95rem', borderBottom: '1px solid #e2e8f0' }}>{mod.title}</div>
-                                                        <div style={{ display: 'grid', padding: '1rem' }}>
-                                                            {mod.lessons?.map((lesson: any) => {
-                                                                const isCompleted = student?.completed_lessons?.some((cl: any) => cl.id === lesson.id);
-                                                                return (
-                                                                    <div key={lesson.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f1f5f9' }}>
-                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                                                            <button 
-                                                                                onClick={() => toggleLessonCompletion(lesson.id, !!isCompleted)}
-                                                                                style={{ width: '26px', height: '26px', borderRadius: '8px', border: `2px solid ${isCompleted ? '#10b981' : '#cbd5e1'}`, background: isCompleted ? '#10b981' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, transition: 'all 0.2s' }}
-                                                                            >
-                                                                                {isCompleted && <CheckCircle2 size={16} color="white" />}
-                                                                            </button>
-                                                                            <span style={{ fontWeight: 700, color: isCompleted ? '#94a3b8' : '#334155', fontSize: '0.9rem', textDecoration: isCompleted ? 'line-through' : 'none', transition: 'all 0.2s' }}>{lesson.title}</span>
-                                                                        </div>
-                                                                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px' }}>{lesson.type}</span>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                            {(!mod.lessons || mod.lessons.length === 0) && (
-                                                                <p style={{ margin: '0.5rem 1rem', color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic', fontWeight: 600 }}>No lessons active in module...</p>
-                                                            )}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                                                        <div style={{
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: 850,
+                                                            color: cohort.pivot?.status === 'inactive' ? '#ef4444' : '#10b981',
+                                                            background: cohort.pivot?.status === 'inactive' ? '#fef2f2' : '#f0fdf4',
+                                                            padding: '2px 8px',
+                                                            borderRadius: '4px'
+                                                        }}>
+                                                            {cohort.pivot?.status?.toUpperCase() || 'ENROLLED'}
                                                         </div>
+                                                        {matchingCert && (
+                                                            <div style={{
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: 850,
+                                                                color: '#0369a1',
+                                                                background: '#e0f2fe',
+                                                                padding: '2px 8px',
+                                                                borderRadius: '4px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px'
+                                                            }}>
+                                                                <Award size={12} /> CERTIFICATE ISSUED
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                ))}
-                                                {(!cohort.course?.modules || cohort.course.modules.length === 0) && (
-                                                    <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>No curriculum data bound to this record.</p>
-                                                )}
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '10px' }}>
+                                                    {matchingCert ? (
+                                                        <a 
+                                                            href={matchingCert.certificate_path} 
+                                                            target="_blank" 
+                                                            rel="noreferrer" 
+                                                            className="btn-secondary-outline"
+                                                            style={{ textDecoration: 'none', background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                        >
+                                                            View Cert <Award size={14} />
+                                                        </a>
+                                                    ) : cohort.course ? (
+                                                        <button 
+                                                            className="btn-secondary-outline"
+                                                            onClick={() => handleOpenIssueCertModal(cohort)}
+                                                            style={{ background: '#fffbeb', color: '#b45309', borderColor: '#fde68a', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                        >
+                                                            Issue Cert <Award size={14} />
+                                                        </button>
+                                                    ) : null}
+                                                    <button className="btn-secondary-outline" onClick={() => setExpandedCohortMap(p => ({ ...p, [cohort.id]: !p[cohort.id] }))}>
+                                                        {expandedCohortMap[cohort.id] ? 'Hide Progress' : 'Manage Progress'}
+                                                    </button>
+                                                    <button
+                                                        className={cohort.pivot?.status === 'inactive' ? "btn-toggle-active" : "btn-toggle-inactive"}
+                                                        onClick={() => toggleActivation(cohort.id, cohort.pivot?.status)}
+                                                    >
+                                                        {cohort.pivot?.status === 'inactive' ? 'Activate' : 'Deactivate'}
+                                                    </button>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
-                                )) : (
+                                            {expandedCohortMap[cohort.id] && (
+                                                <div className="animate-fade-in-up" style={{ padding: '2.5rem', background: '#fcfdfe', border: '1.5px solid #f1f5f9', borderTop: 'none', borderRadius: '0 0 20px 20px', boxShadow: 'inset 0 4px 6px -4px rgba(0,0,0,0.02)' }}>
+                                                    <h4 style={{ margin: '0 0 1.5rem 0', color: '#0f172a', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <CheckCircle2 size={18} color="#1a4d3e" /> Curriculum Override Access
+                                                    </h4>
+                                                    <p style={{ margin: '0 0 2rem 0', color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>Toggle the checkboxes below to manually apply or revoke completion status for a specific resource. This persists immediately to the backend and adjusts percentages automatically.</p>
+                                                    
+                                                    {cohort.course?.modules?.map((mod: any) => (
+                                                        <div key={mod.id} style={{ marginBottom: '1.5rem', background: 'white', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
+                                                            <div style={{ fontWeight: 800, color: '#1a4d3e', padding: '1rem 1.5rem', background: '#f8fafc', fontSize: '0.95rem', borderBottom: '1px solid #e2e8f0' }}>{mod.title}</div>
+                                                            <div style={{ display: 'grid', padding: '1rem' }}>
+                                                                {mod.lessons?.map((lesson: any) => {
+                                                                    const isCompleted = student?.completed_lessons?.some((cl: any) => cl.id === lesson.id);
+                                                                    return (
+                                                                        <div key={lesson.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f1f5f9' }}>
+                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                                                                <button 
+                                                                                    onClick={() => toggleLessonCompletion(lesson.id, !!isCompleted)}
+                                                                                    style={{ width: '26px', height: '26px', borderRadius: '8px', border: `2px solid ${isCompleted ? '#10b981' : '#cbd5e1'}`, background: isCompleted ? '#10b981' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, transition: 'all 0.2s' }}
+                                                                                >
+                                                                                    {isCompleted && <CheckCircle2 size={16} color="white" />}
+                                                                                </button>
+                                                                                <span style={{ fontWeight: 700, color: isCompleted ? '#94a3b8' : '#334155', fontSize: '0.9rem', textDecoration: isCompleted ? 'line-through' : 'none', transition: 'all 0.2s' }}>{lesson.title}</span>
+                                                                            </div>
+                                                                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px' }}>{lesson.type}</span>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                                {(!mod.lessons || mod.lessons.length === 0) && (
+                                                                    <p style={{ margin: '0.5rem 1rem', color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic', fontWeight: 600 }}>No lessons active in module...</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {(!cohort.course?.modules || cohort.course.modules.length === 0) && (
+                                                        <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>No curriculum data bound to this record.</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }) : (
                                     <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>
                                         <BookOpen size={32} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
                                         <p style={{ color: '#64748b', fontWeight: 600 }}>No course enrollments found for this student.</p>
@@ -1510,6 +1641,154 @@ export default function StudentDetails() {
                                 </div>
                             </>
                         )}
+                    </div>
+                </div>
+            )}
+            {showIssueCertModal && selectedCohortForCert && (
+                <div className="modal-overlay">
+                    <div className="modal-box animate-scale-up" style={{ maxWidth: '550px', borderRadius: '24px', padding: '2.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 950, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Award size={22} color="#1a4d3e" />
+                                Issue Verified Certificate
+                            </h3>
+                            <button
+                                onClick={() => setShowIssueCertModal(false)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', padding: '4px' }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <p style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, marginBottom: '2rem' }}>
+                            Generate a manually verified course certificate for <strong>{student.name}</strong>.
+                            This will render a verified certificate background, assign a short verification code, and make it available for the student.
+                        </p>
+
+                        <div style={{ display: 'grid', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                    Recipient Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={certForm.fullName}
+                                    onChange={(e) => setCertForm({ ...certForm, fullName: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        height: '46px',
+                                        background: '#f8fafc',
+                                        border: '1.5px solid #e2e8f0',
+                                        borderRadius: '12px',
+                                        padding: '0 1rem',
+                                        fontSize: '0.95rem',
+                                        fontWeight: 600,
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                    Course Title
+                                </label>
+                                <input
+                                    type="text"
+                                    value={certForm.courseTitle}
+                                    onChange={(e) => setCertForm({ ...certForm, courseTitle: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        height: '46px',
+                                        background: '#f8fafc',
+                                        border: '1.5px solid #e2e8f0',
+                                        borderRadius: '12px',
+                                        padding: '0 1rem',
+                                        fontSize: '0.95rem',
+                                        fontWeight: 600,
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                        Issue Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={certForm.issuedAt}
+                                        onChange={(e) => setCertForm({ ...certForm, issuedAt: e.target.value })}
+                                        style={{
+                                            width: '100%',
+                                            height: '46px',
+                                            background: '#f8fafc',
+                                            border: '1.5px solid #e2e8f0',
+                                            borderRadius: '12px',
+                                            padding: '0 1rem',
+                                            fontSize: '0.95rem',
+                                            fontWeight: 600,
+                                            boxSizing: 'border-box'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                        Issued By
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={certForm.issuedBy}
+                                        onChange={(e) => setCertForm({ ...certForm, issuedBy: e.target.value })}
+                                        style={{
+                                            width: '100%',
+                                            height: '46px',
+                                            background: '#f8fafc',
+                                            border: '1.5px solid #e2e8f0',
+                                            borderRadius: '12px',
+                                            padding: '0 1rem',
+                                            fontSize: '0.95rem',
+                                            fontWeight: 600,
+                                            boxSizing: 'border-box'
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="modal-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <button
+                                className="btn-cancel"
+                                onClick={() => setShowIssueCertModal(false)}
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '44px', margin: 0 }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn-confirm"
+                                disabled={issuingCert || !certForm.fullName.trim() || !certForm.courseTitle.trim()}
+                                onClick={handleIssueCertificate}
+                                style={{
+                                    background: '#1a4d3e',
+                                    color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    height: '44px',
+                                    margin: 0,
+                                    boxShadow: '0 4px 12px rgba(26, 77, 62, 0.2)'
+                                }}
+                            >
+                                {issuingCert ? (
+                                    <>
+                                        <Loader2 className="animate-spin" size={16} style={{ marginRight: '6px' }} />
+                                        <span>Generating...</span>
+                                    </>
+                                ) : (
+                                    <span>Issue Certificate</span>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import {
     Shield,
     ChevronRight,
@@ -92,10 +93,25 @@ export default function EditCohort() {
                 throw new Error(data.message || 'Failed to update cohort.');
             }
 
-            navigate(`/instructor/cohorts/${id}`);
+            Swal.fire({
+                icon: 'success',
+                title: 'Cohort Updated!',
+                text: 'Cohort settings have been updated successfully.',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                navigate(`/instructor/cohorts/${id}`);
+            });
         } catch (err: any) {
             console.error('Cohort Update Error:', err);
-            setError(err.message || 'A network error occurred.');
+            const errorMsg = err.message || 'A network error occurred.';
+            setError(errorMsg);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: errorMsg,
+                confirmButtonColor: '#1a4d3e'
+            });
         } finally {
             setUpdating(false);
         }
@@ -248,24 +264,29 @@ export default function EditCohort() {
 
             {error && (
                 <div className="animate-slide-in" style={{
+                    position: 'fixed',
+                    top: '2rem',
+                    right: '2rem',
+                    maxWidth: '420px',
+                    width: 'calc(100% - 4rem)',
+                    zIndex: 9999,
                     padding: '1rem 1.25rem',
                     background: '#fff1f2',
                     border: '1px solid #ffe4e6',
                     color: '#e11d48',
                     borderRadius: '16px',
-                    marginBottom: '2rem',
                     fontSize: '0.95rem',
                     fontWeight: 500,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.75rem',
-                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
+                    boxShadow: '0 10px 25px rgba(225, 29, 72, 0.15)'
                 }}>
-                    <AlertCircle size={20} strokeWidth={2.5} />
+                    <AlertCircle size={20} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                     <span style={{ flex: 1 }}>{error}</span>
                     <button
                         onClick={() => setError(null)}
-                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px' }}
+                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px', flexShrink: 0 }}
                     >
                         <X size={16} />
                     </button>

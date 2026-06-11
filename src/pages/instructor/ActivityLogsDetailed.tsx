@@ -5,6 +5,8 @@ export default function ActivityLogsDetailed() {
     const [activities, setActivities] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -35,6 +37,14 @@ export default function ActivityLogsDetailed() {
         (activity.user?.name && activity.user.name.toLowerCase().includes(search.toLowerCase())) ||
         activity.action.toLowerCase().includes(search.toLowerCase())
     );
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filteredActivities.length]);
+
+    const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedActivities = filteredActivities.slice(startIndex, startIndex + itemsPerPage);
 
     if (loading) {
         return (
@@ -88,7 +98,7 @@ export default function ActivityLogsDetailed() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredActivities.length > 0 ? filteredActivities.map((activity, idx) => (
+                            {paginatedActivities.length > 0 ? paginatedActivities.map((activity, idx) => (
                                 <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s', background: idx % 2 === 0 ? 'white' : '#fcfdfe' }} onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'} onMouseOut={(e) => e.currentTarget.style.background = idx % 2 === 0 ? 'white' : '#fcfdfe'}>
                                     <td style={{ padding: '1.25rem 2rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -146,6 +156,90 @@ export default function ActivityLogsDetailed() {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '1.5rem 2rem',
+                    borderTop: '1px solid #f1f5f9',
+                    flexWrap: 'wrap',
+                    gap: '1rem',
+                    background: '#f8fafc'
+                }}>
+                    <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>
+                        Showing <span style={{ fontWeight: 800, color: '#0f172a' }}>{filteredActivities.length > 0 ? startIndex + 1 : 0}</span> to <span style={{ fontWeight: 800, color: '#0f172a' }}>{Math.min(startIndex + itemsPerPage, filteredActivities.length)}</span> of <span style={{ fontWeight: 800, color: '#0f172a' }}>{filteredActivities.length}</span> records
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            style={{
+                                padding: '0.5rem 0.85rem',
+                                borderRadius: '8px',
+                                border: '1.5px solid #e2e8f0',
+                                background: 'white',
+                                color: currentPage === 1 ? '#cbd5e1' : '#475569',
+                                fontWeight: 700,
+                                fontSize: '0.85rem',
+                                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            Previous
+                        </button>
+                        
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => {
+                            const isClose = Math.abs(pageNum - currentPage) <= 1;
+                            const isEnd = pageNum === 1 || pageNum === totalPages;
+                            if (!isClose && !isEnd) {
+                                if (pageNum === 2 || pageNum === totalPages - 1) {
+                                    return <span key={pageNum} style={{ padding: '0 0.5rem', color: '#94a3b8' }}>...</span>;
+                                }
+                                return null;
+                            }
+                            return (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => setCurrentPage(pageNum)}
+                                    style={{
+                                        padding: '0.5rem 0.85rem',
+                                        borderRadius: '8px',
+                                        border: '1.5px solid',
+                                        borderColor: currentPage === pageNum ? '#1a4d3e' : '#e2e8f0',
+                                        background: currentPage === pageNum ? '#1a4d3e' : 'white',
+                                        color: currentPage === pageNum ? 'white' : '#475569',
+                                        fontWeight: 800,
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {pageNum}
+                                </button>
+                            );
+                        })}
+
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                            style={{
+                                padding: '0.5rem 0.85rem',
+                                borderRadius: '8px',
+                                border: '1.5px solid #e2e8f0',
+                                background: 'white',
+                                color: (currentPage === totalPages || totalPages === 0) ? '#cbd5e1' : '#475569',
+                                fontWeight: 700,
+                                fontSize: '0.85rem',
+                                cursor: (currentPage === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

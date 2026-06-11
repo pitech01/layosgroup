@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useParams } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { useAuth } from '../../context/AuthContext';
 import {
     ChevronLeft,
@@ -220,12 +221,25 @@ export default function CreateCourse() {
             setLoadingText('Curriculum successfully deployed!');
             setShowSuccess(true);
 
-            // Wait for 3 seconds to show success before navigating
-            setTimeout(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Curriculum successfully saved and deployed!',
+                confirmButtonColor: '#1a4d3e',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
                 navigate('/instructor/courses');
-            }, 3000);
+            });
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'An error occurred while saving.');
+            const errorMsg = err instanceof Error ? err.message : 'An error occurred while saving.';
+            setError(errorMsg);
+            Swal.fire({
+                icon: 'error',
+                title: 'Save Failed',
+                text: errorMsg,
+                confirmButtonColor: '#1a4d3e'
+            });
         } finally {
             setLoading(false);
         }
@@ -1031,8 +1045,12 @@ export default function CreateCourse() {
 
             {error && (
                 <div className="animate-slide-in" style={{
-                    maxWidth: '1240px',
-                    margin: '-3rem auto 3rem auto',
+                    position: 'fixed',
+                    top: '2rem',
+                    right: '2rem',
+                    maxWidth: '420px',
+                    width: 'calc(100% - 4rem)',
+                    zIndex: 9999,
                     padding: '1rem 1.25rem',
                     background: '#fff1f2',
                     border: '1px solid #ffe4e6',
@@ -1043,13 +1061,13 @@ export default function CreateCourse() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.75rem',
-                    boxShadow: '0 4px 12px rgba(225, 29, 72, 0.08)'
+                    boxShadow: '0 10px 25px rgba(225, 29, 72, 0.15)'
                 }}>
-                    <AlertCircle size={20} strokeWidth={2.5} />
+                    <AlertCircle size={20} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                     <span style={{ flex: 1 }}>{error}</span>
                     <button
                         onClick={() => setError(null)}
-                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px' }}
+                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px', flexShrink: 0 }}
                     >
                         <X size={16} />
                     </button>
@@ -1710,83 +1728,149 @@ export default function CreateCourse() {
                                                                         </div>
 
                                                                         {/* Document Questions Integration */}
-                                                                        <div style={{ marginTop: '2.5rem', padding: '2rem', background: '#f8fafc', borderRadius: '24px', border: '1.5px solid #e2e8f0' }}>
-                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.25rem' }}>
-                                                                                <HelpCircle size={20} color="#1a4d3e" />
-                                                                                <h5 style={{ margin: 0, fontWeight: 850, color: '#0f172a' }}>Material-Linked Questions</h5>
+                                                                        <div style={{ marginTop: '2.5rem', padding: '2.5rem', background: 'white', borderRadius: '28px', border: '1.5px solid rgba(26, 77, 62, 0.12)', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.02)' }}>
+                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
+                                                                                <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a4d3e' }}>
+                                                                                    <HelpCircle size={20} />
+                                                                                </div>
+                                                                                <h5 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem', color: '#0f172a' }}>Material-Linked Questions</h5>
                                                                             </div>
-                                                                            <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Enable this to require students to complete a validation quiz after studying this document.</p>
+                                                                            <p style={{ margin: '0 0 1.75rem 0', fontSize: '0.875rem', color: '#64748b', fontWeight: 600, lineHeight: '1.5' }}>
+                                                                                Require students to pass a validation quiz immediately after studying this document to confirm comprehension.
+                                                                            </p>
 
-                                                                            <div className="evaluation-grid-material" style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr 1fr', gap: '1.5rem', alignItems: 'flex-end' }}>
-                                                                                <style>{`
-                                                                                    .staff-scope .evaluation-grid-material { grid-template-columns: min-content 1fr 1fr !important; }
-                                                                                    @media (max-width: 640px) { .evaluation-grid-material { grid-template-columns: 1fr !important; } }
-                                                                                `}</style>
-                                                                                <div>
-                                                                                    <label className="input-label">Enabled</label>
-                                                                                    <div
-                                                                                        onClick={() => {
-                                                                                            const isEnabled = !!lesson.quizData;
-                                                                                            updateLesson(mod.id, lesson.id, {
-                                                                                                quizData: isEnabled ? undefined : { pass_mark: 80, questions: [] as any[] }
-                                                                                            });
-                                                                                        }}
-                                                                                        style={{
-                                                                                            width: '50px',
-                                                                                            height: '26px',
-                                                                                            background: lesson.quizData ? '#1a4d3e' : '#e2e8f0',
-                                                                                            borderRadius: '13px',
-                                                                                            position: 'relative',
-                                                                                            cursor: 'pointer',
-                                                                                            transition: 'all 0.3s'
-                                                                                        }}
-                                                                                    >
-                                                                                        <div style={{
-                                                                                            width: '20px',
-                                                                                            height: '20px',
-                                                                                            background: 'white',
-                                                                                            borderRadius: '50%',
-                                                                                            position: 'absolute',
-                                                                                            top: '3px',
-                                                                                            left: lesson.quizData ? '27px' : '3px',
-                                                                                            transition: 'left 0.3s'
-                                                                                        }}></div>
+                                                                            <div className="evaluation-grid-material" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+                                                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1.25rem', borderBottom: lesson.quizData ? '1px solid #f1f5f9' : 'none' }}>
+                                                                                    <div>
+                                                                                        <label className="input-label" style={{ marginBottom: '4px', fontSize: '0.85rem', fontWeight: 800, color: '#475569' }}>Validation Quiz</label>
+                                                                                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>Toggle assessment requirements</p>
+                                                                                    </div>
+                                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                                                        <div
+                                                                                            onClick={() => {
+                                                                                                const isEnabled = !!lesson.quizData;
+                                                                                                updateLesson(mod.id, lesson.id, {
+                                                                                                    quizData: isEnabled ? undefined : { pass_mark: 80, questions: [] as any[] }
+                                                                                                });
+                                                                                            }}
+                                                                                            style={{
+                                                                                                width: '56px',
+                                                                                                height: '30px',
+                                                                                                background: lesson.quizData ? '#1a4d3e' : '#e2e8f0',
+                                                                                                borderRadius: '99px',
+                                                                                                position: 'relative',
+                                                                                                cursor: 'pointer',
+                                                                                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                                                                boxShadow: lesson.quizData ? '0 4px 12px rgba(26, 77, 62, 0.2)' : 'none'
+                                                                                            }}
+                                                                                        >
+                                                                                            <div style={{
+                                                                                                width: '22px',
+                                                                                                height: '22px',
+                                                                                                background: 'white',
+                                                                                                borderRadius: '50%',
+                                                                                                position: 'absolute',
+                                                                                                top: '4px',
+                                                                                                left: lesson.quizData ? '30px' : '4px',
+                                                                                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                                                            }}></div>
+                                                                                        </div>
+                                                                                        <span style={{ fontSize: '0.9rem', fontWeight: 800, color: lesson.quizData ? '#1a4d3e' : '#64748b', minWidth: '70px' }}>
+                                                                                            {lesson.quizData ? 'Enabled' : 'Disabled'}
+                                                                                        </span>
                                                                                     </div>
                                                                                 </div>
+
                                                                                 {lesson.quizData && (
-                                                                                    <>
+                                                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem', alignItems: 'flex-end' }} className="evaluation-fields-container">
+                                                                                        <style>{`
+                                                                                            @media (max-width: 768px) {
+                                                                                                .evaluation-fields-container {
+                                                                                                    grid-template-columns: 1fr !important;
+                                                                                                    gap: 1.5rem !important;
+                                                                                                }
+                                                                                            }
+                                                                                        `}</style>
                                                                                         <div>
-                                                                                            <label className="input-label">Pass Mark (%)</label>
-                                                                                            <input
-                                                                                                type="number"
-                                                                                                className="custom-input"
-                                                                                                placeholder="80"
-                                                                                                value={lesson.quizData.pass_mark || 80}
-                                                                                                onChange={(e) => updateLesson(mod.id, lesson.id, {
-                                                                                                    quizData: {
-                                                                                                        pass_mark: parseInt(e.target.value) || 0,
-                                                                                                        questions: lesson.quizData?.questions || [] as any[]
-                                                                                                    }
-                                                                                                })}
-                                                                                            />
+                                                                                            <label className="input-label" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>Minimum Passing Score</label>
+                                                                                            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                                                                                <input
+                                                                                                    type="number"
+                                                                                                    min="1"
+                                                                                                    max="100"
+                                                                                                    className="custom-input"
+                                                                                                    placeholder="80"
+                                                                                                    style={{ paddingRight: '2.5rem', fontWeight: 700 }}
+                                                                                                    value={lesson.quizData.pass_mark || 80}
+                                                                                                    onChange={(e) => {
+                                                                                                        let val = parseInt(e.target.value) || 0;
+                                                                                                        if (val > 100) val = 100;
+                                                                                                        updateLesson(mod.id, lesson.id, {
+                                                                                                            quizData: {
+                                                                                                                pass_mark: val,
+                                                                                                                questions: lesson.quizData?.questions || [] as any[]
+                                                                                                            }
+                                                                                                        });
+                                                                                                    }}
+                                                                                                />
+                                                                                                <span style={{ position: 'absolute', right: '1.25rem', fontWeight: 800, color: '#94a3b8', fontSize: '0.95rem' }}>%</span>
+                                                                                            </div>
                                                                                         </div>
-                                                                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                                                                        <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
                                                                                             <button
+                                                                                                type="button"
                                                                                                 className="btn-standard"
-                                                                                                style={{ background: '#020617', whiteSpace: 'nowrap' }}
+                                                                                                style={{
+                                                                                                    background: lesson.quizData.questions?.length > 0 ? '#1a4d3e' : '#e28743',
+                                                                                                    color: 'white',
+                                                                                                    fontWeight: 900,
+                                                                                                    border: 'none',
+                                                                                                    borderRadius: '16px',
+                                                                                                    padding: '1rem 1.75rem',
+                                                                                                    cursor: 'pointer',
+                                                                                                    display: 'flex',
+                                                                                                    alignItems: 'center',
+                                                                                                    justifyContent: 'center',
+                                                                                                    gap: '8px',
+                                                                                                    flex: 1,
+                                                                                                    transition: 'all 0.2s',
+                                                                                                    boxShadow: lesson.quizData.questions?.length > 0 ? '0 4px 12px rgba(26, 77, 62, 0.15)' : '0 4px 12px rgba(226, 135, 67, 0.15)',
+                                                                                                    whiteSpace: 'nowrap'
+                                                                                                }}
                                                                                                 onClick={() => setDesigningQuiz({ moduleId: mod.id, lessonId: lesson.id })}
                                                                                             >
-                                                                                                Design ({lesson.quizData.questions?.length || 0}) Questions
+                                                                                                <HelpCircle size={18} />
+                                                                                                <span>Configure Questions ({lesson.quizData.questions?.length || 0})</span>
+                                                                                                {lesson.quizData.questions?.length === 0 && (
+                                                                                                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white', display: 'inline-block', marginLeft: '4px', animation: 'pulse 1.5s infinite' }}></span>
+                                                                                                )}
                                                                                             </button>
                                                                                             <button
+                                                                                                type="button"
                                                                                                 className="btn-standard"
-                                                                                                style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#0f172a', whiteSpace: 'nowrap' }}
+                                                                                                style={{
+                                                                                                    background: 'white',
+                                                                                                    border: '2px solid #e2e8f0',
+                                                                                                    color: '#475569',
+                                                                                                    fontWeight: 800,
+                                                                                                    borderRadius: '16px',
+                                                                                                    padding: '1rem 1.5rem',
+                                                                                                    cursor: 'pointer',
+                                                                                                    display: 'flex',
+                                                                                                    alignItems: 'center',
+                                                                                                    justifyContent: 'center',
+                                                                                                    gap: '8px',
+                                                                                                    transition: 'all 0.2s',
+                                                                                                    whiteSpace: 'nowrap'
+                                                                                                }}
                                                                                                 onClick={() => setViewingQuizKey({ moduleId: mod.id, lessonId: lesson.id })}
                                                                                             >
-                                                                                                Preview Key
+                                                                                                <Eye size={18} />
+                                                                                                <span>Preview Key</span>
                                                                                             </button>
                                                                                         </div>
-                                                                                    </>
+                                                                                    </div>
                                                                                 )}
                                                                             </div>
                                                                         </div>
@@ -1794,46 +1878,92 @@ export default function CreateCourse() {
                                                                 )}
 
                                                                 {lesson.type === 'quiz' && (
-                                                                    <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+                                                                    <div style={{ marginTop: '2.5rem', padding: '2.5rem', background: 'white', borderRadius: '28px', border: '1.5px solid rgba(217, 119, 6, 0.12)', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.02)' }}>
                                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-                                                                            <HelpCircle size={20} color="#020617" />
-                                                                            <h5 style={{ margin: 0, fontWeight: 800 }}>Evaluation Logic Configuration</h5>
-                                                                        </div>
-                                                                        <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#64748b' }}>Configure passing thresholds and deployment rules for this validation unit.</p>
-                                                                        <div className="evaluation-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
-                                                                            <style>{`
-                                                                                .staff-scope .evaluation-grid { grid-template-columns: 1.2fr 1fr !important; }
-                                                                                @media (max-width: 640px) { .evaluation-grid { grid-template-columns: 1fr !important; } }
-                                                                            `}</style>
-                                                                            <div>
-                                                                                <label className="input-label">Pass Mark (%)</label>
-                                                                                <input
-                                                                                    type="number"
-                                                                                    className="custom-input"
-                                                                                    placeholder="80"
-                                                                                    value={lesson.quizData?.pass_mark || 80}
-                                                                                    onChange={(e) => updateLesson(mod.id, lesson.id, {
-                                                                                        quizData: {
-                                                                                            pass_mark: parseInt(e.target.value) || 80,
-                                                                                            questions: lesson.quizData?.questions || [] as any[]
-                                                                                        }
-                                                                                    })}
-                                                                                />
+                                                                            <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d97706' }}>
+                                                                                <HelpCircle size={20} />
                                                                             </div>
-                                                                            <div style={{ display: 'flex', gap: '1rem', alignSelf: 'flex-end' }}>
+                                                                            <h5 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem', color: '#0f172a' }}>Evaluation Settings</h5>
+                                                                        </div>
+                                                                        <p style={{ margin: '0 0 1.75rem 0', fontSize: '0.875rem', color: '#64748b', fontWeight: 600, lineHeight: '1.5' }}>Configure passing criteria and question items for this standalone assessment lesson.</p>
+                                                                        
+                                                                        <div className="evaluation-fields-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem', alignItems: 'flex-end' }}>
+                                                                            <div>
+                                                                                <label className="input-label" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>Minimum Passing Score</label>
+                                                                                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        min="1"
+                                                                                        max="100"
+                                                                                        className="custom-input"
+                                                                                        placeholder="80"
+                                                                                        style={{ paddingRight: '2.5rem', fontWeight: 700 }}
+                                                                                        value={lesson.quizData?.pass_mark || 80}
+                                                                                        onChange={(e) => {
+                                                                                            let val = parseInt(e.target.value) || 0;
+                                                                                            if (val > 100) val = 100;
+                                                                                            updateLesson(mod.id, lesson.id, {
+                                                                                                quizData: {
+                                                                                                    pass_mark: val,
+                                                                                                    questions: lesson.quizData?.questions || [] as any[]
+                                                                                                }
+                                                                                            });
+                                                                                        }}
+                                                                                    />
+                                                                                    <span style={{ position: 'absolute', right: '1.25rem', fontWeight: 800, color: '#94a3b8', fontSize: '0.95rem' }}>%</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
                                                                                 <button
+                                                                                    type="button"
                                                                                     className="btn-standard"
-                                                                                    style={{ background: '#020617', whiteSpace: 'nowrap' }}
+                                                                                    style={{
+                                                                                        background: '#d97706',
+                                                                                        color: 'white',
+                                                                                        fontWeight: 900,
+                                                                                        border: 'none',
+                                                                                        borderRadius: '16px',
+                                                                                        padding: '1rem 1.75rem',
+                                                                                        cursor: 'pointer',
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'center',
+                                                                                        justifyContent: 'center',
+                                                                                        gap: '8px',
+                                                                                        flex: 1,
+                                                                                        transition: 'all 0.2s',
+                                                                                        boxShadow: '0 4px 12px rgba(217, 119, 6, 0.15)',
+                                                                                        whiteSpace: 'nowrap'
+                                                                                    }}
                                                                                     onClick={() => setDesigningQuiz({ moduleId: mod.id, lessonId: lesson.id })}
                                                                                 >
-                                                                                    Design Quiz Questions ({lesson.quizData?.questions?.length || 0})
+                                                                                    <HelpCircle size={18} />
+                                                                                    <span>Configure Questions ({lesson.quizData?.questions?.length || 0})</span>
+                                                                                    {lesson.quizData?.questions?.length === 0 && (
+                                                                                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white', display: 'inline-block', marginLeft: '4px', animation: 'pulse 1.5s infinite' }}></span>
+                                                                                    )}
                                                                                 </button>
                                                                                 <button
+                                                                                    type="button"
                                                                                     className="btn-standard"
-                                                                                    style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#0f172a', whiteSpace: 'nowrap' }}
+                                                                                    style={{
+                                                                                        background: 'white',
+                                                                                        border: '2px solid #e2e8f0',
+                                                                                        color: '#475569',
+                                                                                        fontWeight: 800,
+                                                                                        borderRadius: '16px',
+                                                                                        padding: '1rem 1.5rem',
+                                                                                        cursor: 'pointer',
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'center',
+                                                                                        justifyContent: 'center',
+                                                                                        gap: '8px',
+                                                                                        transition: 'all 0.2s',
+                                                                                        whiteSpace: 'nowrap'
+                                                                                    }}
                                                                                     onClick={() => setViewingQuizKey({ moduleId: mod.id, lessonId: lesson.id })}
                                                                                 >
-                                                                                    Preview Key
+                                                                                    <Eye size={18} />
+                                                                                    <span>Preview Key</span>
                                                                                 </button>
                                                                             </div>
                                                                         </div>
@@ -1987,7 +2117,12 @@ export default function CreateCourse() {
                             const errorMsg = validateStep(step);
                             if (errorMsg) {
                                 setError(errorMsg);
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Required Information',
+                                    text: errorMsg,
+                                    confirmButtonColor: '#1a4d3e'
+                                });
                                 return;
                             }
                             setError(null);
@@ -2365,80 +2500,60 @@ export default function CreateCourse() {
                 return (
                     <div
                         className="modal-overlay animate-fade-in"
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
                     >
                         <div
                             className="quiz-modal animate-scale-up"
-                            style={{ background: 'white', width: '100%', maxWidth: '900px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
+                            style={{ background: 'white', width: '100%', maxWidth: '950px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 30px 60px -15px rgba(15, 23, 42, 0.3)', borderRadius: '32px' }}
                         >
-                            <style>{`
-                                @media (max-width: 640px) {
-                                    .staff-scope .quiz-modal {
-                                        border-radius: 24px !important;
-                                    }
-                                    .staff-scope .quiz-header {
-                                        padding: 1.5rem !important;
-                                    }
-                                    .staff-scope .quiz-body {
-                                        padding: 1.5rem !important;
-                                    }
-                                    .staff-scope .question-card {
-                                        padding: 1.5rem !important;
-                                    }
-                                    .staff-scope .cohort-selection-card {
-                                        flex-direction: column !important;
-                                        gap: 1.5rem !important;
-                                        align-items: flex-start !important;
-                                        padding: 1.5rem !important;
-                                    }
-                                }
-                                @media (min-width: 641px) {
-                                    .staff-scope .quiz-modal {
-                                        border-radius: 40px !important;
-                                    }
-                                    .staff-scope .quiz-header {
-                                        padding: 2.5rem 3rem !important;
-                                    }
-                                    .staff-scope .quiz-body {
-                                        padding: 3rem !important;
-                                    }
-                                    .staff-scope .question-card {
-                                        padding: 2.5rem !important;
-                                    }
-                                }
-                            `}</style>
-                            <div className="quiz-header" style={{ borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                            <div className="quiz-header" style={{ borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcfdfe', padding: '2rem 2.5rem' }}>
                                 <div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-                                        <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#1a4d3e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                                            <HelpCircle size={18} />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+                                        <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: '#1a4d3e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                                            <HelpCircle size={20} />
                                         </div>
-                                        <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem', color: '#0f172a' }}>Evaluation Intelligence Designer</h3>
+                                        <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.35rem', color: '#0f172a', letterSpacing: '-0.02em' }}>Evaluation Intelligence Designer</h3>
                                     </div>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Crafting validation units for: <span style={{ color: '#1a4d3e' }}>{lesson?.title}</span></p>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Crafting validation units for: <span style={{ color: '#1a4d3e', fontWeight: 800 }}>{lesson?.title}</span></p>
                                 </div>
                                 <button
                                     onClick={() => setDesigningQuiz(null)}
-                                    style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                    style={{ background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                    onMouseOver={(e) => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
+                                    onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
                                 >
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="quiz-body" style={{ flex: 1, overflowY: 'auto' }}>
+                            <div className="quiz-body" style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', background: '#f8fafc' }}>
                                 {quizData.questions.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '5rem 0' }}>
-                                        <div style={{ width: '80px', height: '80px', borderRadius: '30px', background: '#f8fafc', border: '2px dashed #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: '#94a3b8' }}>
-                                            <Plus size={32} />
+                                    <div style={{ textAlign: 'center', padding: '5rem 2rem', background: 'white', borderRadius: '24px', border: '2px dashed #cbd5e1' }}>
+                                        <div style={{ width: '80px', height: '80px', borderRadius: '28px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: '#1a4d3e' }}>
+                                            <Plus size={36} />
                                         </div>
-                                        <h4 style={{ fontWeight: 900, color: '#0f172a', marginBottom: '8px' }}>Empty Evaluation Pipeline</h4>
-                                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2.5rem' }}>Start building your validation unit by adding the first question.</p>
+                                        <h4 style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.2rem', marginBottom: '8px' }}>Empty Evaluation Pipeline</h4>
+                                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2rem', maxWidth: '380px', margin: '0 auto 2rem auto', lineHeight: '1.6' }}>Initialize assessment items for this lesson. Define multi-choice validation keys.</p>
+                                        <button
+                                            onClick={() => {
+                                                updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                    quizData: {
+                                                        ...quizData,
+                                                        questions: [{ id: 'q' + Date.now(), question: '', options: ['', ''], correct_answer: 0 }]
+                                                    }
+                                                });
+                                            }}
+                                            className="btn-primary-forest"
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.85rem 2rem', borderRadius: '14px', border: 'none', background: '#1a4d3e', color: 'white', fontWeight: 900, cursor: 'pointer' }}
+                                        >
+                                            <Plus size={18} /> Initialize First Question
+                                        </button>
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'grid', gap: '2.5rem' }}>
+                                    <div style={{ display: 'grid', gap: '3rem' }}>
                                         {quizData.questions.map((q, qIdx) => (
-                                            <div key={q.id} className="question-card" style={{ background: '#f8fafc', borderRadius: '24px', border: '1.5px solid #f1f5f9', position: 'relative' }}>
-                                                <div style={{ position: 'absolute', top: '-15px', left: '2rem', background: '#1a4d3e', color: 'white', padding: '4px 16px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.05em' }}>
+                                            <div key={q.id} className="question-card" style={{ background: 'white', borderRadius: '28px', border: '1.5px solid #e2e8f0', padding: '2.5rem', position: 'relative', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.02)' }}>
+                                                <div style={{ position: 'absolute', top: '-14px', left: '2rem', background: '#1a4d3e', color: 'white', padding: '5px 16px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.05em', boxShadow: '0 4px 10px rgba(26, 77, 62, 0.2)' }}>
                                                     QUESTION {qIdx + 1}
                                                 </div>
                                                 <button
@@ -2449,13 +2564,16 @@ export default function CreateCourse() {
                                                             quizData: { ...quizData, questions: newQuestions }
                                                         });
                                                     }}
-                                                    style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: '#fff1f2', border: 'none', color: '#e11d48', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                    style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: '#fff1f2', border: 'none', color: '#e11d48', width: '38px', height: '38px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                                    onMouseOver={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = 'white'; }}
+                                                    onMouseOut={(e) => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
+                                                    title="Delete Question"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
 
-                                                <div style={{ marginBottom: '2rem' }}>
-                                                    <label className="input-label">Question Text</label>
+                                                <div style={{ marginBottom: '2rem', marginTop: '0.5rem' }}>
+                                                    <label className="input-label" style={{ fontWeight: 800, color: '#475569', fontSize: '0.85rem' }}>Question Statement</label>
                                                     <textarea
                                                         className="custom-input"
                                                         rows={2}
@@ -2467,72 +2585,93 @@ export default function CreateCourse() {
                                                                 quizData: { ...quizData, questions: newQuestions }
                                                             });
                                                         }}
-                                                        placeholder="e.g. What is the primary objective of this module?"
-                                                        style={{ resize: 'none' }}
+                                                        placeholder="e.g. Which of the following best defines brand hierarchy rules?"
+                                                        style={{ resize: 'none', marginTop: '8px', fontSize: '1rem', fontWeight: 600, padding: '1rem 1.25rem' }}
                                                     />
                                                 </div>
 
                                                 <div style={{ display: 'grid', gap: '1rem' }}>
-                                                    <label className="input-label">Options & Correct Answer</label>
-                                                    {q.options.map((opt: string, oIdx: number) => (
-                                                        <div key={oIdx} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                                            <div
-                                                                onClick={() => {
-                                                                    const newQuestions = [...quizData.questions];
-                                                                    newQuestions[qIdx].correct_answer = oIdx;
-                                                                    updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
-                                                                        quizData: { ...quizData, questions: newQuestions }
-                                                                    });
-                                                                }}
-                                                                style={{
-                                                                    width: '32px',
-                                                                    height: '32px',
-                                                                    borderRadius: '50%',
-                                                                    border: '2px solid',
-                                                                    borderColor: q.correct_answer === oIdx ? '#1a4d3e' : '#e2e8f0',
-                                                                    background: q.correct_answer === oIdx ? '#1a4d3e' : 'white',
-                                                                    cursor: 'pointer',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center',
-                                                                    transition: 'all 0.2s'
-                                                                }}
-                                                            >
-                                                                {q.correct_answer === oIdx && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white' }} />}
-                                                            </div>
-                                                            <input
-                                                                type="text"
-                                                                className="custom-input"
-                                                                style={{ flex: 1, padding: '0.75rem 1.25rem' }}
-                                                                value={opt}
-                                                                onChange={(e) => {
-                                                                    const newQuestions = [...quizData.questions];
-                                                                    newQuestions[qIdx].options[oIdx] = e.target.value;
-                                                                    updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
-                                                                        quizData: { ...quizData, questions: newQuestions }
-                                                                    });
-                                                                }}
-                                                                placeholder={`Option ${oIdx + 1}`}
-                                                            />
-                                                            {q.options.length > 2 && (
-                                                                <button
+                                                    <label className="input-label" style={{ fontWeight: 800, color: '#475569', fontSize: '0.85rem', marginBottom: '4px' }}>Answers and Options (Select correct option)</label>
+                                                    {q.options.map((opt: string, oIdx: number) => {
+                                                        const isCorrect = q.correct_answer === oIdx;
+                                                        return (
+                                                            <div key={oIdx} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                                                <div
                                                                     onClick={() => {
                                                                         const newQuestions = [...quizData.questions];
-                                                                        newQuestions[qIdx].options.splice(oIdx, 1);
-                                                                        if (newQuestions[qIdx].correct_answer >= newQuestions[qIdx].options.length) {
-                                                                            newQuestions[qIdx].correct_answer = 0;
-                                                                        }
+                                                                        newQuestions[qIdx].correct_answer = oIdx;
                                                                         updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
                                                                             quizData: { ...quizData, questions: newQuestions }
                                                                         });
                                                                     }}
-                                                                    style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                                                                    style={{
+                                                                        width: '36px',
+                                                                        height: '36px',
+                                                                        borderRadius: '50%',
+                                                                        border: '2px solid',
+                                                                        borderColor: isCorrect ? '#1a4d3e' : '#cbd5e1',
+                                                                        background: isCorrect ? '#f0fdf4' : 'white',
+                                                                        cursor: 'pointer',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                                        flexShrink: 0
+                                                                    }}
                                                                 >
-                                                                    <X size={16} />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                                    <div style={{
+                                                                        width: '14px',
+                                                                        height: '14px',
+                                                                        borderRadius: '50%',
+                                                                        background: '#1a4d3e',
+                                                                        transform: isCorrect ? 'scale(1)' : 'scale(0)',
+                                                                        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+                                                                    }} />
+                                                                </div>
+                                                                <input
+                                                                    type="text"
+                                                                    className="custom-input"
+                                                                    style={{
+                                                                        flex: 1,
+                                                                        padding: '0.85rem 1.25rem',
+                                                                        background: isCorrect ? '#fcfdfd' : '#f8fafc',
+                                                                        borderWidth: '1.5px',
+                                                                        borderColor: isCorrect ? '#1a4d3e60' : '#e2e8f0',
+                                                                        fontWeight: isCorrect ? 700 : 600
+                                                                    }}
+                                                                    value={opt}
+                                                                    onChange={(e) => {
+                                                                        const newQuestions = [...quizData.questions];
+                                                                        newQuestions[qIdx].options[oIdx] = e.target.value;
+                                                                        updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                                            quizData: { ...quizData, questions: newQuestions }
+                                                                        });
+                                                                    }}
+                                                                    placeholder={`Option ${oIdx + 1}`}
+                                                                />
+                                                                {q.options.length > 2 && (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const newQuestions = [...quizData.questions];
+                                                                            newQuestions[qIdx].options.splice(oIdx, 1);
+                                                                            if (newQuestions[qIdx].correct_answer >= newQuestions[qIdx].options.length) {
+                                                                                newQuestions[qIdx].correct_answer = 0;
+                                                                            }
+                                                                            updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                                                quizData: { ...quizData, questions: newQuestions }
+                                                                            });
+                                                                        }}
+                                                                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '6px', transition: 'color 0.2s' }}
+                                                                        onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                                                                        onMouseOut={(e) => e.currentTarget.style.color = '#94a3b8'}
+                                                                        title="Remove Option"
+                                                                    >
+                                                                        <X size={18} />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
                                                     {q.options.length < 5 && (
                                                         <button
                                                             onClick={() => {
@@ -2543,22 +2682,25 @@ export default function CreateCourse() {
                                                                 });
                                                             }}
                                                             style={{
-                                                                background: 'none',
-                                                                border: '1.5px dashed #e2e8f0',
-                                                                padding: '0.75rem',
-                                                                borderRadius: '12px',
+                                                                background: 'white',
+                                                                border: '1.5px dashed #cbd5e1',
+                                                                padding: '0.85rem',
+                                                                borderRadius: '14px',
                                                                 color: '#64748b',
-                                                                fontSize: '0.8rem',
-                                                                fontWeight: 700,
+                                                                fontSize: '0.85rem',
+                                                                fontWeight: 800,
                                                                 cursor: 'pointer',
                                                                 marginTop: '0.5rem',
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 justifyContent: 'center',
-                                                                gap: '8px'
+                                                                gap: '8px',
+                                                                transition: 'all 0.2s'
                                                             }}
+                                                            onMouseOver={(e) => { e.currentTarget.style.borderColor = '#1a4d3e'; e.currentTarget.style.color = '#1a4d3e'; }}
+                                                            onMouseOut={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#64748b'; }}
                                                         >
-                                                            <Plus size={14} /> Add Option
+                                                            <Plus size={14} /> Add Option Choice
                                                         </button>
                                                     )}
                                                 </div>
@@ -2567,51 +2709,85 @@ export default function CreateCourse() {
                                     </div>
                                 )}
 
-                                <button
-                                    onClick={() => {
-                                        updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
-                                            quizData: {
-                                                ...quizData,
-                                                questions: [
-                                                    ...quizData.questions,
-                                                    {
-                                                        id: 'q' + Date.now(),
-                                                        question: '',
-                                                        options: ['', ''],
-                                                        correct_answer: 0
-                                                    }
-                                                ]
-                                            }
-                                        });
-                                    }}
-                                    className="btn-standard"
-                                    style={{
-                                        width: '100%',
-                                        marginTop: '2rem',
-                                        background: '#f8fafc',
-                                        border: '2px dashed #e2e8f0',
-                                        color: '#0f172a',
-                                        height: '64px',
-                                        fontWeight: 900,
-                                        fontSize: '1rem',
-                                        borderRadius: '20px',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '12px',
-                                        transition: 'all 0.2s ease'
-                                    }}
-                                >
-                                    <Plus size={20} /> Deploy New Validation Question
-                                </button>
+                                {quizData.questions.length > 0 && (
+                                    <button
+                                        onClick={() => {
+                                            updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
+                                                quizData: {
+                                                    ...quizData,
+                                                    questions: [
+                                                        ...quizData.questions,
+                                                        {
+                                                            id: 'q' + Date.now(),
+                                                            question: '',
+                                                            options: ['', ''],
+                                                            correct_answer: 0
+                                                        }
+                                                    ]
+                                                }
+                                            });
+                                        }}
+                                        className="btn-standard shadow-sm"
+                                        style={{
+                                            width: '100%',
+                                            marginTop: '2.5rem',
+                                            background: 'white',
+                                            border: '2px dashed #1a4d3e50',
+                                            color: '#1a4d3e',
+                                            height: '64px',
+                                            fontWeight: 900,
+                                            fontSize: '1rem',
+                                            borderRadius: '20px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '12px',
+                                            transition: 'all 0.3s'
+                                        }}
+                                        onMouseOver={(e) => { e.currentTarget.style.background = '#f0fdf4'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                                        onMouseOut={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                    >
+                                        <Plus size={20} /> Deploy New Validation Question
+                                    </button>
+                                )}
                             </div>
 
-                            <div style={{ padding: '2.5rem 3rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                            <div style={{ padding: '2rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#fcfdfe', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                                {quizData.questions.length > 0 && (
+                                    <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }} className="answer-key-tracker">
+                                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#64748b' }}>Key Check:</span>
+                                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                            {quizData.questions.map((q, idx) => (
+                                                <span key={q.id} style={{ fontSize: '0.75rem', fontWeight: 900, background: '#f0fdf4', color: '#1a4d3e', padding: '4px 8px', borderRadius: '8px', border: '1px solid rgba(26,77,62,0.1)' }}>
+                                                    Q{idx + 1}: {String.fromCharCode(65 + q.correct_answer)}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                                 <button
                                     onClick={() => setDesigningQuiz(null)}
                                     className="btn-standard"
-                                    style={{ background: '#0f172a', color: 'white', padding: '1rem 2.5rem', borderRadius: '16px', fontWeight: 900 }}
+                                    style={{
+                                        background: 'white',
+                                        border: '1.5px solid #cbd5e1',
+                                        color: '#64748b',
+                                        padding: '1rem 3rem',
+                                        borderRadius: '18px',
+                                        fontWeight: 900,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseOver={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#475569'; }}
+                                    onMouseOut={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748b'; }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => setDesigningQuiz(null)}
+                                    className="btn-standard"
+                                    style={{ background: '#1a4d3e', color: 'white', padding: '1rem 3rem', borderRadius: '18px', fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 10px 15px -3px rgba(26, 77, 62, 0.2)' }}
                                 >
                                     Finalize Validation Design
                                 </button>
@@ -2628,64 +2804,69 @@ export default function CreateCourse() {
                 const questions = lesson?.quizData?.questions || [];
 
                 return (
-                    <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-                        <div style={{ background: 'white', width: '100%', maxWidth: '800px', maxHeight: '90vh', borderRadius: '32px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-                            <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                    <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+                        <div style={{ background: 'white', width: '100%', maxWidth: '850px', maxHeight: '90vh', borderRadius: '32px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 30px 60px -15px rgba(15, 23, 42, 0.3)' }}>
+                            <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcfdfe' }}>
                                 <div>
-                                    <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.4rem' }}>Evaluation Intelligence: Answer Key</h3>
-                                    <p style={{ margin: '4px 0 0 0', color: '#1a4d3e', fontWeight: 700, fontSize: '0.9rem' }}>{lesson?.title} • {questions.length} Validation Units</p>
+                                    <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.35rem', color: '#0f172a', letterSpacing: '-0.02em' }}>Evaluation Intelligence: Answer Key</h3>
+                                    <p style={{ margin: '4px 0 0 0', color: '#1a4d3e', fontWeight: 800, fontSize: '0.85rem' }}>{lesson?.title} • {questions.length} Validation Units</p>
                                 </div>
-                                <button onClick={() => setViewingQuizKey(null)} style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <button onClick={() => setViewingQuizKey(null)} style={{ background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem' }}>
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', background: '#f8fafc' }}>
                                 {questions.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-                                        <HelpCircle size={48} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
-                                        <p style={{ color: '#64748b', fontWeight: 600 }}>No validation questions defined yet.</p>
+                                    <div style={{ textAlign: 'center', padding: '5rem 0', background: 'white', borderRadius: '24px', border: '1.5px dashed #cbd5e1' }}>
+                                        <HelpCircle size={48} color="#cbd5e1" style={{ marginBottom: '1.25rem' }} />
+                                        <p style={{ color: '#64748b', fontWeight: 800, margin: 0 }}>No validation questions defined yet.</p>
                                     </div>
-                                ) : questions.map((q: any, idx: number) => (
-                                    <div key={q.id} style={{ marginBottom: '2rem', padding: '2rem', borderRadius: '24px', border: '1.5px solid #f1f5f9', background: '#fcfdfe' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8' }}>Validation Unit {idx + 1}</span>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '4px 10px', borderRadius: '8px' }}>MASTER KEY</span>
-                                        </div>
-                                        <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: '#0f172a', lineHeight: 1.4, fontSize: '1.1rem' }}>{q.question}</h4>
-                                        <div style={{ display: 'grid', gap: '0.75rem' }}>
-                                            {q.options.map((opt: string, oIdx: number) => {
-                                                const isRightAnswer = q.correct_answer === oIdx;
-                                                return (
-                                                    <div
-                                                        key={oIdx}
-                                                        style={{
-                                                            padding: '1.1rem 1.5rem',
-                                                            borderRadius: '16px',
-                                                            background: isRightAnswer ? '#f0fdf4' : 'white',
-                                                            border: `1.5px solid ${isRightAnswer ? '#10b98140' : '#f1f5f9'}`,
-                                                            color: isRightAnswer ? '#166534' : '#64748b',
-                                                            fontWeight: isRightAnswer ? 800 : 500,
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '12px'
-                                                        }}
-                                                    >
-                                                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                                            {isRightAnswer && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'currentColor' }}></div>}
-                                                        </div>
-                                                        {opt}
-                                                        {isRightAnswer && <CheckCircle2 size={16} style={{ marginLeft: 'auto' }} />}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                                ) : (
+                                    <div style={{ display: 'grid', gap: '2rem' }}>
+                                        {questions.map((q: any, idx: number) => (
+                                            <div key={q.id} style={{ padding: '2rem', borderRadius: '24px', border: '1.5px solid #e2e8f0', background: 'white', boxShadow: '0 4px 15px rgba(0,0,0,0.01)' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.05em' }}>Validation Unit {idx + 1}</span>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(26,77,62,0.1)' }}>MASTER KEY</span>
+                                                </div>
+                                                <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: '#0f172a', lineHeight: 1.4, fontSize: '1.05rem' }}>{q.question || 'Untitled Question Statement'}</h4>
+                                                <div style={{ display: 'grid', gap: '0.75rem' }}>
+                                                    {q.options.map((opt: string, oIdx: number) => {
+                                                        const isRightAnswer = q.correct_answer === oIdx;
+                                                        return (
+                                                            <div
+                                                                key={oIdx}
+                                                                style={{
+                                                                    padding: '1rem 1.25rem',
+                                                                    borderRadius: '16px',
+                                                                    background: isRightAnswer ? '#f0fdf4' : 'white',
+                                                                    border: `1.5px solid ${isRightAnswer ? '#10b98150' : '#f1f5f9'}`,
+                                                                    color: isRightAnswer ? '#166534' : '#64748b',
+                                                                    fontWeight: isRightAnswer ? 800 : 600,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '12px',
+                                                                    fontSize: '0.925rem'
+                                                                }}
+                                                            >
+                                                                <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: isRightAnswer ? '#10b981' : '#cbd5e1' }}>
+                                                                    {isRightAnswer && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'currentColor' }}></div>}
+                                                                </div>
+                                                                <span>{opt || `Option ${oIdx + 1} (Empty)`}</span>
+                                                                {isRightAnswer && <CheckCircle2 size={18} color="#10b981" style={{ marginLeft: 'auto' }} />}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                )}
                             </div>
 
-                            <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
-                                <button onClick={() => setViewingQuizKey(null)} style={{ background: '#0f172a', color: 'white', border: 'none', padding: '0.75rem 2rem', borderRadius: '12px', fontWeight: 900, cursor: 'pointer' }}>Close Answer Key</button>
+                            <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#fcfdfe', display: 'flex', justifyContent: 'flex-end' }}>
+                                <button onClick={() => setViewingQuizKey(null)} className="btn-standard" style={{ background: '#0f172a', color: 'white', border: 'none', padding: '0.85rem 2.5rem', borderRadius: '14px', fontWeight: 900, cursor: 'pointer' }}>Close Master Key</button>
                             </div>
                         </div>
                     </div>
