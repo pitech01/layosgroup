@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Download, FileAudio, Eye, X, FileText, Trash2, Bold, Italic, Underline } from 'lucide-react';
+import { Download, FileAudio, Eye, X, FileText, Trash2, Bold, Italic, Underline, CornerUpLeft, MessageSquare } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -14,6 +14,9 @@ export interface Message {
     dueDate?: string;
     isDeleted?: boolean;
     createdAt: string;
+    parentId?: string | null;
+    replies?: Message[];
+    senderId?: string;
 }
 
 interface MessageCardProps {
@@ -23,15 +26,33 @@ interface MessageCardProps {
     onEdit?: (newContent: string) => Promise<void>;
     isMine?: boolean;
     compact?: boolean;
+    currentUserId?: string;
+    onSendReply?: (content: string) => Promise<void>;
+    onDeleteReply?: (replyId: string) => Promise<void>;
+    onEditReply?: (replyId: string, content: string) => Promise<void>;
 }
 
-const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, compact = false }: MessageCardProps) => {
+const MessageCard = ({ 
+    message, 
+    viewerRole, 
+    onDelete, 
+    onEdit, 
+    isMine = false, 
+    compact = false,
+    currentUserId,
+    onSendReply,
+    onDeleteReply,
+    onEditReply
+}: MessageCardProps) => {
     const isInstructor = message.senderRole === 'instructor';
     const [viewingPdf, setViewingPdf] = useState<{ url: string; title: string } | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(message.content);
     const editorRef = useRef<HTMLDivElement>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isReplying, setIsReplying] = useState(false);
+    const [replyContent, setReplyContent] = useState('');
+    const [showReplies, setShowReplies] = useState(true);
 
     const isPdf = (url: string) => {
         return /\.pdf(\?.*)?$/i.test(url.split('?')[0]);
@@ -454,10 +475,136 @@ const MessageCard = ({ message, viewerRole, onDelete, onEdit, isMine = false, co
                         )}
                     </div>
                 )}
+
+                {isReplying && (
+                    <div style={{ width: '100%', marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <input
+                            type="text"
+                            value={replyContent}
+                            onChange={(e) => setReplyContent(e.target.value)}
+                            placeholder="Reply to this message..."
+                            style={{
+                                flex: 1,
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.9rem',
+                                outline: 'none',
+                                background: 'white',
+                                color: '#1e293b'
+                            }}
+                            onKeyDown={async (e) => {
+                                if (e.key === 'Enter' && replyContent.trim()) {
+                                    e.preventDefault();
+                                    if (onSendReply) {
+                                        await onSendReply(replyContent);
+                                        setReplyContent('');
+                                        setIsReplying(false);
+                                        setShowReplies(true);
+                                    }
+                                }
+                            }}
+                        />
+                        <button
+                            onClick={async () => {
+                                if (replyContent.trim() && onSendReply) {
+                                    await onSendReply(replyContent);
+                                    setReplyContent('');
+                                    setIsReplying(false);
+                                    setShowReplies(true);
+                                }
+                            }}
+                            style={{
+                                padding: '6px 12px',
+                                background: '#2563eb',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '0.85rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Send
+                        </button>
+                        <button
+                            onClick={() => {
+                                setIsReplying(false);
+                                setReplyContent('');
+                            }}
+                            style={{
+                                padding: '6px 12px',
+                                background: '#f1f5f9',
+                                color: '#64748b',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '0.85rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                )}
+
+                {message.replies && message.replies.length > 0 && !message.parentId && (
+                    <button 
+                        onClick={() => setShowReplies(!showReplies)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            marginTop: '8px',
+                            background: '#eff6ff',
+                            border: 'none',
+                            borderRadius: '20px',
+                            padding: '4px 12px',
+                            fontSize: '0.8rem',
+                            fontWeight: 700,
+                            color: '#2563eb',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <MessageSquare size={14} />
+                        {message.replies.length} {message.replies.length === 1 ? 'reply' : 'replies'}
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#64748b', marginLeft: '4px' }}>
+                            {showReplies ? '(hide)' : '(view)'}
+                        </span>
+                    </button>
+                )}
+
+                {showReplies && message.replies && message.replies.length > 0 && !message.parentId && (
+                    <div className="replies-list" style={{ width: '100%', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px', borderLeft: '2px solid #e2e8f0', paddingLeft: '12px' }}>
+                        {message.replies.map((reply) => {
+                            const isReplyMine = !!(currentUserId && String(reply.senderId) === String(currentUserId));
+                            return (
+                                <MessageCard
+                                    key={reply.id}
+                                    message={reply}
+                                    viewerRole={viewerRole}
+                                    isMine={isReplyMine}
+                                    compact={true}
+                                    onDelete={onDeleteReply && (isReplyMine || viewerRole === 'instructor') ? () => onDeleteReply(reply.id) : undefined}
+                                    onEdit={onEditReply && isReplyMine ? (newContent) => onEditReply(reply.id, newContent) : undefined}
+                                />
+                            );
+                        })}
+                    </div>
+                )}
             </div>
             
             {!message.isDeleted && (
                 <div className="message-actions-hover">
+                    {onSendReply && !message.parentId && (
+                        <button 
+                            className="action-btn"
+                            onClick={(e) => { e.stopPropagation(); setIsReplying(!isReplying); }}
+                            title="Reply to Thread"
+                        >
+                            <CornerUpLeft size={16} />
+                        </button>
+                    )}
                     {onEdit && (
                         <button 
                             className="action-btn"

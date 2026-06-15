@@ -5,7 +5,8 @@ import {
     Loader2,
     AlertCircle,
     Trash2,
-    Edit
+    Edit,
+    Filter
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,18 +17,46 @@ export default function Students() {
     const { logout } = useAuth();
     const navigate = useNavigate();
     const [users, setUsers] = useState<any[]>([]);
+    const [cohorts, setCohorts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCohort, setSelectedCohort] = useState('all');
+    const [selectedStatus, setSelectedStatus] = useState('all');
+
     useEffect(() => {
         setCurrentPage(1);
-    }, [users.length]);
+    }, [users.length, searchTerm, selectedCohort, selectedStatus]);
 
-    const totalPages = Math.ceil(users.length / itemsPerPage);
+    const filteredUsers = users.filter((user) => {
+        // Search filter
+        const matchesSearch = 
+            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (user.phone && user.phone.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        // Cohort filter
+        const matchesCohort = 
+            selectedCohort === 'all' || 
+            (user.cohorts && user.cohorts.some((c: any) => String(c.id) === String(selectedCohort)));
+
+        // Status filter
+        let matchesStatus = true;
+        if (selectedStatus === 'pending') {
+            matchesStatus = user.payment_status === 'pending' && !!user.payment_method;
+        } else if (selectedStatus === 'active') {
+            matchesStatus = !(user.payment_status === 'pending' && !!user.payment_method);
+        }
+
+        return matchesSearch && matchesCohort && matchesStatus;
+    });
+
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedUsers = users.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -69,8 +98,26 @@ export default function Students() {
         }
     };
 
+    const fetchCohorts = async () => {
+        try {
+            const response = await fetch(`${API_URL}/cohorts`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setCohorts(data);
+            }
+        } catch (err) {
+            console.error("Fetch Cohorts Error:", err);
+        }
+    };
+
     useEffect(() => {
         fetchStudents();
+        fetchCohorts();
     }, []);
 
     const handleDeleteStudent = async (id: number) => {
@@ -92,6 +139,38 @@ export default function Students() {
         } catch (err) {
             alert('Signal lost. Check your network connectivity.');
         }
+    };
+
+    const handleExport = () => {
+        if (filteredUsers.length === 0) {
+            toast.error('No student records to export.');
+            return;
+        }
+
+        const headers = ['ID', 'Name', 'Email', 'Phone', 'Enrollment Date', 'Cohorts', 'Payment Status'];
+        const csvRows = filteredUsers.map(user => {
+            const id = user.id;
+            const name = `"${user.name.replace(/"/g, '""')}"`;
+            const email = `"${user.email.replace(/"/g, '""')}"`;
+            const phone = user.phone ? `"${user.phone.replace(/"/g, '""')}"` : '""';
+            const enrollmentDate = new Date(user.created_at).toLocaleDateString();
+            const cohortsList = `"${(user.cohorts || []).map((c: any) => c.name || c.id).join(', ').replace(/"/g, '""')}"`;
+            const status = user.payment_status === 'pending' && user.payment_method ? 'Pending Approval' : 'Active';
+
+            return [id, name, email, phone, enrollmentDate, cohortsList, status].join(',');
+        });
+
+        const csvContent = [headers.join(','), ...csvRows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `students_export_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Student list exported successfully!');
     };
 
     return (
@@ -177,29 +256,107 @@ export default function Students() {
                     cursor: pointer;
                 }
 
-                .staff-scope .filter-pill {
-                    background-color: #f1f5f9;
-                    border: 1px solid #e2e8f0;
-                    padding: 0.5rem 1rem;
-                    border-radius: 8px;
-                    color: #64748b;
-                    font-size: 0.9rem;
+                .staff-scope .search-filter-belt {
                     display: flex;
-                    align-items: center;
-                    gap: 1.5rem;
-                    cursor: pointer;
+                    gap: 1rem;
+                    margin-bottom: 2rem;
+                    flex-wrap: wrap;
+                    width: 100%;
                 }
 
-                .staff-scope .search-pill-icon {
-                    background-color: #f1f5f9;
-                    border: 1px solid #e2e8f0;
-                    padding: 0.5rem;
-                    border-radius: 8px;
-                    color: #64748b;
-                    cursor: pointer;
+                .staff-scope .search-box-wrapper {
+                    flex: 1;
+                    min-width: 250px;
+                    height: 48px;
+                    background: white;
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
-                    justify-content: center;
+                    padding: 0 1rem;
+                    gap: 10px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+                }
+
+                .staff-scope .search-box-wrapper:focus-within {
+                    border-color: #020617;
+                    box-shadow: 0 0 0 4px rgba(2, 6, 23, 0.05);
+                }
+
+                .staff-scope .search-input {
+                    border: none !important;
+                    background: transparent !important;
+                    outline: none !important;
+                    width: 100% !important;
+                    font-weight: 600 !important;
+                    font-size: 0.9rem !important;
+                    color: #0f172a !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    height: auto !important;
+                    box-shadow: none !important;
+                }
+
+                .staff-scope .search-input:focus {
+                    outline: none !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    background: transparent !important;
+                }
+
+                .staff-scope .filter-dropdown-wrapper {
+                    height: 48px;
+                    background: white;
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 1rem;
+                    gap: 8px;
+                    font-weight: 600;
+                    color: #475569;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+                }
+
+                .staff-scope .filter-dropdown-wrapper:focus-within {
+                    border-color: #020617;
+                    box-shadow: 0 0 0 4px rgba(2, 6, 23, 0.05);
+                }
+
+                .staff-scope .filter-label {
+                    font-size: 0.9rem;
+                    color: #64748b;
+                }
+
+                 .staff-scope .filter-select {
+                    border: none !important;
+                    background: transparent !important;
+                    outline: none !important;
+                    font-weight: 700 !important;
+                    color: #1e293b !important;
+                    font-size: 0.9rem !important;
+                    cursor: pointer;
+                    margin: 0 !important;
+                    padding: 0 0.5rem 0 0 !important;
+                    box-shadow: none !important;
+                }
+
+                .staff-scope .filter-select:focus {
+                    outline: none !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                }
+
+                @media (max-width: 640px) {
+                    .staff-scope .search-filter-belt {
+                        flex-direction: column;
+                        gap: 0.75rem;
+                        width: 100%;
+                    }
+                    .staff-scope .search-box-wrapper,
+                    .staff-scope .filter-dropdown-wrapper {
+                        width: 100%;
+                    }
                 }
 
                 .staff-scope .pagination-btn:hover:not(:disabled) {
@@ -476,11 +633,49 @@ export default function Students() {
 
             <div className="users-card">
                 <div className="users-header">
-                    <h2>Students ({users.length})</h2>
+                    <h2>Students ({filteredUsers.length})</h2>
                     <div className="header-actions">
-                        <button className="btn-export">Export List</button>
+                        <button className="btn-export" onClick={handleExport}>Export List</button>
                         <button className="btn-add-user" onClick={() => navigate('/instructor/students/add')}>Register New Student <Plus size={18} /></button>
-                        <div className="search-pill-icon"><Search size={18} /></div>
+                    </div>
+                </div>
+
+                <div className="search-filter-belt">
+                    <div className="search-box-wrapper">
+                        <Search size={20} color="#94a3b8" />
+                        <input
+                            className="search-input"
+                            placeholder="Search by name, email, phone..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    
+                    <div className="filter-dropdown-wrapper">
+                        <span className="filter-label">Cohort:</span>
+                        <select
+                            value={selectedCohort}
+                            onChange={(e) => setSelectedCohort(e.target.value)}
+                            className="filter-select"
+                        >
+                            <option value="all">All Cohorts</option>
+                            {cohorts.map((cohort: any) => (
+                                <option key={cohort.id} value={cohort.id}>{cohort.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="filter-dropdown-wrapper">
+                        <span className="filter-label">Status:</span>
+                        <select
+                            value={selectedStatus}
+                            onChange={(e) => setSelectedStatus(e.target.value)}
+                            className="filter-select"
+                        >
+                            <option value="all">All Statuses</option>
+                            <option value="pending">Pending Approval</option>
+                            <option value="active">Active / Approved</option>
+                        </select>
                     </div>
                 </div>
 
@@ -604,7 +799,7 @@ export default function Students() {
                         gap: '1rem'
                     }}>
                         <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>
-                            Showing <span style={{ fontWeight: 800, color: '#0f172a' }}>{users.length > 0 ? startIndex + 1 : 0}</span> to <span style={{ fontWeight: 800, color: '#0f172a' }}>{Math.min(startIndex + itemsPerPage, users.length)}</span> of <span style={{ fontWeight: 800, color: '#0f172a' }}>{users.length}</span> students
+                            Showing <span style={{ fontWeight: 800, color: '#0f172a' }}>{filteredUsers.length > 0 ? startIndex + 1 : 0}</span> to <span style={{ fontWeight: 800, color: '#0f172a' }}>{Math.min(startIndex + itemsPerPage, filteredUsers.length)}</span> of <span style={{ fontWeight: 800, color: '#0f172a' }}>{filteredUsers.length}</span> students
                         </div>
                         <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
                             <button

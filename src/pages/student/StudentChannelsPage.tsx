@@ -26,6 +26,8 @@ interface Channel {
 
 interface ChatMessage {
     id: string;
+    parentId?: string | null;
+    senderId?: string;
     user: {
         id: string;
         name: string;
@@ -44,6 +46,7 @@ interface ChatMessage {
         url: string;
     };
     isDeleted?: boolean; // Added isDeleted property
+    replies?: ChatMessage[];
 }
 
 const StudentChannelsPage = () => {
@@ -99,6 +102,57 @@ const StudentChannelsPage = () => {
             if (attachmentUrl) return '';
         }
         return content;
+    };
+
+    const mapMsg = (msg: any): ChatMessage => {
+        let file = undefined;
+        const getFileName = (m: any) => {
+            if (m.attachmentName) return m.attachmentName;
+            if (!m.attachmentUrl) return 'File';
+            const cleanUrl = m.attachmentUrl.split('?')[0];
+            const baseName = cleanUrl.split('/').pop() || 'File';
+            if (baseName.match(/^[0-9a-f-]{36}/i)) {
+                const ext = baseName.split('.').pop()?.toUpperCase();
+                return ext ? `${ext} File` : 'Shared File';
+            }
+            return baseName;
+        };
+
+        if (msg.attachmentUrl) {
+            file = {
+                name: getFileName(msg),
+                size: 'Linked',
+                type: (msg.attachmentUrl.split('?')[0].match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().split('?')[0].endsWith('.pdf') ? 'pdf' : 'other')) as 'image' | 'pdf' | 'other',
+                url: msg.attachmentUrl
+            };
+        }
+
+        let displayContent = msg.content || '';
+        let isQuestionFlag = false;
+        if (displayContent.startsWith('[QUESTION]')) {
+            isQuestionFlag = true;
+            displayContent = displayContent.replace('[QUESTION]', '').trim();
+        }
+
+        return {
+            id: String(msg.id),
+            parentId: msg.parentId || msg.parent_id ? String(msg.parentId || msg.parent_id) : null,
+            senderId: String(msg.senderId || msg.user_id || msg.userId),
+            user: { 
+                id: msg.senderId || msg.user_id || msg.userId,
+                name: msg.senderName, 
+                avatar: msg.senderName ? msg.senderName.charAt(0).toUpperCase() : 'U', 
+                role: msg.senderRole 
+            },
+            content: cleanContent(displayContent, msg.attachmentUrl),
+            timestamp: msg.createdAt || new Date().toISOString(),
+            date: 'Feed',
+            isAnnouncement: msg.type === 'announcement',
+            isQuestion: isQuestionFlag,
+            isDeleted: !!msg.isDeleted,
+            file,
+            replies: msg.replies ? msg.replies.map((reply: any) => mapMsg(reply)) : []
+        };
     };
 
     const fetchChannels = async () => {
@@ -221,54 +275,7 @@ if (!activeChannel && formattedChannels.length > 0) {
                     const data = await response.json();
                     const rawMsgs = Array.isArray(data) ? data : (data.messages || []);
                     
-                    const formattedMsgs = rawMsgs.map((msg: any) => {
-                        let file = undefined;
-                        const getFileName = (m: any) => {
-                            if (m.attachmentName) return m.attachmentName;
-                            if (!m.attachmentUrl) return 'File';
-                            const cleanUrl = m.attachmentUrl.split('?')[0];
-                            const baseName = cleanUrl.split('/').pop() || 'File';
-                            // If it's a long UUID, just say "File" unless it's an image
-                            if (baseName.match(/^[0-9a-f-]{36}/i)) {
-                                const ext = baseName.split('.').pop()?.toUpperCase();
-                                return ext ? `${ext} File` : 'Shared File';
-                            }
-                            return baseName;
-                        };
-
-                        if (msg.attachmentUrl) {
-                            file = {
-                                name: getFileName(msg),
-                                size: 'Linked',
-                                type: (msg.attachmentUrl.split('?')[0].match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().split('?')[0].endsWith('.pdf') ? 'pdf' : 'other')) as 'image' | 'pdf' | 'other',
-                                url: msg.attachmentUrl
-                            };
-                        }
-                        
-                        let displayContent = msg.content || '';
-                        let isQuestionFlag = false;
-                        if (displayContent.startsWith('[QUESTION]')) {
-                            isQuestionFlag = true;
-                            displayContent = displayContent.replace('[QUESTION]', '').trim();
-                        }
-
-                        return {
-                            id: String(msg.id),
-                            user: { 
-                                id: msg.senderId || msg.user_id,
-                                name: msg.senderName, 
-                                avatar: msg.senderName.charAt(0).toUpperCase(), 
-                                role: msg.senderRole 
-                            },
-                            content: cleanContent(displayContent, msg.attachmentUrl),
-                            timestamp: msg.createdAt,
-                            date: 'Feed',
-                            isAnnouncement: msg.type === 'announcement',
-                            isQuestion: isQuestionFlag,
-                            isDeleted: !!msg.isDeleted,
-                            file
-                        };
-                    });
+                    const formattedMsgs = rawMsgs.map((msg: any) => mapMsg(msg));
                     setMessages(formattedMsgs);
                     setPinnedMessages(formattedMsgs.filter((m: ChatMessage) => m.isAnnouncement));
 
@@ -310,61 +317,41 @@ if (!activeChannel && formattedChannels.length > 0) {
             currentEchoChannel = echo.channel(`course-channel.${activeChannel.id}`)
                 .listen('.message.created', (data: any) => {
                     const msg = data.message;
-                    let file = undefined;
-                    const getFileName = (m: any) => {
-                        if (m.attachmentName) return m.attachmentName;
-                        if (!m.attachmentUrl) return 'File';
-                        const cleanUrl = m.attachmentUrl.split('?')[0];
-                        const baseName = cleanUrl.split('/').pop() || 'File';
-                        if (baseName.match(/^[0-9a-f-]{36}/i)) {
-                            const ext = baseName.split('.').pop()?.toUpperCase();
-                            return ext ? `${ext} File` : 'Shared File';
-                        }
-                        return baseName;
-                    };
-
-                    if (msg.attachmentUrl) {
-                        file = {
-                            name: getFileName(msg),
-                            size: 'Linked',
-                            type: (msg.attachmentUrl.split('?')[0].match(/\.(jpeg|jpg|gif|png)$/i) ? 'image' : (msg.attachmentUrl.toLowerCase().split('?')[0].endsWith('.pdf') ? 'pdf' : 'other')) as 'image' | 'pdf' | 'other',
-                            url: msg.attachmentUrl
-                        };
-                    }
-
-                    let displayContent = msg.content || '';
-                    let isQuestionFlag = false;
-                    if (displayContent.startsWith('[QUESTION]')) {
-                        isQuestionFlag = true;
-                        displayContent = displayContent.replace('[QUESTION]', '').trim();
-                    }
-
-                    const finalMessage: ChatMessage = {
-                        id: String(msg.id),
-                        user: { 
-                            id: msg.senderId || msg.user_id,
-                            name: msg.senderName, 
-                            avatar: msg.senderName.charAt(0).toUpperCase(), 
-                            role: msg.senderRole 
-                        },
-                        content: cleanContent(displayContent, msg.attachmentUrl),
-                        timestamp: msg.createdAt,
-                        date: 'Feed',
-                        isAnnouncement: msg.type === 'announcement',
-                        isQuestion: isQuestionFlag,
-                        isDeleted: !!msg.isDeleted,
-                        file
-                    };
+                    const finalMessage = mapMsg(msg);
                     
-                    setMessages(prev => {
-                        const index = prev.findIndex(m => String(m.id) === String(finalMessage.id));
-                        if (index === -1) {
-                            return [...prev, finalMessage];
-                        }
-                        const newMessages = [...prev];
-                        newMessages[index] = { ...prev[index], ...finalMessage };
-                        return newMessages;
-                    });
+                    if (finalMessage.parentId) {
+                        setMessages(prev => {
+                            return prev.map(m => {
+                                if (String(m.id) === String(finalMessage.parentId)) {
+                                    const currentReplies = m.replies || [];
+                                    const index = currentReplies.findIndex(r => String(r.id) === String(finalMessage.id));
+                                    if (index === -1) {
+                                        return {
+                                            ...m,
+                                            replies: [...currentReplies, finalMessage]
+                                        };
+                                    }
+                                    const newReplies = [...currentReplies];
+                                    newReplies[index] = { ...currentReplies[index], ...finalMessage };
+                                    return {
+                                        ...m,
+                                        replies: newReplies
+                                    };
+                                }
+                                return m;
+                            });
+                        });
+                    } else {
+                        setMessages(prev => {
+                            const index = prev.findIndex(m => String(m.id) === String(finalMessage.id));
+                            if (index === -1) {
+                                return [...prev, finalMessage];
+                            }
+                            const newMessages = [...prev];
+                            newMessages[index] = { ...prev[index], ...finalMessage };
+                            return newMessages;
+                        });
+                    }
                     
                     // Instantly mark as read in local storage so background poll doesn't mark it unread
                     const lastReadMap = JSON.parse(localStorage.getItem('channels_last_read') || '{}');
@@ -372,7 +359,19 @@ if (!activeChannel && formattedChannels.length > 0) {
                     localStorage.setItem('channels_last_read', JSON.stringify(lastReadMap));
                 })
                 .listen('.message.deleted', (data: any) => {
-                    setMessages(prev => prev.map(m => m.id === String(data.messageId) ? { ...m, isDeleted: true } : m));
+                    const deletedId = String(data.messageId);
+                    setMessages(prev => prev.map(m => {
+                        if (m.id === deletedId) {
+                            return { ...m, isDeleted: true };
+                        }
+                        if (m.replies) {
+                            return {
+                                ...m,
+                                replies: m.replies.map(r => r.id === deletedId ? { ...r, isDeleted: true } : r)
+                            };
+                        }
+                        return m;
+                    }));
                 });
         }
         
@@ -523,7 +522,18 @@ if (!activeChannel && formattedChannels.length > 0) {
             }
 
             if (response.ok) {
-                setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isDeleted: true } : m));
+                setMessages(prev => prev.map(m => {
+                    if (m.id === messageId) {
+                        return { ...m, isDeleted: true };
+                    }
+                    if (m.replies) {
+                        return {
+                            ...m,
+                            replies: m.replies.map(r => r.id === messageId ? { ...r, isDeleted: true } : r)
+                        };
+                    }
+                    return m;
+                }));
                 toast.success('Message deleted');
             } else {
                 toast.error('Failed to delete message');
@@ -559,7 +569,18 @@ if (!activeChannel && formattedChannels.length > 0) {
 
             if (response.ok) {
                 const updatedMsg = await response.json();
-                setMessages(prev => prev.map(m => String(m.id) === String(messageId) ? { ...m, content: updatedMsg.content } : m));
+                setMessages(prev => prev.map(m => {
+                    if (String(m.id) === String(messageId)) {
+                        return { ...m, content: updatedMsg.content };
+                    }
+                    if (m.replies) {
+                        return {
+                            ...m,
+                            replies: m.replies.map(r => String(r.id) === String(messageId) ? { ...r, content: updatedMsg.content } : r)
+                        };
+                    }
+                    return m;
+                }));
                 toast.success('Message updated');
             } else {
                 toast.error('Failed to update message');
@@ -567,6 +588,68 @@ if (!activeChannel && formattedChannels.length > 0) {
         } catch (error) {
             console.error('Edit error', error);
             toast.error('Error updating message');
+        }
+    };
+
+    const handleSendReply = async (parentId: string, content: string) => {
+        if (!content.trim() || !activeChannel) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+            
+            let url = '';
+            if (activeChannel.type === 'dm') {
+                return;
+            } else {
+                url = `${API_URL}/channels/${activeChannel.id}/messages`;
+            }
+
+            const formData = new FormData();
+            formData.append('content', content);
+            formData.append('parent_id', parentId);
+            formData.append('type', 'message');
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            if (response.status === 401) {
+                logout();
+                navigate('/login');
+                return;
+            }
+
+            if (response.ok) {
+                const msg = await response.json();
+                const finalReply = mapMsg(msg);
+                
+                setMessages(prev => {
+                    return prev.map(m => {
+                        if (String(m.id) === String(parentId)) {
+                            const currentReplies = m.replies || [];
+                            const alreadyExists = currentReplies.some(r => String(r.id) === String(finalReply.id));
+                            if (alreadyExists) return m;
+                            return {
+                                ...m,
+                                replies: [...currentReplies, finalReply]
+                            };
+                        }
+                        return m;
+                    });
+                });
+            } else {
+                const errorData = await response.json();
+                toast.error(errorData.message || 'Failed to post reply.');
+            }
+        } catch (error) {
+            console.error('Send reply error', error);
+            toast.error('Error posting reply');
         }
     };
 
@@ -1183,7 +1266,21 @@ if (!activeChannel && formattedChannels.length > 0) {
                                                     content: msg.content,
                                                     attachmentUrl: msg.file?.url,
                                                     isDeleted: msg.isDeleted,
-                                                    createdAt: formatTime(msg.timestamp)
+                                                    createdAt: formatTime(msg.timestamp),
+                                                    parentId: msg.parentId,
+                                                    senderId: msg.senderId,
+                                                    replies: msg.replies ? msg.replies.map((reply: any) => ({
+                                                        id: reply.id,
+                                                        senderName: reply.user.name,
+                                                        senderRole: reply.user.role,
+                                                        type: reply.isAnnouncement ? 'announcement' : 'message',
+                                                        content: reply.content,
+                                                        attachmentUrl: reply.file?.url,
+                                                        isDeleted: reply.isDeleted,
+                                                        createdAt: formatTime(reply.timestamp),
+                                                        parentId: reply.parentId,
+                                                        senderId: reply.senderId
+                                                    })) : []
                                                 };
 
                                                 return (
@@ -1200,6 +1297,10 @@ if (!activeChannel && formattedChannels.length > 0) {
                                                             onEdit={isMine ? (newContent) => handleEditMessage(msg.id, newContent) : undefined}
                                                             isMine={isMine}
                                                             compact={compact}
+                                                            currentUserId={currentUser ? String(currentUser.id) : undefined}
+                                                            onSendReply={(content) => handleSendReply(msg.id, content)}
+                                                            onDeleteReply={handleDeleteMessage}
+                                                            onEditReply={handleEditMessage}
                                                         />
                                                     </React.Fragment>
                                                 );
