@@ -110,7 +110,8 @@ const CertificateTemplateManager = () => {
             setTemplate(res.data);
             toast.success('Background updated');
         } catch (err: any) {
-            toast.error('Upload failed');
+            const errMsg = err.response?.data?.message || err.response?.data?.error || 'Upload failed';
+            toast.error(errMsg);
         }
     };
 
@@ -261,14 +262,14 @@ const CertificateTemplateManager = () => {
                                         <img src={template?.template_url || (template?.template_path ? `${PUBLIC_URL}/${template.template_path}` : '')} alt="Preview" />
                                         <label className="replace-overlay">
                                             <Upload size={18} /> REPLACE
-                                            <input type="file" hidden onChange={handleUpload} />
+                                            <input type="file" hidden accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handleUpload} />
                                         </label>
                                     </div>
                                 ) : (
                                     <label className="upload-placeholder">
                                         <div className="upload-icon"><Upload size={30} /></div>
                                         <p>Click to upload base</p>
-                                        <input type="file" hidden onChange={handleUpload} />
+                                        <input type="file" hidden accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handleUpload} />
                                     </label>
                                 )}
                             </div>
