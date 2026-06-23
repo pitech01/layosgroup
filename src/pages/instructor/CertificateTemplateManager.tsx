@@ -62,7 +62,12 @@ const CertificateTemplateManager = () => {
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
     const PUBLIC_URL = API_URL.replace('/api', '/storage');
 
-    const [bgImg] = useImage(template?.template_url || (template?.template_path ? `${PUBLIC_URL}/${template.template_path}` : ''));
+    const getBgUrl = (path?: string) => {
+        if (!path) return '';
+        return (path.startsWith('http://') || path.startsWith('https://')) ? path : `${PUBLIC_URL}/${path}`;
+    };
+
+    const [bgImg] = useImage(template?.template_url || getBgUrl(template?.template_path));
 
     useEffect(() => {
         fetchTemplate();
@@ -259,7 +264,7 @@ const CertificateTemplateManager = () => {
                             <div className="upload-zone">
                                 {bgImg ? (
                                     <div className="bg-preview">
-                                        <img src={template?.template_url || (template?.template_path ? `${PUBLIC_URL}/${template.template_path}` : '')} alt="Preview" />
+                                        <img src={template?.template_url || getBgUrl(template?.template_path)} alt="Preview" />
                                         <label className="replace-overlay">
                                             <Upload size={18} /> REPLACE
                                             <input type="file" hidden accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handleUpload} />
