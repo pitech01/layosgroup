@@ -23,7 +23,8 @@ import {
     Check,
     Plus,
     Layers,
-    Info
+    Info,
+    RotateCcw
 } from 'lucide-react';
 
 export default function StudentDetails() {
@@ -70,6 +71,7 @@ export default function StudentDetails() {
     const [certificates, setCertificates] = useState<any[]>([]);
     const [showIssueCertModal, setShowIssueCertModal] = useState(false);
     const [issuingCert, setIssuingCert] = useState(false);
+    const [isReassign, setIsReassign] = useState(false);
     const [selectedCohortForCert, setSelectedCohortForCert] = useState<any>(null);
     const [certForm, setCertForm] = useState({
         fullName: '',
@@ -97,6 +99,7 @@ export default function StudentDetails() {
     };
 
     const handleOpenIssueCertModal = (cohort: any) => {
+        setIsReassign(false);
         setSelectedCohortForCert(cohort);
         setCertForm({
             fullName: student?.name || '',
@@ -107,11 +110,26 @@ export default function StudentDetails() {
         setShowIssueCertModal(true);
     };
 
+    const handleOpenReassignModal = (cohort: any, existingCert: any) => {
+        setIsReassign(true);
+        setSelectedCohortForCert(cohort);
+        setCertForm({
+            fullName: existingCert.full_name || student?.name || '',
+            courseTitle: existingCert.course_title || cohort.course?.title || '',
+            issuedAt: existingCert.issued_at?.substring(0, 10) || new Date().toISOString().substring(0, 10),
+            issuedBy: existingCert.issued_by || user?.name || 'Instructor'
+        });
+        setShowIssueCertModal(true);
+    };
+
     const handleIssueCertificate = async () => {
         if (!selectedCohortForCert) return;
         setIssuingCert(true);
+        const endpoint = isReassign
+            ? `${API_URL}/instructor/certificates/reassign`
+            : `${API_URL}/instructor/certificates/generate-manual`;
         try {
-            const response = await fetch(`${API_URL}/instructor/certificates/generate-manual`, {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -129,7 +147,7 @@ export default function StudentDetails() {
             });
             const data = await response.json();
             if (response.ok) {
-                setNotification({ type: 'success', message: 'Certificate generated and issued successfully!' });
+                setNotification({ type: 'success', message: isReassign ? 'Certificate reassigned successfully! Student will receive a new email.' : 'Certificate generated and issued successfully!' });
                 fetchCertificates();
                 setShowIssueCertModal(false);
             } else {
@@ -893,15 +911,25 @@ export default function StudentDetails() {
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '10px' }}>
                                                     {matchingCert ? (
-                                                        <a 
-                                                            href={matchingCert.certificate_path} 
-                                                            target="_blank" 
-                                                            rel="noreferrer" 
-                                                            className="btn-secondary-outline"
-                                                            style={{ textDecoration: 'none', background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', display: 'flex', alignItems: 'center', gap: '6px' }}
-                                                        >
-                                                            View Cert <Award size={14} />
-                                                        </a>
+                                                        <>
+                                                            <a 
+                                                                href={matchingCert.certificate_path} 
+                                                                target="_blank" 
+                                                                rel="noreferrer" 
+                                                                className="btn-secondary-outline"
+                                                                style={{ textDecoration: 'none', background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                            >
+                                                                View Cert <Award size={14} />
+                                                            </a>
+                                                            <button
+                                                                className="btn-secondary-outline"
+                                                                onClick={() => handleOpenReassignModal(cohort, matchingCert)}
+                                                                title="Regenerate and reassign this certificate"
+                                                                style={{ background: '#fffbeb', color: '#b45309', borderColor: '#fde68a', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                            >
+                                                                Reassign <RotateCcw size={14} />
+                                                            </button>
+                                                        </>
                                                     ) : cohort.course ? (
                                                         <button 
                                                             className="btn-secondary-outline"
@@ -1648,9 +1676,9 @@ export default function StudentDetails() {
                 <div className="modal-overlay">
                     <div className="modal-box animate-scale-up" style={{ maxWidth: '550px', borderRadius: '24px', padding: '2.5rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 950, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Award size={22} color="#1a4d3e" />
-                                Issue Verified Certificate
+                        <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 950, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {isReassign ? <RotateCcw size={22} color="#b45309" /> : <Award size={22} color="#1a4d3e" />}
+                                {isReassign ? 'Reassign Certificate' : 'Issue Verified Certificate'}
                             </h3>
                             <button
                                 onClick={() => setShowIssueCertModal(false)}
@@ -1660,10 +1688,20 @@ export default function StudentDetails() {
                             </button>
                         </div>
 
-                        <p style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, marginBottom: '2rem' }}>
-                            Generate a manually verified course certificate for <strong>{student.name}</strong>.
-                            This will render a verified certificate background, assign a short verification code, and make it available for the student.
+                        <p style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, marginBottom: isReassign ? '1rem' : '2rem' }}>
+                            {isReassign
+                                ? <>Regenerate the certificate for <strong>{student.name}</strong>. The old certificate will be permanently replaced and a new email will be sent to the student.</>  
+                                : <>Generate a manually verified course certificate for <strong>{student.name}</strong>. This will render a verified certificate background, assign a short verification code, and make it available for the student.</>}
                         </p>
+
+                        {isReassign && (
+                            <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '12px', padding: '12px 16px', marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                                <RotateCcw size={16} color="#b45309" style={{ marginTop: '2px', flexShrink: 0 }} />
+                                <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 700, color: '#92400e', lineHeight: 1.5 }}>
+                                    The existing certificate image will be deleted from the CDN and replaced. The verification UUID is preserved so old links remain valid.
+                                </p>
+                            </div>
+                        )}
 
                         <div style={{ display: 'grid', gap: '1.5rem', marginBottom: '2.5rem' }}>
                             <div>
@@ -1769,23 +1807,23 @@ export default function StudentDetails() {
                                 disabled={issuingCert || !certForm.fullName.trim() || !certForm.courseTitle.trim()}
                                 onClick={handleIssueCertificate}
                                 style={{
-                                    background: '#1a4d3e',
+                                    background: isReassign ? '#b45309' : '#1a4d3e',
                                     color: 'white',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     height: '44px',
                                     margin: 0,
-                                    boxShadow: '0 4px 12px rgba(26, 77, 62, 0.2)'
+                                    boxShadow: isReassign ? '0 4px 12px rgba(180,83,9,0.2)' : '0 4px 12px rgba(26, 77, 62, 0.2)'
                                 }}
                             >
                                 {issuingCert ? (
                                     <>
                                         <Loader2 className="animate-spin" size={16} style={{ marginRight: '6px' }} />
-                                        <span>Generating...</span>
+                                        <span>{isReassign ? 'Reassigning...' : 'Generating...'}</span>
                                     </>
                                 ) : (
-                                    <span>Issue Certificate</span>
+                                    <span>{isReassign ? 'Reassign Certificate' : 'Issue Certificate'}</span>
                                 )}
                             </button>
                         </div>
