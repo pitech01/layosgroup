@@ -252,6 +252,7 @@ const CertificateTemplateManager = () => {
                                 <ToolItem icon={<Book />} label="COURSE TITLE" sub="The subject name" onClick={() => addTextElement('course', '{{course_title}}')} />
                                 <ToolItem icon={<Calendar />} label="COMPLETION DATE" sub="Auto-filled date" onClick={() => addTextElement('date', '{{date}}')} />
                                 <ToolItem icon={<TypeIcon />} label="SERIAL HASH" sub="Unique certificate ID" onClick={() => addTextElement('cert_id', '{{cert_id}}')} />
+                                <ToolItem icon={<TypeIcon />} label="CUSTOM TEXT" sub="Any custom text" onClick={() => addTextElement('custom', 'Enter your custom text')} />
                                 <ToolItem icon={<QrCode />} label="VERIFICATION QR" sub="Scan-to-verify code" onClick={() => addTextElement('qr', 'QR')} />
                             </div>
                         </div>
@@ -393,53 +394,66 @@ const CertificateTemplateManager = () => {
                                 </div>
 
                                 {selectedElement.type !== 'qr' && (
-                                    <div className="prop-group">
-                                        <label>TYPOGRAPHY</label>
-                                        <select 
-                                            value={selectedElement.fontFamily} 
-                                            onChange={(e) => updateElement(selectedId!, { fontFamily: e.target.value })}
-                                            className="input-select"
-                                        >
-                                            <option value="Outfit">Outfit</option>
-                                            <option value="Inter">Inter</option>
-                                            <option value="Montserrat">Montserrat</option>
-                                            <option value="Playfair Display">Playfair</option>
-                                            <option value="Great Vibes">Calligraphy</option>
-                                        </select>
-                                        
-                                        <div className="grid-2 mt-10">
-                                            <div className="input-field">
-                                                <span>SIZE</span>
-                                                <input type="number" value={selectedElement.fontSize} onChange={(e) => updateElement(selectedId!, { fontSize: parseInt(e.target.value) })} />
+                                    <>
+                                        <div className="prop-group">
+                                            <label>TEXT CONTENT</label>
+                                            <input 
+                                                type="text" 
+                                                value={selectedElement.text || ''} 
+                                                onChange={(e) => updateElement(selectedId!, { text: e.target.value })} 
+                                                className="input-select"
+                                                style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}
+                                            />
+                                        </div>
+
+                                        <div className="prop-group">
+                                            <label>TYPOGRAPHY</label>
+                                            <select 
+                                                value={selectedElement.fontFamily} 
+                                                onChange={(e) => updateElement(selectedId!, { fontFamily: e.target.value })}
+                                                className="input-select"
+                                            >
+                                                <option value="Outfit">Outfit</option>
+                                                <option value="Inter">Inter</option>
+                                                <option value="Montserrat">Montserrat</option>
+                                                <option value="Playfair Display">Playfair</option>
+                                                <option value="Great Vibes">Calligraphy</option>
+                                            </select>
+                                            
+                                            <div className="grid-2 mt-10">
+                                                <div className="input-field">
+                                                    <span>SIZE</span>
+                                                    <input type="number" value={selectedElement.fontSize} onChange={(e) => updateElement(selectedId!, { fontSize: parseInt(e.target.value) })} />
+                                                </div>
+                                                <div className="input-field">
+                                                    <span>COLOR</span>
+                                                    <div className="color-btn" style={{ backgroundColor: selectedElement.fill }}>
+                                                        <input type="color" value={selectedElement.fill} onChange={(e) => updateElement(selectedId!, { fill: e.target.value })} />
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="input-field">
-                                                <span>COLOR</span>
-                                                <div className="color-btn" style={{ backgroundColor: selectedElement.fill }}>
-                                                    <input type="color" value={selectedElement.fill} onChange={(e) => updateElement(selectedId!, { fill: e.target.value })} />
+
+                                            <select 
+                                                value={selectedElement.fontWeight} 
+                                                onChange={(e) => updateElement(selectedId!, { fontWeight: e.target.value })}
+                                                className="input-select mt-10"
+                                            >
+                                                <option value="normal">Normal</option>
+                                                <option value="bold">Bold</option>
+                                                <option value="900">Black</option>
+                                                <option value="italic">Italic</option>
+                                            </select>
+
+                                            <div className="prop-group mt-10">
+                                                <label>ALIGNMENT</label>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                                                    <button onClick={() => updateElement(selectedId!, { align: 'left' })} style={{ background: selectedElement.align === 'left' ? '#4f46e5' : '#f8fafc', color: selectedElement.align === 'left' ? 'white' : '#1e293b', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>LEFT</button>
+                                                    <button onClick={() => updateElement(selectedId!, { align: 'center' })} style={{ background: selectedElement.align === 'center' ? '#4f46e5' : '#f8fafc', color: selectedElement.align === 'center' ? 'white' : '#1e293b', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>CENTER</button>
+                                                    <button onClick={() => updateElement(selectedId!, { align: 'right' })} style={{ background: selectedElement.align === 'right' ? '#4f46e5' : '#f8fafc', color: selectedElement.align === 'right' ? 'white' : '#1e293b', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>RIGHT</button>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <select 
-                                            value={selectedElement.fontWeight} 
-                                            onChange={(e) => updateElement(selectedId!, { fontWeight: e.target.value })}
-                                            className="input-select mt-10"
-                                        >
-                                            <option value="normal">Normal</option>
-                                            <option value="bold">Bold</option>
-                                            <option value="900">Black</option>
-                                            <option value="italic">Italic</option>
-                                        </select>
-
-                                        <div className="prop-group mt-10">
-                                            <label>ALIGNMENT</label>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                                                <button onClick={() => updateElement(selectedId!, { align: 'left' })} style={{ background: selectedElement.align === 'left' ? '#4f46e5' : '#f8fafc', color: selectedElement.align === 'left' ? 'white' : '#1e293b', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>LEFT</button>
-                                                <button onClick={() => updateElement(selectedId!, { align: 'center' })} style={{ background: selectedElement.align === 'center' ? '#4f46e5' : '#f8fafc', color: selectedElement.align === 'center' ? 'white' : '#1e293b', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>CENTER</button>
-                                                <button onClick={() => updateElement(selectedId!, { align: 'right' })} style={{ background: selectedElement.align === 'right' ? '#4f46e5' : '#f8fafc', color: selectedElement.align === 'right' ? 'white' : '#1e293b', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>RIGHT</button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    </>
                                 )}
 
                                 <div className="prop-group">
