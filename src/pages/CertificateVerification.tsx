@@ -616,6 +616,86 @@ const CertificateVerification = () => {
                 .diag-label { font-size: 0.6rem; font-weight: 900; color: #94a3b8; display: block; margin-bottom: 10px; }
                 .verify-diagnostics code { font-size: 0.6rem; color: #ef4444; word-break: break-all; }
                 .diag-tip { font-size: 0.6rem; color: #64748b; margin: 10px 0 0; }
+
+                @media (max-width: 768px) {
+                    .verify-page {
+                        padding: 20px 12px;
+                    }
+                    .verify-header {
+                        margin-bottom: 30px;
+                    }
+                    .verify-grid {
+                        gap: 20px;
+                    }
+                    .certificate-frame {
+                        padding: 10px;
+                        border-radius: 24px;
+                    }
+                    .certificate-inner {
+                        border-radius: 16px;
+                    }
+                    .seal-badge {
+                        width: 70px;
+                        height: 70px;
+                        border-radius: 20px;
+                        border: 4px solid white;
+                        top: -15px;
+                        left: -15px;
+                    }
+                    .seal-badge svg {
+                        width: 28px !important;
+                        height: 28px !important;
+                    }
+                    .info-card {
+                        padding: 30px 20px;
+                        border-radius: 28px;
+                    }
+                    .credential-title {
+                        font-size: 2.2rem;
+                        letter-spacing: -1px;
+                    }
+                    .name-val {
+                        font-size: 1.5rem;
+                    }
+                    .course-val {
+                        font-size: 1.1rem;
+                    }
+                    .error-card {
+                        padding: 30px 20px !important;
+                    }
+                    .close-modal {
+                        top: 15px;
+                        right: 15px;
+                        background: rgba(0, 0, 0, 0.5);
+                        border-radius: 50%;
+                        padding: 4px;
+                        width: 44px;
+                        height: 44px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .info-metrics {
+                        flex-direction: column;
+                        gap: 15px;
+                    }
+                    .action-buttons {
+                        flex-direction: column;
+                        gap: 12px;
+                    }
+                    .btn-secondary {
+                        width: 100%;
+                        padding: 16px;
+                        border-radius: 20px;
+                        height: 56px;
+                    }
+                    .btn-primary {
+                        padding: 16px;
+                    }
+                }
             `}</style>
         </div>
     );
