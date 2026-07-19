@@ -78,22 +78,23 @@ export default function CheckoutSuccess() {
         __html: `
         .success-page-wrapper {
           min-height: 100vh;
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f3460 100%);
+          background: #f8fafc;
+          background-image: radial-gradient(rgba(52, 121, 127, 0.03) 1.5px, transparent 1.5px);
+          background-size: 24px 24px;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 2.5rem 1rem;
-          color: #f1f5f9;
+          color: #0f172a;
         }
 
         .success-card {
           width: 100%;
           max-width: 620px;
-          background: rgba(30, 41, 59, 0.7);
-          backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
           border-radius: 24px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 20px 40px rgba(15, 23, 42, 0.05);
           padding: 3rem 2.25rem;
           text-align: center;
           position: relative;
@@ -108,7 +109,7 @@ export default function CheckoutSuccess() {
           transform: translateX(-50%);
           width: 150px;
           height: 150px;
-          background: radial-gradient(circle, rgba(52, 121, 127, 0.4) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(52, 121, 127, 0.08) 0%, transparent 70%);
           filter: blur(20px);
           pointer-events: none;
         }
@@ -123,20 +124,20 @@ export default function CheckoutSuccess() {
         }
 
         .spinner-glow {
-          color: #5eead4;
+          color: #34797f;
           animation: spin 1s linear infinite;
-          filter: drop-shadow(0 0 8px rgba(94, 234, 212, 0.5));
+          filter: drop-shadow(0 0 8px rgba(52, 121, 127, 0.2));
         }
 
         .loading-title {
           font-size: 1.35rem;
           font-weight: 800;
-          color: #f8fafc;
+          color: #0f172a;
           letter-spacing: -0.5px;
         }
 
         .loading-subtitle {
-          color: #94a3b8;
+          color: #64748b;
           font-size: 0.9rem;
           max-width: 320px;
           margin: 0 auto;
@@ -150,17 +151,17 @@ export default function CheckoutSuccess() {
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: rgba(16, 185, 129, 0.15);
-          border: 2px solid rgba(16, 185, 129, 0.3);
+          background: rgba(16, 185, 129, 0.1);
+          border: 2px solid rgba(16, 185, 129, 0.2);
           color: #10b981;
           margin-bottom: 1.5rem;
-          filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.25));
+          filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.15));
         }
 
         .success-title {
           font-size: 2.25rem;
           font-weight: 900;
-          color: #ffffff;
+          color: #0f172a;
           letter-spacing: -1px;
           margin-bottom: 0.75rem;
           line-height: 1.15;
@@ -168,15 +169,15 @@ export default function CheckoutSuccess() {
 
         .success-desc {
           font-size: 0.98rem;
-          color: #cbd5e1;
+          color: #475569;
           margin-bottom: 2rem;
           line-height: 1.5;
         }
 
         /* Credentials Box */
         .credential-box {
-          background: rgba(15, 23, 42, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
           border-radius: 16px;
           padding: 1.5rem;
           margin-bottom: 2rem;
@@ -186,7 +187,7 @@ export default function CheckoutSuccess() {
         .credential-header {
           font-size: 0.8rem;
           font-weight: 800;
-          color: #94a3b8;
+          color: #475569;
           text-transform: uppercase;
           letter-spacing: 1.5px;
           margin-bottom: 1rem;
@@ -200,7 +201,7 @@ export default function CheckoutSuccess() {
           justify-content: space-between;
           align-items: center;
           padding: 0.75rem 0;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          border-bottom: 1px solid #e2e8f0;
         }
 
         .credential-field:last-child {
@@ -209,13 +210,13 @@ export default function CheckoutSuccess() {
         }
 
         .field-label {
-          color: #94a3b8;
+          color: #475569;
           font-size: 0.88rem;
         }
 
         .field-value {
           font-family: monospace;
-          color: #ffffff;
+          color: #0f172a;
           font-size: 0.95rem;
           font-weight: 700;
         }
@@ -227,9 +228,9 @@ export default function CheckoutSuccess() {
         }
 
         .copy-btn {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #cbd5e1;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          color: #475569;
           padding: 0.25rem 0.5rem;
           border-radius: 6px;
           cursor: pointer;
@@ -241,27 +242,27 @@ export default function CheckoutSuccess() {
         }
 
         .copy-btn:hover {
-          background: rgba(255, 255, 255, 0.1);
-          color: #ffffff;
+          background: #f1f5f9;
+          color: #0f172a;
         }
 
         /* Next Steps Box */
         .info-notice {
           display: flex;
           gap: 0.75rem;
-          background: rgba(52, 121, 127, 0.1);
-          border: 1px solid rgba(52, 121, 127, 0.2);
+          background: rgba(52, 121, 127, 0.05);
+          border: 1px solid rgba(52, 121, 127, 0.15);
           border-radius: 12px;
           padding: 1.25rem;
           text-align: left;
           font-size: 0.85rem;
           line-height: 1.5;
-          color: #cbd5e1;
+          color: #334155;
           margin-bottom: 2.25rem;
         }
 
         .info-notice-icon {
-          color: #5eead4;
+          color: #34797f;
           flex-shrink: 0;
           margin-top: 1px;
         }
@@ -306,9 +307,9 @@ export default function CheckoutSuccess() {
 
         .btn-home-fallback {
           flex: 1;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #cbd5e1;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          color: #475569;
           border-radius: 12px;
           padding: 0.9rem 1.5rem;
           font-weight: 700;
@@ -322,8 +323,8 @@ export default function CheckoutSuccess() {
         }
 
         .btn-home-fallback:hover {
-          background: rgba(255, 255, 255, 0.1);
-          color: white;
+          background: #f1f5f9;
+          color: #0f172a;
         }
 
         /* Error state */
@@ -334,11 +335,11 @@ export default function CheckoutSuccess() {
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: rgba(239, 68, 68, 0.15);
-          border: 2px solid rgba(239, 68, 68, 0.3);
+          background: rgba(239, 68, 68, 0.1);
+          border: 2px solid rgba(239, 68, 68, 0.2);
           color: #ef4444;
           margin-bottom: 1.5rem;
-          filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.25));
+          filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.1));
         }
 
         @keyframes spin {
