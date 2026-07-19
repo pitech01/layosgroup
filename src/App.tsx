@@ -35,6 +35,7 @@ import EditAssignment from "./pages/instructor/assignments/EditAssignment.tsx";
 import StudentAssignments from './pages/student/assignments/Assignments.tsx';
 import SubmitAssignment from './pages/student/assignments/SubmitAssignment.tsx';
 import NotFound from './pages/NotFound';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 import AdminLayout from './components/layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Preloader from './components/StudentPreloader.tsx';
@@ -80,6 +81,7 @@ function App() {
             {/* <Route path="/admin-login" element={<AdminLogin />} /> */}
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/verify/:uuid" element={<CertificateVerification />} />
+            <Route path="/checkout-success" element={<CheckoutSuccess />} />
 
             {/* Default Route */}
             <Route path="/" element={<Navigate to="/login" replace />} />
