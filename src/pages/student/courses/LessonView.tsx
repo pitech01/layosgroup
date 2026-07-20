@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles, Maximize2, Minimize2, Trophy, Download, RefreshCw, Calendar, Clock, BookOpen, Activity, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, CheckCircle2, ShieldCheck, Loader2, PlayCircle, FileText, Eye, X, Video, HelpCircle, Sparkles, Maximize2, Minimize2, BookOpen, Activity, AlertCircle } from 'lucide-react';
 import AIPDFInteraction from '../../../components/student/AIPDFInteraction';
 import SecurePDFViewer from '../../../components/student/SecurePDFViewer';
 import { SkeletonLessonView } from '../../../components/common/SkeletonLoader';
 import { useAIPutter } from '../../../utils/useAIPutter';
-import { buildProxyUrl } from '../../../utils/pdfTextExtractor';
+import { useAuth } from '../../../context/AuthContext';
+import { getPaymentInfo } from '../../../utils/paymentUtils';
+import { AccessRevokedOverlay } from '../../../components/payment/AccessRevokedOverlay';
 import toast from 'react-hot-toast';
 
 
@@ -176,12 +178,14 @@ const useVideoTrackDetector = (
 // mediaErrorFeedback is now handled in state within LessonView
 
 const LessonView = () => {
+    const { user } = useAuth();
     const { courseId, lessonId } = useParams();
     const [searchParams] = useSearchParams();
     const cohortId = searchParams.get('cohortId');
     const navigate = useNavigate();
 
     const [lesson, setLesson] = useState<any>(null);
+    const [rawCohort, setRawCohort] = useState<any>(null);
     const [isCompleted, setIsCompleted] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -338,6 +342,7 @@ const LessonView = () => {
                 if (response.ok) {
                     const enrolledCohort = data.cohorts.find((c: any) => c.id == cohortId);
                     if (enrolledCohort && enrolledCohort.course) {
+                        setRawCohort(enrolledCohort);
                         const flattenedLessons: any[] = [];
                         enrolledCohort.course.modules.forEach((mod: any) => {
                             mod.lessons.forEach((l: any) => {
@@ -477,6 +482,8 @@ const LessonView = () => {
         return finalUrl;
     };
 
+    const paymentInfo = getPaymentInfo(user, rawCohort);
+
     return (
         <div className="flex flex-col h-[calc(100vh-80px)] overflow-hidden">
             <div className="flex-1 overflow-y-auto scrollbar ">
@@ -511,28 +518,32 @@ const LessonView = () => {
                     {/* Content Player Container */}
                     <div
                         className={`
-                            bg-black rounded-lg overflow-hidden shadow-2xl transition-all duration-500 border border-brand-border
+                            bg-black rounded-3xl overflow-hidden shadow-2xl transition-all duration-500 border border-brand-border
                             ${isMaximized ? 'fixed inset-0 z-[2000] rounded-none' : 'aspect-video relative'}
                         `}
                     >
-                        <button
-                            onClick={() => setIsMaximized(!isMaximized)}
-                            className="absolute top-6 right-6 z-[2100] w-12 h-12 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-white/10 transition-all active:scale-95"
-                        >
-                            {isMaximized ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
-                        </button>
+                        {paymentInfo.isExpired ? (
+                            <AccessRevokedOverlay paymentInfo={paymentInfo} />
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => setIsMaximized(!isMaximized)}
+                                    className="absolute top-6 right-6 z-[2100] w-12 h-12 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 text-white flex items-center justify-center hover:bg-white/10 transition-all active:scale-95"
+                                >
+                                    {isMaximized ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
+                                </button>
 
-                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-brand-charcoal to-black">
-                            <div className="w-full h-full flex flex-col items-center justify-center">
-                                {lesson.type === 'live' ? (
-                                    <div className="text-center p-8 max-w-2xl space-y-8 animate-fade-in-up">
-                                        <div className="w-24 h-24 bg-brand-emerald/10 rounded-[32px] flex items-center justify-center mx-auto border border-brand-emerald/20">
-                                            <Video size={48} className="text-brand-emerald" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-2">Live Session Active</h3>
-                                            <p className="text-brand-muted font-medium text-lg">Synchronized learning protocol initialized. Access via {lesson.live_platform || 'Secure Tunnel'}.</p>
-                                        </div>
+                                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-brand-charcoal to-black">
+                                    <div className="w-full h-full flex flex-col items-center justify-center">
+                                        {lesson.type === 'live' ? (
+                                            <div className="text-center p-8 max-w-2xl space-y-8 animate-fade-in-up">
+                                                <div className="w-24 h-24 bg-brand-emerald/10 rounded-[32px] flex items-center justify-center mx-auto border border-brand-emerald/20">
+                                                    <Video size={48} className="text-brand-emerald" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-2">Live Session Active</h3>
+                                                    <p className="text-brand-muted font-medium text-lg">Synchronized learning protocol initialized. Access via {lesson.live_platform || 'Secure Tunnel'}.</p>
+                                                </div>
 
                                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 bg-white/5 backdrop-blur-xl p-8 rounded-[32px] border border-white/10">
                                             <div className="flex flex-col items-start px-6">
@@ -891,9 +902,11 @@ const LessonView = () => {
                                         </div>
                                     );
                                 })()}
-                            </div>
-                        </div>
-                    </div>
+                             </div>
+                         </div>
+                        </>
+                    )}
+                </div>
 
                     {/* Lesson Meta */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">

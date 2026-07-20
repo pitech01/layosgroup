@@ -21,6 +21,9 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import {SkeletonDashboard} from '../../components/common/SkeletonLoader';
+import { getPaymentInfo } from '../../utils/paymentUtils';
+import { PaymentWarningBanner } from '../../components/payment/PaymentWarningBanner';
+import { PaymentTrackerCard } from '../../components/payment/PaymentTrackerCard';
 
 export default function StudentDashboard() {
     const { user, logout } = useAuth();
@@ -90,6 +93,8 @@ export default function StudentDashboard() {
     }, []);
 
     const firstName = user?.name?.split(' ')[0] || 'Student';
+    const activeCohort = enrollments[0] || null;
+    const paymentInfo = getPaymentInfo(user, activeCohort);
 
     const getCourseIcon = (title: string) => {
         const t = title.toLowerCase();
@@ -174,6 +179,9 @@ export default function StudentDashboard() {
 
     return (
         <div className="space-y-8 pb-12">
+            {/* Top Warning Banner for Outstanding 50% Tuition Balances */}
+            <PaymentWarningBanner paymentInfo={paymentInfo} />
+
             {/* Hero Section */}
             <section className="relative h-full sm:h-full md:h-80 rounded-xl overflow-hidden group shadow-2xl p-2">
                 <img
@@ -230,6 +238,9 @@ export default function StudentDashboard() {
                     </div>
                 ))}
             </div>
+
+            {/* Dedicated Payment Status & Live Countdown Card */}
+            <PaymentTrackerCard user={user} cohort={activeCohort} />
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {/* Left: Course Progress */}

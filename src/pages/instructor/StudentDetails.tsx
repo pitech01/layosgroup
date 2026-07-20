@@ -1124,10 +1124,10 @@ export default function StudentDetails() {
 
 
 
-                                    {/* Zelle Receipt Thumbnail */}
+                                    {/* Receipt Thumbnail */}
                                     {student.receipt_url && (
                                         <div style={{ marginTop: '0.5rem' }}>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Zelle Payment Receipt</span>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Payment Receipt Image</span>
                                             <div 
                                                 onClick={() => setPreviewReceipt(student.receipt_url)}
                                                 style={{
@@ -1147,7 +1147,7 @@ export default function StudentDetails() {
                                             >
                                                 <img 
                                                     src={student.receipt_url} 
-                                                    alt="Zelle Receipt" 
+                                                    alt="Payment Receipt" 
                                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                                                 />
                                                 <div style={{
@@ -1244,6 +1244,74 @@ export default function StudentDetails() {
                                                     )}
                                                 </button>
                                             )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="card-premium-records shadow-premium" style={{ padding: '2rem', marginBottom: '2rem' }}>
+                                <div className="card-title-records" style={{ marginBottom: '1.5rem' }}>
+                                    <h3>
+                                        <Info size={20} color="#1a4d3e" />
+                                        Registration & Referral Details
+                                    </h3>
+                                </div>
+                                
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                    {/* Education Level */}
+                                    <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>Education Level</span>
+                                        <span style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a' }}>
+                                            {student.education_level || 'Not provided'}
+                                        </span>
+                                    </div>
+
+                                    {/* How Heard */}
+                                    <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>How Heard</span>
+                                        <span style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a', textTransform: 'capitalize' }}>
+                                            {student.hear_source ? (student.hear_source === 'referral' ? 'Friend / Referral' : student.hear_source) : 'Not specified'}
+                                        </span>
+                                    </div>
+
+                                    {/* Referral Information Card */}
+                                    {(student.referral_name || student.referral_email || student.hear_source === 'referral') && (
+                                        <div style={{ background: 'rgba(52, 121, 127, 0.04)', padding: '1rem', borderRadius: '16px', border: '1.5px dashed rgba(52, 121, 127, 0.25)' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#1a4d3e', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.75rem' }}>
+                                                Friend / Referral Info
+                                            </span>
+                                            
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                                <div>
+                                                    <span style={{ fontSize: '0.725rem', fontWeight: 700, color: '#64748b', display: 'block' }}>Friend's Name:</span>
+                                                    <span style={{ fontSize: '0.925rem', fontWeight: 850, color: '#0f172a' }}>
+                                                        {student.referral_name || 'N/A'}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span style={{ fontSize: '0.725rem', fontWeight: 700, color: '#64748b', display: 'block' }}>Friend's Email:</span>
+                                                    {student.referral_email ? (
+                                                        <a 
+                                                            href={`mailto:${student.referral_email}`}
+                                                            style={{ fontSize: '0.925rem', fontWeight: 850, color: '#0284c7', textDecoration: 'none' }}
+                                                        >
+                                                            {student.referral_email}
+                                                        </a>
+                                                    ) : (
+                                                        <span style={{ fontSize: '0.925rem', fontWeight: 850, color: '#0f172a' }}>N/A</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Address Details */}
+                                    {(student.address_line1 || student.city || student.country) && (
+                                        <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Address</span>
+                                            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.45, display: 'block' }}>
+                                                {[student.address_line1, student.address_line2, student.city, student.state, student.zip, student.country].filter(Boolean).join(', ')}
+                                            </span>
                                         </div>
                                     )}
                                 </div>

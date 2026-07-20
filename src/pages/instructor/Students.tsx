@@ -36,7 +36,9 @@ export default function Students() {
         const matchesSearch = 
             user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.phone && user.phone.toLowerCase().includes(searchTerm.toLowerCase()));
+            (user.phone && user.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (user.referral_name && user.referral_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (user.referral_email && user.referral_email.toLowerCase().includes(searchTerm.toLowerCase()));
 
         // Cohort filter
         const matchesCohort = 
