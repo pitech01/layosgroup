@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, X } from 'lucide-react';
 
 import { useAuth } from '../../context/AuthContext';
-import { AlertCircle, X } from 'lucide-react';
+import { TwoFactorChallengeModal } from '../../components/auth/TwoFactorChallengeModal';
 // Import images
 import loginHero from '../../assets/login-hero.jpeg';
 
@@ -14,15 +14,17 @@ export default function InstructorLogin() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showForceOption, setShowForceOption] = useState(false);
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [pendingAuthData, setPendingAuthData] = useState<{ user: any; token: string } | null>(null);
     const { login } = useAuth();
     const navigate = useNavigate();
+
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
     const handleLogin = async (e: React.FormEvent, isForce: boolean = false) => {
         if (e) e.preventDefault();
         setLoading(true);
         setError(null);
-
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
         try {
             const response = await fetch(`${API_URL}/login`, {
@@ -48,14 +50,41 @@ export default function InstructorLogin() {
                 throw new Error(data.message || 'Login failed. Please verify your instructor credentials.');
             }
 
-            // Successful login
-            login(data.user, data.token);
-            navigate('/instructor-dashboard');
+            if (data.two_factor_required || data.user?.two_factor_enabled) {
+                setPendingAuthData({ user: data.user, token: data.token });
+                setShow2FAModal(true);
+            } else {
+                login(data.user, data.token);
+                navigate('/instructor-dashboard');
+            }
         } catch (err: any) {
             console.error('Instructor Login Error:', err);
             setError(err.message || 'A network error occurred. Please check your connection.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleVerify2FACode = async (code: string) => {
+        try {
+            const res = await fetch(`${API_URL}/2fa/verify-login`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json' 
+                },
+                body: JSON.stringify({ email, code })
+            });
+            const data = await res.json();
+            if (res.ok && data.token) {
+                login(data.user || pendingAuthData?.user, data.token);
+                setShow2FAModal(false);
+                navigate('/instructor-dashboard');
+            } else {
+                throw new Error(data.message || 'Invalid verification code or recovery key');
+            }
+        } catch (err: any) {
+            throw err;
         }
     };
 
@@ -256,6 +285,13 @@ export default function InstructorLogin() {
                     <p>Access advanced teaching tools, detailed student analytics, and curriculum management features designed for the modern educator.</p>
                 </div>
             </div>
+
+            <TwoFactorChallengeModal
+                isOpen={show2FAModal}
+                email={email}
+                onClose={() => setShow2FAModal(false)}
+                onVerify={handleVerify2FACode}
+            />
         </div>
     );
 }

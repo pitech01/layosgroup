@@ -9,6 +9,7 @@ interface User {
     email: string;
     role: string;
     bio?: string;
+    two_factor_enabled?: boolean;
 }
 
 interface AuthContextType {
@@ -18,6 +19,7 @@ interface AuthContextType {
     login: (user: User, token: string) => void;
     logout: () => void;
     updateUserInfo: (user: User) => void;
+    toggleTwoFactor: (enabled: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,8 +61,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('user', JSON.stringify(updatedUser));
     };
 
+    const toggleTwoFactor = (enabled: boolean) => {
+        if (user) {
+            const updated = { ...user, two_factor_enabled: enabled };
+            setUser(updated);
+            localStorage.setItem('user', JSON.stringify(updated));
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, userRole, isAuthenticated, login, logout, updateUserInfo }}>
+        <AuthContext.Provider value={{ user, userRole, isAuthenticated, login, logout, updateUserInfo, toggleTwoFactor }}>
             {children}
         </AuthContext.Provider>
     );

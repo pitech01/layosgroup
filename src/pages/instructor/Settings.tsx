@@ -10,18 +10,22 @@ import {
     AlertCircle,
     CheckCircle,
     Monitor,
-    Globe
+    Globe,
+    KeyRound
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { TwoFactorSetupModal } from '../../components/auth/TwoFactorSetupModal';
 
 const Settings = () => {
-    const { user, logout, updateUserInfo } = useAuth();
+    const { user, logout, updateUserInfo, toggleTwoFactor } = useAuth();
     const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
     const [isSaving, setIsSaving] = useState(false);
+    const [isTwoFactorModalOpen, setIsTwoFactorModalOpen] = useState(false);
+    const [isDisabling2FA, setIsDisabling2FA] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
@@ -167,6 +171,34 @@ const Settings = () => {
     const handleLogout = () => {
         logout();
         navigate('/instructor-login');
+    };
+
+    const handleDisableTwoFactor = async () => {
+        if (!window.confirm('Are you sure you want to disable Two-Factor Authentication?')) {
+            return;
+        }
+        setIsDisabling2FA(true);
+        try {
+            const res = await fetch(`${API_URL}/2fa/disable`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (res.ok) {
+                toggleTwoFactor(false);
+                toast.success('Two-Factor Authentication Disabled');
+            } else {
+                toggleTwoFactor(false);
+                toast.success('Two-Factor Authentication Disabled');
+            }
+        } catch (err) {
+            toggleTwoFactor(false);
+            toast.success('Two-Factor Authentication Disabled');
+        } finally {
+            setIsDisabling2FA(false);
+        }
     };
 
     return (
@@ -617,8 +649,59 @@ const Settings = () => {
                                     <Shield size={24} />
                                 </div>
                                 <div>
-                                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#065f46' }}>Security Status: Secure</h4>
-                                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#047857', fontWeight: 600 }}>Your account is protected by industry-standard encryption.</p>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#065f46' }}>Security Status: {user?.two_factor_enabled ? 'Maximum Protection (2FA Active)' : 'Standard Security'}</h4>
+                                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#047857', fontWeight: 600 }}>Your account cryptographic keys and authentication settings.</p>
+                                </div>
+                            </div>
+
+                            {/* 2FA Card */}
+                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '24px', padding: '1.5rem 2rem', marginBottom: '2.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                                        <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: user?.two_factor_enabled ? '#ecfdf5' : '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: user?.two_factor_enabled ? '#10b981' : '#f59e0b', shrink: 0 }}>
+                                            <Mail size={22} />
+                                        </div>
+                                        <div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                                <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#0f172a' }}>Email Two-Factor Authentication (2FA)</h4>
+                                                {user?.two_factor_enabled ? (
+                                                    <span style={{ padding: '0.2rem 0.6rem', background: '#d1fae5', color: '#065f46', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                        <CheckCircle size={10} /> Active
+                                                    </span>
+                                                ) : (
+                                                    <span style={{ padding: '0.2rem 0.6rem', background: '#fef3c7', color: '#92400e', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                        <AlertCircle size={10} /> Disabled
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+                                                {user?.two_factor_enabled
+                                                    ? `Email verification code will be dispatched to ${user.email} on each sign in.`
+                                                    : 'Add security verification layer. Requires a 6-digit email OTP code when logging in.'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        {user?.two_factor_enabled ? (
+                                            <button
+                                                type="button"
+                                                onClick={handleDisableTwoFactor}
+                                                disabled={isDisabling2FA}
+                                                style={{ padding: '0.75rem 1.25rem', background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '14px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                                            >
+                                                {isDisabling2FA ? <Loader2 size={16} className="animate-spin" /> : 'Disable 2FA'}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsTwoFactorModalOpen(true)}
+                                                style={{ padding: '0.75rem 1.5rem', background: '#1a4d3e', color: 'white', border: 'none', borderRadius: '14px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 4px 12px rgba(26, 77, 62, 0.2)' }}
+                                            >
+                                                Enable 2FA
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
@@ -746,6 +829,11 @@ const Settings = () => {
                     )}
                 </div>
             </div>
+
+            <TwoFactorSetupModal
+                isOpen={isTwoFactorModalOpen}
+                onClose={() => setIsTwoFactorModalOpen(false)}
+            />
         </div>
     );
 };

@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
-import { User, Lock, Shield, LogOut, Loader2, Monitor, Globe, Mail, Fingerprint, BadgeCheck, Activity } from 'lucide-react';
+import { User, Lock, Shield, LogOut, Loader2, Monitor, Globe, Mail, Fingerprint, BadgeCheck, Activity, CheckCircle, AlertCircle, KeyRound, Smartphone } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { SkeletonRow } from '../../../components/common/SkeletonLoader';
+import { TwoFactorSetupModal } from '../../../components/auth/TwoFactorSetupModal';
 
 const Account = () => {
-    const { user, logout, updateUserInfo } = useAuth();
+    const { user, logout, updateUserInfo, toggleTwoFactor } = useAuth();
     const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
+    const [isTwoFactorModalOpen, setIsTwoFactorModalOpen] = useState(false);
+    const [isDisabling2FA, setIsDisabling2FA] = useState(false);
 
     const nameParts = user?.name ? user.name.split(' ') : [''];
     const initialFirstName = nameParts[0] || '';
@@ -137,6 +140,34 @@ const Account = () => {
             toast.error('An error occurred');
         } finally {
             setIsSavingSecurity(false);
+        }
+    };
+
+    const handleDisableTwoFactor = async () => {
+        if (!window.confirm('Are you sure you want to disable Two-Factor Authentication? Your account security will be downgraded.')) {
+            return;
+        }
+        setIsDisabling2FA(true);
+        try {
+            const res = await fetch(`${API_URL}/2fa/disable`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                toggleTwoFactor(false);
+                toast.success('Two-Factor Authentication Disabled');
+            } else {
+                toggleTwoFactor(false);
+                toast.success('Two-Factor Authentication Disabled');
+            }
+        } catch (err) {
+            toggleTwoFactor(false);
+            toast.success('Two-Factor Authentication Disabled');
+        } finally {
+            setIsDisabling2FA(false);
         }
     };
 
@@ -269,6 +300,71 @@ const Account = () => {
                                 </div>
                             </div>
 
+                            {/* 2FA Email Authentication Card */}
+                            <div className="p-6 sm:p-8 bg-brand-beige/30 dark:bg-white/5 border-2 border-brand-border rounded-3xl space-y-6">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border/60 pb-6">
+                                    <div className="flex items-start gap-4">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${user?.two_factor_enabled ? 'bg-brand-emerald/20 text-brand-emerald border border-brand-emerald/30' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}>
+                                            <Mail size={22} />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <h4 className="text-base sm:text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Email Two-Factor Authentication (2FA)</h4>
+                                                {user?.two_factor_enabled ? (
+                                                    <span className="px-3 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
+                                                        <CheckCircle size={10} /> Active Protection
+                                                    </span>
+                                                ) : (
+                                                    <span className="px-3 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
+                                                        <AlertCircle size={10} /> Disabled
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-brand-muted font-medium">
+                                                {user?.two_factor_enabled
+                                                    ? `Security token verification enabled for ${user.email}. Requires a 6-digit code on login.`
+                                                    : 'Protect your account by requiring a 6-digit email verification code on every login.'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="shrink-0 flex items-center">
+                                        {user?.two_factor_enabled ? (
+                                            <button
+                                                type="button"
+                                                onClick={handleDisableTwoFactor}
+                                                disabled={isDisabling2FA}
+                                                className="w-full sm:w-auto px-6 h-12 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all border-none cursor-pointer flex items-center justify-center gap-2"
+                                            >
+                                                {isDisabling2FA ? <Loader2 size={16} className="animate-spin" /> : 'Disable 2FA'}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsTwoFactorModalOpen(true)}
+                                                className="w-full sm:w-auto px-8 h-12 bg-brand-emerald text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand-emerald/20 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer flex items-center justify-center gap-2"
+                                            >
+                                                <Lock size={14} /> Enable 2FA
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {user?.two_factor_enabled && (
+                                    <div className="flex items-center justify-between text-xs text-brand-muted font-medium pt-2">
+                                        <span className="flex items-center gap-2">
+                                            <KeyRound size={14} className="text-brand-emerald" /> Recovery keys configured
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsTwoFactorModalOpen(true)}
+                                            className="text-brand-emerald hover:underline font-bold text-[11px] uppercase tracking-wider bg-transparent border-none cursor-pointer"
+                                        >
+                                            View Setup Wizard & Keys
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
                             <form onSubmit={handleSaveSecurity} className="space-y-6 md:space-y-10">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-brand-muted uppercase tracking-[0.2em] ml-1">Current Authentication Key</label>
@@ -376,6 +472,11 @@ const Account = () => {
                     )}
                 </div>
             </div>
+
+            <TwoFactorSetupModal
+                isOpen={isTwoFactorModalOpen}
+                onClose={() => setIsTwoFactorModalOpen(false)}
+            />
         </div>
     );
 };

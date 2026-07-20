@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, X, Star, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { TwoFactorChallengeModal } from '../../components/auth/TwoFactorChallengeModal';
 import loginHero from '../../assets/login-hero.jpeg';
 import '../../student.css';
 
@@ -12,15 +13,17 @@ export default function StudentLogin() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showForceOption, setShowForceOption] = useState(false);
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [pendingAuthData, setPendingAuthData] = useState<{ user: any; token: string } | null>(null);
     const { login } = useAuth();
     const navigate = useNavigate();
+
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
     const handleLogin = async (e: React.FormEvent, isForce: boolean = false) => {
         if (e) e.preventDefault();
         setLoading(true);
         setError(null);
-
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
         try {
             const response = await fetch(`${API_URL}/login`, {
@@ -46,13 +49,41 @@ export default function StudentLogin() {
                 throw new Error(data.message || 'Login failed. Please verify your credentials.');
             }
 
-            login(data.user, data.token);
-            navigate('/student/dashboard');
+            if (data.two_factor_required || data.user?.two_factor_enabled) {
+                setPendingAuthData({ user: data.user, token: data.token });
+                setShow2FAModal(true);
+            } else {
+                login(data.user, data.token);
+                navigate('/student/dashboard');
+            }
         } catch (err: any) {
             console.error('Student Login Error:', err);
             setError(err.message || 'A network error occurred. Please check your connection.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleVerify2FACode = async (code: string) => {
+        try {
+            const res = await fetch(`${API_URL}/2fa/verify-login`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json' 
+                },
+                body: JSON.stringify({ email, code })
+            });
+            const data = await res.json();
+            if (res.ok && data.token) {
+                login(data.user || pendingAuthData?.user, data.token);
+                setShow2FAModal(false);
+                navigate('/student/dashboard');
+            } else {
+                throw new Error(data.message || 'Invalid verification code or recovery key');
+            }
+        } catch (err: any) {
+            throw err;
         }
     };
 
@@ -204,6 +235,13 @@ export default function StudentLogin() {
                     </div>
                 </div>
             </div>
+
+            <TwoFactorChallengeModal
+                isOpen={show2FAModal}
+                email={email}
+                onClose={() => setShow2FAModal(false)}
+                onVerify={handleVerify2FACode}
+            />
         </div>
     );
 }
