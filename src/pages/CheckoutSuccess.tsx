@@ -9,13 +9,25 @@ import {
   ExternalLink,
   Info,
   ShieldCheck,
+  Receipt,
 } from 'lucide-react';
 
 interface StudentData {
+  id?: number;
   name: string;
   email: string;
   first_name: string;
   last_name: string;
+  phone?: string;
+  payment_plan?: string;
+  payment_method?: string;
+  payment_status?: string;
+  education_level?: string;
+  referral_name?: string;
+  referral_email?: string;
+  address_line1?: string;
+  city?: string;
+  created_at?: string;
 }
 
 export default function CheckoutSuccess() {
@@ -346,6 +358,71 @@ export default function CheckoutSuccess() {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+
+        @media (max-width: 640px) {
+          .success-page-wrapper {
+            padding: 1.5rem 0.75rem;
+          }
+          .success-card {
+            padding: 2rem 1.25rem;
+            border-radius: 20px;
+          }
+          .check-icon-wrapper, .error-icon-wrapper {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1.25rem;
+          }
+          .check-icon-wrapper svg, .error-icon-wrapper svg {
+            width: 32px;
+            height: 32px;
+          }
+          .success-title {
+            font-size: 1.65rem;
+            margin-bottom: 0.5rem;
+          }
+          .success-desc {
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+          }
+          .credential-box {
+            padding: 1.15rem 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 14px;
+          }
+          .credential-field {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.35rem;
+            padding: 0.75rem 0;
+          }
+          .field-label {
+            font-size: 0.8rem;
+          }
+          .field-value {
+            font-size: 0.88rem;
+            word-break: break-all;
+            max-width: 100%;
+          }
+          .password-value-wrap {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .info-notice {
+            padding: 1rem;
+            margin-bottom: 1.75rem;
+            font-size: 0.82rem;
+            border-radius: 10px;
+          }
+          .action-row {
+            flex-direction: column;
+            width: 100%;
+          }
+          .btn-lms-login, .btn-home-fallback {
+            width: 100%;
+            padding: 0.85rem 1.25rem;
+            font-size: 0.92rem;
+          }
+        }
         `,
       }} />
 
@@ -410,6 +487,87 @@ export default function CheckoutSuccess() {
                     {copied ? 'Copied' : 'Copy'}
                   </button>
                 </div>
+              </div>
+            </div>
+
+            {/* Payment Receipt Summary Card */}
+            <div className="receipt-display-box" style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              textAlign: 'left'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                borderBottom: '1px dashed #cbd5e1',
+                paddingBottom: '0.85rem',
+                marginBottom: '1rem'
+              }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 850, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Receipt size={17} style={{ color: '#34797f' }} /> Official Payment Receipt
+                  </h4>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                    Receipt #LAYOS-{String(student.id || 1).padStart(5, '0')}
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '0.725rem',
+                  fontWeight: 900,
+                  color: '#166534',
+                  background: '#dcfce7',
+                  border: '1px solid #86efac',
+                  padding: '4px 10px',
+                  borderRadius: '99px',
+                  textTransform: 'uppercase'
+                }}>
+                  APPROVED
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gap: '0.65rem', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>Billed Student</span>
+                  <span style={{ color: '#0f172a', fontWeight: 700 }}>{student.first_name} {student.last_name}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>Email Address</span>
+                  <span style={{ color: '#0f172a', fontWeight: 700, fontFamily: 'monospace', fontSize: '0.82rem' }}>{student.email}</span>
+                </div>
+                {student.phone && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                    <span style={{ color: '#64748b', fontWeight: 600 }}>Phone Number</span>
+                    <span style={{ color: '#0f172a', fontWeight: 700 }}>{student.phone}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>Payment Plan</span>
+                  <span style={{ color: '#0f172a', fontWeight: 700, textTransform: 'capitalize' }}>
+                    {student.payment_plan ? student.payment_plan.replace('_', ' ') : 'Full Tuition'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>Payment Method</span>
+                  <span style={{ color: '#0f172a', fontWeight: 700 }}>Stripe Card</span>
+                </div>
+                {student.education_level && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                    <span style={{ color: '#64748b', fontWeight: 600 }}>Education Level</span>
+                    <span style={{ color: '#0f172a', fontWeight: 700 }}>{student.education_level}</span>
+                  </div>
+                )}
+                {(student.referral_name || student.referral_email) && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
+                    <span style={{ color: '#64748b', fontWeight: 600 }}>Referred By</span>
+                    <span style={{ color: '#0f172a', fontWeight: 700 }}>
+                      {student.referral_name || 'Friend'} {student.referral_email ? `(${student.referral_email})` : ''}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

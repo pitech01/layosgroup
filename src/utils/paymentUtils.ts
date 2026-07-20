@@ -21,8 +21,16 @@ export interface PaymentInfo {
 }
 
 export function getPaymentInfo(user: any, cohort: any): PaymentInfo {
-    // 1. Determine Payment Plan & Active Tracking
-    const rawPlan = (user?.payment_plan || cohort?.pivot?.payment_plan || user?.payment_status || '').toString().toLowerCase();
+    // 1. Determine Payment Plan
+    const rawPlan = (user?.payment_plan || cohort?.pivot?.payment_plan || '').toString().toLowerCase();
+
+    const isFiftyPercent = (
+        rawPlan === 'installment' || 
+        rawPlan === '50_percent' || 
+        rawPlan === '50%' || 
+        rawPlan === 'partial' || 
+        rawPlan === 'half'
+    );
 
     // The payment tracking banner/lock should ONLY show when the instructor explicitly makes it active or student chose 50% plan
     const isExplicitlyActivated = 
@@ -34,13 +42,21 @@ export function getPaymentInfo(user: any, cohort: any): PaymentInfo {
         cohort?.payment_tracking_enabled === '1' ||
         cohort?.pivot?.payment_tracking_enabled === true || 
         cohort?.pivot?.payment_tracking_enabled === 1 ||
-        rawPlan === 'installment' || 
-        rawPlan === '50_percent' || 
-        rawPlan === '50%' || 
-        rawPlan === 'partial' || 
-        rawPlan === 'half';
+        isFiftyPercent;
 
-    // If NOT explicitly activated by instructor, treat existing cohort/course as fully active with no banner or lock
+    // Course Title & Type Resolution
+    const courseTitle = cohort?.course?.title || cohort?.name || user?.course_name || 'Foundation Academy';
+    const titleLower = courseTitle.toLowerCase();
+    const isPro = titleLower.includes('professional') || titleLower.includes('master');
+    const courseType: 'foundation' | 'professional' = isPro ? 'professional' : 'foundation';
+    const durationDays = isPro ? 14 : 7;
+
+    // Prices: Foundation = $999 total ($500 paid, $499 remaining), Professional = $1,499 total ($750 paid, $749 remaining)
+    const totalAmount = isPro ? 1499 : 999;
+    const remainingBalance = isFiftyPercent ? (isPro ? 749 : 499) : 0;
+    const amountPaid = isFiftyPercent ? (isPro ? 750 : 500) : totalAmount;
+
+    // If NOT explicitly activated by instructor AND not 50% plan, treat as fully paid with no banner or lock
     if (!isExplicitlyActivated) {
         return {
             isFullyPaid: true,
@@ -48,15 +64,15 @@ export function getPaymentInfo(user: any, cohort: any): PaymentInfo {
             hasStarted: false,
             isExpired: false,
             paymentPlan: 'full',
-            amountPaid: 1000,
-            totalAmount: 1000,
+            amountPaid: totalAmount,
+            totalAmount: totalAmount,
             remainingBalance: 0,
-            courseType: 'foundation',
-            courseTitle: cohort?.course?.title || cohort?.name || 'Course',
+            courseType,
+            courseTitle,
             cohortName: cohort?.name || 'Assigned Cohort',
             startDate: cohort?.start_date ? new Date(cohort.start_date) : null,
             deadlineDate: null,
-            durationDays: 7,
+            durationDays,
             daysRemaining: 0,
             hoursRemaining: 0,
             minutesRemaining: 0,
@@ -65,29 +81,7 @@ export function getPaymentInfo(user: any, cohort: any): PaymentInfo {
         };
     }
 
-    const isFullyPaid = rawPlan === 'full' || rawPlan === 'fully_paid' || rawPlan === 'approved' || rawPlan === '100%' || rawPlan === 'completed' || (user?.payment_status === 'approved' && user?.payment_plan !== 'installment' && user?.payment_plan !== '50_percent');
-    
-    // Check if 50% plan is explicitly set
-    const isFiftyPercent = !isFullyPaid && (
-        rawPlan === 'installment' || 
-        rawPlan === '50_percent' || 
-        rawPlan === '50%' || 
-        rawPlan === 'partial' || 
-        rawPlan === 'half'
-    );
-
-    // 2. Determine Course Type (Foundation = 7 days, Professional = 14 days)
-    const courseTitle = cohort?.course?.title || cohort?.name || 'Course';
-    const titleLower = courseTitle.toLowerCase();
-    const isFoundation = titleLower.includes('foundation') || titleLower.includes('academy');
-    const courseType: 'foundation' | 'professional' = isFoundation ? 'foundation' : 'professional';
-    const durationDays = isFoundation ? 7 : 14;
-
-    // Prices (Foundation = $999 total / $500 bal, Professional = $1,499 or $2,000 total / $1,000 bal)
-    const isPro = courseType === 'professional';
-    const totalAmount = isPro ? 2000 : 1000;
-    const remainingBalance = isFullyPaid ? 0 : (isPro ? 1000 : 500);
-    const amountPaid = totalAmount - remainingBalance;
+    const isFullyPaid = !isFiftyPercent && (rawPlan === 'full' || rawPlan === 'fully_paid' || rawPlan === '100%' || rawPlan === 'completed' || user?.payment_status === 'approved');
 
     // 3. Cohort Start Date
     const hasCohort = !!cohort;
@@ -100,7 +94,6 @@ export function getPaymentInfo(user: any, cohort: any): PaymentInfo {
         if (isNaN(startDate.getTime())) {
             startDate = new Date();
         }
-        // Deadline = Start Date + durationDays
         deadlineDate = new Date(startDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
     }
 
@@ -144,14 +137,14 @@ export function getPaymentInfo(user: any, cohort: any): PaymentInfo {
     }
 
     return {
-        isFullyPaid: isFullyPaid || !isFiftyPercent && user?.payment_status === 'approved',
+        isFullyPaid,
         hasCohort,
         hasStarted,
         isExpired,
         paymentPlan: isFiftyPercent ? '50_percent' : 'full',
         amountPaid,
         totalAmount,
-        remainingBalance,
+        remainingBalance: isFullyPaid ? 0 : remainingBalance,
         courseType,
         courseTitle,
         cohortName: cohort?.name || 'Assigned Cohort',
