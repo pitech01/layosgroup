@@ -3,7 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import StudentLogin from './pages/auth/StudentLogin';
 import InstructorLogin from './pages/auth/InstructorLogin';
 // import AdminLogin from './pages/auth/AdminLogin';
-// import StudentRegister from './pages/auth/StudentRegister';
+import StudentRegister from './pages/auth/StudentRegister';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import StudentDashboard from './pages/student/Dashboard';
 import InstructorDashboard from './pages/instructor/InstructorDashboard';
@@ -76,7 +76,7 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<StudentLogin />} />
-            {/* <Route path="/register" element={<StudentRegister />} /> */}
+            <Route path="/register" element={<StudentRegister />} />
             <Route path="/instructor-login" element={<InstructorLogin />} />
             {/* <Route path="/admin-login" element={<AdminLogin />} /> */}
             <Route path="/forgot-password" element={<ForgotPassword />} />
