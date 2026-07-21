@@ -7,7 +7,7 @@ export interface PaymentInfo {
     amountPaid: number;
     totalAmount: number;
     remainingBalance: number;
-    courseType: 'foundation' | 'professional';
+    courseType: 'foundation' | 'professional' | 'bundle';
     courseTitle: string;
     cohortName: string;
     startDate: Date | null;
@@ -47,14 +47,15 @@ export function getPaymentInfo(user: any, cohort: any): PaymentInfo {
     // Course Title & Type Resolution
     const courseTitle = cohort?.course?.title || cohort?.name || user?.course_name || 'Foundation Academy';
     const titleLower = courseTitle.toLowerCase();
-    const isPro = titleLower.includes('professional') || titleLower.includes('master');
-    const courseType: 'foundation' | 'professional' = isPro ? 'professional' : 'foundation';
-    const durationDays = isPro ? 14 : 7;
+    const isBundle = titleLower.includes('bundle') || (titleLower.includes('foundation') && titleLower.includes('master'));
+    const isPro = !isBundle && (titleLower.includes('professional') || titleLower.includes('master'));
+    const courseType: 'foundation' | 'professional' | 'bundle' = isBundle ? 'bundle' : (isPro ? 'professional' : 'foundation');
+    const durationDays = isBundle ? 21 : (isPro ? 14 : 7);
 
-    // Prices: Foundation = $999 total ($500 paid, $499 remaining), Professional = $1,499 total ($750 paid, $749 remaining)
-    const totalAmount = isPro ? 1499 : 999;
-    const remainingBalance = isFiftyPercent ? (isPro ? 749 : 499) : 0;
-    const amountPaid = isFiftyPercent ? (isPro ? 750 : 500) : totalAmount;
+    // Prices: Foundation = $799, Professional = $1,199, Bundle = $1,799 (Save $200)
+    const totalAmount = isBundle ? 1799 : (isPro ? 1199 : 799);
+    const remainingBalance = isFiftyPercent ? (isBundle ? 899 : (isPro ? 599 : 399)) : 0;
+    const amountPaid = isFiftyPercent ? (isBundle ? 900 : (isPro ? 600 : 400)) : totalAmount;
 
     // If NOT explicitly activated by instructor AND not 50% plan, treat as fully paid with no banner or lock
     if (!isExplicitlyActivated) {
