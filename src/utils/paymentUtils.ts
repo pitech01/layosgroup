@@ -54,18 +54,34 @@ export function getPaymentInfo(user: any, cohort: any): PaymentInfo {
 
     // Resolve pricing based on user registration date for backward compatibility
     const registrationDate = user?.created_at ? new Date(user.created_at) : new Date();
+    
+    // Check historical milestones:
+    // - Before July 30, 2026: Old prices (Foundation $799, Pro $1199, Bundle $1799)
+    // - July 30 to Sept 5, 2026: Promo prices (Foundation $799, Pro $1199, Bundle $1999)
+    // - After Sept 5, 2026: New baseline prices (Foundation $999, Pro $1499, Bundle $2499)
+    const promoStartDate = new Date('2026-07-30T00:00:00');
     const promoEndDate = new Date('2026-09-06T00:00:00'); // Promo ends end of Sept 5, 2026
-    const isPromoOrOld = registrationDate < promoEndDate;
 
-    const priceConfig = isPromoOrOld ? {
-        foundation: { total: 799, installment: 400, remaining: 399 },
-        professional: { total: 1199, installment: 600, remaining: 599 },
-        bundle: { total: 1799, installment: 900, remaining: 899 }
-    } : {
-        foundation: { total: 999, installment: 500, remaining: 499 },
-        professional: { total: 1499, installment: 750, remaining: 749 },
-        bundle: { total: 1999, installment: 1000, remaining: 999 }
-    };
+    let priceConfig;
+    if (registrationDate < promoStartDate) {
+        priceConfig = {
+            foundation: { total: 799, installment: 400, remaining: 399 },
+            professional: { total: 1199, installment: 600, remaining: 599 },
+            bundle: { total: 1799, installment: 900, remaining: 899 }
+        };
+    } else if (registrationDate < promoEndDate) {
+        priceConfig = {
+            foundation: { total: 799, installment: 400, remaining: 399 },
+            professional: { total: 1199, installment: 600, remaining: 599 },
+            bundle: { total: 1999, installment: 1000, remaining: 999 }
+        };
+    } else {
+        priceConfig = {
+            foundation: { total: 999, installment: 500, remaining: 499 },
+            professional: { total: 1499, installment: 750, remaining: 749 },
+            bundle: { total: 2499, installment: 1250, remaining: 1249 }
+        };
+    }
 
     const currentConfig = isBundle ? priceConfig.bundle : (isPro ? priceConfig.professional : priceConfig.foundation);
 
