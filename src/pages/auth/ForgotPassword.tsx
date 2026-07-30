@@ -117,7 +117,7 @@ export default function ForgotPassword() {
                 <div className="w-full max-w-[400px] animate-fade-in-up">
                     <div className="flex justify-center mb-10">
                         <img
-                            src="/logo.png"
+                            src="/logo-v2.png"
                             alt="Layos Group LLC"
                             className="h-12 w-auto"
                         />

@@ -95,7 +95,7 @@ export default function InstructorLogin() {
                 <div className="login-form-wrapper animate-fade-in-up">
                     <div className="login-logo-centered delay-100">
                         <img
-                            src="/logo.png"
+                            src="/logo-v2.png"
                             alt="Layos Group LLC"
                             className="login-logo-img"
                         />

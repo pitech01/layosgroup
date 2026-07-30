@@ -51,7 +51,7 @@ const Sidebar = ({ collapsed, mobileOpen }: SidebarProps) => {
             {/* Header: Logo */}
             <div className={`flex items-center h-20 px-6 ${collapsed ? 'justify-center' : 'justify-start gap-4'}`}>
                 <img
-                    src="/logo.png"
+                    src="/logo-v2.png"
                     alt="Logo"
                     className={`h-8 w-auto transition-opacity duration-200 ${collapsed ? 'opacity-0' : 'opacity-100'}`}
                 />

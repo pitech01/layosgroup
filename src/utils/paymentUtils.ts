@@ -52,10 +52,26 @@ export function getPaymentInfo(user: any, cohort: any): PaymentInfo {
     const courseType: 'foundation' | 'professional' | 'bundle' = isBundle ? 'bundle' : (isPro ? 'professional' : 'foundation');
     const durationDays = isBundle ? 21 : (isPro ? 14 : 7);
 
-    // Prices: Foundation = $799, Professional = $1,199, Bundle = $1,799 (Save $200)
-    const totalAmount = isBundle ? 1799 : (isPro ? 1199 : 799);
-    const remainingBalance = isFiftyPercent ? (isBundle ? 899 : (isPro ? 599 : 399)) : 0;
-    const amountPaid = isFiftyPercent ? (isBundle ? 900 : (isPro ? 600 : 400)) : totalAmount;
+    // Resolve pricing based on user registration date for backward compatibility
+    const registrationDate = user?.created_at ? new Date(user.created_at) : new Date();
+    const promoEndDate = new Date('2026-09-06T00:00:00'); // Promo ends end of Sept 5, 2026
+    const isPromoOrOld = registrationDate < promoEndDate;
+
+    const priceConfig = isPromoOrOld ? {
+        foundation: { total: 799, installment: 400, remaining: 399 },
+        professional: { total: 1199, installment: 600, remaining: 599 },
+        bundle: { total: 1799, installment: 900, remaining: 899 }
+    } : {
+        foundation: { total: 999, installment: 500, remaining: 499 },
+        professional: { total: 1499, installment: 750, remaining: 749 },
+        bundle: { total: 1999, installment: 1000, remaining: 999 }
+    };
+
+    const currentConfig = isBundle ? priceConfig.bundle : (isPro ? priceConfig.professional : priceConfig.foundation);
+
+    const totalAmount = currentConfig.total;
+    const remainingBalance = isFiftyPercent ? currentConfig.remaining : 0;
+    const amountPaid = isFiftyPercent ? currentConfig.installment : totalAmount;
 
     // If NOT explicitly activated by instructor AND not 50% plan, treat as fully paid with no banner or lock
     if (!isExplicitlyActivated) {

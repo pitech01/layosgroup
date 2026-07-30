@@ -109,7 +109,7 @@ const NotFound = () => {
             <div className="not-found-container animate-fade-in-up">
                 <div className="icon-container">
                     <img
-                        src="/logo.png"
+                        src="/logo-v2.png"
                         alt="LayosGroup Logo"
                         style={{ height: '60px', width: 'auto' }}
                     />

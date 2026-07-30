@@ -96,7 +96,7 @@ export default function StudentRegister() {
                 <div className="w-full max-w-[700px] mx-auto p-8 md:p-16 animate-fade-in-up">
                     <div className="flex justify-center mb-12">
                         <img
-                            src="/logo.png"
+                            src="/logo-v2.png"
                             alt="Layos Group LLC"
                             className="h-12 w-auto"
                         />

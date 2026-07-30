@@ -59,7 +59,7 @@ const StudentLayout = () => {
             {/* Desktop Sidebar */}
             <aside className={`hidden lg:flex flex-col bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] sticky top-0 h-screen transition-all duration-300 z-40 ${collapsed ? 'w-[90px]' : 'w-[280px]'} py-8 px-4`}>
                 <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-start px-2'} mb-10 h-10`}>
-                    <img src="/logo.png" alt="Logo" className="w-8 h-auto flex-shrink-0" />
+                    <img src="/logo-v2.png" alt="Logo" className="w-8 h-auto flex-shrink-0" />
                     {!collapsed && <span className="ml-3 font-bold text-xl tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">LMS Portal</span>}
                 </div>
 

@@ -57,7 +57,7 @@ const InstructorSidebar = ({ collapsed, mobileOpen }: InstructorSidebarProps) =>
         <aside className={`sidebar-modern instructor-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`} style={{ overflowY: 'auto' }}>
             <div className="sidebar-header">
                 <img
-                    src="/logo.png"
+                    src="/logo-v2.png"
                     alt="Logo"
                     className="sidebar-logo"
                     style={{

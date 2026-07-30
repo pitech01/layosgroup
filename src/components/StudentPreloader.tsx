@@ -7,7 +7,7 @@ const Preloader: React.FC = () => {
                 {/* Logo with a gentle pulse effect */}
                 <div className="relative">
                     <img 
-                        src="/logo.png" 
+                        src="/logo-v2.png" 
                         alt="Loading..." 
                         className="h-32 w-32 object-contain animate-pulse"
                     />
