@@ -221,8 +221,7 @@ const Courses = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredCourses.length > 0 ? (
                     filteredCourses.map((course: any) => {
-                        console.log(course);
-                        const progress = course.progress || 0;
+                        const progress = Math.round(Number(course.progress) || 0);
                         const isCompleted = progress === 100;
                         const isStarted = progress > 0;
 
@@ -240,8 +239,8 @@ const Courses = () => {
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal/80 via-transparent to-transparent" />
                                     <div className={`absolute top-6 right-6 px-4 py-1.5 rounded-full text-[10px] font-black shadow-xl backdrop-blur-md ${
-                                        isCompleted ? 'bg-emerald-500 text-white' : 
-                                        isStarted ? 'bg-indigo-500 text-white' : 'bg-white/90 text-brand-charcoal'
+                                        isCompleted ? 'bg-emerald-500 text-white' :
+                                        isStarted ? 'bg-brand-emerald text-white' : 'bg-white/90 text-brand-charcoal'
                                     } uppercase tracking-widest border border-white/20`}>
                                         {isCompleted ? 'Finished' : isStarted ? 'In Progress' : 'Ready to Start'}
                                     </div>
@@ -249,7 +248,7 @@ const Courses = () => {
 
                                 <div className="p-8 flex flex-col flex-1">
                                     <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-2 h-2 rounded-full bg-brand-emerald shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                                        <div className="w-2 h-2 rounded-full bg-brand-emerald shadow-[0_0_10px_color-mix(in srgb, var(--lgl-success) 50%, transparent)]" />
                                         <span className="text-[10px] font-black text-brand-emerald uppercase tracking-widest">
                                             Instructor: {course.instructor}
                                         </span>
@@ -266,7 +265,7 @@ const Courses = () => {
                                         </div>
                                         <div className="w-full bg-brand-beige dark:bg-white/5 h-2 rounded-full overflow-hidden border border-brand-border">
                                             <div
-                                                className="bg-brand-emerald h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                                                className="bg-brand-emerald h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_color-mix(in srgb, var(--lgl-success) 30%, transparent)]"
                                                 style={{ width: `${progress}%` }}
                                             />
                                         </div>

@@ -168,10 +168,10 @@ const Announcements = () => {
 
     const getCategoryBadgeColor = (cat: string) => {
         switch (cat) {
-            case 'Student Success': return { bg: '#ecfdf5', color: '#047857', border: '#bbf7d0' };
-            case 'Cohort Launch': return { bg: '#e0f2fe', color: '#0369a1', border: '#bae6fd' };
-            case 'Webinar': return { bg: '#fffbeb', color: '#b45309', border: '#fde68a' };
-            default: return { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' };
+            case 'Student Success': return { bg: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)', color: 'var(--lgl-success)', border: 'color-mix(in srgb, var(--lgl-success) 35%, transparent)' };
+            case 'Cohort Launch': return { bg: 'var(--index-accent-soft-bg)', color: 'var(--lgl-cyan-dark)', border: 'color-mix(in srgb, var(--lgl-cyan-dark) 35%, transparent)' };
+            case 'Webinar': return { bg: 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)', color: 'var(--lgl-warning)', border: 'color-mix(in srgb, var(--lgl-warning) 35%, transparent)' };
+            default: return { bg: 'var(--index-hover-bg)', color: 'var(--index-text-secondary)', border: 'var(--index-border-color)' };
         }
     };
 
@@ -197,7 +197,7 @@ const Announcements = () => {
                 .announcements-header-block h1 {
                     font-size: 2.25rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0;
                     letter-spacing: -0.03em;
                     display: flex;
@@ -206,7 +206,7 @@ const Announcements = () => {
                 }
 
                 .staff-scope .btn-add-announcement {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     padding: 0.75rem 1.5rem;
                     border-radius: 14px;
@@ -217,19 +217,19 @@ const Announcements = () => {
                     align-items: center;
                     gap: 0.5rem;
                     cursor: pointer;
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) calc(0.2 * 100%), transparent);
                     transition: all 0.3s;
                 }
 
                 .btn-add-announcement:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 12px 20px -3px rgba(26, 77, 62, 0.35);
-                    background: #153e32;
+                    box-shadow: 0 12px 20px -3px color-mix(in srgb, var(--index-primary-color) calc(0.35 * 100%), transparent);
+                    background: var(--index-primary-hover);
                 }
 
                 .staff-scope .announcements-dashboard-card {
                     background: white;
-                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border: 1px solid color-mix(in srgb, var(--index-border-color) 80%, transparent);
                     border-radius: 32px;
                     overflow: hidden;
                     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.01);
@@ -258,8 +258,8 @@ const Announcements = () => {
 
                 /* Cards Styling */
                 .staff-scope .announcement-card-premium {
-                    background: #ffffff;
-                    border: 1px solid #e2e8f0;
+                    background: var(--index-card-bg);
+                    border: 1px solid var(--index-border-color);
                     border-radius: 24px;
                     overflow: hidden;
                     display: flex;
@@ -270,16 +270,16 @@ const Announcements = () => {
 
                 .announcement-card-premium:hover {
                     transform: translateY(-4px);
-                    box-shadow: 0 15px 35px rgba(26, 77, 62, 0.08);
-                    border-color: #cbd5e1;
+                    box-shadow: 0 15px 35px color-mix(in srgb, var(--index-primary-color) calc(0.08 * 100%), transparent);
+                    border-color: var(--index-text-faint);
                 }
 
                 .staff-scope .card-banner-box {
                     position: relative;
                     aspect-ratio: 16 / 9;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     overflow: hidden;
-                    border-bottom: 1px solid #e2e8f0;
+                    border-bottom: 1px solid var(--index-border-color);
                 }
 
                 .card-banner-box img {
@@ -296,7 +296,7 @@ const Announcements = () => {
                 .staff-scope .banner-overlay-preview {
                     position: absolute;
                     inset: 0;
-                    background: rgba(2, 6, 23, 0.4);
+                    background: color-mix(in srgb, var(--lgl-charcoal) 40%, transparent);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -329,7 +329,7 @@ const Announcements = () => {
 
                 .staff-scope .card-date-badge {
                     font-size: 0.78rem;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     display: flex;
                     align-items: center;
                     gap: 4px;
@@ -349,7 +349,7 @@ const Announcements = () => {
                 .staff-scope .card-title-text {
                     font-size: 1.15rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0;
                     line-height: 1.3;
                     letter-spacing: -0.02em;
@@ -357,7 +357,7 @@ const Announcements = () => {
 
                 .staff-scope .card-excerpt-text {
                     font-size: 0.88rem;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     line-height: 1.5;
                     margin: 0;
                     font-weight: 500;
@@ -377,7 +377,7 @@ const Announcements = () => {
                 .staff-scope .card-actions-row {
                     display: flex;
                     justify-content: flex-end;
-                    border-top: 1px solid #f1f5f9;
+                    border-top: 1px solid var(--index-hover-bg);
                     padding-top: 1rem;
                     margin-top: 0.5rem;
                 }
@@ -386,7 +386,7 @@ const Announcements = () => {
                 .staff-scope .modal-overlay {
                     position: fixed;
                     inset: 0;
-                    background: rgba(15, 23, 42, 0.6);
+                    background: color-mix(in srgb, var(--lgl-charcoal) 60%, transparent);
                     backdrop-filter: blur(8px);
                     display: flex;
                     align-items: center;
@@ -417,7 +417,7 @@ const Announcements = () => {
                     margin: 0;
                     font-size: 1.35rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     display: flex;
                     align-items: center;
                     gap: 8px;
@@ -430,7 +430,7 @@ const Announcements = () => {
                 .form-group-premium label {
                     display: block;
                     font-weight: 800;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin-bottom: 0.5rem;
                     font-size: 0.88rem;
                 }
@@ -438,48 +438,48 @@ const Announcements = () => {
                 .staff-scope .form-input-premium {
                     width: 100%;
                     padding: 0.8rem 1.25rem;
-                    background: #f8fafc;
-                    border: 1.5px solid #e2e8f0;
+                    background: var(--index-hover-bg);
+                    border: 1.5px solid var(--index-border-color);
                     border-radius: 14px;
                     font-family: inherit;
                     font-size: 0.95rem;
                     font-weight: 600;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     transition: all 0.3s;
                 }
 
                 .form-input-premium:focus {
                     outline: none;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     background: white;
-                    box-shadow: 0 0 0 4px rgba(26,77,62,0.05);
+                    box-shadow: 0 0 0 4px color-mix(in srgb, var(--index-primary-color) 5%, transparent);
                 }
 
                 .staff-scope .form-textarea-premium {
                     width: 100%;
                     padding: 0.8rem 1.25rem;
-                    background: #f8fafc;
-                    border: 1.5px solid #e2e8f0;
+                    background: var(--index-hover-bg);
+                    border: 1.5px solid var(--index-border-color);
                     border-radius: 14px;
                     font-family: inherit;
                     font-size: 0.95rem;
                     font-weight: 600;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     transition: all 0.3s;
                     resize: none;
                 }
 
                 .form-textarea-premium:focus {
                     outline: none;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     background: white;
-                    box-shadow: 0 0 0 4px rgba(26,77,62,0.05);
+                    box-shadow: 0 0 0 4px color-mix(in srgb, var(--index-primary-color) 5%, transparent);
                 }
 
                 /* Uploader premium styling */
                 .staff-scope .banner-uploader-box {
-                    background: #f8fafc;
-                    border: 2px dashed #cbd5e1;
+                    background: var(--index-hover-bg);
+                    border: 2px dashed var(--index-text-faint);
                     border-radius: 16px;
                     padding: 2rem;
                     text-align: center;
@@ -493,8 +493,8 @@ const Announcements = () => {
                 }
 
                 .banner-uploader-box:hover {
-                    border-color: #1a4d3e;
-                    background: #f0fdf4;
+                    border-color: var(--index-primary-color);
+                    background: color-mix(in srgb, var(--lgl-success) 12%, transparent);
                 }
 
                 .staff-scope .uploader-preview-banner {
@@ -502,14 +502,14 @@ const Announcements = () => {
                     max-height: 200px;
                     border-radius: 12px;
                     object-fit: cover;
-                    border: 1px solid #cbd5e1;
+                    border: 1px solid var(--index-text-faint);
                 }
 
                 /* Lightbox preview */
                 .staff-scope .lightbox-overlay-premium {
                     position: fixed;
                     inset: 0;
-                    background: rgba(2, 6, 23, 0.95);
+                    background: color-mix(in srgb, var(--lgl-charcoal) 95%, transparent);
                     backdrop-filter: blur(12px);
                     z-index: 999999;
                     display: flex;
@@ -551,8 +551,8 @@ const Announcements = () => {
 
             <header className="announcements-header-block">
                 <div>
-                    <h1><Megaphone size={30} color="#1a4d3e" /> Academic Announcements</h1>
-                    <p style={{ color: '#64748b', fontWeight: 600, marginTop: '0.5rem' }}>Compose and broadcast general bulletins, course webinar alerts, and student success stories onto the landing page.</p>
+                    <h1><Megaphone size={30} color="var(--index-primary-color)" /> Academic Announcements</h1>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, marginTop: '0.5rem' }}>Compose and broadcast general bulletins, course webinar alerts, and student success stories onto the landing page.</p>
                 </div>
                 <button className="btn-add-announcement" onClick={() => setShowCreateModal(true)}>
                     <Plus size={18} /> Compose Post
@@ -562,14 +562,14 @@ const Announcements = () => {
             <div className="announcements-dashboard-card">
                 {loading ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 0', gap: '1rem' }}>
-                        <Loader2 size={42} className="animate-spin" color="#1a4d3e" />
-                        <p style={{ color: '#64748b', fontWeight: 700 }}>Fetching announcements logs...</p>
+                        <Loader2 size={42} className="animate-spin" color="var(--index-primary-color)" />
+                        <p style={{ color: 'var(--index-text-secondary)', fontWeight: 700 }}>Fetching announcements logs...</p>
                     </div>
                 ) : announcements.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '5rem 2rem', border: '2px dashed #e2e8f0', borderRadius: '24px', background: '#f8fafc' }}>
-                        <Megaphone size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#475569', margin: 0 }}>No Announcements Found</h3>
-                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '0.4rem', fontWeight: 600 }}>Create your first dynamic announcement post to highlight important alerts to visitors.</p>
+                    <div style={{ textAlign: 'center', padding: '5rem 2rem', border: '2px dashed var(--index-border-color)', borderRadius: '24px', background: 'var(--index-hover-bg)' }}>
+                        <Megaphone size={48} color="var(--index-text-faint)" style={{ margin: '0 auto 1rem' }} />
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--index-text-secondary)', margin: 0 }}>No Announcements Found</h3>
+                        <p style={{ color: 'var(--index-text-faint)', fontSize: '0.9rem', marginTop: '0.4rem', fontWeight: 600 }}>Create your first dynamic announcement post to highlight important alerts to visitors.</p>
                     </div>
                 ) : (
                     <div className="announcements-grid animate-fade-in-up">
@@ -586,7 +586,7 @@ const Announcements = () => {
                                                 </div>
                                             </>
                                         ) : (
-                                            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', background: '#f1f5f9', color: '#94a3b8', gap: '8px' }}>
+                                            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', background: 'var(--index-hover-bg)', color: 'var(--index-text-faint)', gap: '8px' }}>
                                                 <ImageIcon size={32} />
                                                 <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>No Banner Image</span>
                                             </div>
@@ -647,14 +647,14 @@ const Announcements = () => {
                 <div className="modal-overlay">
                     <div className="modal-content-box animate-fade-in-up">
                         <div className="modal-title-row">
-                            <h3><Megaphone size={22} color="#1a4d3e" /> Compose New Announcement</h3>
+                            <h3><Megaphone size={22} color="var(--index-primary-color)" /> Compose New Announcement</h3>
                             <button 
                                 onClick={() => {
                                     setShowCreateModal(false);
                                     setImageFile(null);
                                     setImagePreview(null);
                                 }}
-                                style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                style={{ background: 'var(--index-hover-bg)', border: '1.5px solid var(--index-border-color)', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
                                 <X size={18} />
                             </button>
@@ -731,7 +731,7 @@ const Announcements = () => {
                                                 setImageFile(null);
                                                 setImagePreview(null);
                                             }}
-                                            style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(2, 6, 23, 0.8)', border: 'none', color: 'white', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            style={{ position: 'absolute', top: '10px', right: '10px', background: 'color-mix(in srgb, var(--lgl-charcoal) 80%, transparent)', border: 'none', color: 'white', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
                                             <X size={16} />
                                         </button>
@@ -741,9 +741,9 @@ const Announcements = () => {
                                         className="banner-uploader-box"
                                         onClick={() => fileInputRef.current?.click()}
                                     >
-                                        <Upload size={32} color="#64748b" />
-                                        <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#475569' }}>Click to Upload Banner Image</span>
-                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 650 }}>Supports jpeg, png, webp (max 10MB)</span>
+                                        <Upload size={32} color="var(--index-text-secondary)" />
+                                        <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--index-text-secondary)' }}>Click to Upload Banner Image</span>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--index-text-faint)', fontWeight: 650 }}>Supports jpeg, png, webp (max 10MB)</span>
                                     </div>
                                 )}
                             </div>
@@ -757,7 +757,7 @@ const Announcements = () => {
                                         setImageFile(null);
                                         setImagePreview(null);
                                     }}
-                                    style={{ flex: 1, height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0, border: '1.5px solid #e2e8f0', background: '#f8fafc', borderRadius: '14px', fontWeight: 800, cursor: 'pointer', color: '#64748b' }}
+                                    style={{ flex: 1, height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0, border: '1.5px solid var(--index-border-color)', background: 'var(--index-hover-bg)', borderRadius: '14px', fontWeight: 800, cursor: 'pointer', color: 'var(--index-text-secondary)' }}
                                 >
                                     Cancel
                                 </button>
@@ -765,7 +765,7 @@ const Announcements = () => {
                                     type="submit"
                                     className="btn-confirm"
                                     disabled={creating}
-                                    style={{ flex: 1, height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0, background: '#1a4d3e', color: 'white', borderRadius: '14px', fontWeight: 850, border: 'none', cursor: creating ? 'not-allowed' : 'pointer', boxShadow: '0 4px 12px rgba(26, 77, 62, 0.2)' }}
+                                    style={{ flex: 1, height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0, background: 'var(--index-primary-color)', color: 'white', borderRadius: '14px', fontWeight: 850, border: 'none', cursor: creating ? 'not-allowed' : 'pointer', boxShadow: '0 4px 12px color-mix(in srgb, var(--index-primary-color) calc(0.2 * 100%), transparent)' }}
                                 >
                                     {creating ? (
                                         <>

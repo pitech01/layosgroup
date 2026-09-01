@@ -1,29 +1,119 @@
 @import 'tailwindcss';
-@theme {
-  --color-emerald-500: #10b981;
-  --color-emerald-600: #059669;
-  --color-emerald-700: #047857;
-  --color-emerald-800: #065f46;
-  
-  --color-charcoal-800: #1e293b;
-  --color-charcoal-900: #0f172a;
-  
-  --color-beige-50: #fdfbf7;
-  --color-beige-100: #f7f3ea;
-  --color-beige-200: #e9e4d9;
-  
-  --color-gold-400: #facc15;
-  --color-gold-500: #eab308;
 
-  /* Brand Aliases */
-  --color-brand-emerald: var(--color-emerald-600);
-  --color-brand-charcoal: var(--color-charcoal-800);
-  --color-brand-beige: var(--color-beige-50);
-  --color-brand-border: var(--color-beige-200);
-  --color-brand-muted: #64748b;
-  
-  --color-link-color: #1e293b;
-  --color-link-hover:#f8fbff;
+:root {
+  --lgl-cyan: #00D9E9;
+  --lgl-charcoal: #1E1F2B;
+
+  --lgl-cyan-light: #CFFAFE;
+  --lgl-cyan-medium: #06B6D4;
+  --lgl-cyan-dark: #0891B2;
+
+  --lgl-gray-light: #F5F5F7;
+  --lgl-gray-mid: #9CA3AF;
+  --lgl-gray-dark: #4B5563;
+
+  --lgl-success: #10B981;
+  --lgl-warning: #F59E0B;
+  --lgl-error: #EF4444;
+
+  --lgl-text-primary: #1E1F2B;
+  --lgl-text-secondary: #4B5563;
+  --lgl-text-muted: #9CA3AF;
+  --lgl-text-light: #F5F5F7;
+
+  --lgl-bg-dark: #1E1F2B;
+  --lgl-bg-light: #F5F5F7;
+  --lgl-bg-white: #FFFFFF;
+
+  --lgl-border-light: #E5E7EB;
+  --lgl-border-mid: #D1D5DB;
+
+  /* Theme mappings for standard index variables in light mode
+     (shared vocabulary with src/components/layouts/staff.css) */
+  --index-primary-color: var(--lgl-cyan-medium);
+  --index-primary-hover: var(--lgl-cyan-dark);
+  --index-bg-color: var(--lgl-bg-light);
+  --index-text-color: var(--lgl-text-primary);
+  --index-card-bg: var(--lgl-bg-white);
+  --index-input-bg: var(--lgl-bg-white);
+  --index-border-color: var(--lgl-border-light);
+
+  /* Extended semantic tokens (dark-mode aware) */
+  --index-text-heading: var(--lgl-text-primary);
+  --index-text-secondary: var(--lgl-text-secondary);
+  --index-text-faint: var(--lgl-text-muted);
+  --index-border-subtle: var(--lgl-border-light);
+  --index-hover-bg: var(--lgl-bg-light);
+  --index-accent-soft-bg: var(--lgl-cyan-light);
+  --index-danger-bg-soft: #fef2f2;
+}
+
+/* ============================================
+   DARK MODE OVERRIDES (student portal)
+   Activated via the .dark class on html, set by useTheme.ts
+   ============================================ */
+:root.dark {
+  --index-primary-color: var(--lgl-cyan);
+  --index-primary-hover: var(--lgl-cyan-dark);
+  --index-bg-color: var(--lgl-bg-dark);
+  --index-text-color: var(--lgl-text-light);
+  --index-card-bg: #282a3a;
+  --index-input-bg: var(--lgl-bg-dark);
+  --index-border-color: #36384a;
+
+  --index-text-heading: #ffffff;
+  --index-text-secondary: var(--lgl-text-muted);
+  --index-text-faint: var(--lgl-text-secondary);
+  --index-border-subtle: #36384a;
+  --index-hover-bg: rgba(255, 255, 255, 0.05);
+  --index-accent-soft-bg: rgba(0, 217, 233, 0.15);
+  --index-danger-bg-soft: color-mix(in srgb, var(--lgl-error) 12%, transparent);
+}
+
+@theme {
+  /* Typography (see public/fonts/fonts.css for @font-face + --font-* vars) */
+  --font-display: 'Acorn', sans-serif;
+  --font-heading: 'Sora', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* LGL Core Palette */
+  --color-lgl-cyan: var(--lgl-cyan);
+  --color-lgl-charcoal: var(--lgl-charcoal);
+  --color-lgl-cyan-light: var(--lgl-cyan-light);
+  --color-lgl-cyan-medium: var(--lgl-cyan-medium);
+  --color-lgl-cyan-dark: var(--lgl-cyan-dark);
+  --color-lgl-gray-light: var(--lgl-gray-light);
+  --color-lgl-gray-mid: var(--lgl-gray-mid);
+  --color-lgl-gray-dark: var(--lgl-gray-dark);
+  --color-lgl-success: var(--lgl-success);
+  --color-lgl-warning: var(--lgl-warning);
+  --color-lgl-error: var(--lgl-error);
+
+  /* Legacy mapping aliases to ensure system-wide compatibility */
+  --color-brand-emerald: var(--lgl-cyan-medium);
+  --color-brand-charcoal: var(--lgl-charcoal);
+  --color-brand-beige: var(--lgl-gray-light);
+  --color-brand-border: var(--lgl-border-light);
+  --color-brand-muted: var(--lgl-gray-dark);
+
+  --color-emerald-500: var(--lgl-cyan-medium);
+  --color-emerald-600: var(--lgl-cyan-medium);
+  --color-emerald-700: var(--lgl-cyan-dark);
+  --color-emerald-800: var(--lgl-cyan-dark);
+
+  --color-charcoal-700: #36384a; /* Lighter than the page bg so surfaces on it stay visible */
+  --color-charcoal-800: var(--lgl-charcoal);
+  --color-charcoal-900: #11121d; /* Deep custom slate for panel depth background */
+
+  --color-beige-50: var(--lgl-gray-light);
+  --color-beige-100: #E5E7EB;
+  --color-beige-200: #D1D5DB;
+
+  --color-gold-400: var(--lgl-warning);
+  --color-gold-500: var(--lgl-warning);
+
+  --color-link-color: var(--lgl-charcoal);
+  --color-link-hover: var(--lgl-cyan-light);
 
   --radius-premium: 12px;
   --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
@@ -37,7 +127,7 @@
   }
 
   .nav-link:hover {
-    @apply text-white bg-[#020617];
+    @apply text-white bg-[var(--lgl-charcoal)];
   }
 }
 
@@ -46,7 +136,7 @@
   * {
     scrollbar-width: thin; /* Thinner scrollbar */
     /* Format: scrollbar-color: thumb_color track_color */
-    scrollbar-color: color-mix(in srgb, var(--color-brand-emerald) 40%, transparent) #f1f5f9;
+    scrollbar-color: color-mix(in srgb, var(--color-brand-emerald) 40%, transparent) var(--index-hover-bg);
   }
 
   /* 2. WebKit Browsers (Chrome, Safari, Edge) */
@@ -56,7 +146,7 @@
   }
 
   ::-webkit-scrollbar-track {
-    background-color: #f1f5f9;
+    background-color: var(--index-hover-bg);
   }
 
   ::-webkit-scrollbar-thumb {

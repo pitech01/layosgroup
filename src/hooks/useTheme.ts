@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
 
-export function useTheme() {
-    const [isDark, setIsDark] = useState(false);
-
-    useEffect(() => {
+function getInitialIsDark() {
+    try {
         const saved = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const shouldBeDark = saved ? saved === 'dark' : prefersDark;
+        return saved ? saved === 'dark' : prefersDark;
+    } catch {
+        return false;
+    }
+}
 
-        setIsDark(shouldBeDark);
-        document.documentElement.classList.toggle('dark', shouldBeDark);
+export function useTheme() {
+    // Lazy-initialized so React's state matches the `dark` class the inline
+    // script in index.html already applied before first paint — no effect
+    // needed (and no flash-of-wrong-theme) to correct it after mount.
+    const [isDark, setIsDark] = useState(getInitialIsDark);
 
+    useEffect(() => {
         // Listen for OS preference changes (only when no manual override saved)
         const mq = window.matchMedia('(prefers-color-scheme: dark)');
         const handler = (e: MediaQueryListEvent) => {

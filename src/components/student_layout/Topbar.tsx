@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Video, User, Hash } from 'lucide-react';
 import TopbarLeft from './TopbarLeft';
 import TopbarRight from './TopbarRight';
+import ThemeToggle from '../common/ThemeToggle';
 
 interface TopbarProps {
     role: 'instructor' | 'student';
@@ -67,7 +68,7 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }:
 
         return {
             title: role === 'instructor' ? 'Instructor Portal' : 'Student Portal',
-            subtitle: 'Welcome back to LayosGroup',
+            subtitle: 'Welcome back to LGL Consulting',
             icon: <LayoutDashboard size={20} />
         };
     };
@@ -75,7 +76,7 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }:
     const context = getPageContext();
 
     return (
-        <header className={`flex items-center justify-between px-4 lg:px-8 py-3 lg:py-5 bg-[var(--bg-neutral)] border-b border-[var(--border-subtle)] lg:border-none sticky top-0 z-30 transition-all ${className || ''}`}>
+        <header className={`flex items-center justify-between px-3 sm:px-4 lg:px-8 py-2.5 sm:py-3 lg:py-5 bg-[var(--bg-neutral)] border-b border-[var(--border-subtle)] lg:border-none sticky top-0 z-30 transition-all gap-2 sm:gap-4 ${className || ''}`}>
             <TopbarLeft
                 collapsed={collapsed}
                 onToggle={onToggle}
@@ -84,19 +85,8 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }:
                 icon={context.icon}
             />
 
-            <div className="flex items-center gap-4">
-                {/* Search Field (Desktop only) */}
-                {/* <div className="hidden lg:flex items-center relative">
-                    <input 
-                        type="text" 
-                        placeholder="Search..." 
-                        className="pl-10 pr-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full text-sm focus:outline-none focus:border-[var(--accent-emerald)] transition-colors w-64 shadow-sm"
-                    />
-                    <svg className="w-4 h-4 absolute left-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-                <ThemeToggle /> */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <ThemeToggle />
                 <TopbarRight role={role} />
             </div>
         </header>

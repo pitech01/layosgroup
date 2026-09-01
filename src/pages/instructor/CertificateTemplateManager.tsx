@@ -45,7 +45,7 @@ const KONVA_WIDTH = 1000;
 const KONVA_HEIGHT = 707; 
 
 const CertificateTemplateManager = () => {
-    const { courseId } = useParams();
+    const { cohortId } = useParams();
     const navigate = useNavigate();
     const [template, setTemplate] = useState<Template | null>(null);
     const [elements, setElements] = useState<Element[]>([]);
@@ -72,7 +72,7 @@ const CertificateTemplateManager = () => {
     useEffect(() => {
         fetchTemplate();
         if (window.innerWidth < 1280) setShowSidebar(false);
-    }, [courseId]);
+    }, [cohortId]);
 
     useEffect(() => {
         if (selectedId && transformerRef.current) {
@@ -86,7 +86,7 @@ const CertificateTemplateManager = () => {
 
     const fetchTemplate = async () => {
         try {
-            const res = await axios.get(`${API_URL}/instructor/courses/${courseId}/certificate-template`, {
+            const res = await axios.get(`${API_URL}/instructor/cohorts/${cohortId}/certificate-template`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             setTemplate(res.data);
@@ -106,7 +106,7 @@ const CertificateTemplateManager = () => {
         formData.append('template', e.target.files[0]);
 
         try {
-            const res = await axios.post(`${API_URL}/instructor/courses/${courseId}/certificate-template`, formData, {
+            const res = await axios.post(`${API_URL}/instructor/cohorts/${cohortId}/certificate-template`, formData, {
                 headers: { 
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                     'Content-Type': 'multipart/form-data'
@@ -124,7 +124,7 @@ const CertificateTemplateManager = () => {
         if (!template) return;
         setSaving(true);
         try {
-            await axios.put(`${API_URL}/instructor/courses/${courseId}/certificate-template/positions`, {
+            await axios.put(`${API_URL}/instructor/cohorts/${cohortId}/certificate-template/positions`, {
                 layout_json: { elements }
             }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -150,7 +150,7 @@ const CertificateTemplateManager = () => {
             rotation: 0,
             fontSize: 42,
             fontFamily: 'Outfit',
-            fill: '#1e293b',
+            fill: 'var(--index-text-heading)',
             fontWeight: 'bold',
             align: 'center'
         };
@@ -206,7 +206,7 @@ const CertificateTemplateManager = () => {
                             <h3>CERTIFICATE STUDIO</h3>
                             <span className="badge">PRO</span>
                         </div>
-                        <p className="brand-subtitle">Design your course certificates</p>
+                        <p className="brand-subtitle">Design this cohort's certificate</p>
                     </div>
                 </div>
 
@@ -311,7 +311,7 @@ const CertificateTemplateManager = () => {
                                                 height={el.height}
                                                 rotation={el.rotation}
                                                 fill="#ffffffcc"
-                                                stroke={selectedId === el.id ? '#4f46e5' : '#e2e8f0'}
+                                                stroke={selectedId === el.id ? 'var(--index-primary-color)' : 'var(--index-border-color)'}
                                                 strokeWidth={2}
                                                 dash={selectedId === el.id ? [0, 0] : [5, 5]}
                                                 cornerRadius={4}
@@ -348,7 +348,7 @@ const CertificateTemplateManager = () => {
                                                 fontSize={10} 
                                                 fontFamily="sans-serif"
                                                 fontStyle="bold"
-                                                fill="#64748b"
+                                                fill="var(--index-text-secondary)"
                                                 listening={false}
                                             />
                                         )}
@@ -359,9 +359,9 @@ const CertificateTemplateManager = () => {
                                     rotateEnabled
                                     anchorSize={8}
                                     anchorCornerRadius={4}
-                                    anchorStroke="#4f46e5"
+                                    anchorStroke="var(--index-primary-color)"
                                     anchorFill="#ffffff"
-                                    borderStroke="#4f46e5"
+                                    borderStroke="var(--index-primary-color)"
                                     borderStrokeWidth={1}
                                 />
                             </Layer>
@@ -402,7 +402,7 @@ const CertificateTemplateManager = () => {
                                                 value={selectedElement.text || ''} 
                                                 onChange={(e) => updateElement(selectedId!, { text: e.target.value })} 
                                                 className="input-select"
-                                                style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}
+                                                style={{ background: 'var(--index-card-bg)', border: '1px solid var(--index-border-color)' }}
                                             />
                                         </div>
 
@@ -447,9 +447,9 @@ const CertificateTemplateManager = () => {
                                             <div className="prop-group mt-10">
                                                 <label>ALIGNMENT</label>
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                                                    <button onClick={() => updateElement(selectedId!, { align: 'left' })} style={{ background: selectedElement.align === 'left' ? '#4f46e5' : '#f8fafc', color: selectedElement.align === 'left' ? 'white' : '#1e293b', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>LEFT</button>
-                                                    <button onClick={() => updateElement(selectedId!, { align: 'center' })} style={{ background: selectedElement.align === 'center' ? '#4f46e5' : '#f8fafc', color: selectedElement.align === 'center' ? 'white' : '#1e293b', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>CENTER</button>
-                                                    <button onClick={() => updateElement(selectedId!, { align: 'right' })} style={{ background: selectedElement.align === 'right' ? '#4f46e5' : '#f8fafc', color: selectedElement.align === 'right' ? 'white' : '#1e293b', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>RIGHT</button>
+                                                    <button onClick={() => updateElement(selectedId!, { align: 'left' })} style={{ background: selectedElement.align === 'left' ? 'var(--index-primary-color)' : 'var(--index-hover-bg)', color: selectedElement.align === 'left' ? 'white' : 'var(--index-text-heading)', border: '1px solid var(--index-border-color)', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>LEFT</button>
+                                                    <button onClick={() => updateElement(selectedId!, { align: 'center' })} style={{ background: selectedElement.align === 'center' ? 'var(--index-primary-color)' : 'var(--index-hover-bg)', color: selectedElement.align === 'center' ? 'white' : 'var(--index-text-heading)', border: '1px solid var(--index-border-color)', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>CENTER</button>
+                                                    <button onClick={() => updateElement(selectedId!, { align: 'right' })} style={{ background: selectedElement.align === 'right' ? 'var(--index-primary-color)' : 'var(--index-hover-bg)', color: selectedElement.align === 'right' ? 'white' : 'var(--index-text-heading)', border: '1px solid var(--index-border-color)', padding: '8px', borderRadius: '10px', fontSize: '10px', fontWeight: 900, cursor: 'pointer' }}>RIGHT</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -480,7 +480,7 @@ const CertificateTemplateManager = () => {
                     height: 100vh;
                     display: flex;
                     flex-direction: column;
-                    background-color: #f8fafc;
+                    background-color: var(--index-hover-bg);
                     font-family: 'Outfit', 'Inter', sans-serif;
                     overflow: hidden;
                     position: relative;
@@ -488,8 +488,8 @@ const CertificateTemplateManager = () => {
 
                 .staff-scope .studio-header {
                     height: 70px;
-                    background: #ffffff;
-                    border-bottom: 1px solid #e2e8f0;
+                    background: var(--index-card-bg);
+                    border-bottom: 1px solid var(--index-border-color);
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
@@ -504,91 +504,91 @@ const CertificateTemplateManager = () => {
                     gap: 20px;
                 }
 
-                .staff-scope .divider { width: 1px; height: 30px; background: #e2e8f0; }
+                .staff-scope .divider { width: 1px; height: 30px; background: var(--index-border-color); }
 
                 .branding .brand-title { display: flex; align-items: center; gap: 10px; }
-                .branding h3 { font-size: 15px; font-weight: 900; margin: 0; color: #1e293b; letter-spacing: -0.5px; }
-                .branding .badge { background: #4f46e5; color: white; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
-                .branding .brand-subtitle { font-size: 11px; color: #94a3b8; font-weight: 600; margin: 2px 0 0 0; }
+                .branding h3 { font-size: 15px; font-weight: 900; margin: 0; color: var(--index-text-heading); letter-spacing: -0.5px; }
+                .branding .badge { background: var(--index-primary-color); color: white; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
+                .branding .brand-subtitle { font-size: 11px; color: var(--index-text-faint); font-weight: 600; margin: 2px 0 0 0; }
 
-                .staff-scope .btn-icon { background: none; border: 1px solid #e2e8f0; color: #64748b; padding: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-                .btn-icon:hover { background: #f1f5f9; color: #4f46e5; transform: translateX(-2px); }
+                .staff-scope .btn-icon { background: none; border: 1px solid var(--index-border-color); color: var(--index-text-secondary); padding: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+                .btn-icon:hover { background: var(--index-hover-bg); color: var(--index-primary-color); transform: translateX(-2px); }
 
-                .staff-scope .zoom-controls { display: flex; align-items: center; gap: 15px; background: #f1f5f9; padding: 5px 12px; border-radius: 12px; }
-                .zoom-controls button { background: none; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; }
-                .zoom-controls button:hover { color: #4f46e5; }
-                .staff-scope .zoom-text { font-size: 12px; font-weight: 900; color: #475569; width: 45px; text-align: center; font-family: monospace; }
+                .staff-scope .zoom-controls { display: flex; align-items: center; gap: 15px; background: var(--index-hover-bg); padding: 5px 12px; border-radius: 12px; }
+                .zoom-controls button { background: none; border: none; color: var(--index-text-secondary); cursor: pointer; display: flex; align-items: center; }
+                .zoom-controls button:hover { color: var(--index-primary-color); }
+                .staff-scope .zoom-text { font-size: 12px; font-weight: 900; color: var(--index-text-secondary); width: 45px; text-align: center; font-family: monospace; }
 
-                .staff-scope .btn-publish { background: #4f46e5; color: white; border: none; padding: 10px 22px; border-radius: 14px; font-weight: 900; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
-                .btn-publish:hover { background: #4338ca; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3); }
+                .staff-scope .btn-publish { background: var(--index-primary-color); color: white; border: none; padding: 10px 22px; border-radius: 14px; font-weight: 900; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px color-mix(in srgb, var(--index-primary-color) 20%, transparent); }
+                .btn-publish:hover { background: var(--index-primary-hover); transform: translateY(-1px); box-shadow: 0 6px 15px color-mix(in srgb, var(--index-primary-color) 30%, transparent); }
                 .btn-publish:disabled { opacity: 0.6; cursor: not-allowed; }
 
                 .staff-scope .studio-main { flex: 1; display: flex; position: relative; overflow: hidden; }
 
-                .staff-scope .tool-rail { width: 75px; background: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; padding: 20px 0; z-index: 90; }
-                .staff-scope .rail-item { background: none; border: none; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; width: 100%; padding: 15px 0; transition: all 0.2s; }
+                .staff-scope .tool-rail { width: 75px; background: var(--index-card-bg); border-right: 1px solid var(--index-border-color); display: flex; flex-direction: column; align-items: center; padding: 20px 0; z-index: 90; }
+                .staff-scope .rail-item { background: none; border: none; color: var(--index-text-faint); display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; width: 100%; padding: 15px 0; transition: all 0.2s; }
                 .rail-item span { font-size: 9px; font-weight: 900; }
-                .rail-item:hover { color: #64748b; background: #f8fafc; }
-                .rail-item.active { color: #4f46e5; background: #eff6ff; border-right: 3px solid #4f46e5; }
+                .rail-item:hover { color: var(--index-text-secondary); background: var(--index-hover-bg); }
+                .rail-item.active { color: var(--index-primary-color); background: var(--index-accent-soft-bg); border-right: 3px solid var(--index-primary-color); }
                 .staff-scope .spacer { flex: 1; }
 
-                .staff-scope .tool-panel { width: 320px; background: rgba(255,255,255,0.98); border-right: 1px solid #e2e8f0; transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1); z-index: 80; overflow-y: auto; }
+                .staff-scope .tool-panel { width: 320px; background: rgba(255,255,255,0.98); border-right: 1px solid var(--index-border-color); transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1); z-index: 80; overflow-y: auto; }
                 .tool-panel.closed { width: 0; opacity: 0; pointer-events: none; transform: translateX(-20px); }
                 .staff-scope .panel-content { padding: 30px; min-width: 320px; }
                 .staff-scope .panel-header { margin-bottom: 25px; }
-                .panel-header h4 { font-size: 13px; font-weight: 900; color: #1e293b; margin: 0; letter-spacing: 0.5px; }
-                .panel-header p { font-size: 11px; color: #94a3b8; font-weight: 600; margin: 5px 0 0 0; font-style: italic; }
+                .panel-header h4 { font-size: 13px; font-weight: 900; color: var(--index-text-heading); margin: 0; letter-spacing: 0.5px; }
+                .panel-header p { font-size: 11px; color: var(--index-text-faint); font-weight: 600; margin: 5px 0 0 0; font-style: italic; }
 
                 .staff-scope .tool-list { display: flex; flex-direction: column; gap: 12px; }
-                .staff-scope .tool-item { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.2s; text-align: left; width: 100%; outline: none; }
-                .tool-item:hover { border-color: #4f46e5; background: #f5f3ff; box-shadow: 0 4px 12px rgba(79,70,229,0.05); transform: translateY(-2px); }
-                .tool-item svg { color: #4f46e5; }
-                .tool-item .label { font-size: 11px; font-weight: 900; color: #1e293b; display: block; }
-                .tool-item .sub { font-size: 10px; color: #94a3b8; font-weight: 500; font-style: italic; }
+                .staff-scope .tool-item { background: var(--index-card-bg); border: 1px solid var(--index-border-color); border-radius: 18px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.2s; text-align: left; width: 100%; outline: none; }
+                .tool-item:hover { border-color: var(--index-primary-color); background: var(--index-accent-soft-bg); box-shadow: 0 4px 12px color-mix(in srgb, var(--index-primary-color) 5%, transparent); transform: translateY(-2px); }
+                .tool-item svg { color: var(--index-primary-color); }
+                .tool-item .label { font-size: 11px; font-weight: 900; color: var(--index-text-heading); display: block; }
+                .tool-item .sub { font-size: 10px; color: var(--index-text-faint); font-weight: 500; font-style: italic; }
 
-                .staff-scope .upload-zone { border: 2px dashed #e2e8f0; border-radius: 24px; padding: 30px; text-align: center; background: #f8fafc; transition: all 0.2s; }
-                .upload-zone:hover { border-color: #4f46e5; background: #eff6ff; }
+                .staff-scope .upload-zone { border: 2px dashed var(--index-border-color); border-radius: 24px; padding: 30px; text-align: center; background: var(--index-hover-bg); transition: all 0.2s; }
+                .upload-zone:hover { border-color: var(--index-primary-color); background: var(--index-accent-soft-bg); }
                 .staff-scope .upload-placeholder { cursor: pointer; display: block; }
-                .staff-scope .upload-icon { color: #4f46e5; margin-bottom: 15px; opacity: 0.7; }
-                .upload-zone p { font-size: 12px; font-weight: 900; color: #64748b; margin: 0; }
+                .staff-scope .upload-icon { color: var(--index-primary-color); margin-bottom: 15px; opacity: 0.7; }
+                .upload-zone p { font-size: 12px; font-weight: 900; color: var(--index-text-secondary); margin: 0; }
 
                 .staff-scope .bg-preview { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
                 .bg-preview img { width: 100%; display: block; border-radius: 12px; }
-                .staff-scope .replace-overlay { position: absolute; inset: 0; background: rgba(79, 70, 229, 0.85); color: white; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 11px; font-weight: 900; opacity: 0; transition: 0.2s; cursor: pointer; }
+                .staff-scope .replace-overlay { position: absolute; inset: 0; background: color-mix(in srgb, var(--index-primary-color) 85%, transparent); color: white; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 11px; font-weight: 900; opacity: 0; transition: 0.2s; cursor: pointer; }
                 .bg-preview:hover .replace-overlay { opacity: 1; }
 
-                .staff-scope .canvas-wrapper { flex: 1; background: #eff2f5; display: flex; align-items: center; justify-content: center; padding: 50px; overflow: auto; position: relative; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; }
-                .staff-scope .canvas-container { background: white; box-shadow: 0 50px 100px -20px rgba(15,23,42,0.3); border: 1px solid rgba(0,0,0,0.05); transition: transform 0.1s ease; }
+                .staff-scope .canvas-wrapper { flex: 1; background: var(--index-accent-soft-bg); display: flex; align-items: center; justify-content: center; padding: 50px; overflow: auto; position: relative; background-image: radial-gradient(var(--index-text-faint) 1px, transparent 1px); background-size: 24px 24px; }
+                .staff-scope .canvas-container { background: white; box-shadow: 0 50px 100px -20px color-mix(in srgb, var(--lgl-charcoal) 30%, transparent); border: 1px solid rgba(0,0,0,0.05); transition: transform 0.1s ease; }
 
-                .staff-scope .property-panel { width: 340px; background: white; border-left: 1px solid #e2e8f0; transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1); z-index: 85; }
+                .staff-scope .property-panel { width: 340px; background: white; border-left: 1px solid var(--index-border-color); transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1); z-index: 85; }
                 .property-panel.hidden { width: 0; opacity: 0; pointer-events: none; transform: translateX(20px); }
                 .staff-scope .property-content { padding: 30px; min-width: 340px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
                 .staff-scope .header-top { display: flex; align-items: center; justify-content: space-between; }
-                .staff-scope .btn-delete { background: #fee2e2; color: #ef4444; border: none; padding: 8px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
-                .btn-delete:hover { background: #fecaca; transform: scale(1.1); }
+                .staff-scope .btn-delete { background: var(--index-danger-bg-soft); color: var(--lgl-error); border: none; padding: 8px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+                .btn-delete:hover { background: color-mix(in srgb, var(--lgl-error) 35%, transparent); transform: scale(1.1); }
 
                 .staff-scope .property-groups { display: flex; flex-direction: column; gap: 35px; margin-top: 20px; flex: 1; overflow-y: auto; padding-right: 5px; }
-                .prop-group label { display: block; font-size: 10px; font-weight: 900; color: #94a3b8; letter-spacing: 1px; margin-bottom: 12px; }
+                .prop-group label { display: block; font-size: 10px; font-weight: 900; color: var(--index-text-faint); letter-spacing: 1px; margin-bottom: 12px; }
                 .staff-scope .grid-2 { display: grid; grid-template-cols: 1fr 1fr; gap: 12px; }
-                .staff-scope .mini-prop { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px; font-size: 12px; font-weight: 900; color: #1e293b; display: flex; justify-content: space-between; }
-                .mini-prop span { color: #94a3b8; font-size: 10px; }
+                .staff-scope .mini-prop { background: var(--index-hover-bg); border: 1px solid var(--index-border-color); border-radius: 14px; padding: 12px; font-size: 12px; font-weight: 900; color: var(--index-text-heading); display: flex; justify-content: space-between; }
+                .mini-prop span { color: var(--index-text-faint); font-size: 10px; }
 
-                .staff-scope .input-select { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px; font-size: 13px; font-weight: 700; color: #1e293b; outline: none; cursor: pointer; transition: 0.2s; }
-                .input-select:focus { border-color: #4f46e5; background: white; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+                .staff-scope .input-select { width: 100%; background: var(--index-hover-bg); border: 1px solid var(--index-border-color); border-radius: 14px; padding: 12px; font-size: 13px; font-weight: 700; color: var(--index-text-heading); outline: none; cursor: pointer; transition: 0.2s; }
+                .input-select:focus { border-color: var(--index-primary-color); background: white; box-shadow: 0 0 0 4px color-mix(in srgb, var(--index-primary-color) 10%, transparent); }
 
-                .staff-scope .input-field { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 10px 15px; position: relative; }
-                .input-field span { display: block; font-size: 9px; font-weight: 900; color: #94a3b8; margin-bottom: 4px; }
-                .input-field input { width: 100%; border: none; background: none; font-size: 13px; font-weight: 900; color: #1e293b; outline: none; padding: 0; border-radius: 0; }
+                .staff-scope .input-field { background: var(--index-hover-bg); border: 1px solid var(--index-border-color); border-radius: 14px; padding: 10px 15px; position: relative; }
+                .input-field span { display: block; font-size: 9px; font-weight: 900; color: var(--index-text-faint); margin-bottom: 4px; }
+                .input-field input { width: 100%; border: none; background: none; font-size: 13px; font-weight: 900; color: var(--index-text-heading); outline: none; padding: 0; border-radius: 0; }
 
-                .staff-scope .color-btn { width: 100%; height: 32px; border-radius: 10px; border: 2px solid white; box-shadow: 0 0 0 1px #e2e8f0; position: relative; overflow: hidden; }
+                .staff-scope .color-btn { width: 100%; height: 32px; border-radius: 10px; border: 2px solid white; box-shadow: 0 0 0 1px var(--index-border-color); position: relative; overflow: hidden; }
                 .color-btn input { position: absolute; inset: -5px; width: 150%; height: 150%; cursor: pointer; opacity: 0; }
 
-                .staff-scope .input-range { width: 100%; -webkit-appearance: none; background: #e2e8f0; height: 6px; border-radius: 10px; outline: none; margin: 15px 0; }
-                .staff-scope .input-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; background: #4f46e5; border: 4px solid white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s; }
+                .staff-scope .input-range { width: 100%; -webkit-appearance: none; background: var(--index-border-color); height: 6px; border-radius: 10px; outline: none; margin: 15px 0; }
+                .staff-scope .input-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; background: var(--index-primary-color); border: 4px solid white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s; }
                 .staff-scope .input-range::-webkit-slider-thumb:hover { transform: scale(1.1); }
 
-                .staff-scope .btn-close { width: 100%; background: #1e293b; color: white; border: none; padding: 15px; border-radius: 18px; font-weight: 900; font-size: 11px; letter-spacing: 1px; cursor: pointer; margin-top: 30px; transition: 0.2s; }
-                .btn-close:hover { background: #0f172a; }
+                .staff-scope .btn-close { width: 100%; background: var(--index-text-heading); color: white; border: none; padding: 15px; border-radius: 18px; font-weight: 900; font-size: 11px; letter-spacing: 1px; cursor: pointer; margin-top: 30px; transition: 0.2s; }
+                .btn-close:hover { background: var(--index-text-heading); }
 
                 .staff-scope .mt-10 { margin-top: 10px; }
                 .staff-scope .spinner { animation: spin 1s linear infinite; }
@@ -596,11 +596,11 @@ const CertificateTemplateManager = () => {
 
                 .staff-scope .studio-loader { height: 100vh; display: flex; align-items: center; justify-content: center; background: white; }
                 .staff-scope .spinner-container { text-align: center; }
-                .staff-scope .spinner-container p { font-size: 12px; font-weight: 900; color: #94a3b8; margin-top: 15px; letter-spacing: 2px; text-transform: uppercase; }
+                .staff-scope .spinner-container p { font-size: 12px; font-weight: 900; color: var(--index-text-faint); margin-top: 15px; letter-spacing: 2px; text-transform: uppercase; }
 
                 .staff-scope .custom-scrollbar::-webkit-scrollbar { width: 5px; }
                 .staff-scope .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-                .staff-scope .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+                .staff-scope .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--index-border-color); border-radius: 10px; }
             `}</style>
         </div>
     );

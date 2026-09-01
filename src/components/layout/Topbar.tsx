@@ -2,18 +2,20 @@ import { useLocation } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Video, User, Hash } from 'lucide-react';
 import TopbarLeft from './TopbarLeft';
 import TopbarRight from './TopbarRight';
+import ThemeToggle from '../common/ThemeToggle';
 
 interface TopbarProps {
-    role: 'instructor' | 'student';
+    role: 'instructor' | 'student' | 'admin';
     collapsed: boolean;
     onToggle: () => void;
     title?: string;
     subtitle?: string;
     icon?: React.ReactNode;
     className?: string;
+    onSearchClick?: () => void;
 }
 
-const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }: TopbarProps) => {
+const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className, onSearchClick }: TopbarProps) => {
     const location = useLocation();
 
     // Derive title from route if not provided
@@ -24,8 +26,8 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }:
 
         if (path.includes('dashboard')) {
             return {
-                title: role === 'instructor' ? 'Instructor Dashboard' : 'Student Dashboard',
-                subtitle: role === 'instructor' ? 'Manage your courses and students' : 'Overview of your learning progress',
+                title: role === 'admin' ? 'Admin Dashboard' : role === 'instructor' ? 'Instructor Dashboard' : 'Student Dashboard',
+                subtitle: role === 'admin' ? 'Full platform administration' : role === 'instructor' ? 'Manage your courses and students' : 'Overview of your learning progress',
                 icon: <LayoutDashboard size={20} strokeWidth={2.5} />
             };
         }
@@ -59,8 +61,8 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }:
         }
 
         return {
-            title: role === 'instructor' ? 'Instructor Portal' : 'Student Portal',
-            subtitle: 'Welcome back to LayosGroup',
+            title: role === 'admin' ? 'Admin Console' : role === 'instructor' ? 'Instructor Portal' : 'Student Portal',
+            subtitle: 'Welcome back to LGL Consulting',
             icon: <LayoutDashboard size={20} strokeWidth={2.5} />
         };
     };
@@ -75,9 +77,13 @@ const Topbar = ({ role, collapsed, onToggle, title, subtitle, icon, className }:
                 title={context.title}
                 subtitle={context.subtitle}
                 icon={context.icon}
+                onSearchClick={onSearchClick}
             />
 
-            <TopbarRight role={role} />
+            <div className="top-nav-right-actions">
+                <ThemeToggle />
+                <TopbarRight role={role} />
+            </div>
         </header>
     );
 };

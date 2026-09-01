@@ -179,88 +179,88 @@ export default function CurriculumBuilder() {
     return (
         <div className="curriculum-container">
             <style>{`
-                .staff-scope .curriculum-container { min-height: 100vh; background: #fcfdfe; color: #0f172a; padding-bottom: 5rem; }
-                .staff-scope .curriculum-header { background: white; padding: 1.25rem 4rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid rgba(226, 232, 240, 0.7); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+                .staff-scope .curriculum-container { min-height: 100vh; background: var(--index-card-bg); color: var(--index-text-heading); padding-bottom: 5rem; }
+                .staff-scope .curriculum-header { background: white; padding: 1.25rem 4rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid color-mix(in srgb, var(--index-border-color) 70%, transparent); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
                 .staff-scope .header-brand { display: flex; align-items: center; gap: 2rem; }
-                .staff-scope .exit-btn { width: 44px; height: 44px; border-radius: 14px; background: #f8fafc; border: 1.5px solid #f1f5f9; display: flex; align-items: center; justify-content: center; color: #64748b; transition: all 0.2s; text-decoration: none; }
-                .exit-btn:hover { background: #1a4d3e; color: white; border-color: #1a4d3e; transform: translateX(-4px); }
+                .staff-scope .exit-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--index-hover-bg); border: 1.5px solid var(--index-hover-bg); display: flex; align-items: center; justify-content: center; color: var(--index-text-secondary); transition: all 0.2s; text-decoration: none; }
+                .exit-btn:hover { background: var(--index-primary-color); color: white; border-color: var(--index-primary-color); transform: translateX(-4px); }
                 .staff-scope .header-title-row { display: flex; alignItems: center; gap: 16px; }
-                .header-title-row h1 { font-size: 1.4rem; font-weight: 950; margin: 0; color: #0f172a; letter-spacing: -0.02em; }
-                .staff-scope .badge-blueprint { background: #f0fdf4; color: #1a4d3e; font-size: 0.75rem; font-weight: 900; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #1a4d3e10; }
-                .staff-scope .save-status { font-size: 0.8rem; font-weight: 800; color: #94a3b8; display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-                .save-status.saving { color: #1a4d3e; }
+                .header-title-row h1 { font-size: 1.4rem; font-weight: 950; margin: 0; color: var(--index-text-heading); letter-spacing: -0.02em; }
+                .staff-scope .badge-blueprint { background: var(--index-accent-soft-bg); color: var(--index-primary-color); font-size: 0.75rem; font-weight: 900; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid var(--index-primary-color)10; }
+                .staff-scope .save-status { font-size: 0.8rem; font-weight: 800; color: var(--index-text-faint); display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+                .save-status.saving { color: var(--index-primary-color); }
                 .staff-scope .header-actions { display: flex; gap: 1.25rem; }
                 
-                .staff-scope .btn-primary-forest { background: #1a4d3e; color: white; border: none; padding: 0.85rem 2rem; border-radius: 16px; font-weight: 900; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2); }
-                .btn-primary-forest:hover { transform: translateY(-2px); box-shadow: 0 15px 20px -5px rgba(26, 77, 62, 0.25); }
-                .staff-scope .btn-outline-premium { background: white; color: #475569; border: 2.5px solid #f1f5f9; padding: 0.85rem 1.75rem; border-radius: 16px; font-weight: 850; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
-                .btn-outline-premium:hover { border-color: #1a4d3e30; background: #fcfdfe; color: #1a4d3e; }
+                .staff-scope .btn-primary-forest { background: var(--index-primary-color); color: white; border: none; padding: 0.85rem 2rem; border-radius: 16px; font-weight: 900; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 20%, transparent); }
+                .btn-primary-forest:hover { transform: translateY(-2px); box-shadow: 0 15px 20px -5px color-mix(in srgb, var(--index-primary-color) 25%, transparent); }
+                .staff-scope .btn-outline-premium { background: white; color: var(--index-text-secondary); border: 2.5px solid var(--index-hover-bg); padding: 0.85rem 1.75rem; border-radius: 16px; font-weight: 850; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+                .btn-outline-premium:hover { border-color: var(--index-primary-color)30; background: var(--index-card-bg); color: var(--index-primary-color); }
 
                 .staff-scope .curriculum-canvas { max-width: 1000px; margin: 5rem auto; padding: 0 3rem; }
                 .staff-scope .canvas-header { margin-bottom: 4rem; }
-                .canvas-header h2 { font-size: 2.5rem; font-weight: 950; margin-bottom: 0.75rem; color: #0f172a; letter-spacing: -0.04em; }
-                .canvas-header p { color: #64748b; font-weight: 600; font-size: 1.15rem; line-height: 1.6; }
+                .canvas-header h2 { font-size: 2.5rem; font-weight: 950; margin-bottom: 0.75rem; color: var(--index-text-heading); letter-spacing: -0.04em; }
+                .canvas-header p { color: var(--index-text-secondary); font-weight: 600; font-size: 1.15rem; line-height: 1.6; }
 
                 .staff-scope .modules-list { display: flex; flex-direction: column; gap: 2.5rem; }
-                .staff-scope .module-box { background: white; border-radius: 32px; border: 1.5px solid rgba(226, 232, 240, 0.8); overflow: hidden; transition: all 0.4s; }
-                .module-box.expanded { border-color: #1a4d3e15; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.04); }
+                .staff-scope .module-box { background: white; border-radius: 32px; border: 1.5px solid color-mix(in srgb, var(--index-border-color) 80%, transparent); overflow: hidden; transition: all 0.4s; }
+                .module-box.expanded { border-color: var(--index-primary-color)15; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.04); }
                 
-                .staff-scope .module-top { padding: 2.25rem 2.5rem; display: flex; align-items: center; gap: 2rem; cursor: pointer; background: #fcfdfe; }
-                .module-top:hover { background: #f8fafc; }
-                .staff-scope .drag-handle { color: #cbd5e1; cursor: grab; }
+                .staff-scope .module-top { padding: 2.25rem 2.5rem; display: flex; align-items: center; gap: 2rem; cursor: pointer; background: var(--index-card-bg); }
+                .module-top:hover { background: var(--index-hover-bg); }
+                .staff-scope .drag-handle { color: var(--index-border-subtle); cursor: grab; }
                 .staff-scope .module-title-zone { flex: 1; display: flex; flex-direction: column; }
-                .staff-scope .module-title-input { font-size: 1.35rem; font-weight: 950; border: none; background: transparent; padding: 6px 0; outline: none; transition: border 0.2s; border-bottom: 2.5px solid transparent; color: #0f172a; letter-spacing: -0.02em; }
-                .module-title-input:focus { border-bottom-color: #1a4d3e; }
-                .staff-scope .module-meta { font-size: 0.85rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 6px; }
+                .staff-scope .module-title-input { font-size: 1.35rem; font-weight: 950; border: none; background: transparent; padding: 6px 0; outline: none; transition: border 0.2s; border-bottom: 2.5px solid transparent; color: var(--index-text-heading); letter-spacing: -0.02em; }
+                .module-title-input:focus { border-bottom-color: var(--index-primary-color); }
+                .staff-scope .module-meta { font-size: 0.85rem; font-weight: 800; color: var(--index-text-faint); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 6px; }
                 
                 .staff-scope .module-controls { display: flex; align-items: center; gap: 1.5rem; }
-                .staff-scope .ctrl-btn { border: none; background: transparent; padding: 10px; border-radius: 12px; cursor: pointer; color: #94a3b8; transition: all 0.2s; }
-                .ctrl-btn.delete:hover { background: #fef2f2; color: #ef4444; }
+                .staff-scope .ctrl-btn { border: none; background: transparent; padding: 10px; border-radius: 12px; cursor: pointer; color: var(--index-text-faint); transition: all 0.2s; }
+                .ctrl-btn.delete:hover { background: var(--index-danger-bg-soft); color: var(--lgl-error); }
                 
-                .staff-scope .module-body { padding: 0 2.5rem 2.5rem 2.5rem; border-top: 1.5px solid rgba(241, 245, 249, 0.8); background: white; }
+                .staff-scope .module-body { padding: 0 2.5rem 2.5rem 2.5rem; border-top: 1.5px solid color-mix(in srgb, var(--index-hover-bg) 80%, transparent); background: white; }
                 .staff-scope .sessions-container { display: flex; flex-direction: column; gap: 1rem; padding: 2.5rem 0; }
                 
-                .staff-scope .session-item { background: white; border: 1.5px solid #f1f5f9; padding: 1.5rem 2.5rem; border-radius: 24px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
-                .session-item:hover { transform: translateX(10px); border-color: #1a4d3e30; box-shadow: 0 10px 25px -5px rgba(26,77,62,0.05); }
+                .staff-scope .session-item { background: white; border: 1.5px solid var(--index-hover-bg); padding: 1.5rem 2.5rem; border-radius: 24px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+                .session-item:hover { transform: translateX(10px); border-color: var(--index-primary-color)30; box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--index-primary-color) 5%, transparent); }
                 .staff-scope .session-left { display: flex; align-items: center; gap: 2rem; }
                 .staff-scope .session-icon { width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; }
-                .staff-scope .session-icon.video { background: #eff6ff; color: #1d4ed8; }
-                .staff-scope .session-icon.live { background: #fef2f2; color: #b91c1c; }
-               .staff-scope  .session-icon.docs { background: #f0fdf4; color: #166534; }
-                .staff-scope .session-icon.evaluation { background: #fefce8; color: #854d0e; }
-                .staff-scope .session-text h4 { font-size: 1.15rem; font-weight: 900; margin: 0; color: #0f172a; }
-                .staff-scope .session-text p { font-size: 0.85rem; font-weight: 800; color: #64748b; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em; }
+                .staff-scope .session-icon.video { background: var(--index-accent-soft-bg); color: var(--index-primary-color); }
+                .staff-scope .session-icon.live { background: var(--index-danger-bg-soft); color: var(--lgl-error); }
+               .staff-scope  .session-icon.docs { background: var(--index-accent-soft-bg); color: var(--lgl-success); }
+                .staff-scope .session-icon.evaluation { background: color-mix(in srgb, var(--lgl-warning) 15%, transparent); color: var(--lgl-warning); }
+                .staff-scope .session-text h4 { font-size: 1.15rem; font-weight: 900; margin: 0; color: var(--index-text-heading); }
+                .staff-scope .session-text p { font-size: 0.85rem; font-weight: 800; color: var(--index-text-secondary); margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em; }
 
-                .staff-scope .add-module-master { width: 100%; padding: 3rem; border-radius: 40px; border: 3px dashed rgba(26, 77, 62, 0.2); background: white; color: #1a4d3e; font-size: 1.35rem; font-weight: 950; display: flex; align-items: center; justify-content: center; gap: 20px; cursor: pointer; transition: all 0.4s; margin-top: 4rem; }
-                .add-module-master:hover { background: #f0fdf4; border-color: #1a4d3e60; transform: translateY(-8px); box-shadow: 0 30px 60px -15px rgba(26, 77, 62, 0.1); }
+                .staff-scope .add-module-master { width: 100%; padding: 3rem; border-radius: 40px; border: 3px dashed color-mix(in srgb, var(--index-primary-color) 20%, transparent); background: white; color: var(--index-primary-color); font-size: 1.35rem; font-weight: 950; display: flex; align-items: center; justify-content: center; gap: 20px; cursor: pointer; transition: all 0.4s; margin-top: 4rem; }
+                .add-module-master:hover { background: var(--index-accent-soft-bg); border-color: var(--index-primary-color)60; transform: translateY(-8px); box-shadow: 0 30px 60px -15px color-mix(in srgb, var(--index-primary-color) 10%, transparent); }
 
                 /* MODAL SYSTEM */
-                .staff-scope .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 2rem; }
+                .staff-scope .modal-overlay { position: fixed; inset: 0; background: color-mix(in srgb, var(--lgl-charcoal) 80%, transparent); backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 2rem; }
                 .staff-scope .modal-content { background: white; border-radius: 52px; width: 100%; max-width: 1000px; max-height: 94vh; overflow-y: auto; position: relative; box-shadow: 0 60px 120px -30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
                 .staff-scope .session-selector { padding: 6rem; text-align: center; }
-                .staff-scope .session-selector h3 { font-size: 2.75rem; font-weight: 950; margin-bottom: 1.5rem; color: #0f172a; letter-spacing: -0.04em; }
+                .staff-scope .session-selector h3 { font-size: 2.75rem; font-weight: 950; margin-bottom: 1.5rem; color: var(--index-text-heading); letter-spacing: -0.04em; }
                 .staff-scope .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 5rem; }
-                .staff-scope .select-opt { padding: 3.5rem; border: 3px solid #f1f5f9; border-radius: 44px; text-align: left; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-                .select-opt:hover { border-color: #1a4d3e; background: #f0fdf4; transform: scale(1.02) translateY(-10px); }
-               .staff-scope  .select-opt h4 { font-size: 1.5rem; font-weight: 950; margin: 2rem 0 0.75rem 0; color: #0f172a; }
-               .staff-scope  .select-opt p { color: #64748b; font-weight: 600; line-height: 1.5; }
-                .staff-scope .modal-close { position: absolute; top: 3rem; right: 3rem; border: none; background: #f1f5f9; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; transition: all 0.3s; }
-                .staff-scope .modal-close:hover { background: #fef2f2; color: #ef4444; transform: rotate(90deg); }
+                .staff-scope .select-opt { padding: 3.5rem; border: 3px solid var(--index-hover-bg); border-radius: 44px; text-align: left; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+                .select-opt:hover { border-color: var(--index-primary-color); background: var(--index-accent-soft-bg); transform: scale(1.02) translateY(-10px); }
+               .staff-scope  .select-opt h4 { font-size: 1.5rem; font-weight: 950; margin: 2rem 0 0.75rem 0; color: var(--index-text-heading); }
+               .staff-scope  .select-opt p { color: var(--index-text-secondary); font-weight: 600; line-height: 1.5; }
+                .staff-scope .modal-close { position: absolute; top: 3rem; right: 3rem; border: none; background: var(--index-hover-bg); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--index-text-secondary); cursor: pointer; transition: all 0.3s; }
+                .staff-scope .modal-close:hover { background: var(--index-danger-bg-soft); color: var(--lgl-error); transform: rotate(90deg); }
 
                 /* FORMS */
                 .staff-scope .form-wrapper { padding: 6rem; }
                 .staff-scope .form-header { display: flex; gap: 3rem; align-items: center; margin-bottom: 5rem; }
-                .staff-scope .form-header h2 { font-size: 2.5rem; font-weight: 950; margin: 0; color: #0f172a; letter-spacing: -0.05em; }
+                .staff-scope .form-header h2 { font-size: 2.5rem; font-weight: 950; margin: 0; color: var(--index-text-heading); letter-spacing: -0.05em; }
                 .staff-scope .form-body { display: flex; flex-direction: column; gap: 3rem; }
-                .staff-scope .form-input-premium { width: 100%; background: #fcfdfe; border: 2.5px solid #e2e8f0; border-radius: 20px; padding: 1.25rem 1.75rem; font-size: 1.15rem; font-weight: 700; color: #0f172a; outline: none; transition: all 0.3s; }
+                .staff-scope .form-input-premium { width: 100%; background: var(--index-card-bg); border: 2.5px solid var(--index-border-color); border-radius: 20px; padding: 1.25rem 1.75rem; font-size: 1.15rem; font-weight: 700; color: var(--index-text-heading); outline: none; transition: all 0.3s; }
 
-                .staff-scope .form-input-premium:focus { border-color: #1a4d3e; background: white; box-shadow: 0 0 0 8px rgba(26, 77, 62, 0.08); }
-                .staff-scope .form-textarea-premium { width: 100%; background: #fcfdfe; border: 2.5px solid #e2e8f0; border-radius: 20px; padding: 1.75rem; font-size: 1.15rem; font-weight: 700; color: #0f172a; outline: none; min-height: 160px; resize: none; transition: all 0.3s; }
-                .staff-scope .form-textarea-premium:focus { border-color: #1a4d3e; background: white; box-shadow: 0 0 0 8px rgba(26, 77, 62, 0.08); }
+                .staff-scope .form-input-premium:focus { border-color: var(--index-primary-color); background: white; box-shadow: 0 0 0 8px color-mix(in srgb, var(--index-primary-color) 8%, transparent); }
+                .staff-scope .form-textarea-premium { width: 100%; background: var(--index-card-bg); border: 2.5px solid var(--index-border-color); border-radius: 20px; padding: 1.75rem; font-size: 1.15rem; font-weight: 700; color: var(--index-text-heading); outline: none; min-height: 160px; resize: none; transition: all 0.3s; }
+                .staff-scope .form-textarea-premium:focus { border-color: var(--index-primary-color); background: white; box-shadow: 0 0 0 8px color-mix(in srgb, var(--index-primary-color) 8%, transparent); }
                 
-                .staff-scope .deploy-btn-forest { background: #1a4d3e; color: white; border: none; border-radius: 24px; padding: 1.75rem 5rem; font-weight: 950; cursor: pointer; font-size: 1.25rem; box-shadow: 0 20px 40px -10px rgba(26, 77, 62, 0.4); transition: all 0.4s; }
+                .staff-scope .deploy-btn-forest { background: var(--index-primary-color); color: white; border: none; border-radius: 24px; padding: 1.75rem 5rem; font-weight: 950; cursor: pointer; font-size: 1.25rem; box-shadow: 0 20px 40px -10px color-mix(in srgb, var(--index-primary-color) 40%, transparent); transition: all 0.4s; }
 
-                .staff-scope .deploy-btn-forest:hover { transform: translateY(-5px); box-shadow: 0 30px 60px -15px rgba(26, 77, 62, 0.5); }
+                .staff-scope .deploy-btn-forest:hover { transform: translateY(-5px); box-shadow: 0 30px 60px -15px color-mix(in srgb, var(--index-primary-color) 50%, transparent); }
             `}</style>
 
             <header className="curriculum-header">
@@ -307,7 +307,7 @@ export default function CurriculumBuilder() {
                                 </div>
                                 <div className="module-controls" onClick={(e) => e.stopPropagation()}>
                                     <button onClick={() => handleDeleteModule(mod.id)} className="ctrl-btn delete"><Trash2 size={20} /></button>
-                                    <div style={{ transform: mod.isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s', color: '#64748b' }}>
+                                    <div style={{ transform: mod.isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s', color: 'var(--index-text-secondary)' }}>
                                         <ChevronDown size={24} />
                                     </div>
                                 </div>
@@ -343,10 +343,10 @@ export default function CurriculumBuilder() {
                                     <button onClick={() => handleOpenAddSession(mod.id)} style={{
                                         width: '100%',
                                         padding: '1.5rem',
-                                        background: '#f8fafc',
-                                        border: '2px dashed #e2e8f0',
+                                        background: 'var(--index-hover-bg)',
+                                        border: '2px dashed var(--index-border-color)',
                                         borderRadius: '20px',
-                                        color: '#1a4d3e',
+                                        color: 'var(--index-primary-color)',
                                         fontWeight: 800,
                                         display: 'flex',
                                         alignItems: 'center',
@@ -355,7 +355,7 @@ export default function CurriculumBuilder() {
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
                                         marginTop: '1.5rem'
-                                    }} onMouseOver={e => e.currentTarget.style.background = '#f0fdf4'} onMouseOut={e => e.currentTarget.style.background = '#f8fafc'}>
+                                    }} onMouseOver={e => e.currentTarget.style.background = 'var(--index-accent-soft-bg)'} onMouseOut={e => e.currentTarget.style.background = 'var(--index-hover-bg)'}>
                                         <PlusCircle size={22} />
                                         <span>Add New Lesson</span>
                                     </button>
@@ -478,18 +478,18 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
 
             <div className="form-body">
                 <div className="form-group">
-                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '12px', display: 'block' }}>Lesson Title</label>
+                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--index-text-secondary)', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '12px', display: 'block' }}>Lesson Title</label>
                     <input className="form-input-premium" value={formData.title} onChange={e => handleFieldChange('title', e.target.value)} placeholder="e.g. Introduction to Course" />
                 </div>
 
                 <div className="form-group">
-                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '12px', display: 'block' }}>Description</label>
+                    <label style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--index-text-secondary)', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '12px', display: 'block' }}>Description</label>
                     <textarea className="form-textarea-premium" value={formData.description} onChange={e => handleFieldChange('description', e.target.value)} placeholder="Describe what students will learn in this session..." />
                 </div>
 
                 {type === 'video' && (
                     <div className="upload-box">
-                        <UploadCloud size={56} color="#1a4d3e" />
+                        <UploadCloud size={56} color="var(--index-primary-color)" />
                         <h4>Upload Video Lesson</h4>
                         <p>MP4, MOV or link to external video sources.</p>
                     </div>
@@ -498,13 +498,13 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                 {type === 'live' && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                         <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#475569', marginBottom: '8px', display: 'block' }}>Live Platform</label>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--index-text-secondary)', marginBottom: '8px', display: 'block' }}>Live Platform</label>
                             <select className="form-input-premium">
                                 <option>Microsoft Teams</option>
                             </select>
                         </div>
                         <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: '#475569', marginBottom: '8px', display: 'block' }}>Meeting Link</label>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--index-text-secondary)', marginBottom: '8px', display: 'block' }}>Meeting Link</label>
                             <input className="form-input-premium" placeholder="https://..." />
                         </div>
                     </div>
@@ -512,9 +512,9 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
 
                 {type === 'evaluation' && (
                     <div className="questions-builder">
-                        <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '24px', border: '2px solid #e2e8f0' }}>
-                            <label style={{ fontWeight: 900, color: '#0f172a' }}>Passing Grade: {evaluationFields.pass_mark}%</label>
-                            <input type="range" min="0" max="100" step="5" value={evaluationFields.pass_mark} onChange={e => setEvaluationFields({ ...evaluationFields, pass_mark: parseInt(e.target.value) })} style={{ width: '100%', marginTop: '1rem', accentColor: '#1a4d3e' }} />
+                        <div style={{ padding: '2rem', background: 'var(--index-hover-bg)', borderRadius: '24px', border: '2px solid var(--index-border-color)' }}>
+                            <label style={{ fontWeight: 900, color: 'var(--index-text-heading)' }}>Passing Grade: {evaluationFields.pass_mark}%</label>
+                            <input type="range" min="0" max="100" step="5" value={evaluationFields.pass_mark} onChange={e => setEvaluationFields({ ...evaluationFields, pass_mark: parseInt(e.target.value) })} style={{ width: '100%', marginTop: '1rem', accentColor: 'var(--index-primary-color)' }} />
                         </div>
 
                         {evaluationFields.questions.map((q, idx) => (
@@ -542,22 +542,22 @@ function SessionForm({ type, initialData, onCancel, onSave }: { type: SessionTyp
                     </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '3rem', paddingTop: '3rem', borderTop: '2.5px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', gap: '3rem', paddingTop: '3rem', borderTop: '2.5px solid var(--index-border-subtle)' }}>
                     <div style={{ flex: 1 }}>
-                        <label style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>Preview Access</label>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '6px' }}>Allow students to view this lesson before enrolling.</p>
-                        <input type="checkbox" checked={formData.preview_enabled} onChange={e => handleFieldChange('preview_enabled', e.target.checked)} style={{ marginTop: '12px', width: '24px', height: '24px', accentColor: '#1a4d3e' }} />
+                        <label style={{ fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.1rem' }}>Preview Access</label>
+                        <p style={{ color: 'var(--index-text-secondary)', fontSize: '0.9rem', marginTop: '6px' }}>Allow students to view this lesson before enrolling.</p>
+                        <input type="checkbox" checked={formData.preview_enabled} onChange={e => handleFieldChange('preview_enabled', e.target.checked)} style={{ marginTop: '12px', width: '24px', height: '24px', accentColor: 'var(--index-primary-color)' }} />
                     </div>
                     <div style={{ flex: 1 }}>
-                        <label style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>Lock Lesson</label>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '6px' }}>Require completion of previous lessons.</p>
-                        <input type="checkbox" checked={formData.is_locked} onChange={e => handleFieldChange('is_locked', e.target.checked)} style={{ marginTop: '12px', width: '24px', height: '24px', accentColor: '#1a4d3e' }} />
+                        <label style={{ fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.1rem' }}>Lock Lesson</label>
+                        <p style={{ color: 'var(--index-text-secondary)', fontSize: '0.9rem', marginTop: '6px' }}>Require completion of previous lessons.</p>
+                        <input type="checkbox" checked={formData.is_locked} onChange={e => handleFieldChange('is_locked', e.target.checked)} style={{ marginTop: '12px', width: '24px', height: '24px', accentColor: 'var(--index-primary-color)' }} />
                     </div>
                 </div>
             </div>
 
-            <footer style={{ marginTop: '5rem', display: 'flex', justifyContent: 'flex-end', gap: '2rem', background: 'white', padding: '2.5rem 0', borderTop: '2px solid #f1f5f9', position: 'sticky', bottom: 0 }}>
-                <button onClick={onCancel} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontWeight: 900, cursor: 'pointer', fontSize: '1.1rem' }}>Cancel</button>
+            <footer style={{ marginTop: '5rem', display: 'flex', justifyContent: 'flex-end', gap: '2rem', background: 'var(--index-card-bg)', padding: '2.5rem 0', borderTop: '2px solid var(--index-border-subtle)', position: 'sticky', bottom: 0 }}>
+                <button onClick={onCancel} style={{ background: 'transparent', border: 'none', color: 'var(--index-text-faint)', fontWeight: 900, cursor: 'pointer', fontSize: '1.1rem' }}>Cancel</button>
                 <button className="deploy-btn-forest" onClick={handleSubmit}>Save to Module</button>
             </footer>
         </div>

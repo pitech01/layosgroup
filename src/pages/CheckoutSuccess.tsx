@@ -90,23 +90,23 @@ export default function CheckoutSuccess() {
         __html: `
         .success-page-wrapper {
           min-height: 100vh;
-          background: #f8fafc;
-          background-image: radial-gradient(rgba(52, 121, 127, 0.03) 1.5px, transparent 1.5px);
+          background: var(--index-bg-color);
+          background-image: radial-gradient(color-mix(in srgb, var(--index-primary-color) 3%, transparent) 1.5px, transparent 1.5px);
           background-size: 24px 24px;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 2.5rem 1rem;
-          color: #0f172a;
+          color: var(--index-text-heading);
         }
 
         .success-card {
           width: 100%;
           max-width: 620px;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
+          background: var(--index-card-bg);
+          border: 1px solid var(--index-border-color);
           border-radius: 24px;
-          box-shadow: 0 20px 40px rgba(15, 23, 42, 0.05);
+          box-shadow: 0 20px 40px color-mix(in srgb, var(--lgl-charcoal) 5%, transparent);
           padding: 3rem 2.25rem;
           text-align: center;
           position: relative;
@@ -121,7 +121,7 @@ export default function CheckoutSuccess() {
           transform: translateX(-50%);
           width: 150px;
           height: 150px;
-          background: radial-gradient(circle, rgba(52, 121, 127, 0.08) 0%, transparent 70%);
+          background: radial-gradient(circle, color-mix(in srgb, var(--index-primary-color) 8%, transparent) 0%, transparent 70%);
           filter: blur(20px);
           pointer-events: none;
         }
@@ -136,20 +136,20 @@ export default function CheckoutSuccess() {
         }
 
         .spinner-glow {
-          color: #34797f;
+          color: var(--index-primary-color);
           animation: spin 1s linear infinite;
-          filter: drop-shadow(0 0 8px rgba(52, 121, 127, 0.2));
+          filter: drop-shadow(0 0 8px color-mix(in srgb, var(--index-primary-color) 20%, transparent));
         }
 
         .loading-title {
           font-size: 1.35rem;
           font-weight: 800;
-          color: #0f172a;
+          color: var(--index-text-heading);
           letter-spacing: -0.5px;
         }
 
         .loading-subtitle {
-          color: #64748b;
+          color: var(--index-text-secondary);
           font-size: 0.9rem;
           max-width: 320px;
           margin: 0 auto;
@@ -163,17 +163,17 @@ export default function CheckoutSuccess() {
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: rgba(16, 185, 129, 0.1);
-          border: 2px solid rgba(16, 185, 129, 0.2);
-          color: #10b981;
+          background: color-mix(in srgb, var(--lgl-success) 10%, transparent);
+          border: 2px solid color-mix(in srgb, var(--lgl-success) 20%, transparent);
+          color: var(--lgl-success);
           margin-bottom: 1.5rem;
-          filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.15));
+          filter: drop-shadow(0 0 12px color-mix(in srgb, var(--lgl-success) 15%, transparent));
         }
 
         .success-title {
           font-size: 2.25rem;
           font-weight: 900;
-          color: #0f172a;
+          color: var(--index-text-heading);
           letter-spacing: -1px;
           margin-bottom: 0.75rem;
           line-height: 1.15;
@@ -181,15 +181,15 @@ export default function CheckoutSuccess() {
 
         .success-desc {
           font-size: 0.98rem;
-          color: #475569;
+          color: var(--index-text-secondary);
           margin-bottom: 2rem;
           line-height: 1.5;
         }
 
         /* Credentials Box */
         .credential-box {
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
+          background: var(--index-hover-bg);
+          border: 1px solid var(--index-border-color);
           border-radius: 16px;
           padding: 1.5rem;
           margin-bottom: 2rem;
@@ -199,7 +199,7 @@ export default function CheckoutSuccess() {
         .credential-header {
           font-size: 0.8rem;
           font-weight: 800;
-          color: #475569;
+          color: var(--index-text-secondary);
           text-transform: uppercase;
           letter-spacing: 1.5px;
           margin-bottom: 1rem;
@@ -213,7 +213,7 @@ export default function CheckoutSuccess() {
           justify-content: space-between;
           align-items: center;
           padding: 0.75rem 0;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid var(--index-border-color);
         }
 
         .credential-field:last-child {
@@ -222,13 +222,13 @@ export default function CheckoutSuccess() {
         }
 
         .field-label {
-          color: #475569;
+          color: var(--index-text-secondary);
           font-size: 0.88rem;
         }
 
         .field-value {
           font-family: monospace;
-          color: #0f172a;
+          color: var(--index-text-heading);
           font-size: 0.95rem;
           font-weight: 700;
         }
@@ -240,9 +240,9 @@ export default function CheckoutSuccess() {
         }
 
         .copy-btn {
-          background: #ffffff;
-          border: 1px solid #cbd5e1;
-          color: #475569;
+          background: var(--index-card-bg);
+          border: 1px solid var(--index-border-color);
+          color: var(--index-text-secondary);
           padding: 0.25rem 0.5rem;
           border-radius: 6px;
           cursor: pointer;
@@ -254,27 +254,27 @@ export default function CheckoutSuccess() {
         }
 
         .copy-btn:hover {
-          background: #f1f5f9;
-          color: #0f172a;
+          background: var(--index-hover-bg);
+          color: var(--index-text-heading);
         }
 
         /* Next Steps Box */
         .info-notice {
           display: flex;
           gap: 0.75rem;
-          background: rgba(52, 121, 127, 0.05);
-          border: 1px solid rgba(52, 121, 127, 0.15);
+          background: color-mix(in srgb, var(--index-primary-color) 5%, transparent);
+          border: 1px solid color-mix(in srgb, var(--index-primary-color) 15%, transparent);
           border-radius: 12px;
           padding: 1.25rem;
           text-align: left;
           font-size: 0.85rem;
           line-height: 1.5;
-          color: #334155;
+          color: var(--index-text-heading);
           margin-bottom: 2.25rem;
         }
 
         .info-notice-icon {
-          color: #34797f;
+          color: var(--index-primary-color);
           flex-shrink: 0;
           margin-top: 1px;
         }
@@ -294,7 +294,7 @@ export default function CheckoutSuccess() {
 
         .btn-lms-login {
           flex: 1;
-          background: linear-gradient(135deg, #34797f 0%, #0d9488 100%);
+          background: linear-gradient(135deg, var(--index-primary-color) 0%, var(--index-primary-hover) 100%);
           color: white;
           border: none;
           border-radius: 12px;
@@ -307,21 +307,21 @@ export default function CheckoutSuccess() {
           justify-content: center;
           gap: 0.5rem;
           transition: all 0.25s ease;
-          box-shadow: 0 4px 15px rgba(13, 148, 136, 0.25);
+          box-shadow: 0 4px 15px color-mix(in srgb, var(--index-primary-hover) 25%, transparent);
           text-decoration: none;
         }
 
         .btn-lms-login:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
-          background: linear-gradient(135deg, #3c8c93 0%, #0f9f93 100%);
+          box-shadow: 0 6px 20px color-mix(in srgb, var(--index-primary-hover) 40%, transparent);
+          background: linear-gradient(135deg, var(--index-primary-color) 0%, var(--index-primary-hover) 100%);
         }
 
         .btn-home-fallback {
           flex: 1;
-          background: #ffffff;
-          border: 1px solid #cbd5e1;
-          color: #475569;
+          background: var(--index-card-bg);
+          border: 1px solid var(--index-border-color);
+          color: var(--index-text-secondary);
           border-radius: 12px;
           padding: 0.9rem 1.5rem;
           font-weight: 700;
@@ -335,8 +335,8 @@ export default function CheckoutSuccess() {
         }
 
         .btn-home-fallback:hover {
-          background: #f1f5f9;
-          color: #0f172a;
+          background: var(--index-hover-bg);
+          color: var(--index-text-heading);
         }
 
         /* Error state */
@@ -347,11 +347,11 @@ export default function CheckoutSuccess() {
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: rgba(239, 68, 68, 0.1);
-          border: 2px solid rgba(239, 68, 68, 0.2);
-          color: #ef4444;
+          background: color-mix(in srgb, var(--lgl-error) 10%, transparent);
+          border: 2px solid color-mix(in srgb, var(--lgl-error) 20%, transparent);
+          color: var(--lgl-error);
           margin-bottom: 1.5rem;
-          filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.1));
+          filter: drop-shadow(0 0 12px color-mix(in srgb, var(--lgl-error) 10%, transparent));
         }
 
         @keyframes spin {
@@ -472,7 +472,7 @@ export default function CheckoutSuccess() {
 
             <div className="credential-box">
               <div className="credential-header">
-                <ShieldCheck size={16} style={{ color: '#5eead4' }} /> Learning Portal Credentials
+                <ShieldCheck size={16} style={{ color: 'var(--lgl-cyan)' }} /> Learning Portal Credentials
               </div>
               <div className="credential-field">
                 <span className="field-label">Portal Login Username</span>
@@ -483,7 +483,7 @@ export default function CheckoutSuccess() {
                 <div className="password-value-wrap">
                   <span className="field-value">password123</span>
                   <button className="copy-btn" onClick={handleCopyPassword}>
-                    {copied ? <Check size={13} style={{ color: '#10b981' }} /> : <Copy size={13} />}
+                    {copied ? <Check size={13} style={{ color: 'var(--lgl-success)' }} /> : <Copy size={13} />}
                     {copied ? 'Copied' : 'Copy'}
                   </button>
                 </div>
@@ -492,8 +492,8 @@ export default function CheckoutSuccess() {
 
             {/* Payment Receipt Summary Card */}
             <div className="receipt-display-box" style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--index-hover-bg)',
+              border: '1px solid var(--index-border-color)',
               borderRadius: '16px',
               padding: '1.5rem',
               marginBottom: '2rem',
@@ -503,24 +503,24 @@ export default function CheckoutSuccess() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                borderBottom: '1px dashed #cbd5e1',
+                borderBottom: '1px dashed var(--index-border-color)',
                 paddingBottom: '0.85rem',
                 marginBottom: '1rem'
               }}>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 850, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Receipt size={17} style={{ color: '#34797f' }} /> Official Payment Receipt
+                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 850, color: 'var(--index-text-heading)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Receipt size={17} style={{ color: 'var(--index-primary-color)' }} /> Official Payment Receipt
                   </h4>
-                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>
                     Receipt #LAYOS-{String(student.id || 1).padStart(5, '0')}
                   </span>
                 </div>
                 <span style={{
                   fontSize: '0.725rem',
                   fontWeight: 900,
-                  color: '#166534',
-                  background: '#dcfce7',
-                  border: '1px solid #86efac',
+                  color: 'var(--lgl-success)',
+                  background: 'color-mix(in srgb, var(--lgl-success) 15%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--lgl-success) 40%, transparent)',
                   padding: '4px 10px',
                   borderRadius: '99px',
                   textTransform: 'uppercase'
@@ -530,40 +530,40 @@ export default function CheckoutSuccess() {
               </div>
 
               <div style={{ display: 'grid', gap: '0.65rem', fontSize: '0.85rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
-                  <span style={{ color: '#64748b', fontWeight: 600 }}>Billed Student</span>
-                  <span style={{ color: '#0f172a', fontWeight: 700 }}>{student.first_name} {student.last_name}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--index-border-subtle)', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>Billed Student</span>
+                  <span style={{ color: 'var(--index-text-heading)', fontWeight: 700 }}>{student.first_name} {student.last_name}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
-                  <span style={{ color: '#64748b', fontWeight: 600 }}>Email Address</span>
-                  <span style={{ color: '#0f172a', fontWeight: 700, fontFamily: 'monospace', fontSize: '0.82rem' }}>{student.email}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--index-border-subtle)', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>Email Address</span>
+                  <span style={{ color: 'var(--index-text-heading)', fontWeight: 700, fontFamily: 'monospace', fontSize: '0.82rem' }}>{student.email}</span>
                 </div>
                 {student.phone && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
-                    <span style={{ color: '#64748b', fontWeight: 600 }}>Phone Number</span>
-                    <span style={{ color: '#0f172a', fontWeight: 700 }}>{student.phone}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--index-border-subtle)', paddingBottom: '0.4rem' }}>
+                    <span style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>Phone Number</span>
+                    <span style={{ color: 'var(--index-text-heading)', fontWeight: 700 }}>{student.phone}</span>
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
-                  <span style={{ color: '#64748b', fontWeight: 600 }}>Payment Plan</span>
-                  <span style={{ color: '#0f172a', fontWeight: 700, textTransform: 'capitalize' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--index-border-subtle)', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>Payment Plan</span>
+                  <span style={{ color: 'var(--index-text-heading)', fontWeight: 700, textTransform: 'capitalize' }}>
                     {student.payment_plan ? student.payment_plan.replace('_', ' ') : 'Full Tuition'}
                   </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
-                  <span style={{ color: '#64748b', fontWeight: 600 }}>Payment Method</span>
-                  <span style={{ color: '#0f172a', fontWeight: 700 }}>Stripe Card</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--index-border-subtle)', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>Payment Method</span>
+                  <span style={{ color: 'var(--index-text-heading)', fontWeight: 700 }}>Stripe Card</span>
                 </div>
                 {student.education_level && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
-                    <span style={{ color: '#64748b', fontWeight: 600 }}>Education Level</span>
-                    <span style={{ color: '#0f172a', fontWeight: 700 }}>{student.education_level}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--index-border-subtle)', paddingBottom: '0.4rem' }}>
+                    <span style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>Education Level</span>
+                    <span style={{ color: 'var(--index-text-heading)', fontWeight: 700 }}>{student.education_level}</span>
                   </div>
                 )}
                 {(student.referral_name || student.referral_email) && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.4rem' }}>
-                    <span style={{ color: '#64748b', fontWeight: 600 }}>Referred By</span>
-                    <span style={{ color: '#0f172a', fontWeight: 700 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--index-border-subtle)', paddingBottom: '0.4rem' }}>
+                    <span style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>Referred By</span>
+                    <span style={{ color: 'var(--index-text-heading)', fontWeight: 700 }}>
                       {student.referral_name || 'Friend'} {student.referral_email ? `(${student.referral_email})` : ''}
                     </span>
                   </div>

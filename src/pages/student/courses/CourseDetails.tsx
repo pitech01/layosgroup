@@ -46,7 +46,7 @@ const CourseDetails = () => {
                             instructor: enrolledCohort.instructor?.name || 'Assigned Instructor',
                             cohortName: enrolledCohort.name,
                             description: enrolledCohort.course.description,
-                            progress: enrolledCohort.pivot.progress || 0,
+                            progress: Math.round(Number(enrolledCohort.pivot.progress) || 0),
                             modules: enrolledCohort.course.modules || [],
                             isEnrolled: true,
                             completedLessons: data.completed_lessons || []

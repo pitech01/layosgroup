@@ -78,7 +78,7 @@ const NotificationIcon = ({ role }: NotificationIconProps) => {
                                     <p className="notif-title">{notif.title}</p>
                                     <p className="notif-text">{notif.desc}</p>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                                        <Clock size={12} color="#94a3b8" />
+                                        <Clock size={12} color="var(--color-lgl-gray-mid)" />
                                         <span className="notif-time">{notif.time}</span>
                                     </div>
                                 </div>

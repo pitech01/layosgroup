@@ -836,7 +836,7 @@ const InstructorChannelsPage = () => {
 
 
     const StatusDot = ({ status }: { status?: string }) => {
-        const color = status === 'online' ? '#10b981' : status === 'away' ? '#f59e0b' : '#64748b';
+        const color = status === 'online' ? 'var(--lgl-success)' : status === 'away' ? 'var(--lgl-warning)' : 'var(--index-text-secondary)';
         return <Circle size={10} fill={color} color={color} style={{ flexShrink: 0 }} />;
     };
 
@@ -851,7 +851,7 @@ const InstructorChannelsPage = () => {
                     height: calc(100vh - 120px);
                     background: white;
                     border-radius: 20px;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     overflow: hidden;
                     font-family: 'Inter', system-ui, sans-serif;
                     box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
@@ -861,8 +861,8 @@ const InstructorChannelsPage = () => {
                     display: flex;
                     align-items: center;
                     padding: 1rem 1.5rem;
-                    border-bottom: 1px solid #e2e8f0;
-                    background: #f8fafc;
+                    border-bottom: 1px solid var(--index-border-color);
+                    background: var(--index-hover-bg);
                     gap: 1rem;
                 }
 
@@ -872,14 +872,14 @@ const InstructorChannelsPage = () => {
                     display: flex;
                     align-items: center;
                     background: white;
-                    border: 1.5px solid #e2e8f0;
+                    border: 1.5px solid var(--index-border-color);
                     border-radius: 12px;
                     padding: 0 1rem;
                     transition: all 0.2s;
                 }
                 .search-bar-global:focus-within {
-                    border-color: #3b82f6;
-                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                    border-color: var(--index-primary-color);
+                    box-shadow: 0 0 0 3px var(--index-accent-soft-bg);
                 }
                 .search-bar-global input {
                     border: none;
@@ -900,10 +900,10 @@ const InstructorChannelsPage = () => {
                 /* Sub Sidebar Profile (Left Panel) */
                 .staff-scope .sub-sidebar {
                     width: 260px;
-                    background: #0f172a;
+                    background: var(--index-text-heading);
                     display: flex;
                     flex-direction: column;
-                    border-right: 1px solid #1e293b;
+                    border-right: 1px solid var(--index-text-heading);
                     flex-shrink: 0;
                     overflow-y: auto;
                 }
@@ -919,7 +919,7 @@ const InstructorChannelsPage = () => {
                     letter-spacing: 0.05em;
                     font-weight: 700;
                     margin: 0 0 0.5rem 0.75rem;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -932,7 +932,7 @@ const InstructorChannelsPage = () => {
                     padding: 0.5rem 0.75rem;
                     border-radius: 6px;
                     cursor: pointer;
-                    color: #cbd5e1;
+                    color: var(--index-text-faint);
                     margin-bottom: 2px;
                     text-decoration: none;
                     font-size: 0.95rem;
@@ -941,10 +941,10 @@ const InstructorChannelsPage = () => {
                 }
                 .nav-item:hover {
                     background: rgba(255,255,255,0.08);
-                    color: #f1f5f9;
+                    color: var(--index-hover-bg);
                 }
                 .nav-item.active {
-                    background: #2563eb;
+                    background: var(--index-primary-hover);
                     color: white;
                     font-weight: 600;
                 }
@@ -959,21 +959,21 @@ const InstructorChannelsPage = () => {
                     position: absolute;
                     bottom: -2px;
                     right: -2px;
-                    border: 2px solid #0f172a;
+                    border: 2px solid var(--index-text-heading);
                     border-radius: 50%;
-                    background: #0f172a;
+                    background: var(--index-text-heading);
                 }
                 .nav-item:hover .status-dot-wrapper {
-                    border-color: #1e293b;
+                    border-color: var(--index-text-heading);
                 }
                 .nav-item.active .status-dot-wrapper {
-                    border-color: #2563eb;
-                    background: #2563eb;
+                    border-color: var(--index-primary-hover);
+                    background: var(--index-primary-hover);
                 }
 
                 .staff-scope .unread-pill {
                     background: white;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     font-size: 0.7rem;
                     font-weight: 900;
                     padding: 2px 8px;
@@ -983,18 +983,18 @@ const InstructorChannelsPage = () => {
                 }
                 .nav-item.active .unread-pill {
                     background: white;
-                    color: #2563eb;
+                    color: var(--index-primary-hover);
                 }
 
                 .staff-scope .badge {
-                    background: #ef4444;
+                    background: var(--lgl-error);
                     color: white;
                     font-size: 0.72rem;
                     font-weight: 800;
                     padding: 2px 8px;
                     border-radius: 20px;
                     margin-left: auto;
-                    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+                    box-shadow: 0 2px 4px color-mix(in srgb, var(--lgl-error) 20%, transparent);
                     animation: pulse 2s infinite;
                 }
 
@@ -1018,8 +1018,8 @@ const InstructorChannelsPage = () => {
                 /* Right Sidebar */
                 .staff-scope .right-sidebar {
                     width: 300px;
-                    background: #f8fafc;
-                    border-left: 1px solid #e2e8f0;
+                    background: var(--index-hover-bg);
+                    border-left: 1px solid var(--index-border-color);
                     display: flex;
                     flex-direction: column;
                     flex-shrink: 0;
@@ -1028,17 +1028,17 @@ const InstructorChannelsPage = () => {
                 .right-sidebar h3 {
                     margin: 0;
                     font-weight: 800;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     font-size: 1rem;
                 }
                 .staff-scope .right-sidebar-section {
                     padding: 1.5rem;
-                    border-bottom: 1px solid #e2e8f0;
+                    border-bottom: 1px solid var(--index-border-color);
                 }
 
                 .staff-scope .chat-header {
                     padding: 1rem 1.5rem;
-                    border-bottom: 1px solid #e2e8f0;
+                    border-bottom: 1px solid var(--index-border-color);
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -1047,7 +1047,7 @@ const InstructorChannelsPage = () => {
                 .staff-scope .chat-header-title {
                     font-weight: 800;
                     font-size: 1.1rem;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     display: flex;
                     align-items: center;
                     gap: 8px;
@@ -1071,13 +1071,13 @@ const InstructorChannelsPage = () => {
                 .date-divider::before, .date-divider::after {
                     content: '';
                     flex: 1;
-                    border-bottom: 1px solid #e2e8f0;
+                    border-bottom: 1px solid var(--index-border-color);
                 }
                 .date-divider span {
                     padding: 0 1rem;
                     font-size: 0.75rem;
                     font-weight: 700;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     text-transform: uppercase;
                 }
 
@@ -1087,14 +1087,14 @@ const InstructorChannelsPage = () => {
                     margin-bottom: 1.5rem;
                 }
                 .message-item:hover {
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     border-radius: 8px;
                 }
                 .staff-scope .message-avatar {
                     width: 40px;
                     height: 40px;
                     border-radius: 10px;
-                    background: #3b82f6;
+                    background: var(--index-primary-color);
                     color: white;
                     display: flex;
                     align-items: center;
@@ -1114,38 +1114,38 @@ const InstructorChannelsPage = () => {
                 }
                 .staff-scope .message-user {
                     font-weight: 800;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     font-size: 0.95rem;
                 }
                 .staff-scope .message-time {
                     font-size: 0.75rem;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     font-weight: 600;
                 }
                 .staff-scope .message-text {
-                    color: #334155;
+                    color: var(--index-text-secondary);
                     font-size: 0.95rem;
                     line-height: 1.5;
                     white-space: pre-wrap;
                 }
 
                 .staff-scope .instructor-message {
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     padding: 0.75rem;
                     border-radius: 12px;
-                    border-left: 3px solid #0f172a;
+                    border-left: 3px solid var(--index-text-heading);
                     margin-left: -0.75rem;
                     margin-right: -0.75rem;
                 }
 
                 .staff-scope .announcement-message {
-                    border: 1px solid #fee2e2;
-                    background: #fffafa;
-                    border-left: 4px solid #ef4444;
+                    border: 1px solid var(--index-danger-bg-soft);
+                    background: var(--index-card-bg);
+                    border-left: 4px solid var(--lgl-error);
                 }
 
                 .announcement-message .message-user {
-                    color: #b91c1c;
+                    color: var(--lgl-error);
                 }
 
 
@@ -1155,23 +1155,23 @@ const InstructorChannelsPage = () => {
                     align-items: center;
                     gap: 1rem;
                     padding: 1rem;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 12px;
                     margin-top: 0.5rem;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     max-width: 400px;
                     transition: all 0.2s;
                 }
                 .file-attachment:hover {
-                    border-color: #cbd5e1;
+                    border-color: var(--index-text-faint);
                     background: white;
                 }
                 .staff-scope .file-icon-box {
                     width: 40px;
                     height: 40px;
                     border-radius: 8px;
-                    background: #eff6ff;
-                    color: #3b82f6;
+                    background: var(--index-accent-soft-bg);
+                    color: var(--index-primary-color);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -1183,15 +1183,15 @@ const InstructorChannelsPage = () => {
                     background: white;
                 }
                 .staff-scope .chat-input-wrapper {
-                    border: 1.5px solid #e2e8f0;
+                    border: 1.5px solid var(--index-border-color);
                     border-radius: 16px;
-                    background: #fcfdfe;
+                    background: var(--index-card-bg);
                     padding: 0.5rem;
                     transition: all 0.2s;
                 }
                 .chat-input-wrapper:focus-within {
-                    border-color: #3b82f6;
-                    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+                    border-color: var(--index-primary-color);
+                    box-shadow: 0 4px 6px -1px var(--index-accent-soft-bg);
                     background: white;
                 }
                 .staff-scope .file-preview-strip {
@@ -1199,7 +1199,7 @@ const InstructorChannelsPage = () => {
                     display: flex;
                     align-items: center;
                     gap: 1rem;
-                    border-bottom: 1px solid #e2e8f0;
+                    border-bottom: 1px solid var(--index-border-color);
                 }
 
                 /* Responsiveness Overrides */
@@ -1278,14 +1278,14 @@ const InstructorChannelsPage = () => {
                     </button>
                 )}
                 <div className="search-bar-global">
-                    <Search size={18} color="#94a3b8" />
+                    <Search size={18} color="var(--index-text-faint)" />
                     <input 
                         type="text" 
                         placeholder="Search messages, files, and channels..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <Filter size={18} color="#94a3b8" style={{ cursor: 'pointer' }} />
+                    <Filter size={18} color="var(--index-text-faint)" style={{ cursor: 'pointer' }} />
                 </div>
             </div>
 
@@ -1293,7 +1293,7 @@ const InstructorChannelsPage = () => {
                 {/* Left Panel (Internal Sidebar) */}
                 <div className="sub-sidebar">
                     <div className="sidebar-section">
-                        <h3>Channels <Plus size={16} style={{ cursor: 'pointer', color: '#64748b', background: '#e2e8f0', borderRadius: '4px', padding: '2px' }} onClick={() => setIsCreateChannelModalOpen(true)} /></h3>
+                        <h3>Channels <Plus size={16} style={{ cursor: 'pointer', color: 'var(--index-text-secondary)', background: 'var(--index-border-color)', borderRadius: '4px', padding: '2px' }} onClick={() => setIsCreateChannelModalOpen(true)} /></h3>
                         {channels.map(channel => (
                             <div 
                                 key={channel.id} 
@@ -1313,12 +1313,12 @@ const InstructorChannelsPage = () => {
                             Direct Messages 
                             <Plus 
                                 size={16} 
-                                style={{ cursor: 'pointer', color: '#64748b', background: '#e2e8f0', borderRadius: '4px', padding: '2px' }} 
+                                style={{ cursor: 'pointer', color: 'var(--index-text-secondary)', background: 'var(--index-border-color)', borderRadius: '4px', padding: '2px' }} 
                                 onClick={() => setIsUserSearchOpen(true)}
                             />
                         </h3>
                         {dms.length === 0 && (
-                            <div style={{ padding: '0 0.75rem', fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                            <div style={{ padding: '0 0.75rem', fontSize: '0.8rem', color: 'var(--index-text-faint)', fontStyle: 'italic' }}>
                                 No active chats. Click + to start.
                             </div>
                         )}
@@ -1329,7 +1329,7 @@ const InstructorChannelsPage = () => {
                                 onClick={() => handleChannelSelect(dm)}
                             >
                                 <div style={{ position: 'relative' }}>
-                                    <div style={{ width: '20px', height: '20px', borderRadius: '6px', background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 800 }}>
+                                    <div style={{ width: '20px', height: '20px', borderRadius: '6px', background: 'var(--index-primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 800 }}>
                                         {dm.avatar || dm.title.charAt(0)}
                                     </div>
                                     <div className="status-dot-wrapper">
@@ -1350,13 +1350,13 @@ const InstructorChannelsPage = () => {
                         {/* Chat Header */}
                         <div className="chat-header">
                             <div className="chat-header-title">
-                                {activeChannel.type === 'channel' ? <Hash size={20} color="#64748b" /> : <StatusDot status={activeChannel.status} />}
+                                {activeChannel.type === 'channel' ? <Hash size={20} color="var(--index-text-secondary)" /> : <StatusDot status={activeChannel.status} />}
                                 {activeChannel.title}
                             </div>
-                            <div style={{ display: 'flex', gap: '16px', color: '#64748b', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '16px', color: 'var(--index-text-secondary)', alignItems: 'center' }}>
                                 <div 
                                     onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
-                                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', background: isRightSidebarOpen ? '#f1f5f9' : 'transparent', padding: '6px 12px', borderRadius: '8px', transition: 'all 0.2s' }}
+                                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', background: isRightSidebarOpen ? 'var(--index-hover-bg)' : 'transparent', padding: '6px 12px', borderRadius: '8px', transition: 'all 0.2s' }}
                                 >
                                     {activeChannel.type === 'channel' ? <Users size={18} /> : <Info size={18} />}
                                     <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Details</span>
@@ -1364,7 +1364,7 @@ const InstructorChannelsPage = () => {
                                 {activeChannel.type === 'channel' && activeChannel.title !== 'general-discussion' && (
                                     <button 
                                         onClick={handleDeleteChannel}
-                                        style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '6px', borderRadius: '8px', transition: 'all 0.2s', marginLeft: '4px' }}
+                                        style={{ background: 'var(--index-danger-bg-soft)', border: '1px solid var(--index-danger-bg-soft)', color: 'var(--lgl-error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '6px', borderRadius: '8px', transition: 'all 0.2s', marginLeft: '4px' }}
                                         title="Delete Channel"
                                     >
                                         <Trash2 size={16} />
@@ -1385,33 +1385,33 @@ const InstructorChannelsPage = () => {
                                     justifyContent: 'center', 
                                     padding: '4rem 2rem',
                                     textAlign: 'center',
-                                    backgroundColor: '#f8fafc'
+                                    backgroundColor: 'var(--index-hover-bg)'
                                 }}>
                                     <div style={{ 
                                         width: '80px', 
                                         height: '80px', 
-                                        background: 'white', 
+                                        background: 'var(--index-card-bg)', 
                                         borderRadius: '24px', 
                                         display: 'flex', 
                                         alignItems: 'center', 
                                         justifyContent: 'center', 
                                         marginBottom: '1.5rem',
                                         boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                                        border: '1px solid #e2e8f0'
+                                        border: '1px solid var(--index-border-color)'
                                     }}>
-                                        <Megaphone size={40} color="#3b82f6" />
+                                        <Megaphone size={40} color="var(--index-primary-color)" />
                                     </div>
-                                    <h2 style={{ margin: '0 0 0.5rem', fontWeight: 900, fontSize: '1.8rem', color: '#0f172a' }}>
+                                    <h2 style={{ margin: '0 0 0.5rem', fontWeight: 900, fontSize: '1.8rem', color: 'var(--index-text-heading)' }}>
                                         Start the conversation
                                     </h2>
-                                    <p style={{ margin: '0 0 2.5rem', fontSize: '1.05rem', color: '#64748b', maxWidth: '450px', lineHeight: 1.6 }}>
+                                    <p style={{ margin: '0 0 2.5rem', fontSize: '1.05rem', color: 'var(--index-text-secondary)', maxWidth: '450px', lineHeight: 1.6 }}>
                                         This channel is empty. As the instructor, you can kick things off by sharing a welcome message, uploading course materials, or posting an announcement.
                                     </p>
                                 </div>
                             ) : isLoadingMessages ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '4rem 2rem' }}>
-                                    <Loader2 size={48} className="animate-spin" style={{ color: '#0f172a', margin: '0 auto 1.5rem' }} />
-                                    <p style={{ margin: '0', fontSize: '1rem', color: '#64748b', fontWeight: 600 }}>Loading messages...</p>
+                                    <Loader2 size={48} className="animate-spin" style={{ color: 'var(--index-text-heading)', margin: '0 auto 1.5rem' }} />
+                                    <p style={{ margin: '0', fontSize: '1rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>Loading messages...</p>
                                 </div>
                             ) : (
                                 <>
@@ -1487,39 +1487,39 @@ const InstructorChannelsPage = () => {
                         <div className="right-sidebar">
                             <div className="right-sidebar-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <h3>Details</h3>
-                                <X size={20} style={{ cursor: 'pointer', color: '#64748b' }} onClick={() => setIsRightSidebarOpen(false)} />
+                                <X size={20} style={{ cursor: 'pointer', color: 'var(--index-text-secondary)' }} onClick={() => setIsRightSidebarOpen(false)} />
                             </div>
                             <div className="right-sidebar-section">
-                                <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>About</h4>
+                                <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: 'var(--index-text-faint)', textTransform: 'uppercase', fontWeight: 800 }}>About</h4>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        {activeChannel?.type === 'channel' ? <Hash size={24} color="#64748b" /> : <Users size={24} color="#64748b" />}
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--index-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {activeChannel?.type === 'channel' ? <Hash size={24} color="var(--index-text-secondary)" /> : <Users size={24} color="var(--index-text-secondary)" />}
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: 800, color: '#0f172a' }}>{activeChannel.title}</div>
-                                        {activeChannel.type === 'channel' && <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{activeChannel.participants || 'Instructor'} participants</div>}
+                                        <div style={{ fontWeight: 800, color: 'var(--index-text-heading)' }}>{activeChannel.title}</div>
+                                        {activeChannel.type === 'channel' && <div style={{ fontSize: '0.8rem', color: 'var(--index-text-secondary)' }}>{activeChannel.participants || 'Instructor'} participants</div>}
                                     </div>
                                 </div>
-                                <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', lineHeight: 1.5 }}>
+                                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--index-text-secondary)', lineHeight: 1.5 }}>
                                     {activeChannel.description || 'No description available for this channel.'}
                                 </p>
                             </div>
                             {activeChannel.type === 'channel' && (
                                 <div className="right-sidebar-section">
-                                    <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Files & Links</h4>
-                                    <div style={{ fontSize: '0.9rem', color: '#64748b', fontStyle: 'italic' }}>Shared files will appear here...</div>
+                                    <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: 'var(--index-text-faint)', textTransform: 'uppercase', fontWeight: 800 }}>Files & Links</h4>
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--index-text-secondary)', fontStyle: 'italic' }}>Shared files will appear here...</div>
                                 </div>
                             )}
                         </div>
                     )}
                 </>
                 ) : (
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', flexDirection: 'column', color: '#94a3b8', padding: '2rem', textAlign: 'center' }}>
-                        <div style={{ width: '80px', height: '80px', background: 'white', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                            <Hash size={40} color="#cbd5e1" />
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--index-hover-bg)', flexDirection: 'column', color: 'var(--index-text-faint)', padding: '2rem', textAlign: 'center' }}>
+                        <div style={{ width: '80px', height: '80px', background: 'var(--index-card-bg)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                            <Hash size={40} color="var(--index-text-faint)" />
                         </div>
-                        <h3 style={{ margin: '0 0 0.5rem', fontWeight: 900, color: '#0f172a', fontSize: '1.5rem' }}>No Channel Selected</h3>
-                        <p style={{ marginTop: '0.5rem', fontSize: '1rem', color: '#64748b', maxWidth: '350px', lineHeight: 1.6 }}>
+                        <h3 style={{ margin: '0 0 0.5rem', fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.5rem' }}>No Channel Selected</h3>
+                        <p style={{ marginTop: '0.5rem', fontSize: '1rem', color: 'var(--index-text-secondary)', maxWidth: '350px', lineHeight: 1.6 }}>
                             {channels.length === 0 
                                 ? "You haven't been assigned to any courses yet. Once assigned, your class channels will appear in the sidebar." 
                                 : "Select a discussion channel or a direct message from the sidebar to begin communicating."}
@@ -1527,7 +1527,7 @@ const InstructorChannelsPage = () => {
                         {channels.length > 0 && (
                             <button 
                                 onClick={() => setActiveChannel(channels[0])}
-                                style={{ marginTop: '1.5rem', background: '#3b82f6', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: 700, cursor: 'pointer' }}
+                                style={{ marginTop: '1.5rem', background: 'var(--index-primary-color)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
                                 Open General Channel
                             </button>
@@ -1537,34 +1537,34 @@ const InstructorChannelsPage = () => {
             </div>            {/* Announcement Modal */}
             {isAnnouncementModalOpen && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-                    <div style={{ background: 'white', width: '100%', maxWidth: '500px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-                        <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ background: 'var(--index-card-bg)', width: '100%', maxWidth: '500px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+                        <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--index-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <h3 style={{ margin: 0, fontWeight: 800 }}>Post Announcement</h3>
                             <X size={20} style={{ cursor: 'pointer' }} onClick={() => setIsAnnouncementModalOpen(false)} />
                         </div>
                         <div style={{ padding: '1.25rem' }}>
                             <div style={{ marginBottom: '1.25rem' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>Title</label>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--index-text-secondary)', marginBottom: '0.5rem' }}>Title</label>
                                 <input 
                                     type="text" 
                                     value={announcementTitle}
                                     onChange={(e) => setAnnouncementTitle(e.target.value)}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--index-border-color)' }}
                                 />
                             </div>
                             <div style={{ marginBottom: '1.25rem' }}>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '0.5rem' }}>Content</label>
+                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: 'var(--index-text-secondary)', marginBottom: '0.5rem' }}>Content</label>
                                 <textarea 
                                     value={announcementContent}
                                     onChange={(e) => setAnnouncementContent(e.target.value)}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0', minHeight: '120px' }}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--index-border-color)', minHeight: '120px' }}
                                 />
                             </div>
                             <div style={{ display: 'flex', gap: '12px' }}>
-                                <button onClick={() => setIsAnnouncementModalOpen(false)} style={{ flex: 1, border: 'none', background: '#f1f5f9', padding: '0.75rem', borderRadius: '10px' }}>Cancel</button>
+                                <button onClick={() => setIsAnnouncementModalOpen(false)} style={{ flex: 1, border: 'none', background: 'var(--index-hover-bg)', padding: '0.75rem', borderRadius: '10px' }}>Cancel</button>
                                 <button 
                                     onClick={() => handleSendMessage(announcementTitle + ": " + announcementContent, null, 'announcement')}
-                                    style={{ flex: 2, border: 'none', background: '#3b82f6', color: 'white', padding: '0.75rem', borderRadius: '10px' }}
+                                    style={{ flex: 2, border: 'none', background: 'var(--index-primary-color)', color: 'white', padding: '0.75rem', borderRadius: '10px' }}
                                 >
                                     Post
                                 </button>
@@ -1577,14 +1577,14 @@ const InstructorChannelsPage = () => {
             {/* User Search Modal for DMs */}
             {isUserSearchOpen && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-                    <div style={{ background: 'white', width: '100%', maxWidth: '400px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-                        <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ background: 'var(--index-card-bg)', width: '100%', maxWidth: '400px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+                        <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--index-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <h3 style={{ margin: 0, fontWeight: 800 }}>New Message</h3>
                             <X size={20} style={{ cursor: 'pointer' }} onClick={() => setIsUserSearchOpen(false)} />
                         </div>
                         <div style={{ padding: '1.25rem' }}>
                             <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-                                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--index-text-faint)' }} />
                                 <input 
                                     type="text" 
                                     placeholder="Search by name..."
@@ -1602,7 +1602,7 @@ const InstructorChannelsPage = () => {
                                             setSearchResults([]);
                                         }
                                     }}
-                                    style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                    style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '10px', border: '1px solid var(--index-border-color)' }}
                                 />
                             </div>
                             
@@ -1619,12 +1619,12 @@ const InstructorChannelsPage = () => {
                                         }}
                                         style={{ padding: '0.75rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
                                     >
-                                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--index-primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
                                             {user.title.charAt(0)}
                                         </div>
                                         <div>
                                             <p style={{ margin: 0, fontWeight: 700 }}>{user.title}</p>
-                                            <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>{user.type}</p>
+                                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--index-text-secondary)' }}>{user.type}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -1636,25 +1636,25 @@ const InstructorChannelsPage = () => {
 
             {/* Create Channel Modal */}
             {isCreateChannelModalOpen && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', animation: 'fadeIn 0.2s ease-out' }}>
-                    <div style={{ background: 'white', width: '100%', maxWidth: '480px', borderRadius: '24px', padding: '2.5rem', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', animation: 'slideUp 0.3s ease-out' }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'color-mix(in srgb, var(--lgl-charcoal) 60%, transparent)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', animation: 'fadeIn 0.2s ease-out' }}>
+                    <div style={{ background: 'var(--index-card-bg)', width: '100%', maxWidth: '480px', borderRadius: '24px', padding: '2.5rem', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', animation: 'slideUp 0.3s ease-out' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                             <div>
-                                <h2 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem', color: '#0f172a' }}>Create Channel</h2>
-                                <p style={{ margin: '0.25rem 0 0', color: '#64748b', fontSize: '0.9rem' }}>Set up a new space for discussion.</p>
+                                <h2 style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem', color: 'var(--index-text-heading)' }}>Create Channel</h2>
+                                <p style={{ margin: '0.25rem 0 0', color: 'var(--index-text-secondary)', fontSize: '0.9rem' }}>Set up a new space for discussion.</p>
                             </div>
                             <button 
                                 onClick={() => setIsCreateChannelModalOpen(false)}
-                                style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.2s' }}
+                                style={{ background: 'var(--index-hover-bg)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.2s' }}
                             >
-                                <X size={20} color="#64748b" />
+                                <X size={20} color="var(--index-text-secondary)" />
                             </button>
                         </div>
                         
                         <div style={{ marginBottom: '1.75rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Channel Name <span style={{ color: '#ef4444' }}>*</span></label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-heading)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Channel Name <span style={{ color: 'var(--lgl-error)' }}>*</span></label>
                             <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--index-text-faint)' }}>
                                     <Hash size={18} />
                                 </div>
                                 <input 
@@ -1662,33 +1662,33 @@ const InstructorChannelsPage = () => {
                                     placeholder="e.g. assignment-help"
                                     value={newChannelName}
                                     onChange={(e) => setNewChannelName(e.target.value.toLowerCase().replace(/\\s+/g, '-'))}
-                                    style={{ width: '100%', padding: '0.875rem 1rem 0.875rem 2.5rem', borderRadius: '12px', border: '2px solid #e2e8f0', fontSize: '0.95rem', background: '#f8fafc', fontWeight: 600, color: '#0f172a', transition: 'all 0.2s', outline: 'none' }}
-                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = 'white'; }}
-                                    onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                                    style={{ width: '100%', padding: '0.875rem 1rem 0.875rem 2.5rem', borderRadius: '12px', border: '2px solid var(--index-border-color)', fontSize: '0.95rem', background: 'var(--index-hover-bg)', fontWeight: 600, color: 'var(--index-text-heading)', transition: 'all 0.2s', outline: 'none' }}
+                                    onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--index-primary-color)'; e.currentTarget.style.background = 'var(--index-card-bg)'; }}
+                                    onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--index-border-color)'; e.currentTarget.style.background = 'var(--index-hover-bg)'; }}
                                 />
                             </div>
                         </div>
 
                         <div style={{ marginBottom: '1.75rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description (Optional)</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-heading)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description (Optional)</label>
                             <textarea 
                                 placeholder="What is this channel about?"
                                 value={newChannelDesc}
                                 onChange={(e) => setNewChannelDesc(e.target.value)}
-                                style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid #e2e8f0', fontSize: '0.95rem', background: '#f8fafc', minHeight: '100px', resize: 'none', transition: 'all 0.2s', outline: 'none' }}
-                                onFocus={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = 'white'; }}
-                                onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                                style={{ width: '100%', padding: '1rem', borderRadius: '12px', border: '2px solid var(--index-border-color)', fontSize: '0.95rem', background: 'var(--index-hover-bg)', minHeight: '100px', resize: 'none', transition: 'all 0.2s', outline: 'none' }}
+                                onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--index-primary-color)'; e.currentTarget.style.background = 'var(--index-card-bg)'; }}
+                                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--index-border-color)'; e.currentTarget.style.background = 'var(--index-hover-bg)'; }}
                             />
                         </div>
 
                         <div style={{ marginBottom: '2.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Course Association</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-heading)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Course Association</label>
                             <select 
                                 value={targetCourseId}
                                 onChange={(e) => setTargetCourseId(e.target.value)}
-                                style={{ width: '100%', padding: '0.875rem 1rem', borderRadius: '12px', border: '2px solid #e2e8f0', fontSize: '0.95rem', background: '#f8fafc', fontWeight: 600, color: '#0f172a', cursor: 'pointer', outline: 'none', appearance: 'none' }}
-                                onFocus={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = 'white'; }}
-                                onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                                style={{ width: '100%', padding: '0.875rem 1rem', borderRadius: '12px', border: '2px solid var(--index-border-color)', fontSize: '0.95rem', background: 'var(--index-hover-bg)', fontWeight: 600, color: 'var(--index-text-heading)', cursor: 'pointer', outline: 'none', appearance: 'none' }}
+                                onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--index-primary-color)'; e.currentTarget.style.background = 'var(--index-card-bg)'; }}
+                                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--index-border-color)'; e.currentTarget.style.background = 'var(--index-hover-bg)'; }}
                             >
                                 <option value="general">Global (Visible to Everyone)</option>
                                 {instructorCourses.map(course => (
@@ -1701,14 +1701,14 @@ const InstructorChannelsPage = () => {
                             <button 
                                 onClick={() => setIsCreateChannelModalOpen(false)} 
                                 disabled={isCreatingChannel}
-                                style={{ flex: 1, border: 'none', background: '#f1f5f9', color: '#475569', padding: '1rem', borderRadius: '12px', fontWeight: 800, cursor: isCreatingChannel ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}
+                                style={{ flex: 1, border: 'none', background: 'var(--index-hover-bg)', color: 'var(--index-text-secondary)', padding: '1rem', borderRadius: '12px', fontWeight: 800, cursor: isCreatingChannel ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}
                             >
                                 Cancel
                             </button>
                             <button 
                                 onClick={handleCreateChannel}
                                 disabled={isCreatingChannel || !newChannelName.trim()}
-                                style={{ flex: 2, border: 'none', background: (!newChannelName.trim() || isCreatingChannel) ? '#94a3b8' : '#3b82f6', color: 'white', padding: '1rem', borderRadius: '12px', fontWeight: 800, cursor: (!newChannelName.trim() || isCreatingChannel) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s', boxShadow: (!newChannelName.trim() || isCreatingChannel) ? 'none' : '0 10px 15px -3px rgba(59, 130, 246, 0.3)' }}
+                                style={{ flex: 2, border: 'none', background: (!newChannelName.trim() || isCreatingChannel) ? 'var(--index-text-faint)' : 'var(--index-primary-color)', color: 'white', padding: '1rem', borderRadius: '12px', fontWeight: 800, cursor: (!newChannelName.trim() || isCreatingChannel) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s', boxShadow: (!newChannelName.trim() || isCreatingChannel) ? 'none' : '0 10px 15px -3px var(--index-accent-soft-bg)' }}
                             >
                                 {isCreatingChannel ? (
                                     <>

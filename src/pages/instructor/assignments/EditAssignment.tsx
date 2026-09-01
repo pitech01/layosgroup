@@ -156,7 +156,7 @@ export default function EditAssignment() {
     if (isLoading) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80vh' }}>
-                <Loader2 className="animate-spin" size={48} color="#1a4d3e" />
+                <Loader2 className="animate-spin" size={48} color="var(--index-primary-color)" />
             </div>
         );
     }
@@ -175,7 +175,7 @@ export default function EditAssignment() {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     text-decoration: none;
                     font-weight: 800;
                     font-size: 0.9rem;
@@ -187,7 +187,7 @@ export default function EditAssignment() {
                 }
 
                 .back-link:hover {
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     transform: translateX(-4px);
                 }
 
@@ -205,7 +205,7 @@ export default function EditAssignment() {
 
                 .staff-scope .form-card-premium {
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 32px;
                     padding: 3rem;
                     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -219,17 +219,17 @@ export default function EditAssignment() {
                 }
 
                 .staff-scope .icon-box {
-                    background: #f1f5f9;
+                    background: var(--index-hover-bg);
                     padding: 12px;
                     border-radius: 12px;
-                    color: #1a4d3e;
+                    color: var(--index-primary-color);
                 }
 
                 .section-title h2 {
                     margin: 0;
                     font-size: 1.75rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     letter-spacing: -0.04em;
                 }
 
@@ -242,28 +242,28 @@ export default function EditAssignment() {
 
                 .form-group label {
                     font-weight: 800;
-                    color: #334155;
+                    color: var(--index-text-secondary);
                     font-size: 0.95rem;
                 }
 
                 .staff-scope .premium-input {
                     width: 100%;
                     padding: 1rem 1.25rem;
-                    background: #f8fafc;
-                    border: 2px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 16px;
                     font-family: inherit;
                     font-size: 1rem;
                     font-weight: 600;
                     transition: all 0.2s;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope .premium-input:focus {
                     outline: none;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     background: white;
-                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                    box-shadow: 0 0 0 4px color-mix(in srgb, var(--index-primary-color) 5%, transparent);
                 }
 
                 .staff-scope .premium-textarea {
@@ -272,19 +272,19 @@ export default function EditAssignment() {
                 }
 
                 .staff-scope .file-upload-zone {
-                    border: 2px dashed #e2e8f0;
+                    border: 2px dashed var(--index-border-color);
                     border-radius: 20px;
                     padding: 2.5rem;
                     text-align: center;
                     transition: all 0.3s;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     cursor: pointer;
                     position: relative;
                 }
 
                 .staff-scope .file-upload-zone:hover {
-                    border-color: #1a4d3e;
-                    background: #f0f7f4;
+                    border-color: var(--index-primary-color);
+                    background: var(--index-accent-soft-bg);
                 }
 
                 .staff-scope .file-selected-card {
@@ -294,7 +294,7 @@ export default function EditAssignment() {
                     background: white;
                     padding: 1rem 1.5rem;
                     border-radius: 16px;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     margin-top: 1rem;
                 }
 
@@ -302,17 +302,17 @@ export default function EditAssignment() {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     padding: 1rem 1.5rem;
                     border-radius: 16px;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     margin-top: 0.5rem;
                     margin-bottom: 1rem;
                 }
 
                 .staff-scope .remove-file {
                     margin-left: auto;
-                    color: #ef4444;
+                    color: var(--lgl-error);
                     cursor: pointer;
                     padding: 4px;
                     border-radius: 8px;
@@ -320,11 +320,11 @@ export default function EditAssignment() {
                 }
 
                 .staff-scope .remove-file:hover {
-                    background: #fee2e2;
+                    background: var(--index-danger-bg-soft);
                 }
 
                 .staff-scope .btn-submit {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     border: none;
                     padding: 1.25rem;
@@ -339,11 +339,11 @@ export default function EditAssignment() {
                     transition: all 0.3s;
                     width: 100%;
                     margin-top: 1rem;
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.3);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 30%, transparent);
                 }
 
                 .staff-scope .btn-submit:hover {
-                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.4);
+                    box-shadow: 0 20px 25px -5px color-mix(in srgb, var(--index-primary-color) 40%, transparent);
                     transform: translateY(-2px);
                 }
 
@@ -362,14 +362,14 @@ export default function EditAssignment() {
                     background: white;
                     border-radius: 24px;
                     padding: 2rem;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                 }
 
                 .staff-scope .info-card h4 {
                     margin: 0 0 1rem 0;
                     font-size: 1.1rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     display: flex;
                     align-items: center;
                     gap: 10px;
@@ -387,7 +387,7 @@ export default function EditAssignment() {
                 .staff-scope .info-list li {
                     display: flex;
                     gap: 10px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-size: 0.9rem;
                     font-weight: 600;
                     line-height: 1.5;
@@ -471,8 +471,8 @@ export default function EditAssignment() {
                                 <label>Assignment Resource (Leave empty to keep existing)</label>
                                 {existingAssignment?.assignment_file && !selectedFile && (
                                     <div className="existing-file-card">
-                                        <FileText size={20} color="#64748b" />
-                                        <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+                                        <FileText size={20} color="var(--index-text-secondary)" />
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>
                                             Currently: <span style={{ fontWeight: 800 }}>{existingAssignment.assignment_file.split('/').pop()}</span>
                                         </div>
                                     </div>
@@ -486,15 +486,15 @@ export default function EditAssignment() {
                                             onChange={handleFileChange}
                                             accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip"
                                         />
-                                        <Upload size={32} color="#1a4d3e" style={{ marginBottom: '1rem' }} />
-                                        <div style={{ fontWeight: 800, color: '#0f172a' }}>Click to upload new instruction file</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
+                                        <Upload size={32} color="var(--index-primary-color)" style={{ marginBottom: '1rem' }} />
+                                        <div style={{ fontWeight: 800, color: 'var(--index-text-heading)' }}>Click to upload new instruction file</div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--index-text-secondary)', marginTop: '0.5rem' }}>
                                             PDF, DOCX, PPT, Excel or ZIP (Max 50MB)
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="file-selected-card">
-                                        <FileText size={20} color="#1a4d3e" />
+                                        <FileText size={20} color="var(--index-primary-color)" />
                                         <div style={{ fontWeight: 700, fontSize: '0.9rem', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedFile.name} (Ready to upload)</div>
                                         <div className="remove-file" onClick={() => setSelectedFile(null)}>
                                             <X size={18} />
@@ -503,9 +503,9 @@ export default function EditAssignment() {
                                 )}
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f8fafc', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid #e2e8f0' }}>
-                                <Info size={18} color="#64748b" />
-                                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Updates will be stored on Bunny.net. Old files will be automatically replaced.</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--index-hover-bg)', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid var(--index-border-color)' }}>
+                                <Info size={18} color="var(--index-text-secondary)" />
+                                <span style={{ fontSize: '0.8rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>Updates will be stored on Bunny.net. Old files will be automatically replaced.</span>
                             </div>
 
                             <button className="btn-submit" disabled={isSubmitting}>
@@ -521,22 +521,22 @@ export default function EditAssignment() {
 
                 <aside className="info-sidebar">
                     <div className="info-card">
-                        <h4><BookOpen size={20} color="#1a4d3e" /> Guidelines</h4>
+                        <h4><BookOpen size={20} color="var(--index-primary-color)" /> Guidelines</h4>
                         <ul className="info-list">
                             <li>
-                                <div style={{ height: '6px', width: '6px', borderRadius: '50%', background: '#1a4d3e', marginTop: '7px', flexShrink: 0 }} />
+                                <div style={{ height: '6px', width: '6px', borderRadius: '50%', background: 'var(--index-primary-color)', marginTop: '7px', flexShrink: 0 }} />
                                 Edited changes are visible to students immediately.
                             </li>
                             <li>
-                                <div style={{ height: '6px', width: '6px', borderRadius: '50%', background: '#1a4d3e', marginTop: '7px', flexShrink: 0 }} />
+                                <div style={{ height: '6px', width: '6px', borderRadius: '50%', background: 'var(--index-primary-color)', marginTop: '7px', flexShrink: 0 }} />
                                 Re-uploading a file replaces the old attachment on Bunny.net storage automatically.
                             </li>
                         </ul>
                     </div>
 
                     <div className="info-card">
-                        <h4><Clock size={20} color="#0f172a" /> Deadlines</h4>
-                        <p style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600, margin: 0 }}>
+                        <h4><Clock size={20} color="var(--index-text-heading)" /> Deadlines</h4>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--index-text-secondary)', fontWeight: 600, margin: 0 }}>
                             Updating the due date will change the remaining time displayed to students. Any past submissions will remain but status might be re-evaluated against the new due date.
                         </p>
                     </div>

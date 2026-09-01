@@ -808,7 +808,7 @@ if (!activeChannel && formattedChannels.length > 0) {
     };
 
     const StatusDot = ({ status }: { status?: string }) => {
-        const color = status === 'online' ? '#10b981' : status === 'away' ? '#f59e0b' : '#64748b';
+        const color = status === 'online' ? 'var(--color-lgl-success)' : status === 'away' ? 'var(--color-lgl-warning)' : 'var(--index-text-secondary)';
         return <Circle size={10} fill={color} color={color} style={{ flexShrink: 0 }} />;
     };
 
@@ -819,9 +819,9 @@ if (!activeChannel && formattedChannels.length > 0) {
                     display: flex;
                     flex-direction: column;
                     height: calc(100vh - 120px);
-                    background: white;
+                    background: var(--index-card-bg);
                     border-radius: 20px;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     overflow: hidden;
                     font-family: 'Inter', system-ui, sans-serif;
                     box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
@@ -831,8 +831,8 @@ if (!activeChannel && formattedChannels.length > 0) {
                     display: flex;
                     align-items: center;
                     padding: 1rem 1.5rem;
-                    border-bottom: 1px solid #e2e8f0;
-                    background: #f8fafc;
+                    border-bottom: 1px solid var(--index-border-color);
+                    background: var(--index-hover-bg);
                     gap: 1rem;
                 }
 
@@ -841,15 +841,15 @@ if (!activeChannel && formattedChannels.length > 0) {
                     max-width: 600px;
                     display: flex;
                     align-items: center;
-                    background: white;
-                    border: 1.5px solid #e2e8f0;
+                    background: var(--index-input-bg);
+                    border: 1.5px solid var(--index-border-color);
                     border-radius: 12px;
                     padding: 0 1rem;
                     transition: all 0.2s;
                 }
                 .search-bar-global:focus-within {
-                    border-color: #3b82f6;
-                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                    border-color: var(--color-brand-emerald);
+                    box-shadow: 0 0 0 3px var(--color-brand-border);
                 }
                 .search-bar-global input {
                     border: none;
@@ -858,6 +858,7 @@ if (!activeChannel && formattedChannels.length > 0) {
                     width: 100%;
                     font-size: 0.9rem;
                     background: transparent;
+                    color: var(--index-text-color);
                 }
 
                 .comm-body {
@@ -870,10 +871,10 @@ if (!activeChannel && formattedChannels.length > 0) {
                 /* Sub Sidebar Profile (Left Panel) */
                 .sub-sidebar {
                     width: 260px;
-                    background: #1e293b;
+                    background: var(--color-brand-charcoal);
                     display: flex;
                     flex-direction: column;
-                    border-right: 1px solid #1e293b;
+                    border-right: 1px solid var(--index-border-color);
                     flex-shrink: 0;
                     overflow-y: auto;
                 }
@@ -889,7 +890,7 @@ if (!activeChannel && formattedChannels.length > 0) {
                     letter-spacing: 0.05em;
                     font-weight: 700;
                     margin: 0 0 0.5rem 0.75rem;
-                    color: #94a3b8;
+                    color: var(--color-lgl-gray-mid);
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -902,7 +903,7 @@ if (!activeChannel && formattedChannels.length > 0) {
                     padding: 0.5rem 0.75rem;
                     border-radius: 6px;
                     cursor: pointer;
-                    color: #cbd5e1;
+                    color: var(--color-lgl-gray-mid);
                     margin-bottom: 2px;
                     text-decoration: none;
                     font-size: 0.95rem;
@@ -911,10 +912,10 @@ if (!activeChannel && formattedChannels.length > 0) {
                 }
                 .nav-item:hover {
                     background: rgba(255,255,255,0.08);
-                    color: #f1f5f9;
+                    color: white;
                 }
                 .nav-item.active {
-                    background: #2563eb;
+                    background: var(--color-brand-emerald);
                     color: white;
                     font-weight: 600;
                 }
@@ -930,7 +931,7 @@ if (!activeChannel && formattedChannels.length > 0) {
                     flex: 1;
                     display: flex;
                     flex-direction: column;
-                    background: white;
+                    background: var(--index-card-bg);
                     min-width: 0;
                     min-height: 0;
                     position: relative;
@@ -939,8 +940,8 @@ if (!activeChannel && formattedChannels.length > 0) {
                 /* Right Sidebar */
                 .right-sidebar {
                     width: 300px;
-                    background: #f8fafc;
-                    border-left: 1px solid #e2e8f0;
+                    background: var(--index-hover-bg);
+                    border-left: 1px solid var(--index-border-color);
                     display: flex;
                     flex-direction: column;
                     flex-shrink: 0;
@@ -949,18 +950,19 @@ if (!activeChannel && formattedChannels.length > 0) {
                 .right-sidebar h3 {
                     margin: 0;
                     font-weight: 800;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     font-size: 1rem;
                 }
                 .right-sidebar-section {
                     padding: 1.5rem;
-                    border-bottom: 1px solid #e2e8f0;
+                    border-bottom: 1px solid var(--index-border-color);
                 }
 
                 /* Enhanced Context Header */
+                .context-header {
                     padding: 1rem;
-                    border-bottom: 1px solid #e2e8f0;
-                    background: white;
+                    border-bottom: 1px solid var(--index-border-color);
+                    background: var(--index-card-bg);
                     display: flex;
                     flex-direction: column;
                     gap: 1rem;
@@ -980,13 +982,13 @@ if (!activeChannel && formattedChannels.length > 0) {
                     display: flex;
                     gap: 2rem;
                     padding: 0 1.5rem;
-                    border-bottom: 1px solid #e2e8f0;
-                    background: #fcfdfe;
+                    border-bottom: 1px solid var(--index-border-color);
+                    background: var(--index-card-bg);
                 }
                 .tab {
                     padding: 0.75rem 0;
                     font-weight: 700;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     cursor: pointer;
                     border-bottom: 2px solid transparent;
                     transition: all 0.2s;
@@ -995,11 +997,11 @@ if (!activeChannel && formattedChannels.length > 0) {
                     gap: 6px;
                 }
                 .tab.active {
-                    color: #000;
-                    border-bottom-color: #059669;
+                    color: var(--index-text-heading);
+                    border-bottom-color: var(--color-brand-emerald);
                 }
                 .tab:hover:not(.active) {
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .chat-messages {
@@ -1008,7 +1010,7 @@ if (!activeChannel && formattedChannels.length > 0) {
                     padding: 1.5rem;
                     display: flex;
                     flex-direction: column;
-                    background: #ffffff;
+                    background: var(--index-card-bg);
                     min-height: 0;
                 }
 
@@ -1021,13 +1023,13 @@ if (!activeChannel && formattedChannels.length > 0) {
                 .date-divider::before, .date-divider::after {
                     content: '';
                     flex: 1;
-                    border-bottom: 1px solid #e2e8f0;
+                    border-bottom: 1px solid var(--index-border-color);
                 }
                 .date-divider span {
                     padding: 0 1rem;
                     font-size: 0.75rem;
                     font-weight: 700;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     text-transform: uppercase;
                 }
 
@@ -1090,24 +1092,24 @@ if (!activeChannel && formattedChannels.length > 0) {
                     <button 
                         className="md:hidden" 
                         onClick={() => setActiveChannel(null)}
-                        style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', fontWeight: 700, color: '#334155' }}
+                        style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', fontWeight: 700, color: 'var(--index-text-secondary)' }}
                     >
                         <ArrowLeft size={20} className="" style={{ marginRight: '8px' }} />
                         Back
                     </button>
                 )}
                 <div className="search-bar-global">
-                    <Search size={18} color="#94a3b8" />
+                    <Search size={18} color="var(--color-lgl-gray-mid)" />
                     <input 
                         type="text" 
                         placeholder="Search resources, lessons, and channels..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <Filter size={18} color="#94a3b8" style={{ cursor: 'pointer' }} />
+                    <Filter size={18} color="var(--color-lgl-gray-mid)" style={{ cursor: 'pointer' }} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ padding: '6px 12px', background: '#fef3c7', color: '#b45309', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ padding: '6px 12px', background: 'color-mix(in srgb, var(--lgl-warning) 20%, white)', color: 'var(--lgl-warning)', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <GraduationCap size={16} /> Student Mode
                     </div>
                 </div>
@@ -1124,7 +1126,7 @@ if (!activeChannel && formattedChannels.length > 0) {
                                 className={`nav-item ${activeChannel?.id === channel.id && activeChannel?.type === 'channel' ? 'active' : ''}`}
                                 onClick={() => handleChannelSelect(channel)}
                             >
-                                <Hash size={16} style={{ flexShrink: 0, color: channel.id === 'general' ? '#3b82f6' : '#94a3b8' }} />
+                                <Hash size={16} style={{ flexShrink: 0, color: channel.id === 'general' ? 'var(--color-brand-emerald)' : 'var(--color-lgl-gray-mid)' }} />
                                 <span className="truncate" style={{ fontWeight: channel.id === 'general' ? 800 : 600 }}>{channel.title}</span>
                                 {channel.unread && channel.unread > 0 && !(activeChannel?.id === channel.id && activeChannel?.type === 'channel') && <span className="badge">{channel.unread}</span>}
                             </div>
@@ -1134,7 +1136,7 @@ if (!activeChannel && formattedChannels.length > 0) {
                     <div className="sidebar-section">
                         <h3>Direct Support</h3>
                         {dms.length === 0 && (
-                            <div style={{ padding: '0 0.75rem', fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                            <div style={{ padding: '0 0.75rem', fontSize: '0.8rem', color: 'var(--color-lgl-gray-mid)', fontStyle: 'italic' }}>
                                 No active chats.
                             </div>
                         )}
@@ -1145,10 +1147,10 @@ if (!activeChannel && formattedChannels.length > 0) {
                                 onClick={() => handleChannelSelect(dm)}
                             >
                                 <div style={{ position: 'relative' }}>
-                                    <div style={{ width: '20px', height: '20px', borderRadius: '6px', background: '#334155', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 800 }}>
+                                    <div style={{ width: '20px', height: '20px', borderRadius: '6px', background: 'var(--index-text-secondary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 800 }}>
                                         {dm.avatar || dm.title.charAt(0)}
                                     </div>
-                                    <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', background: '#f1f5f9', borderRadius: '50%', padding: '1px' }}>
+                                    <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', background: 'var(--index-hover-bg)', borderRadius: '50%', padding: '1px' }}>
                                         <StatusDot status={dm.status} />
                                     </div>
                                 </div>
@@ -1167,26 +1169,26 @@ if (!activeChannel && formattedChannels.length > 0) {
                         <div className="context-header padding-5">
                             <div className='padding-5' style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', gap: '12px' }}>
-                                    <h2 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', wordBreak: 'break-word' }}>
+                                    <h2 style={{ margin: 0, fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', wordBreak: 'break-word' }}>
 
-                                        {activeChannel.type === 'channel' ? <Hash size={22} color="#64748b" /> : <StatusDot status={activeChannel.status} />}
+                                        {activeChannel.type === 'channel' ? <Hash size={22} color="var(--index-text-secondary)" /> : <StatusDot status={activeChannel.status} />}
                                         {activeChannel.title}
                                     </h2>
                                     {activeChannel.type === 'channel' && activeChannel.instructorName && (
-                                        <span style={{ fontSize: '0.75rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px', color: '#475569', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span style={{ fontSize: '0.75rem', background: 'var(--index-hover-bg)', padding: '4px 8px', borderRadius: '6px', color: 'var(--index-text-secondary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             <GraduationCap size={14} /> Instructor: {activeChannel.instructorName}
                                         </span>
                                     )}
                                 </div>
                                 {activeChannel.description && (
-                                    <p style={{ margin: '0', fontSize: '0.85rem', color: '#64748b', wordBreak: 'break-word' }}>{activeChannel.description}</p>
+                                    <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--index-text-secondary)', wordBreak: 'break-word' }}>{activeChannel.description}</p>
                                 )}
                             </div>
-                            <div style={{ display: 'flex', gap: '16px', color: '#64748b', flexShrink: 0 }}>
+                            <div style={{ display: 'flex', gap: '16px', color: 'var(--index-text-secondary)', flexShrink: 0 }}>
 
                                 <div 
                                     onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
-                                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', background: isRightSidebarOpen ? '#f1f5f9' : 'transparent', padding: '6px 12px', borderRadius: '8px', transition: 'all 0.2s' }}
+                                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', background: isRightSidebarOpen ? 'var(--index-hover-bg)' : 'transparent', padding: '6px 12px', borderRadius: '8px', transition: 'all 0.2s' }}
                                 >
                                     {activeChannel?.type === 'channel' ? <Users size={18} /> : <Info size={18} />}
                                     <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Details</span>
@@ -1210,7 +1212,7 @@ if (!activeChannel && formattedChannels.length > 0) {
                                 {pinnedMessages.length > 0 && (
                                     <div className="pinned-banner" onClick={() => setShowPinned(!showPinned)}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <Pin size={16} fill="#991b1b" />
+                                            <Pin size={16} fill="var(--lgl-error)" />
                                             <span>{pinnedMessages.length} Pinned Instructor Announcement{pinnedMessages.length > 1 ? 's' : ''}</span>
                                         </div>
                                         <span>{showPinned ? 'Hide' : 'View'}</span>
@@ -1218,13 +1220,13 @@ if (!activeChannel && formattedChannels.length > 0) {
                                 )}
 
                                 {showPinned && pinnedMessages.length > 0 && (
-                                    <div style={{ background: '#fef2f2', borderBottom: '1px solid #fecaca', padding: '1rem 1.5rem' }}>
+                                    <div style={{ background: 'var(--index-danger-bg-soft)', borderBottom: '1px solid color-mix(in srgb, var(--lgl-error) 40%, transparent)', padding: '1rem 1.5rem' }}>
                                         {pinnedMessages.map((msg, idx) => (
-                                            <div key={idx} style={{ padding: '0.75rem', background: 'white', borderRadius: '8px', border: '1px solid #fecaca', marginBottom: '8px' }}>
-                                                <div style={{ display: 'flex', gap: '8px', fontWeight: 800, color: '#7f1d1d', fontSize: '0.85rem', marginBottom: '4px' }}>
+                                            <div key={idx} style={{ padding: '0.75rem', background: 'var(--index-card-bg)', borderRadius: '8px', border: '1px solid color-mix(in srgb, var(--lgl-error) 40%, transparent)', marginBottom: '8px' }}>
+                                                <div style={{ display: 'flex', gap: '8px', fontWeight: 800, color: 'var(--lgl-error)', fontSize: '0.85rem', marginBottom: '4px' }}>
                                                     <AlertCircle size={14} /> {msg.user.name} - {msg.date}
                                                 </div>
-                                                <div style={{ color: '#450a0a', fontSize: '0.9rem' }}>{msg.content}</div>
+                                                <div style={{ color: 'var(--index-text-heading)', fontSize: '0.9rem' }}>{msg.content}</div>
                                             </div>
                                         ))}
                                     </div>
@@ -1234,18 +1236,18 @@ if (!activeChannel && formattedChannels.length > 0) {
                                 <div className="chat-messages">
                                     {isLoadingMessages ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyItems: 'center', textAlign: 'center', padding: '4rem 2rem' }}>
-                                            <Loader2 size={48} className="animate-spin" style={{ color: '#3b82f6', margin: '0 auto 1.5rem' }} />
-                                            <p style={{ margin: '0', fontSize: '1rem', color: '#94a3b8', fontWeight: 600 }}>Loading messages...</p>
+                                            <Loader2 size={48} className="animate-spin" style={{ color: 'var(--color-brand-emerald)', margin: '0 auto 1.5rem' }} />
+                                            <p style={{ margin: '0', fontSize: '1rem', color: 'var(--color-lgl-gray-mid)', fontWeight: 600 }}>Loading messages...</p>
                                         </div>
                                     ) : messages.length === 0 ? (
                                         <div className="empty-state" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-                                            <div style={{ width: '64px', height: '64px', background: '#f1f5f9', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                                                <BookOpen size={32} color="#cbd5e1" />
+                                            <div style={{ width: '64px', height: '64px', background: 'var(--index-hover-bg)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                                                <BookOpen size={32} color="var(--color-lgl-gray-mid)" />
                                             </div>
-                                            <h2 style={{ margin: '0 0 0.5rem', fontWeight: 900, fontSize: '1.5rem', color: '#0f172a' }}>
+                                            <h2 style={{ margin: '0 0 0.5rem', fontWeight: 900, fontSize: '1.5rem', color: 'var(--index-text-heading)' }}>
                                                 No messages yet.
                                             </h2>
-                                            <p style={{ margin: '0', fontSize: '1rem', color: '#94a3b8' }}>
+                                            <p style={{ margin: '0', fontSize: '1rem', color: 'var(--color-lgl-gray-mid)' }}>
                                                 Waiting for your instructor to initiate the conversation...
                                             </p>
                                         </div>
@@ -1317,10 +1319,10 @@ if (!activeChannel && formattedChannels.length > 0) {
                                         isSending={isSending}
                                         placeholder={isAskingQuestion ? "Ask your question to the instructor..." : "Message the class..."}
                                     />
-                                    <div style={{ background: 'white', padding: '0 1.5rem 1rem', display: 'flex', gap: '12px' }}>
+                                    <div style={{ background: 'var(--index-card-bg)', padding: '0 1.5rem 1rem', display: 'flex', gap: '12px' }}>
                                         <button 
                                             onClick={() => setIsAskingQuestion(!isAskingQuestion)}
-                                            style={{ background: isAskingQuestion ? '#fef3c7' : '#f1f5f9', border: 'none', cursor: 'pointer', color: isAskingQuestion ? '#b45309' : '#64748b', padding: '6px 14px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '0.75rem', transition: 'all 0.2s' }}
+                                            style={{ background: isAskingQuestion ? 'color-mix(in srgb, var(--lgl-warning) 20%, white)' : 'var(--index-hover-bg)', border: 'none', cursor: 'pointer', color: isAskingQuestion ? 'var(--lgl-warning)' : 'var(--index-text-secondary)', padding: '6px 14px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '0.75rem', transition: 'all 0.2s' }}
                                         >
                                             <HelpCircle size={16} /> {isAskingQuestion ? 'Question Mode Active' : 'Need Help? Ask a Question'}
                                         </button>
@@ -1331,22 +1333,22 @@ if (!activeChannel && formattedChannels.length > 0) {
                             <div className="resources-grid">
                                 {extractSharedFiles().length > 0 ? (
                                     extractSharedFiles().map(file => (
-                                        <div key={file.id} style={{ border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.25rem', background: 'white', display: 'flex', flexDirection: 'column', gap: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+                                        <div key={file.id} style={{ border: '1px solid var(--index-border-color)', borderRadius: '16px', padding: '1.25rem', background: 'white', display: 'flex', flexDirection: 'column', gap: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
                                             <div style={{ display: 'flex', gap: '12px' }}>
                                                 <div className='bg-brand-emerald/80 text-white' style={{ width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     {file.type === 'pdf' ? <FileText size={24} /> : file.type === 'image' ? <ImageIcon size={24} /> : <FileGeneric size={24} />}
                                                 </div>
                                                 <div style={{ flex: 1 }}>
-                                                    <h4 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', wordBreak: 'break-all' }}>{file.name}</h4>
-                                                    <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>{file.size} • {file.type.toUpperCase()}</p>
+                                                    <h4 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 800, color: 'var(--index-text-heading)', wordBreak: 'break-all' }}>{file.name}</h4>
+                                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>{file.size} • {file.type.toUpperCase()}</p>
                                                 </div>
                                             </div>
-                                            <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', color: '#475569', display: 'flex', justifyContent: 'space-between' }}>
+                                            <div style={{ background: 'var(--index-hover-bg)', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--index-text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
                                                 <span>Shared by: <strong>{file.uploadedBy}</strong></span>
                                                 <span>{file.date}</span>
                                             </div>
                                             <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
-                                                <button onClick={() => window.open(file.url, '_blank')} style={{ flex: 1, background: '#f1f5f9', border: 'none', color: '#0f172a', padding: '8px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
+                                                <button onClick={() => window.open(file.url, '_blank')} style={{ flex: 1, background: 'var(--index-hover-bg)', border: 'none', color: 'var(--index-text-heading)', padding: '8px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
                                                     Preview
                                                 </button>
                                                 <button className='bg-brand-emerald/90' onClick={(e) => forceDownload(e, file.url, file.name || 'Resource')} style={{ flex: 1,  border: 'none', color: 'white', padding: '8px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
@@ -1356,11 +1358,11 @@ if (!activeChannel && formattedChannels.length > 0) {
                                         </div>
                                     ))
                                 ) : (
-                                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem', color: '#64748b' }}>
-                                        <div style={{ width: '64px', height: '64px', background: '#f1f5f9', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                                            <FileGeneric size={32} color="#94a3b8" />
+                                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem', color: 'var(--index-text-secondary)' }}>
+                                        <div style={{ width: '64px', height: '64px', background: 'var(--index-hover-bg)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                                            <FileGeneric size={32} color="var(--color-lgl-gray-mid)" />
                                         </div>
-                                        <h3 style={{ margin: '0 0 0.5rem', fontWeight: 800, color: '#0f172a' }}>No Files Shared Yet</h3>
+                                        <h3 style={{ margin: '0 0 0.5rem', fontWeight: 800, color: 'var(--index-text-heading)' }}>No Files Shared Yet</h3>
                                         <p style={{ margin: 0 }}>Resources shared in the chat will automatically appear here for easy access.</p>
                                     </div>
                                 )}
@@ -1371,31 +1373,31 @@ if (!activeChannel && formattedChannels.length > 0) {
                         <div className="right-sidebar">
                             <div className="right-sidebar-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <h3>Details</h3>
-                                <X size={20} style={{ cursor: 'pointer', color: '#64748b' }} onClick={() => setIsRightSidebarOpen(false)} />
+                                <X size={20} style={{ cursor: 'pointer', color: 'var(--index-text-secondary)' }} onClick={() => setIsRightSidebarOpen(false)} />
                             </div>
                             <div className="right-sidebar-section">
-                                <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>About</h4>
+                                <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: 'var(--color-lgl-gray-mid)', textTransform: 'uppercase', fontWeight: 800 }}>About</h4>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        {activeChannel?.type === 'channel' ? <Hash size={24} color="#64748b" /> : <Users size={24} color="#64748b" />}
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--index-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {activeChannel?.type === 'channel' ? <Hash size={24} color="var(--index-text-secondary)" /> : <Users size={24} color="var(--index-text-secondary)" />}
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: 800, color: '#0f172a' }}>{activeChannel.title}</div>
-                                        {activeChannel?.type === 'channel' && <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{activeChannel.participants || '...'} participants</div>}
+                                        <div style={{ fontWeight: 800, color: 'var(--index-text-heading)' }}>{activeChannel.title}</div>
+                                        {activeChannel?.type === 'channel' && <div style={{ fontSize: '0.8rem', color: 'var(--index-text-secondary)' }}>{activeChannel.participants || '...'} participants</div>}
                                     </div>
                                 </div>
-                                <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', lineHeight: 1.5 }}>
+                                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--index-text-secondary)', lineHeight: 1.5 }}>
                                     {activeChannel.description || 'No description available for this channel.'}
                                 </p>
                             </div>
                             {activeChannel?.type === 'channel' && activeChannel.instructorName && (
                                 <div className="right-sidebar-section">
-                                    <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Instructor</h4>
+                                    <h4 style={{ margin: '0 0 12px', fontSize: '0.8rem', color: 'var(--color-lgl-gray-mid)', textTransform: 'uppercase', fontWeight: 800 }}>Instructor</h4>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
+                                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--color-brand-emerald)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
                                             {activeChannel.instructorName.charAt(0)}
                                         </div>
-                                        <span style={{ fontWeight: 700, color: '#0f172a' }}>{activeChannel.instructorName}</span>
+                                        <span style={{ fontWeight: 700, color: 'var(--index-text-heading)' }}>{activeChannel.instructorName}</span>
                                     </div>
                                 </div>
                             )}
@@ -1403,9 +1405,9 @@ if (!activeChannel && formattedChannels.length > 0) {
                     )}
                     </>
                 ) : (
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', flexDirection: 'column', color: '#94a3b8' }}>
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--index-hover-bg)', flexDirection: 'column', color: 'var(--color-lgl-gray-mid)' }}>
                         <Hash size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                        <h3 style={{ margin: 0, fontWeight: 800, color: '#64748b' }}>No Channel Selected</h3>
+                        <h3 style={{ margin: 0, fontWeight: 800, color: 'var(--index-text-secondary)' }}>No Channel Selected</h3>
                         <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>Choose your enrolled course channel to start learning.</p>
                     </div>
                 )}

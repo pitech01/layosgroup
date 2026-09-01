@@ -119,13 +119,13 @@ export default function InstructorInterviews() {
                 .header-content h1 {
                     font-size: 2.5rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0 0 0.5rem 0;
                     letter-spacing: -0.04em;
                 }
 
                 .header-content p {
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-weight: 600;
                     margin: 0;
                     font-size: 1.1rem;
@@ -135,24 +135,24 @@ export default function InstructorInterviews() {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     padding: 1rem 2rem;
                     border-radius: 16px;
                     text-decoration: none;
                     font-weight: 900;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.3);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 30%, transparent);
                 }
 
                 .btn-create:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.4);
+                    box-shadow: 0 20px 25px -5px color-mix(in srgb, var(--index-primary-color) 40%, transparent);
                 }
 
                 .staff-scope .search-bar {
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 20px;
                     padding: 1.25rem;
                     margin-bottom: 2.5rem;
@@ -172,19 +172,19 @@ export default function InstructorInterviews() {
                     left: 16px;
                     top: 50%;
                     transform: translateY(-50%);
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                 }
 
                 .staff-scope .search-input {
                     width: 100%;
                     padding: 0.85rem 1rem 0.85rem 3rem;
-                    border: 1px solid #f1f5f9;
+                    border: 1px solid var(--index-hover-bg);
                     border-radius: 14px;
                     font-size: 1rem;
                     font-weight: 600;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     transition: all 0.2s;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope .interview-grid {
@@ -195,7 +195,7 @@ export default function InstructorInterviews() {
 
                 .staff-scope .interview-card {
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 28px;
                     padding: 2rem;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -206,7 +206,7 @@ export default function InstructorInterviews() {
                 }
 
                 .interview-card:hover {
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     transform: translateY(-6px);
                     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
                 }
@@ -214,8 +214,8 @@ export default function InstructorInterviews() {
                 .staff-scope .cohort-badge {
                     display: inline-flex;
                     padding: 6px 14px;
-                    background: #f0fdf4;
-                    color: #166534;
+                    background: color-mix(in srgb, var(--lgl-success) 15%, transparent);
+                    color: var(--lgl-success);
                     border-radius: 10px;
                     font-size: 0.75rem;
                     font-weight: 900;
@@ -241,16 +241,16 @@ export default function InstructorInterviews() {
                     transition: all 0.2s;
                 }
 
-                .staff-scope .pill-doc { background: #e0f2fe; color: #0369a1; }
-                .staff-scope .pill-video { background: #fee2e2; color: #991b1b; }
+                .staff-scope .pill-doc { background: var(--index-accent-soft-bg); color: var(--index-primary-color); }
+                .staff-scope .pill-video { background: var(--index-danger-bg-soft); color: var(--lgl-error); }
 
-                .pill-doc:hover { background: #bae6fd; }
-                .pill-video:hover { background: #fecaca; }
+                .pill-doc:hover { background: color-mix(in srgb, var(--index-primary-color) 25%, transparent); }
+                .pill-video:hover { background: color-mix(in srgb, var(--lgl-error) 30%, transparent); }
 
                 .staff-scope .card-footer {
                     margin-top: auto;
                     padding-top: 1.5rem;
-                    border-top: 1px solid #f1f5f9;
+                    border-top: 1px solid var(--index-hover-bg);
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -282,7 +282,7 @@ export default function InstructorInterviews() {
 
                 .staff-scope .preview-header {
                     padding: 1.5rem 2rem;
-                    border-bottom: 1px solid #f1f5f9;
+                    border-bottom: 1px solid var(--index-hover-bg);
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -310,28 +310,28 @@ export default function InstructorInterviews() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button style={{ padding: '0.85rem 1.5rem', background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', fontWeight: 800, color: '#475569' }}>
+                <button style={{ padding: '0.85rem 1.5rem', background: 'var(--index-card-bg)', border: '1px solid var(--index-border-color)', borderRadius: '14px', fontWeight: 800, color: 'var(--index-text-secondary)' }}>
                     <Filter size={18} /> Filters
                 </button>
             </div>
 
             {loading ? (
                 <div style={{ padding: '10rem 0', textAlign: 'center' }}>
-                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
-                    <p style={{ marginTop: '2rem', fontWeight: 800, color: '#64748b' }}>Fetching interview data...</p>
+                    <Loader2 className="animate-spin" size={48} color="var(--index-primary-color)" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '2rem', fontWeight: 800, color: 'var(--index-text-secondary)' }}>Fetching interview data...</p>
                 </div>
             ) : error ? (
-                <div style={{ padding: '4rem', background: '#fff1f2', borderRadius: '32px', textAlign: 'center', border: '1px solid #ffe4e6' }}>
-                    <AlertCircle size={48} color="#e11d48" style={{ margin: '0 auto 1.5rem' }} />
-                    <h3 style={{ margin: 0, fontWeight: 900, color: '#0f172a' }}>Error</h3>
-                    <p style={{ color: '#64748b', fontWeight: 600 }}>{error}</p>
+                <div style={{ padding: '4rem', background: 'var(--index-danger-bg-soft)', borderRadius: '32px', textAlign: 'center', border: '1px solid var(--index-danger-bg-soft)' }}>
+                    <AlertCircle size={48} color="var(--lgl-error)" style={{ margin: '0 auto 1.5rem' }} />
+                    <h3 style={{ margin: 0, fontWeight: 900, color: 'var(--index-text-heading)' }}>Error</h3>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>{error}</p>
                     <button onClick={fetchInterviews} className="btn-create" style={{ margin: '2rem auto' }}>Retry</button>
                 </div>
             ) : filteredInterviews.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '8rem 2rem', background: 'white', border: '2px dashed #e2e8f0', borderRadius: '40px' }}>
-                    <Mic2 size={80} color="#cbd5e1" style={{ marginBottom: '2rem' }} />
-                    <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a' }}>No interview resources</h2>
-                    <p style={{ color: '#64748b', fontWeight: 600, marginBottom: '3rem' }}>
+                <div style={{ textAlign: 'center', padding: '8rem 2rem', background: 'var(--index-card-bg)', border: '2px dashed var(--index-border-color)', borderRadius: '40px' }}>
+                    <Mic2 size={80} color="var(--index-text-faint)" style={{ marginBottom: '2rem' }} />
+                    <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--index-text-heading)' }}>No interview resources</h2>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, marginBottom: '3rem' }}>
                         Create your first interview resource to share materials with your students.
                     </p>
                     <Link to="/instructor/interviews/create" className="btn-create" style={{ display: 'inline-flex', margin: '0 auto' }}>
@@ -343,8 +343,8 @@ export default function InstructorInterviews() {
                     {filteredInterviews.map(i => (
                         <div key={i.id} className="interview-card shadow-sm">
                             <div className="cohort-badge">{i.cohort?.name || 'General'}</div>
-                            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: '0 0 1rem 0' }}>{i.title}</h3>
-                            <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600, marginBottom: '1.5rem' }}>{i.description}</p>
+                            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--index-text-heading)', margin: '0 0 1rem 0' }}>{i.title}</h3>
+                            <p style={{ color: 'var(--index-text-secondary)', fontSize: '0.9rem', fontWeight: 600, marginBottom: '1.5rem' }}>{i.description}</p>
                             
                             <div className="asset-pills">
                                 {i.document_url && (
@@ -360,20 +360,20 @@ export default function InstructorInterviews() {
                             </div>
 
                             <div className="card-footer">
-                                <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>
+                                <div style={{ color: 'var(--index-text-faint)', fontSize: '0.75rem', fontWeight: 800 }}>
                                     ADDED {new Date(i.created_at).toLocaleDateString()}
                                 </div>
                                 <div style={{ display: 'flex', gap: '15px' }}>
                                     <button 
                                         onClick={() => navigate(`/instructor/interviews/edit/${i.id}`)} 
-                                        style={{ background: 'none', border: 'none', color: '#1a4d3e', cursor: 'pointer' }}
+                                        style={{ background: 'none', border: 'none', color: 'var(--index-primary-color)', cursor: 'pointer' }}
                                         title="Edit Resource"
                                     >
                                         <Edit size={18} />
                                     </button>
                                     <button 
                                         onClick={() => handleDelete(i.id)} 
-                                        style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer' }}
+                                        style={{ background: 'none', border: 'none', color: 'var(--lgl-error)', cursor: 'pointer' }}
                                         title="Delete Resource"
                                     >
                                         <Trash2 size={18} />
@@ -394,7 +394,7 @@ export default function InstructorInterviews() {
                                 <X size={24} />
                             </button>
                         </div>
-                        <div style={{ flex: 1, background: '#f8fafc' }}>
+                        <div style={{ flex: 1, background: 'var(--index-hover-bg)' }}>
                             {previewAsset.type === 'pdf' ? (
                                 <iframe 
                                     src={previewAsset.url.includes('bunnycdn.com') || previewAsset.url.includes('mediadelivery.net') || previewAsset.url.includes('b-cdn.net')

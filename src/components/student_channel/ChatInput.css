@@ -11,8 +11,8 @@
 }
 
 .mega-pro-composer {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: var(--index-card-bg);
+    border: 1px solid var(--index-border-color);
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -23,9 +23,9 @@
 }
 
 .mega-pro-composer:focus-within {
-    border-color: #94a3b8;
+    border-color: var(--color-lgl-gray-mid);
     /* Slate focus border */
-    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.1);
+    box-shadow: 0 12px 36px color-mix(in srgb, var(--lgl-charcoal) 10%, transparent);
     transform: translateY(-2px);
 }
 
@@ -33,8 +33,8 @@
     display: flex;
     align-items: center;
     padding: 6px 12px;
-    background: #0F172A;
-    border-bottom: 1px solid #f1f5f9;
+    background: var(--lgl-charcoal);
+    border-bottom: 1px solid var(--index-border-subtle);
     gap: 4px;
 }
 
@@ -45,15 +45,15 @@
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    color: #000000;
-    background: #f9fbfd;
+    color: var(--index-text-heading);
+    background: var(--index-hover-bg);
     border: none;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .mp-tool-icon:hover {
-    background: #c9cccf;
+    background: var(--index-border-color);
     /* Darker Slate Background on hover */
     transform: scale(1.08);
 }
@@ -76,7 +76,7 @@
     font-family: 'Inter', system-ui, sans-serif;
     font-size: 1rem;
     line-height: 1.5;
-    color: #0f172a;
+    color: var(--index-text-heading);
     background: transparent;
     min-height: 44px;
     max-height: 200px;
@@ -85,7 +85,7 @@
 
 .mp-textarea:empty:before {
     content: attr(data-placeholder);
-    color: #94a3b8;
+    color: var(--color-lgl-gray-mid);
     pointer-events: none;
     display: block; 
 }
@@ -110,22 +110,22 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    color: #000000;
-    background: #f1f5f9;
+    color: var(--index-text-heading);
+    background: var(--index-hover-bg);
     border: none;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .mp-action-btn:hover {
-    background: #e2e8f0;
+    background: var(--index-border-color);
     /* Darker Slate */
     transform: scale(1.05);
 }
 
 .mp-plus-btn {
-    background: #f1f5f9;
-    color: #000000;
+    background: var(--index-hover-bg);
+    color: var(--index-text-heading);
     border-radius: 50%;
     width: 28px;
     height: 28px;
@@ -133,41 +133,41 @@
     align-items: center;
     justify-content: center;
     margin-right: 8px;
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.1);
+    box-shadow: 0 2px 4px color-mix(in srgb, var(--lgl-charcoal) 10%, transparent);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mp-plus-btn:hover {
     transform: rotate(90deg) scale(1.1);
-    background: #e2e8f0;
+    background: var(--index-border-color);
 }
 
 .mp-send-group {
     display: flex;
     align-items: center;
-    background: #0f172a;
+    background: var(--index-primary-color);
     border-radius: 8px;
-    color: white;
+    color: var(--lgl-charcoal);
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--index-primary-color) 15%, transparent);
     transition: all 0.2s;
 }
 
 .mp-send-group:hover:not(.disabled) {
-    background: #000000;
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.3);
+    background: var(--index-primary-hover);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--index-primary-color) 30%, transparent);
     transform: translateY(-1px);
 }
 
 .mp-send-group.disabled {
-    background: #e2e8f0;
+    background: var(--index-border-color);
     box-shadow: none;
 }
 
 .mp-send-btn {
     background: transparent;
     border: none;
-    color: white;
+    color: inherit;
     padding: 0 16px;
     height: 38px;
     display: flex;
@@ -179,15 +179,15 @@
 }
 
 .mp-send-btn:disabled {
-    color: #94a3b8;
+    color: var(--color-lgl-gray-mid);
     cursor: not-allowed;
 }
 
 .mp-send-drop {
     background: transparent;
     border: none;
-    border-left: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
+    border-left: 1px solid color-mix(in srgb, var(--lgl-charcoal) 20%, transparent);
+    color: inherit;
     width: 32px;
     height: 38px;
     display: flex;
@@ -197,25 +197,23 @@
 }
 
 .mp-send-group.disabled .mp-send-drop {
-    border-left-color: #cbd5e1;
-    color: #94a3b8;
+    border-left-color: var(--color-lgl-gray-mid);
+    color: var(--index-text-secondary);
     cursor: not-allowed;
 }
 
 .mp-file-chip {
     margin: 10px 22px 0;
-    background: #f1f5f9;
-    /* Slate Gray */
+    background: var(--index-hover-bg);
     padding: 8px 16px;
     border-radius: 10px;
     font-size: 0.95rem;
-    color: #000000;
-    /* Black */
+    color: var(--index-text-heading);
     display: flex;
     align-items: center;
     gap: 10px;
     width: fit-content;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--index-border-color);
 }
 
 @keyframes spin {

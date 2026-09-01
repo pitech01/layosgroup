@@ -93,8 +93,8 @@ export default function CohortsPage() {
     };
 
     const stats = [
-        { label: 'Active Cohorts', count: cohorts.length, trend: 'Updated', isUp: true, color: '#1a4d3e', icon: CheckCircle2 },
-        { label: 'Total Enrollment', count: cohorts.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Real-time', isUp: true, color: '#64748b', icon: Users },
+        { label: 'Active Cohorts', count: cohorts.length, trend: 'Updated', isUp: true, color: 'var(--index-primary-color)', icon: CheckCircle2 },
+        { label: 'Total Enrollment', count: cohorts.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Real-time', isUp: true, color: 'var(--index-text-secondary)', icon: Users },
     ];
 
     const filteredCohorts = cohorts.filter(c =>
@@ -115,13 +115,13 @@ export default function CohortsPage() {
                 .staff-scope .inventory-header-premium h1 {
                     font-size: 2.5rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     letter-spacing: -0.04em;
                     margin: 0;
                 }
 
                 .staff-scope .inventory-header-premium p {
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-size: 1.1rem;
                     font-weight: 600;
                     margin: 0.5rem 0 0 0;
@@ -136,7 +136,7 @@ export default function CohortsPage() {
 
                 .staff-scope .stat-card-premium-inventory {
                     background: white;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 28px;
                     padding: 2rem;
                     display: flex;
@@ -149,8 +149,8 @@ export default function CohortsPage() {
                     width: 64px;
                     height: 64px;
                     border-radius: 18px;
-                    background: #f0fdf4;
-                    color: #1a4d3e;
+                    background: var(--index-accent-soft-bg);
+                    color: var(--index-primary-color);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -164,7 +164,7 @@ export default function CohortsPage() {
 
                 .staff-scope .cohort-table-card {
                     background: white;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 32px;
                     overflow: hidden;
                     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
@@ -178,8 +178,8 @@ export default function CohortsPage() {
                 .staff-scope .cohort-table th {
                     text-align: left;
                     padding: 1.75rem 2rem;
-                    background: #f8fafc;
-                    color: #64748b;
+                    background: var(--index-hover-bg);
+                    color: var(--index-text-secondary);
                     font-size: 0.85rem;
                     font-weight: 850;
                     text-transform: uppercase;
@@ -188,7 +188,7 @@ export default function CohortsPage() {
 
                 .staff-scope .cohort-table td {
                     padding: 2rem;
-                    border-bottom: 1px solid #f8fafc;
+                    border-bottom: 1px solid var(--index-hover-bg);
                     vertical-align: middle;
                 }
 
@@ -202,9 +202,9 @@ export default function CohortsPage() {
                     display: inline-block;
                 }
 
-                .staff-scope .status-active { background: #f0fdf4; color: #16a34a; }
-                .staff-scope .status-upcoming { background: #eff6ff; color: #2563eb; }
-                .staff-scope .status-completed { background: #f8fafc; color: #64748b; border: 1px solid #f1f5f9; }
+                .staff-scope .status-active { background: var(--index-accent-soft-bg); color: var(--lgl-success); }
+                .staff-scope .status-upcoming { background: var(--index-accent-soft-bg); color: var(--index-primary-color); }
+                .staff-scope .status-completed { background: var(--index-hover-bg); color: var(--index-text-secondary); border: 1px solid var(--index-hover-bg); }
 
                 .staff-scope .blueprint-tag {
                     display: flex;
@@ -212,7 +212,7 @@ export default function CohortsPage() {
                     gap: 8px;
                     font-size: 0.95rem;
                     font-weight: 850;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope .blueprint-empty {
@@ -221,8 +221,8 @@ export default function CohortsPage() {
                     gap: 8px;
                     font-size: 0.9rem;
                     font-weight: 700;
-                    color: #ef4444;
-                    background: #fef2f2;
+                    color: var(--lgl-error);
+                    background: var(--index-danger-bg-soft);
                     padding: 4px 12px;
                     border-radius: 8px;
                     width: fit-content;
@@ -230,7 +230,7 @@ export default function CohortsPage() {
 
                 .staff-scope .btn-create-shell {
                     height: 60px;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     border: none;
                     border-radius: 18px;
@@ -241,7 +241,7 @@ export default function CohortsPage() {
                     align-items: center;
                     gap: 12px;
                     cursor: pointer;
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 20%, transparent);
                     transition: all 0.3s;
                     text-decoration: none;
                 }
@@ -249,28 +249,28 @@ export default function CohortsPage() {
                 .staff-scope .action-fab-inventory {
                     width: 44px;
                     height: 44px;
-                    background: #fcfdfe;
-                    border: 1.5px solid #f1f5f9;
+                    background: var(--index-card-bg);
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 12px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     cursor: pointer;
                     transition: all 0.2s;
                     text-decoration: none;
                 }
 
                 .staff-scope .action-fab-inventory:hover {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                 }
 
                 .staff-scope .btn-manage-text {
-                    background: #f8fafc;
-                    border: 1.5px solid #e2e8f0;
-                    color: #1a4d3e;
+                    background: var(--index-hover-bg);
+                    border: 1.5px solid var(--index-border-color);
+                    color: var(--index-primary-color);
                     padding: 0.6rem 1rem;
                     border-radius: 12px;
                     font-weight: 800;
@@ -284,15 +284,15 @@ export default function CohortsPage() {
                 }
 
                 .staff-scope .btn-manage-text:hover {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                 }
 
                 .staff-scope .btn-delete-text {
-                    background: #fef2f2;
-                    border: 1.5px solid #fee2e2;
-                    color: #ef4444;
+                    background: var(--index-danger-bg-soft);
+                    border: 1.5px solid var(--index-danger-bg-soft);
+                    color: var(--lgl-error);
                     padding: 0.6rem 1rem;
                     border-radius: 12px;
                     font-weight: 800;
@@ -305,9 +305,9 @@ export default function CohortsPage() {
                 }
 
                 .staff-scope .btn-delete-text:hover {
-                    background: #ef4444;
+                    background: var(--lgl-error);
                     color: white;
-                    border-color: #ef4444;
+                    border-color: var(--lgl-error);
                 }
 
                 .staff-scope .table-responsive-wrapper {
@@ -404,16 +404,16 @@ export default function CohortsPage() {
                             <stat.icon size={32} />
                         </div>
                         <div>
-                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase' }}>{stat.label}</p>
-                            <h3 style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: 950, color: '#0f172a' }}>{stat.count}</h3>
+                            <p style={{ margin: 0, color: 'var(--index-text-secondary)', fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase' }}>{stat.label}</p>
+                            <h3 style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: 950, color: 'var(--index-text-heading)' }}>{stat.count}</h3>
                         </div>
                     </div>
                 ))}
             </div>
 
             <div className="search-filter-belt">
-                <div style={{ flex: 1, height: '56px', background: 'white', border: '2px solid #f1f5f9', borderRadius: '18px', display: 'flex', alignItems: 'center', padding: '0 1.5rem', gap: '12px' }}>
-                    <Search size={22} color="#94a3b8" />
+                <div style={{ flex: 1, height: '56px', background: 'var(--index-card-bg)', border: '2px solid var(--index-border-subtle)', borderRadius: '18px', display: 'flex', alignItems: 'center', padding: '0 1.5rem', gap: '12px' }}>
+                    <Search size={22} color="var(--index-text-faint)" />
                     <input
                         style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontWeight: 600 }}
                         placeholder="Search cohorts or batches..."
@@ -421,7 +421,7 @@ export default function CohortsPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div style={{ height: '56px', background: 'white', border: '2px solid #f1f5f9', borderRadius: '18px', display: 'flex', alignItems: 'center', padding: '0 1.5rem', gap: '12px', fontWeight: 800, color: '#475569', cursor: 'pointer' }}>
+                <div style={{ height: '56px', background: 'var(--index-card-bg)', border: '2px solid var(--index-border-subtle)', borderRadius: '18px', display: 'flex', alignItems: 'center', padding: '0 1.5rem', gap: '12px', fontWeight: 800, color: 'var(--index-text-secondary)', cursor: 'pointer' }}>
                     <span>Live Status</span>
                     <Filter size={18} />
                 </div>
@@ -429,14 +429,14 @@ export default function CohortsPage() {
 
             {loading ? (
                 <div style={{ padding: '5rem', textAlign: 'center' }}>
-                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
-                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#64748b' }}>Loading cohort records...</p>
+                    <Loader2 className="animate-spin" size={48} color="var(--index-primary-color)" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: 'var(--index-text-secondary)' }}>Loading cohort records...</p>
                 </div>
             ) : error ? (
-                <div style={{ padding: '3rem', background: '#fff1f2', borderRadius: '24px', border: '1.5px solid #ffe4e6', textAlign: 'center', marginBottom: '3rem' }}>
-                    <AlertCircle size={40} color="#e11d48" style={{ margin: '0 auto 1rem' }} />
-                    <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 900 }}>Connection Interrupted</h3>
-                    <p style={{ color: '#64748b', fontWeight: 600, margin: '8px 0 2rem' }}>{error}</p>
+                <div style={{ padding: '3rem', background: 'var(--index-danger-bg-soft)', borderRadius: '24px', border: '1.5px solid var(--index-danger-bg-soft)', textAlign: 'center', marginBottom: '3rem' }}>
+                    <AlertCircle size={40} color="var(--lgl-error)" style={{ margin: '0 auto 1rem' }} />
+                    <h3 style={{ margin: 0, color: 'var(--index-text-heading)', fontWeight: 900 }}>Connection Interrupted</h3>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, margin: '8px 0 2rem' }}>{error}</p>
                     <button onClick={fetchCohorts} className="btn-primary-forest" style={{ margin: '0 auto' }}>Try Connecting Again</button>
                 </div>
             ) : (
@@ -458,8 +458,8 @@ export default function CohortsPage() {
                                     <tr key={cohort.id}>
                                         <td>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#1a4d3e' }}>ID: {cohort.id}</span>
-                                                <span style={{ fontWeight: 900, fontSize: '1.1rem', color: '#0f172a', marginTop: '4px' }}>{cohort.name}</span>
+                                                <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--index-primary-color)' }}>ID: {cohort.id}</span>
+                                                <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--index-text-heading)', marginTop: '4px' }}>{cohort.name}</span>
                                             </div>
                                         </td>
                                         <td>
@@ -468,7 +468,7 @@ export default function CohortsPage() {
                                         <td>
                                             {cohort.course ? (
                                                 <div className="blueprint-tag">
-                                                    <Layers size={18} color="#1a4d3e" />
+                                                    <Layers size={18} color="var(--index-primary-color)" />
                                                     {cohort.course.title}
                                                 </div>
                                             ) : (
@@ -479,14 +479,14 @@ export default function CohortsPage() {
                                             )}
                                         </td>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#475569', fontSize: '0.9rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: 'var(--index-text-secondary)', fontSize: '0.9rem' }}>
                                                 <Calendar size={16} /> {new Date(cohort.start_date).toLocaleDateString()} — {new Date(cohort.end_date).toLocaleDateString()}
                                             </div>
                                         </td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <Users size={18} color="#94a3b8" />
-                                                <span style={{ fontWeight: 950, color: '#0f172a' }}>{cohort.students?.length || 0}</span>
+                                                <Users size={18} color="var(--index-text-faint)" />
+                                                <span style={{ fontWeight: 950, color: 'var(--index-text-heading)' }}>{cohort.students?.length || 0}</span>
                                             </div>
                                         </td>
                                         <td style={{ textAlign: 'right' }}>
@@ -502,7 +502,7 @@ export default function CohortsPage() {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan={6} style={{ textAlign: 'center', padding: '5rem', color: '#64748b', fontWeight: 800 }}>
+                                        <td colSpan={6} style={{ textAlign: 'center', padding: '5rem', color: 'var(--index-text-secondary)', fontWeight: 800 }}>
                                             No cohorts found matching your current search.
                                         </td>
                                     </tr>

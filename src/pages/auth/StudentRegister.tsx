@@ -404,7 +404,7 @@ export default function StudentRegister() {
                 </div>
 
                 <div className="mt-auto w-full p-8 md:p-12 border-t border-brand-border flex flex-col md:flex-row justify-between text-[10px] font-black uppercase tracking-widest text-brand-muted gap-4">
-                    <div>© 2026 Layos Group LLC. All rights reserved.</div>
+                    <div>© 2026 LGL Consulting. All rights reserved.</div>
                     <div className="flex gap-8">
                         <a href="#" className="hover:text-brand-charcoal transition-colors">Privacy Policy</a>
                         <a href="#" className="hover:text-brand-charcoal transition-colors">Terms of Service</a>
@@ -414,7 +414,7 @@ export default function StudentRegister() {
 
             {/* Right Panel - Hero Content */}
             <div className="hidden lg:flex flex-1 bg-brand-charcoal relative flex-col p-16 text-white overflow-hidden justify-center items-center">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(5,150,105,0.15),transparent_70%)] pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,color-mix(in srgb, var(--index-primary-color) 15%, transparent),transparent_70%)] pointer-events-none" />
                 
                 <div className="relative z-10 w-full flex flex-col items-center">
                     <div className="relative w-full max-w-[500px] perspective-1000">

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Menu, ChevronDown, Clock } from 'lucide-react';
+import { Bell, PanelLeft, PanelLeftClose, ChevronDown, Clock } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -64,8 +64,9 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                     onClick={() => setCollapsed(!collapsed)}
                     className="sidebar-toggle-btn instructor-toggle"
                     title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                    aria-label={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
                 >
-                    <Menu size={24} strokeWidth={2} />
+                    {collapsed ? <PanelLeft size={20} strokeWidth={2.2} /> : <PanelLeftClose size={20} strokeWidth={2.2} />}
                 </button>
                 <div style={{ flex: 1 }}></div>
             </div>
@@ -84,8 +85,8 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                     {showNotifications && (
                         <div className="notifications-dropdown" ref={notificationRef}>
                             <div className="notification-header">
-                                <span style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a' }}>Notifications</span>
-                                <button style={{ fontSize: '0.75rem', color: '#8b5cf6', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
+                                <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--index-text-heading)' }}>Notifications</span>
+                                <button style={{ fontSize: '0.75rem', color: 'var(--index-primary-color)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
                                     Mark all read
                                 </button>
                             </div>
@@ -93,12 +94,12 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                                 {notifications.map(notification => (
                                     <div key={notification.id} className={`notification-item ${notification.unread ? 'unread' : ''}`}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                            <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', margin: 0 }}>{notification.title}</h4>
-                                            <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--index-text-heading)', margin: 0 }}>{notification.title}</h4>
+                                            <span style={{ fontSize: '0.7rem', color: 'var(--index-text-faint)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 <Clock size={10} /> {notification.time}
                                             </span>
                                         </div>
-                                        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: '1.4' }}>{notification.desc}</p>
+                                        <p style={{ fontSize: '0.8rem', color: 'var(--index-text-secondary)', margin: 0, lineHeight: '1.4' }}>{notification.desc}</p>
                                     </div>
                                 ))}
                             </div>
@@ -113,14 +114,14 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                         ref={profileBtnRef}
                         style={{ cursor: 'pointer' }}
                     >
-                        <div className="user-avatar-small" style={{ background: '#1a4d3e' }}>
+                        <div className="user-avatar-small" style={{ background: 'var(--index-primary-color)' }}>
                             {userInitial}
                         </div>
                         <div className="user-info-text">
                             <span className="user-name">{userName}</span>
                             <span className="user-role">{userRole}</span>
                         </div>
-                        <ChevronDown size={14} color="#94a3b8" style={{ transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+                        <ChevronDown size={14} color="var(--index-text-faint)" style={{ transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
                     </div>
 
                     {showProfileMenu && (
@@ -129,10 +130,10 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                             top: 'calc(100% + 12px)',
                             right: 0,
                             width: '200px',
-                            background: 'white',
+                            background: 'var(--index-card-bg)',
                             borderRadius: '16px',
                             padding: '0.75rem',
-                            border: '1.5px solid #f1f5f9',
+                            border: '1.5px solid var(--index-border-subtle)',
                             zIndex: 1000
                         }}>
                             <div
@@ -144,18 +145,18 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '12px',
-                                    color: '#475569',
+                                    color: 'var(--index-text-secondary)',
                                     fontWeight: 700,
                                     fontSize: '0.9rem',
                                     transition: 'all 0.2s'
                                 }}
-                                onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+                                onMouseOver={(e) => e.currentTarget.style.background = 'var(--index-hover-bg)'}
                                 onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                             >
-                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1a4d3e' }}></span>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--index-primary-color)' }}></span>
                                 My Profile
                             </div>
-                            <div style={{ height: '1px', background: '#f1f5f9', margin: '0.5rem 0' }}></div>
+                            <div style={{ height: '1px', background: 'var(--index-hover-bg)', margin: '0.5rem 0' }}></div>
                             <div
                                 onClick={() => logout()}
                                 style={{
@@ -165,15 +166,15 @@ const InstructorTopbar = ({ collapsed, setCollapsed }: InstructorTopbarProps) =>
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '12px',
-                                    color: '#ef4444',
+                                    color: 'var(--lgl-error)',
                                     fontWeight: 700,
                                     fontSize: '0.9rem',
                                     transition: 'all 0.2s'
                                 }}
-                                onMouseOver={(e) => e.currentTarget.style.background = '#fef2f2'}
+                                onMouseOver={(e) => e.currentTarget.style.background = 'var(--index-danger-bg-soft)'}
                                 onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                             >
-                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }}></span>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--lgl-error)' }}></span>
                                 Sign Out
                             </div>
                         </div>

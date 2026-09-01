@@ -14,8 +14,8 @@ const ChannelFeed = ({ messages, userRole }: ChannelFeedProps) => {
                 <div className="empty-icon-box">
                     <MessageSquareOff size={40} />
                 </div>
-                <h3 style={{ fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>No posts yet</h3>
-                <p style={{ color: '#64748b', margin: 0 }}>
+                <h3 style={{ fontWeight: 800, color: 'var(--index-text-heading)', marginBottom: '0.5rem' }}>No posts yet</h3>
+                <p style={{ color: 'var(--index-text-secondary)', margin: 0 }}>
                     {userRole === 'instructor'
                         ? 'Post your first announcement or message to the class.'
                         : 'Nothing has been shared yet.'}

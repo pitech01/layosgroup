@@ -42,22 +42,23 @@ const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
     }, []);
 
     return (
-        <div className="relative">
+        <div className="relative flex-shrink-0">
             <button
                 ref={buttonRef}
-                className={`flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-full border transition-all cursor-pointer ${isOpen ? 'bg-brand-border border-brand-border' : 'bg-white dark:bg-brand-charcoal border-brand-border hover:border-brand-emerald shadow-sm hover:shadow-md'}`}
+                className={`flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 sm:pl-2 sm:pr-3 rounded-full border transition-all cursor-pointer flex-shrink-0 ${isOpen ? 'bg-brand-border border-brand-border' : 'bg-white dark:bg-brand-charcoal border-brand-border hover:border-brand-emerald shadow-sm hover:shadow-md'}`}
                 onClick={() => setIsOpen(!isOpen)}
+                aria-label="User Profile Menu"
             >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black text-white shadow-sm bg-brand-emerald`}>
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-black text-white shadow-sm bg-brand-emerald flex-shrink-0`}>
                     {userInitial}
                 </div>
-                <div className="hidden sm:flex flex-col items-start ml-1">
-                    <span className="text-sm font-bold text-brand-charcoal dark:text-white leading-tight">{userData.name}</span>
-                    {userData.tier && <span className="text-[10px] text-brand-muted font-black uppercase tracking-wider leading-tight">{userData.tier}</span>}
+                <div className="hidden sm:flex flex-col items-start ml-1 max-w-[120px]">
+                    <span className="text-sm font-bold text-brand-charcoal dark:text-white leading-tight truncate w-full text-left">{userData.name}</span>
+                    {userData.tier && <span className="text-[10px] text-brand-muted font-black uppercase tracking-wider leading-tight truncate w-full text-left">{userData.tier}</span>}
                 </div>
                 <ChevronDown
-                    size={16}
-                    className={`text-brand-muted ml-1 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                    size={15}
+                    className={`text-brand-muted ml-0.5 sm:ml-1 transition-transform duration-300 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
                 />
             </button>
 

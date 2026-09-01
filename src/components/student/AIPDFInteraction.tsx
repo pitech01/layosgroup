@@ -68,7 +68,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
         <div className="fixed inset-0 z-[4000] flex flex-col bg-slate-950/95 text-white antialiased backdrop-blur-2xl selection:bg-teal-500/30 font-['Inter',_sans-serif]">
             <style>{`
                 @keyframes slideInUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-                @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(73, 186, 186, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); } }
+                @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--lgl-cyan) 40%, transparent); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
                 .ai-section-card {
                     background: rgba(255, 255, 255, 0.03);
                     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -77,8 +77,8 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                     transition: all 0.3s ease;
                 }
                 .ai-section-card.active {
-                    background: rgba(73, 186, 186, 0.1);
-                    border-color: #49BABA;
+                    background: color-mix(in srgb, var(--lgl-cyan) 10%, transparent);
+                    border-color: var(--lgl-cyan);
                     transform: scale(1.02);
                 }
                 .ai-chat-bubble {
@@ -88,8 +88,8 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                     font-size: 0.9rem;
                     line-height: 1.5;
                 }
-                .user-bubble { background: #1e293b; align-self: flex-end; border-bottom-right-radius: 4px; }
-                .ai-bubble { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(73, 186, 186, 0.2); align-self: flex-start; border-bottom-left-radius: 4px; }
+                .user-bubble { background: var(--lgl-charcoal); align-self: flex-end; border-bottom-right-radius: 4px; }
+                .ai-bubble { background: color-mix(in srgb, var(--lgl-cyan) 15%, transparent); border: 1px solid color-mix(in srgb, var(--lgl-cyan) 20%, transparent); align-self: flex-start; border-bottom-left-radius: 4px; }
                 .premium-input {
                     background: rgba(255,255,255,0.05);
                     border: 1px solid rgba(255,255,255,0.1);
@@ -100,7 +100,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                     outline: none;
                     transition: all 0.2s;
                 }
-                .premium-input:focus { border-color: #49BABA; background: rgba(255,255,255,0.08); }
+                .premium-input:focus { border-color: var(--lgl-cyan); background: rgba(255,255,255,0.08); }
                 
                 /* Scoped Markdown styling for the AI bubble response */
                 .markdown-body p { margin-top: 0; margin-bottom: 0.5rem; line-height: 1.6; }
@@ -113,7 +113,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
             {/* Header */}
             <div className="flex flex-col lg:flex-row items-center justify-between gap-4 border-b border-white/5 bg-slate-900/40 px-4 md:px-10 py-4 backdrop-blur-md shrink-0">
                 <div className="flex items-center gap-4 w-full lg:w-auto lg:min-w-[240px]">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#49BABA] to-[#5bc4c4] text-lg font-black text-white shadow-lg shadow-[#49BABA]/10">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--lgl-cyan)] to-[var(--lgl-cyan-medium)] text-lg font-black text-white shadow-lg shadow-[var(--lgl-cyan)]/10">
                         L
                     </div>
                     <div>
@@ -131,7 +131,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                     {ai.state === 'idle' ? (
                         <button 
                             onClick={handleStart}
-                            className="w-full sm:w-auto bg-gradient-to-r from-[#49BABA] to-[#3fa3a3] text-white px-6 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase shadow-[0_10px_20px_-5px_rgba(73,186,186,0.3)] hover:opacity-90 active:scale-95 transition-all"
+                            className="w-full sm:w-auto bg-gradient-to-r from-[var(--lgl-cyan)] to-[var(--lgl-cyan-dark)] text-white px-6 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase shadow-[0_10px_20px_-5px_rgba(0,217,233,0.3)] hover:opacity-90 active:scale-95 transition-all"
                         >
                             INITIALIZE VIRTUAL TUTOR
                         </button>
@@ -155,7 +155,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                             <div className="hidden sm:block w-px h-6 bg-white/10 mx-2" />
 
                             <div className="flex flex-col min-w-[120px] max-w-[180px] text-center sm:text-left">
-                                <span className="text-[9px] font-black text-[#67d9d9] tracking-widest uppercase">
+                                <span className="text-[9px] font-black text-[var(--lgl-cyan-light)] tracking-widest uppercase">
                                     {ai.isSpeaking ? 'NOW TEACHING' : 'PAUSED'}
                                 </span>
                                 <span className="text-xs font-bold text-slate-200 truncate">
@@ -163,9 +163,9 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                                 </span>
                             </div>
 
-                            <button 
+                            <button
                                 onClick={() => setShowChat(true)}
-                                className="w-full sm:w-auto bg-purple-500/15 text-[#67d9d9] border border-[#49BABA]/30 px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase hover:bg-purple-500/20 active:scale-95 transition-all"
+                                className="w-full sm:w-auto bg-[var(--lgl-cyan)]/15 text-[var(--lgl-cyan-light)] border border-[var(--lgl-cyan)]/30 px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase hover:bg-[var(--lgl-cyan)]/20 active:scale-95 transition-all"
                             >
                                 ASK LAYOS
                             </button>
@@ -178,14 +178,14 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                             >
                                 {ai.state === 'summarizing' ? 'START READING (STILL ANALYZING...)' : 'START READING NOW'}
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setShowChat(true)}
-                                className="w-full sm:w-auto bg-purple-500/15 text-[#67d9d9] border border-[#49BABA]/30 px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase hover:bg-purple-500/20 active:scale-95 transition-all"
+                                className="w-full sm:w-auto bg-[var(--lgl-cyan)]/15 text-[var(--lgl-cyan-light)] border border-[var(--lgl-cyan)]/30 px-5 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase hover:bg-[var(--lgl-cyan)]/20 active:scale-95 transition-all"
                             >
                                 ASK LAYOS
                             </button>
                             {ai.state === 'summarizing' && (
-                                <span className="text-[11px] text-[#49BABA] font-black animate-pulse whitespace-nowrap">
+                                <span className="text-[11px] text-[var(--lgl-cyan)] font-black animate-pulse whitespace-nowrap">
                                     ANALYZING MORE PAGES...
                                 </span>
                             )}
@@ -226,8 +226,8 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                                 .css-loader {
                                     width: 50px;
                                     height: 50px;
-                                    border: 4px solid rgba(73, 186, 186, 0.2);
-                                    border-top-color: #49BABA;
+                                    border: 4px solid color-mix(in srgb, var(--lgl-cyan) 20%, transparent);
+                                    border-top-color: var(--lgl-cyan);
                                     border-radius: 50%;
                                     animation: spin 0.8s linear infinite;
                                 }
@@ -271,7 +271,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                             </div>
                             <button
                                 onClick={handleStart}
-                                className="bg-gradient-to-r from-[#49BABA] to-[#3fa3a3] text-white px-8 py-3 rounded-xl font-black text-xs tracking-wider uppercase shadow-[0_10px_20px_-5px_rgba(73,186,186,0.3)] hover:opacity-90 active:scale-95 transition-all"
+                                className="bg-gradient-to-r from-[var(--lgl-cyan)] to-[var(--lgl-cyan-dark)] text-white px-8 py-3 rounded-xl font-black text-xs tracking-wider uppercase shadow-[0_10px_20px_-5px_rgba(0,217,233,0.3)] hover:opacity-90 active:scale-95 transition-all"
                             >
                                 Retry Connection
                             </button>
@@ -281,20 +281,20 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
 
 
                 {showChat && (
-                    <div className="absolute inset-0 sm:inset-y-6 sm:right-6 sm:left-auto w-full sm:w-[440px] bg-slate-900/95 sm:bg-slate-900/92 backdrop-blur-3xl sm:rounded-[32px] border-t sm:border border-[#49BABA]/30 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8),_0_0_40px_rgba(73,186,186,0.1)] flex flex-col overflow-hidden z-[1000] [animation:chatSlideInUp_0.4s_cubic-bezier(0.16,_1,_0.3,_1)]">
+                    <div className="absolute inset-0 sm:inset-y-6 sm:right-6 sm:left-auto w-full sm:w-[440px] bg-slate-900/95 sm:bg-slate-900/92 backdrop-blur-3xl sm:rounded-[32px] border-t sm:border border-[var(--lgl-cyan)]/30 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8),_0_0_40px_rgba(0,217,233,0.1)] flex flex-col overflow-hidden z-[1000] [animation:chatSlideInUp_0.4s_cubic-bezier(0.16,_1,_0.3,_1)]">
                         <style>{`
                             @keyframes chatSlideInUp { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
                             @media (min-width: 640px) {
                                 @keyframes chatSlideInUp { from { opacity: 0; transform: translateX(40px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
                             }
-                            .ai-chat-bubble.ai-bubble { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.1); align-self: flex-start; border-bottom-left-radius: 4px; color: #e2e8f0; }
-                            .ai-chat-bubble.user-bubble { background: linear-gradient(135deg, #49BABA 0%, #3fa3a3 100%); align-self: flex-end; border-bottom-right-radius: 4px; color: white; box-shadow: 0 10px 20px -5px rgba(73, 186, 186, 0.3); }
+                            .ai-chat-bubble.ai-bubble { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.1); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--lgl-text-light); }
+                            .ai-chat-bubble.user-bubble { background: linear-gradient(135deg, var(--lgl-cyan) 0%, var(--lgl-cyan-dark) 100%); align-self: flex-end; border-bottom-right-radius: 4px; color: white; box-shadow: 0 10px 20px -5px color-mix(in srgb, var(--lgl-cyan) 30%, transparent); }
                         `}</style>
 
                         {/* Chat Panel Header */}
-                        <div className="flex items-center justify-between gap-4 p-4 md:p-5 bg-purple-500/12 border-b border-[#49BABA]/20 shrink-0">
+                        <div className="flex items-center justify-between gap-4 p-4 md:p-5 bg-[var(--lgl-cyan)]/12 border-b border-[var(--lgl-cyan)]/20 shrink-0">
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#49BABA] font-black text-white">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--lgl-cyan)] font-black text-white">
                                     L
                                 </div>
                                 <div className="min-w-0">
@@ -305,7 +305,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                             <div className="flex items-center gap-2 shrink-0">
                                 <button 
                                     onClick={() => ai.state === 'paused' ? ai.resume() : ai.pause()}
-                                    className="bg-[#49BABA]/15 text-[#49BABA] border border-[#49BABA]/30 px-2.5 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black tracking-wider uppercase active:scale-95 transition-all whitespace-nowrap"
+                                    className="bg-[var(--lgl-cyan)]/15 text-[var(--lgl-cyan)] border border-[var(--lgl-cyan)]/30 px-2.5 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black tracking-wider uppercase active:scale-95 transition-all whitespace-nowrap"
                                 >
                                     {ai.state === 'paused' ? 'PLAY AUDIO' : 'PAUSE AUDIO'}
                                 </button>
@@ -322,7 +322,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                         <div ref={chatScrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-5 scrollbar-thin scrollbar-thumb-white/10">
                             {chat.length === 0 && (
                                 <div className="text-center text-slate-500 my-auto py-12 px-4">
-                                    <div className="flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full bg-purple-500/5 text-2xl md:text-3xl font-black text-[#49BABA] mx-auto mb-4 md:mb-6">
+                                    <div className="flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full bg-[var(--lgl-cyan)]/5 text-2xl md:text-3xl font-black text-[var(--lgl-cyan)] mx-auto mb-4 md:mb-6">
                                         ?
                                     </div>
                                     <h3 className="text-base md:text-lg font-black text-white mb-2">Direct Interaction</h3>
@@ -344,16 +344,16 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                             ))}
                             {isAsking && (
                                 <div className="ai-bubble ai-chat-bubble flex gap-1.5 p-4 items-center">
-                                    <div className="w-1.5 h-1.5 bg-[#49BABA] rounded-full animate-pulse" />
-                                    <div className="w-1.5 h-1.5 bg-[#49BABA] rounded-full animate-pulse [animation-delay:0.2s]" />
-                                    <div className="w-1.5 h-1.5 bg-[#49BABA] rounded-full animate-pulse [animation-delay:0.4s]" />
+                                    <div className="w-1.5 h-1.5 bg-[var(--lgl-cyan)] rounded-full animate-pulse" />
+                                    <div className="w-1.5 h-1.5 bg-[var(--lgl-cyan)] rounded-full animate-pulse [animation-delay:0.2s]" />
+                                    <div className="w-1.5 h-1.5 bg-[var(--lgl-cyan)] rounded-full animate-pulse [animation-delay:0.4s]" />
                                 </div>
                             )}
                         </div>
     
                         {/* Chat Form Area */}
                         <div className="p-4 md:p-6 bg-black/40 sm:bg-black/30 border-t border-white/5 shrink-0 pb-safe-bottom">
-                            <form onSubmit={handleAsk} className="relative flex items-center bg-slate-900/80 sm:bg-slate-900/60 rounded-2xl border border-white/10 p-1.5 focus-within:border-[#49BABA] transition-colors gap-1">
+                            <form onSubmit={handleAsk} className="relative flex items-center bg-slate-900/80 sm:bg-slate-900/60 rounded-2xl border border-white/10 p-1.5 focus-within:border-[var(--lgl-cyan)] transition-colors gap-1">
                                 <input 
                                     ref={inputRef}
                                     className="flex-1 bg-transparent border-none text-white px-3 md:px-4 py-2.5 md:py-3 text-sm outline-none placeholder:text-slate-500 min-w-0"
@@ -365,7 +365,7 @@ const AIPDFInteraction: React.FC<AIPDFInteractionProps> = ({ pdfUrl, onClose, on
                                     type="submit"
                                     disabled={!question.trim() || isAsking}
                                     className={`px-4 md:px-5 h-10 md:h-11 rounded-xl font-black text-xs tracking-wider uppercase transition-all shrink-0 flex items-center justify-center ${
-                                        question.trim() ? 'bg-[#49BABA] text-white active:scale-95' : 'bg-white/5 text-slate-500 cursor-not-allowed'
+                                        question.trim() ? 'bg-[var(--lgl-cyan)] text-white active:scale-95' : 'bg-white/5 text-slate-500 cursor-not-allowed'
                                     }`}
                                 >
                                     {isAsking ? '...' : 'SEND'}

@@ -1,0 +1,78 @@
+/*
+  LGL LMS Typography
+  - Acorn (self-hosted, display): hero headlines, marketing/landing pages,
+    onboarding, badges, achievement callouts, gamification, section dividers.
+  - Sora (Google Fonts, heading): section headings, dashboard titles, card headers.
+  - Inter (Google Fonts, body): course content, forms, tables, nav, buttons, admin panels.
+  Loaded globally via <link> in index.html so it's available on every route,
+  independent of which per-section stylesheet (student.css / staff.css) is imported.
+*/
+
+@font-face {
+  font-family: 'Acorn';
+  src: url('/fonts/Acorn-Thin.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Acorn';
+  src: url('/fonts/Acorn-ExtraLight.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Acorn';
+  src: url('/fonts/Acorn-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Acorn';
+  src: url('/fonts/Acorn-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Acorn';
+  src: url('/fonts/Acorn-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Acorn';
+  src: url('/fonts/Acorn-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Acorn';
+  src: url('/fonts/Acorn-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-display: 'Acorn', sans-serif;
+  --font-heading: 'Sora', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Usage map: applies the pairing by default; components can still override per-instance. */
+h1, .hero-title, .badge, .achievement-label {
+  font-family: var(--font-display);
+}
+
+h2, h3, .dashboard-title, .card-header {
+  font-family: var(--font-heading);
+}
+
+body, p, table, form, button, nav {
+  font-family: var(--font-body);
+}

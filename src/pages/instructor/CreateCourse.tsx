@@ -225,7 +225,7 @@ export default function CreateCourse() {
                 icon: 'success',
                 title: 'Success!',
                 text: 'Curriculum successfully saved and deployed!',
-                confirmButtonColor: '#1a4d3e',
+                confirmButtonColor: 'var(--index-primary-color)',
                 timer: 2000,
                 showConfirmButton: false
             }).then(() => {
@@ -238,7 +238,7 @@ export default function CreateCourse() {
                 icon: 'error',
                 title: 'Save Failed',
                 text: errorMsg,
-                confirmButtonColor: '#1a4d3e'
+                confirmButtonColor: 'var(--index-primary-color)'
             });
         } finally {
             setLoading(false);
@@ -538,7 +538,7 @@ export default function CreateCourse() {
                     left: 2rem;
                     right: 2rem;
                     height: 4px;
-                    background: #f1f5f9;
+                    background: var(--index-hover-bg);
                     z-index: 1;
                     border-radius: 10px;
                 }
@@ -558,12 +558,12 @@ export default function CreateCourse() {
                     height: 56px;
                     border-radius: 18px;
                     background: white;
-                    border: 2.5px solid #e2e8f0;
+                    border: 2.5px solid var(--index-border-color);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-weight: 800;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
                     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
                 }
@@ -577,23 +577,23 @@ export default function CreateCourse() {
                 }
 
                 .staff-scope .step-item.active .step-circle {
-                    border-color: #1a4d3e;
-                    background: linear-gradient(135deg, #1a4d3e, #0f172a);
+                    border-color: var(--index-primary-color);
+                    background: linear-gradient(135deg, var(--index-primary-color), var(--index-text-heading));
                     color: white;
                     transform: scale(1.15) translateY(-4px);
-                    box-shadow: 0 15px 25px -5px rgba(26, 77, 62, 0.25);
+                    box-shadow: 0 15px 25px -5px color-mix(in srgb, var(--index-primary-color) 25%, transparent);
                 }
 
                 .staff-scope .step-item.completed .step-circle {
-                    border-color: #1a4d3e;
-                    background: #f0fdf4;
-                    color: #1a4d3e;
+                    border-color: var(--index-primary-color);
+                    background: var(--index-accent-soft-bg);
+                    color: var(--index-primary-color);
                 }
 
                 .staff-scope .step-label {
                     font-size: 0.85rem;
                     font-weight: 800;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     text-transform: uppercase;
                     letter-spacing: 0.1em;
                     transition: all 0.3s;
@@ -608,13 +608,13 @@ export default function CreateCourse() {
                 }
 
                .staff-scope  .step-item.active .step-label { 
-                    color: #1a4d3e; 
+                    color: var(--index-primary-color); 
                     transform: translateY(-2px);
                 }
 
                .staff-scope  .form-section-card {
                     background: white;
-                    border: 1px solid rgba(226, 232, 240, 0.7);
+                    border: 1px solid color-mix(in srgb, var(--index-border-color) 70%, transparent);
                     border-radius: 32px;
                     padding: 4rem;
                     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.03), 0 15px 20px -5px rgba(0,0,0,0.02);
@@ -631,7 +631,7 @@ export default function CreateCourse() {
                     margin: 0 0 3rem 0;
                     font-size: 1.75rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     display: flex;
                     align-items: center;
                     gap: 16px;
@@ -642,18 +642,18 @@ export default function CreateCourse() {
                     width: 100%;
                     padding: 1.15rem 1.35rem;
                     border-radius: 18px;
-                    border: 1.5px solid #e2e8f0;
+                    border: 1.5px solid var(--index-border-color);
                     outline: none;
                     font-size: 1rem;
-                    color: #1f2937;
-                    background: #fcfdfe;
+                    color: var(--index-text-heading);
+                    background: var(--index-card-bg);
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
 
                 .custom-input:focus {
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     background: white;
-                    box-shadow: 0 0 0 5px rgba(26, 77, 62, 0.06);
+                    box-shadow: 0 0 0 5px color-mix(in srgb, var(--index-primary-color) 6%, transparent);
                     transform: translateY(-1px);
                 }
 
@@ -661,7 +661,7 @@ export default function CreateCourse() {
                     display: block;
                     font-size: 0.95rem;
                     font-weight: 800;
-                    color: #475569;
+                    color: var(--index-text-secondary);
                     margin-bottom: 0.8rem;
                     display: flex;
                     align-items: center;
@@ -669,7 +669,7 @@ export default function CreateCourse() {
                 }
 
              .staff-scope    .curriculum-module {
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 24px;
                     margin-bottom: 2.5rem;
                     background: white;
@@ -680,7 +680,7 @@ export default function CreateCourse() {
 
              .staff-scope    .module-header {
                     padding: 1.5rem 2.5rem;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     display: flex;
                     align-items: center;
                     gap: 1.5rem;
@@ -696,11 +696,11 @@ export default function CreateCourse() {
                     }
                 }
 
-              .staff-scope   .module-header:hover { background: #f1f5f9; }
+              .staff-scope   .module-header:hover { background: var(--index-hover-bg); }
 
               .staff-scope   .lesson-card {
                     padding: 1.5rem 2.5rem;
-                    border-top: 1px solid #f1f5f9;
+                    border-top: 1px solid var(--index-hover-bg);
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
@@ -722,7 +722,7 @@ export default function CreateCourse() {
                 }
 
                 .staff-scope .lesson-card:hover {
-                    background: #fcfdfe;
+                    background: var(--index-card-bg);
                     transform: translateX(6px);
                 }
                 
@@ -744,15 +744,15 @@ export default function CreateCourse() {
                     gap: 8px;
                 }
 
-             .staff-scope    .type-video { background: #eff6ff; color: #1d4ed8; }
-             .staff-scope    .type-live { background: #fee2e2; color: #b91c1c; }
-             .staff-scope    .type-material { background: #ecfdf5; color: #065f46; }
-             .staff-scope    .type-quiz { background: #fff7ed; color: #9a3412; }
+             .staff-scope    .type-video { background: var(--index-accent-soft-bg); color: var(--index-primary-color); }
+             .staff-scope    .type-live { background: var(--index-danger-bg-soft); color: var(--lgl-error); }
+             .staff-scope    .type-material { background: color-mix(in srgb, var(--lgl-success) 15%, transparent); color: var(--lgl-success); }
+             .staff-scope    .type-quiz { background: color-mix(in srgb, var(--lgl-warning) 15%, transparent); color: var(--lgl-warning); }
 
              .staff-scope    .add-lesson-bar {
                     padding: 2rem 2.5rem;
-                    background: rgba(248, 250, 252, 0.6);
-                    border-top: 1px solid #f1f5f9;
+                    background: color-mix(in srgb, var(--index-hover-bg) 60%, transparent);
+                    border-top: 1px solid var(--index-hover-bg);
                     display: flex;
                     gap: 1.5rem;
                     justify-content: center;
@@ -775,11 +775,11 @@ export default function CreateCourse() {
              .staff-scope    .type-btn {
                     padding: 0.75rem 1.5rem;
                     border-radius: 14px;
-                    border: 2px dashed #cbd5e1;
+                    border: 2px dashed var(--index-border-subtle);
                     background: white;
                     font-size: 0.9rem;
                     font-weight: 800;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     cursor: pointer;
                     display: flex;
                     align-items: center;
@@ -789,11 +789,11 @@ export default function CreateCourse() {
 
             .staff-scope     .type-btn:hover {
                     border-style: solid;
-                    border-color: #1a4d3e;
-                    color: #1a4d3e;
+                    border-color: var(--index-primary-color);
+                    color: var(--index-primary-color);
                     background: white;
                     transform: scale(1.05) translateY(-3px);
-                    box-shadow: 0 10px 20px -5px rgba(26, 77, 62, 0.15);
+                    box-shadow: 0 10px 20px -5px color-mix(in srgb, var(--index-primary-color) 15%, transparent);
                 }
 
             .staff-scope     .sticky-actions-bar {
@@ -877,8 +877,8 @@ export default function CreateCourse() {
 
                .staff-scope  .btn-save-progress {
                     background: white !important;
-                    border: 1.5px solid #e2e8f0 !important;
-                    color: #64748b !important;
+                    border: 1.5px solid var(--index-border-color) !important;
+                    color: var(--index-text-secondary) !important;
                     font-weight: 800 !important;
                     display: flex;
                     align-items: center;
@@ -886,7 +886,7 @@ export default function CreateCourse() {
                 }
 
              .staff-scope    .btn-next-step {
-                    background: #1a4d3e !important;
+                    background: var(--index-primary-color) !important;
                     color: white !important;
                     padding: 0 3rem;
                     height: 60px;
@@ -895,7 +895,7 @@ export default function CreateCourse() {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    box-shadow: 0 10px 20px -5px rgba(26, 77, 62, 0.3);
+                    box-shadow: 0 10px 20px -5px color-mix(in srgb, var(--index-primary-color) 30%, transparent);
                 }
 
                 @media (max-width: 768px) {
@@ -945,7 +945,7 @@ export default function CreateCourse() {
                 }
 
                 .staff-scope .shimmer-progress {
-                    background: linear-gradient(90deg, #1a4d3e 25%, #2d7a63 50%, #1a4d3e 75%);
+                    background: linear-gradient(90deg, var(--index-primary-color) 25%, var(--lgl-cyan-dark) 50%, var(--index-primary-color) 75%);
                     background-size: 200% 100%;
                     animation: shimmer 2.5s infinite linear;
                 }
@@ -966,27 +966,27 @@ export default function CreateCourse() {
                     background: transparent;
                 }
               .staff-scope   .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #e2e8f0;
+                    background: var(--index-border-color);
                     border-radius: 10px;
                 }
 
              .staff-scope    .mode-card {
                     padding: 2.5rem;
                     border-radius: 28px;
-                    border: 2.5px solid #f1f5f9;
+                    border: 2.5px solid var(--index-hover-bg);
                     background: white;
                     cursor: pointer;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     text-align: center;
                 }
             .staff-scope     .mode-card.selected {
-                    border-color: #1a4d3e;
-                    background: #f0fdf4;
+                    border-color: var(--index-primary-color);
+                    background: var(--index-accent-soft-bg);
                     transform: translateY(-4px);
-                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.1);
+                    box-shadow: 0 20px 25px -5px color-mix(in srgb, var(--index-primary-color) 10%, transparent);
                 }
-               .staff-scope     .mode-card h4 { margin: 16px 0 8px 0; font-weight: 900; color: #0f172a; }
-                .staff-scope     .mode-card p { font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.5; }
+               .staff-scope     .mode-card h4 { margin: 16px 0 8px 0; font-weight: 900; color: var(--index-text-heading); }
+                .staff-scope     .mode-card p { font-size: 0.85rem; color: var(--index-text-secondary); margin: 0; line-height: 1.5; }
 
                 @keyframes fadeInUp {
                     from { opacity: 0; transform: translateY(20px); }
@@ -997,15 +997,15 @@ export default function CreateCourse() {
                     animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 }
                 
-            .staff-scope     .hover-danger:hover { background: #fef2f2 !important; color: #ef4444 !important; }
+            .staff-scope     .hover-danger:hover { background: var(--index-danger-bg-soft) !important; color: var(--lgl-error) !important; }
                 
             .staff-scope     .thumbnail-container:hover .thumbnail-overlay { opacity: 1 !important; }
               .staff-scope   .preview-btn:hover {
-                    background: #1a4d3e !important;
+                    background: var(--index-primary-color) !important;
                     color: white !important;
-                    border-color: #1a4d3e !important;
+                    border-color: var(--index-primary-color) !important;
                     transform: scale(1.1);
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 20%, transparent);
                 }
 
                 .staff-scope .modal-overlay {
@@ -1052,22 +1052,22 @@ export default function CreateCourse() {
                     width: 'calc(100% - 4rem)',
                     zIndex: 9999,
                     padding: '1rem 1.25rem',
-                    background: '#fff1f2',
-                    border: '1px solid #ffe4e6',
-                    color: '#e11d48',
+                    background: 'var(--index-danger-bg-soft)',
+                    border: '1px solid color-mix(in srgb, var(--lgl-error) 20%, transparent)',
+                    color: 'var(--lgl-error)',
                     borderRadius: '16px',
                     fontSize: '0.95rem',
                     fontWeight: 500,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.75rem',
-                    boxShadow: '0 10px 25px rgba(225, 29, 72, 0.15)'
+                    boxShadow: '0 10px 25px color-mix(in srgb, var(--lgl-error) 15%, transparent)'
                 }}>
                     <AlertCircle size={20} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                     <span style={{ flex: 1 }}>{error}</span>
                     <button
                         onClick={() => setError(null)}
-                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px', flexShrink: 0 }}
+                        style={{ background: 'none', border: 'none', color: 'color-mix(in srgb, var(--lgl-error) 60%, transparent)', cursor: 'pointer', display: 'flex', padding: '4px', flexShrink: 0 }}
                     >
                         <X size={16} />
                     </button>
@@ -1078,7 +1078,7 @@ export default function CreateCourse() {
             {step === 1 && (
                 <div className="form-section-card animate-fade-in-up">
                     <h3 className="section-title">
-                        <Layout size={32} color="#020617" style={{ background: 'rgba(2, 6, 23, 0.08)', padding: '8px', borderRadius: '14px' }} />
+                        <Layout size={32} color="var(--lgl-charcoal)" style={{ background: 'color-mix(in srgb, var(--lgl-charcoal) 8%, transparent)', padding: '8px', borderRadius: '14px' }} />
                         General Course Information
                     </h3>
 
@@ -1086,7 +1086,7 @@ export default function CreateCourse() {
                         <div style={{ display: 'grid', gap: '3rem' }}>
                             <div style={{ display: 'grid', gap: '2rem' }}>
                                 <div>
-                                    <label className="input-label">Course Title <span style={{ color: '#ef4444' }}>*</span></label>
+                                    <label className="input-label">Course Title <span style={{ color: 'var(--lgl-error)' }}>*</span></label>
                                     <input
                                         type="text"
                                         className="custom-input"
@@ -1111,10 +1111,10 @@ export default function CreateCourse() {
                                     <label className="input-label">Primary Content Type</label>
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                                         {[
-                                            { id: 'video', label: 'Video Lessons', icon: Video, color: '#1d4ed8' },
-                                            { id: 'live', label: 'Live Sessions', icon: Users, color: '#b91c1c' },
-                                            { id: 'material', label: 'Document Hub', icon: FileText, color: '#065f46' },
-                                            { id: 'quiz', label: 'Evaluations', icon: HelpCircle, color: '#9a3412' }
+                                            { id: 'video', label: 'Video Lessons', icon: Video, color: 'var(--index-primary-color)' },
+                                            { id: 'live', label: 'Live Sessions', icon: Users, color: 'var(--lgl-error)' },
+                                            { id: 'material', label: 'Document Hub', icon: FileText, color: 'var(--lgl-success)' },
+                                            { id: 'quiz', label: 'Evaluations', icon: HelpCircle, color: 'var(--lgl-warning)' }
                                         ].map((cat) => (
                                             <div
                                                 key={cat.id}
@@ -1122,15 +1122,15 @@ export default function CreateCourse() {
                                                 style={{
                                                     padding: '1.25rem',
                                                     borderRadius: '18px',
-                                                    border: courseData.category === cat.id ? `2px solid ${cat.color}` : '2px solid #f1f5f9',
+                                                    border: courseData.category === cat.id ? `2px solid ${cat.color}` : '2px solid var(--index-hover-bg)',
                                                     background: courseData.category === cat.id ? `${cat.color}05` : 'white',
                                                     cursor: 'pointer',
                                                     textAlign: 'center',
                                                     transition: 'all 0.2s'
                                                 }}
                                             >
-                                                <cat.icon size={24} color={courseData.category === cat.id ? cat.color : '#94a3b8'} style={{ marginBottom: '8px' }} />
-                                                <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 900, color: courseData.category === cat.id ? cat.color : '#64748b', textTransform: 'uppercase' }}>{cat.label}</p>
+                                                <cat.icon size={24} color={courseData.category === cat.id ? cat.color : 'var(--index-text-faint)'} style={{ marginBottom: '8px' }} />
+                                                <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 900, color: courseData.category === cat.id ? cat.color: 'var(--index-text-secondary)', textTransform: 'uppercase' }}>{cat.label}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -1142,7 +1142,7 @@ export default function CreateCourse() {
 
                         </div>
 
-                        <div className="blueprint-meta-sidebar" style={{ background: '#f8fafc', padding: '3rem', borderRadius: '24px', border: '1.5px solid #f1f5f9' }}>
+                        <div className="blueprint-meta-sidebar" style={{ background: 'var(--index-hover-bg)', padding: '3rem', borderRadius: '24px', border: '1.5px solid var(--index-border-subtle)' }}>
                             <style>{`
                                 @media (max-width: 768px) {
                                     .staff-scope .blueprint-meta-sidebar {
@@ -1153,7 +1153,7 @@ export default function CreateCourse() {
                             <div style={{ display: 'grid', gap: '2rem' }}>
                                 <div
                                     className="thumbnail-container"
-                                    style={{ textAlign: 'center', padding: '2.5rem', border: '2.5px dashed #cbd5e1', borderRadius: '24px', background: 'white', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
+                                    style={{ textAlign: 'center', padding: '2.5rem', border: '2.5px dashed var(--index-border-color)', borderRadius: '24px', background: 'var(--index-card-bg)', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
                                     onClick={() => document.getElementById('thumbnail-upload')?.click()}
                                 >
                                     {courseData.thumbnail ? (
@@ -1170,8 +1170,8 @@ export default function CreateCourse() {
                                         </div>
                                     ) : (
                                         <>
-                                            <UploadCloud size={32} color="#94a3b8" />
-                                            <p style={{ margin: '1rem 0 0 0', fontWeight: 800, color: '#64748b', fontSize: '0.85rem' }}>UPLOAD COURSE THUMBNAIL</p>
+                                            <UploadCloud size={32} color="var(--index-text-faint)" />
+                                            <p style={{ margin: '1rem 0 0 0', fontWeight: 800, color: 'var(--index-text-secondary)', fontSize: '0.85rem' }}>UPLOAD COURSE THUMBNAIL</p>
                                         </>
                                     )}
                                     <input
@@ -1201,11 +1201,11 @@ export default function CreateCourse() {
             {step === 2 && (
                 <div className="form-section-card animate-fade-in-up">
                     <h3 className="section-title">
-                        <Users size={32} color="#1a4d3e" style={{ background: '#f0fdf4', padding: '8px', borderRadius: '14px' }} />
+                        <Users size={32} color="var(--index-primary-color)" style={{ background: 'var(--index-accent-soft-bg)', padding: '8px', borderRadius: '14px' }} />
                         Target Cohort Assignment
                     </h3>
 
-                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>Select the cohort you want to assign this course curriculum to.</p>
+                    <p style={{ color: 'var(--index-text-secondary)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>Select the cohort you want to assign this course curriculum to.</p>
 
                     <div style={{ display: 'grid', gap: '1.25rem' }}>
                         {cohorts.length > 0 ? (
@@ -1214,29 +1214,29 @@ export default function CreateCourse() {
                                     key={cohort.id}
                                     style={{
                                         padding: '2rem',
-                                        border: selectedCohortId === cohort.id ? '2.5px solid #1a4d3e' : '2px solid #f1f5f9',
-                                        background: selectedCohortId === cohort.id ? '#f0fdf4' : 'white',
+                                        border: selectedCohortId === cohort.id ? '2.5px solid var(--index-primary-color)' : '2px solid var(--index-hover-bg)',
+                                        background: selectedCohortId === cohort.id ? 'var(--index-accent-soft-bg)' : 'var(--index-card-bg)',
                                         borderRadius: '24px',
                                         display: 'flex',
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
-                                        boxShadow: selectedCohortId === cohort.id ? '0 10px 20px -5px rgba(26, 77, 62, 0.1)' : 'none',
+                                        boxShadow: selectedCohortId === cohort.id ? '0 10px 20px -5px color-mix(in srgb, var(--index-primary-color) 10%, transparent)' : 'none',
                                     }}
                                     onClick={() => setSelectedCohortId(selectedCohortId === cohort.id ? null : cohort.id)}
                                     className="cohort-selection-card hover-premium"
                                 >
                                     <div>
                                         <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900 }}>{cohort.name}</h4>
-                                        <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 800 }}>ID: {cohort.id}</span>
+                                        <span style={{ fontSize: '0.85rem', color: 'var(--index-text-faint)', fontWeight: 800 }}>ID: {cohort.id}</span>
                                     </div>
                                     <button
                                         className="btn-standard"
                                         style={{
-                                            background: selectedCohortId === cohort.id ? '#1a4d3e' : '#f8fafc',
-                                            border: '1.5px solid #e2e8f0',
-                                            color: selectedCohortId === cohort.id ? 'white' : '#1a4d3e',
+                                            background: selectedCohortId === cohort.id ? 'var(--index-primary-color)' : 'var(--index-hover-bg)',
+                                            border: '1.5px solid var(--index-border-color)',
+                                            color: selectedCohortId === cohort.id ? 'white' : 'var(--index-primary-color)',
                                             fontWeight: 800
                                         }}
                                     >
@@ -1245,16 +1245,16 @@ export default function CreateCourse() {
                                 </div>
                             ))
                         ) : (
-                            <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '24px', border: '1.5px dashed #cbd5e1' }}>
-                                <p style={{ color: '#64748b', fontWeight: 700 }}>No cohorts found. You can continue without deploying.</p>
-                                <Link to="/instructor/cohorts/create" style={{ color: '#1a4d3e', fontWeight: 800, textDecoration: 'none', fontSize: '0.9rem' }}>+ Create New Cohort</Link>
+                            <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--index-hover-bg)', borderRadius: '24px', border: '1.5px dashed var(--index-border-color)' }}>
+                                <p style={{ color: 'var(--index-text-secondary)', fontWeight: 700 }}>No cohorts found. You can continue without deploying.</p>
+                                <Link to="/instructor/cohorts/create" style={{ color: 'var(--index-primary-color)', fontWeight: 800, textDecoration: 'none', fontSize: '0.9rem' }}>+ Create New Cohort</Link>
                             </div>
                         )}
                     </div>
 
-                    <div style={{ marginTop: '3rem', padding: '2rem', background: '#f8fafc', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-                        <Plus size={20} color="#64748b" />
-                        <span style={{ fontWeight: 800, color: '#64748b' }}>Or save to Course Library without deploying.</span>
+                    <div style={{ marginTop: '3rem', padding: '2rem', background: 'var(--index-hover-bg)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                        <Plus size={20} color="var(--index-text-secondary)" />
+                        <span style={{ fontWeight: 800, color: 'var(--index-text-secondary)' }}>Or save to Course Library without deploying.</span>
                     </div>
                 </div>
             )}
@@ -1266,12 +1266,12 @@ export default function CreateCourse() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3rem' }}>
                             <div>
                                 <h3 className="section-title" style={{ marginBottom: '0.5rem' }}>
-                                    <BookOpen size={32} color="#020617" style={{ background: 'rgba(2, 6, 23, 0.08)', padding: '8px', borderRadius: '14px' }} />
+                                    <BookOpen size={32} color="var(--lgl-charcoal)" style={{ background: 'color-mix(in srgb, var(--lgl-charcoal) 8%, transparent)', padding: '8px', borderRadius: '14px' }} />
                                     Course Curriculum
                                 </h3>
-                                <p style={{ color: '#64748b', margin: 0, fontSize: '1rem', fontWeight: 600 }}>Design the learning path with modules and lessons.</p>
+                                <p style={{ color: 'var(--index-text-secondary)', margin: 0, fontSize: '1rem', fontWeight: 600 }}>Design the learning path with modules and lessons.</p>
                             </div>
-                            <button onClick={addModule} className="btn-standard" style={{ background: '#020617', padding: '0 2rem', boxShadow: '0 10px 15px -3px rgba(2, 6, 23, 0.2)', width: window.innerWidth <= 640 ? '100%' : 'auto', marginTop: window.innerWidth <= 640 ? '1rem' : '0' }}>
+                            <button onClick={addModule} className="btn-standard" style={{ background: 'var(--lgl-charcoal)', padding: '0 2rem', boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--lgl-charcoal) 20%, transparent)', width: window.innerWidth <= 640 ? '100%' : 'auto', marginTop: window.innerWidth <= 640 ? '1rem' : '0' }}>
                                 <Plus size={20} /> New Module
                             </button>
                         </div>
@@ -1281,7 +1281,7 @@ export default function CreateCourse() {
                                 <div key={mod.id} className="curriculum-module">
                                     <div className="module-header" onClick={() => toggleModule(mod.id)}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flex: 1 }}>
-                                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+                                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--index-card-bg)', border: '1.5px solid var(--index-border-color)', color: 'var(--lgl-charcoal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
                                                 {modIdx + 1}
                                             </div>
                                             <input
@@ -1295,26 +1295,26 @@ export default function CreateCourse() {
                                                     background: 'transparent',
                                                     fontSize: '1.2rem',
                                                     fontWeight: 800,
-                                                    color: '#0f172a',
+                                                    color: 'var(--index-text-heading)',
                                                     outline: 'none',
                                                     width: '100%',
                                                     padding: '4px 0',
                                                     borderBottom: '2px solid transparent'
                                                 }}
-                                                onFocus={(e) => e.target.style.borderBottomColor = '#020617'}
+                                                onFocus={(e) => e.target.style.borderBottomColor = 'var(--lgl-charcoal)'}
                                                 onBlur={(e) => e.target.style.borderBottomColor = 'transparent'}
                                             />
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{mod.lessons.length} {mod.lessons.length === 1 ? 'Unit' : 'Units'}</span>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-faint)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{mod.lessons.length} {mod.lessons.length === 1 ? 'Unit' : 'Units'}</span>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); removeModule(mod.id); }}
-                                                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '8px', borderRadius: '8px' }}
+                                                style={{ background: 'transparent', border: 'none', color: 'var(--index-text-faint)', cursor: 'pointer', padding: '8px', borderRadius: '8px' }}
                                                 className="hover-danger"
                                             >
                                                 <Trash2 size={18} />
                                             </button>
-                                            <ChevronDown size={22} color="#64748b" style={{ transform: mod.isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.4s' }} />
+                                            <ChevronDown size={22} color="var(--index-text-secondary)" style={{ transform: mod.isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.4s' }} />
                                         </div>
                                     </div>
                                     {mod.isOpen && (
@@ -1323,7 +1323,7 @@ export default function CreateCourse() {
                                                 <div key={lesson.id} style={{ marginBottom: '0.25rem' }}>
                                                     <div className="lesson-card">
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                                                            <GripVertical size={20} color="#cbd5e1" style={{ cursor: 'grab' }} />
+                                                            <GripVertical size={20} color="var(--index-border-subtle)" style={{ cursor: 'grab' }} />
                                                             <div className={`lesson-type-badge type-${lesson.type}`}>
                                                                 {lesson.type === 'video' && <Video size={14} />}
                                                                 {lesson.type === 'live' && <Users size={14} />}
@@ -1331,12 +1331,12 @@ export default function CreateCourse() {
                                                                 {lesson.type === 'quiz' && <HelpCircle size={14} />}
                                                                 {lesson.type === 'material' ? 'Docs' : lesson.type === 'quiz' ? 'Evaluation' : lesson.type === 'live' ? 'Live Class' : 'Video'}
                                                             </div>
-                                                            <span style={{ fontWeight: 800, fontSize: '1rem', color: '#334155' }}>{lesson.title}</span>
+                                                            <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--index-text-secondary)' }}>{lesson.title}</span>
                                                         </div>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                             <button
                                                                 className="btn-standard"
-                                                                style={{ height: '40px', width: '40px', padding: 0, background: editingLessonId === lesson.id ? '#020617' : '#f8fafc', border: '1px solid #e2e8f0', color: editingLessonId === lesson.id ? 'white' : '#64748b' }}
+                                                                style={{ height: '40px', width: '40px', padding: 0, background: editingLessonId === lesson.id ? 'var(--lgl-charcoal)' : 'var(--index-hover-bg)', border: '1px solid var(--index-border-color)', color: editingLessonId === lesson.id ? 'white' : 'var(--index-text-secondary)' }}
                                                                 onClick={(e) => { e.stopPropagation(); setEditingLessonId(editingLessonId === lesson.id ? null : lesson.id); }}
                                                                 title="Configure Session"
                                                             >
@@ -1344,7 +1344,7 @@ export default function CreateCourse() {
                                                             </button>
                                                             <button
                                                                 className="btn-standard preview-btn"
-                                                                style={{ height: '40px', width: '40px', padding: 0, background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b' }}
+                                                                style={{ height: '40px', width: '40px', padding: 0, background: 'var(--index-hover-bg)', border: '1px solid var(--index-border-color)', color: 'var(--index-text-secondary)' }}
                                                                 onClick={(e) => { e.stopPropagation(); setViewingLesson(lesson); }}
                                                                 title="Preview Lesson"
                                                             >
@@ -1352,7 +1352,7 @@ export default function CreateCourse() {
                                                             </button>
                                                             <button
                                                                 className="btn-standard"
-                                                                style={{ height: '40px', width: '40px', padding: 0, background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: '#ef4444' }}
+                                                                style={{ height: '40px', width: '40px', padding: 0, background: 'color-mix(in srgb, var(--lgl-error) 5%, transparent)', border: '1px solid color-mix(in srgb, var(--lgl-error) 10%, transparent)', color: 'var(--lgl-error)' }}
                                                                 onClick={(e) => { e.stopPropagation(); removeLesson(mod.id, lesson.id); }}
                                                                 title="Remove"
                                                             >
@@ -1362,7 +1362,7 @@ export default function CreateCourse() {
                                                     </div>
 
                                                     {editingLessonId === lesson.id && (
-                                                        <div className="animate-fade-in" style={{ margin: '0 2.5rem 1.5rem 2.5rem', background: '#fcfdfe', border: '1.5px solid #e2e8f0', borderRadius: '0 0 24px 24px', borderTop: 'none', padding: '2.5rem', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.03)' }}>
+                                                        <div className="animate-fade-in" style={{ margin: '0 2.5rem 1.5rem 2.5rem', background: 'var(--index-hover-bg)', border: '1.5px solid var(--index-border-color)', borderRadius: '0 0 24px 24px', borderTop: 'none', padding: '2.5rem', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.03)' }}>
                                                             <div style={{ display: 'grid', gap: '2rem' }}>
                                                                 <div>
                                                                     <label className="input-label">Session Title</label>
@@ -1390,7 +1390,7 @@ export default function CreateCourse() {
                                                                 {lesson.type === 'video' && (
                                                                     <div style={{ display: 'grid', gap: '1.5rem' }}>
                                                                         <div
-                                                                            style={{ padding: '3rem', border: '2.5px dashed #cbd5e1', borderRadius: '20px', textAlign: 'center', background: 'white', cursor: uploadingVideos[lesson.id] ? 'not-allowed' : 'pointer', position: 'relative' }}
+                                                                            style={{ padding: '3rem', border: '2.5px dashed var(--index-border-color)', borderRadius: '20px', textAlign: 'center', background: 'var(--index-card-bg)', cursor: uploadingVideos[lesson.id] ? 'not-allowed' : 'pointer', position: 'relative' }}
                                                                             onClick={() => {
                                                                                 if (!uploadingVideos[lesson.id] && !lesson.videoUrl) {
                                                                                     document.getElementById(`video-upload-${lesson.id}`)?.click();
@@ -1399,21 +1399,21 @@ export default function CreateCourse() {
                                                                         >
                                                                             {uploadingVideos[lesson.id] ? (
                                                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
-                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#f8fafc', marginBottom: '1rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
-                                                                                        <UploadCloud size={32} color="#1a4d3e" />
+                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: 'var(--index-hover-bg)', marginBottom: '1rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+                                                                                        <UploadCloud size={32} color="var(--index-primary-color)" />
                                                                                     </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#1a4d3e' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
-                                                                                    <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
-                                                                                        <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: '#10b981', transition: 'width 0.3s ease' }}></div>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: 'var(--index-primary-color)' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
+                                                                                    <div style={{ width: '100%', height: '8px', background: 'var(--index-border-color)', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
+                                                                                        <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: 'var(--lgl-success)', transition: 'width 0.3s ease' }}></div>
                                                                                     </div>
                                                                                 </div>
                                                                             ) : lesson.fileToUpload ? (
                                                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#fffbeb', marginBottom: '1rem' }}>
-                                                                                        <Clock size={32} color="#f59e0b" />
+                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: 'color-mix(in srgb, var(--lgl-warning) 12%, transparent)', marginBottom: '1rem' }}>
+                                                                                        <Clock size={32} color="var(--lgl-warning)" />
                                                                                     </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#f59e0b' }}>Pending Upload</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', wordBreak: 'break-all', padding: '0 2rem' }}>{lesson.fileToUpload.name}</p>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: 'var(--lgl-warning)' }}>Pending Upload</h5>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--index-text-secondary)', wordBreak: 'break-all', padding: '0 2rem' }}>{lesson.fileToUpload.name}</p>
                                                                                     <button
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
@@ -1421,37 +1421,37 @@ export default function CreateCourse() {
                                                                                             const fileInput = document.getElementById(`video-upload-${lesson.id}`) as HTMLInputElement;
                                                                                             if (fileInput) fileInput.value = '';
                                                                                         }}
-                                                                                        style={{ marginTop: '15px', padding: '8px 16px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                        style={{ marginTop: '15px', padding: '8px 16px', background: 'var(--index-danger-bg-soft)', color: 'var(--lgl-error)', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                     >
                                                                                         <Trash2 size={16} /> Remove Selection
                                                                                     </button>
                                                                                 </div>
                                                                             ) : lesson.videoUrl ? (
                                                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#f0fdf4', marginBottom: '1rem' }}>
-                                                                                        <CheckCircle2 size={32} color="#10b981" />
+                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: 'var(--index-accent-soft-bg)', marginBottom: '1rem' }}>
+                                                                                        <CheckCircle2 size={32} color="var(--lgl-success)" />
                                                                                     </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#10b981' }}>Video Uploaded Successfully</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', wordBreak: 'break-all', padding: '0 2rem' }}>{lesson.videoUrl}</p>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: 'var(--lgl-success)' }}>Video Uploaded Successfully</h5>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--index-text-secondary)', wordBreak: 'break-all', padding: '0 2rem' }}>{lesson.videoUrl}</p>
                                                                                     <button
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
                                                                                             handleDeleteVideo(mod.id, lesson.id, lesson.videoUrl || '');
                                                                                         }}
-                                                                                        style={{ marginTop: '15px', padding: '8px 16px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                        style={{ marginTop: '15px', padding: '8px 16px', background: 'var(--index-danger-bg-soft)', color: 'var(--lgl-error)', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                     >
                                                                                         <Trash2 size={16} /> Delete Video
                                                                                     </button>
                                                                                 </div>
                                                                             ) : (
                                                                                 <>
-                                                                                    <UploadCloud size={40} color="#020617" style={{ marginBottom: '1rem' }} />
+                                                                                    <UploadCloud size={40} color="var(--lgl-charcoal)" style={{ marginBottom: '1rem' }} />
                                                                                     <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Upload Video File</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', marginBottom: '1.5rem' }}>Supports 4K/HD formats up to 2GB</p>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--index-text-secondary)', marginBottom: '1.5rem' }}>Supports 4K/HD formats up to 2GB</p>
                                                                                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                                                                                         <button
                                                                                             className="btn-standard"
-                                                                                            style={{ background: '#020617', color: 'white', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
+                                                                                            style={{ background: 'var(--lgl-charcoal)', color: 'white', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
                                                                                                 document.getElementById(`video-upload-${lesson.id}`)?.click();
@@ -1461,7 +1461,7 @@ export default function CreateCourse() {
                                                                                         </button>
                                                                                         <button
                                                                                             className="btn-standard"
-                                                                                            style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
+                                                                                            style={{ background: 'var(--index-card-bg)', border: '1.5px solid var(--index-border-color)', color: 'var(--lgl-charcoal)', fontSize: '0.8rem', padding: '0.5rem 1rem' }}
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
                                                                                                 fetchExistingVideos(mod.id, lesson.id);
@@ -1532,31 +1532,31 @@ export default function CreateCourse() {
                                                                         </div>
 
                                                                         {/* Recording Section */}
-                                                                        <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1.5px dashed #e2e8f0' }}>
-                                                                            <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1a4d3e' }}>
+                                                                        <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1.5px dashed var(--index-border-color)' }}>
+                                                                            <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--index-primary-color)' }}>
                                                                                 <Video size={18} /> Recording Vault (Post-Session)
                                                                             </label>
 
                                                                             {uploadingVideos[lesson.id] ? (
-                                                                                <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '16px', border: '1.5px dashed #cbd5e1', textAlign: 'center' }}>
-                                                                                    <div style={{ width: '48px', height: '48px', background: '#f0fdf4', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
-                                                                                        <Video size={24} color="#1a4d3e" />
+                                                                                <div style={{ padding: '2rem', background: 'var(--index-hover-bg)', borderRadius: '16px', border: '1.5px dashed var(--index-border-color)', textAlign: 'center' }}>
+                                                                                    <div style={{ width: '48px', height: '48px', background: 'var(--index-accent-soft-bg)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+                                                                                        <Video size={24} color="var(--index-primary-color)" />
                                                                                     </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#1a4d3e' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
-                                                                                    <div style={{ width: '100%', maxWidth: '200px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden', margin: '10px auto' }}>
-                                                                                        <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: '#10b981', transition: 'width 0.3s ease' }}></div>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: 'var(--index-primary-color)' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
+                                                                                    <div style={{ width: '100%', maxWidth: '200px', height: '6px', background: 'var(--index-border-color)', borderRadius: '3px', overflow: 'hidden', margin: '10px auto' }}>
+                                                                                        <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: 'var(--lgl-success)', transition: 'width 0.3s ease' }}></div>
                                                                                     </div>
                                                                                 </div>
                                                                             ) : lesson.videoToUpload ? (
-                                                                                <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '16px', border: '1.5px dashed #1a4d3e', textAlign: 'center' }}>
-                                                                                    <div style={{ width: '48px', height: '48px', background: '#f0fdf4', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
-                                                                                        <Clock size={24} color="#1a4d3e" />
+                                                                                <div style={{ padding: '2rem', background: 'var(--index-hover-bg)', borderRadius: '16px', border: '1.5px dashed var(--index-primary-color)', textAlign: 'center' }}>
+                                                                                    <div style={{ width: '48px', height: '48px', background: 'var(--index-accent-soft-bg)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
+                                                                                        <Clock size={24} color="var(--index-primary-color)" />
                                                                                     </div>
                                                                                     <h5 style={{ margin: '0 0 5px 0', fontWeight: 800 }}>Recording Staged</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>{lesson.videoToUpload.name}</p>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--index-text-secondary)' }}>{lesson.videoToUpload.name}</p>
                                                                                     <button
                                                                                         onClick={() => updateLesson(mod.id, lesson.id, { videoToUpload: undefined })}
-                                                                                        style={{ marginTop: '1rem', color: '#ef4444', background: 'none', border: 'none', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+                                                                                        style={{ marginTop: '1rem', color: 'var(--lgl-error)', background: 'none', border: 'none', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
                                                                                     >
                                                                                         Remove Recording
                                                                                     </button>
@@ -1573,26 +1573,26 @@ export default function CreateCourse() {
                                                                                     />
                                                                                     <button
                                                                                         onClick={() => handleDeleteVideo(mod.id, lesson.id, lesson.videoUrl || '')}
-                                                                                        style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', zIndex: 10 }}
+                                                                                        style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'color-mix(in srgb, var(--lgl-error) 90%, transparent)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', zIndex: 10 }}
                                                                                     >
                                                                                         Delete Recording
                                                                                     </button>
                                                                                 </div>
                                                                             ) : (
-                                                                                <div style={{ padding: '2.5rem', background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '16px', textAlign: 'center' }}>
-                                                                                    <Video size={32} color="#64748b" style={{ marginBottom: '1rem' }} />
+                                                                                <div style={{ padding: '2.5rem', background: 'var(--index-hover-bg)', border: '1.5px dashed var(--index-border-color)', borderRadius: '16px', textAlign: 'center' }}>
+                                                                                    <Video size={32} color="var(--index-text-secondary)" style={{ marginBottom: '1rem' }} />
                                                                                     <h5 style={{ margin: '0 0 10px 0', fontWeight: 800 }}>Upload Session Recording</h5>
                                                                                     <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
                                                                                         <button
                                                                                             className="btn-standard"
-                                                                                            style={{ background: '#020617', color: 'white', fontSize: '0.75rem', height: '36px' }}
+                                                                                            style={{ background: 'var(--lgl-charcoal)', color: 'white', fontSize: '0.75rem', height: '36px' }}
                                                                                             onClick={() => document.getElementById(`recording-upload-${lesson.id}`)?.click()}
                                                                                         >
                                                                                             <Upload size={14} style={{ marginRight: '6px' }} /> Upload New
                                                                                         </button>
                                                                                         <button
                                                                                             className="btn-standard"
-                                                                                            style={{ background: 'white', border: '1.5px solid #e2e8f0', color: '#020617', fontSize: '0.75rem', height: '36px' }}
+                                                                                            style={{ background: 'var(--index-card-bg)', border: '1.5px solid var(--index-border-color)', color: 'var(--lgl-charcoal)', fontSize: '0.75rem', height: '36px' }}
                                                                                             onClick={() => fetchExistingVideos(mod.id, lesson.id)}
                                                                                         >
                                                                                             <Cloud size={14} style={{ marginRight: '6px' }} /> Browse Server
@@ -1619,7 +1619,7 @@ export default function CreateCourse() {
                                                                 {lesson.type === 'material' && (
                                                                     <>
                                                                         <div
-                                                                            style={{ padding: '3rem', border: '2.5px dashed #cbd5e1', borderRadius: '20px', textAlign: 'center', background: 'white', cursor: uploadingVideos[lesson.id] ? 'not-allowed' : 'pointer' }}
+                                                                            style={{ padding: '3rem', border: '2.5px dashed var(--index-border-color)', borderRadius: '20px', textAlign: 'center', background: 'var(--index-card-bg)', cursor: uploadingVideos[lesson.id] ? 'not-allowed' : 'pointer' }}
                                                                             onClick={() => {
                                                                                 if (!uploadingVideos[lesson.id] && !lesson.fileUrl && !lesson.fileToUpload) {
                                                                                     document.getElementById(`file-upload-${lesson.id}`)?.click();
@@ -1628,21 +1628,21 @@ export default function CreateCourse() {
                                                                         >
                                                                             {uploadingVideos[lesson.id] ? (
                                                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
-                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#f8fafc', marginBottom: '1rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
-                                                                                        <UploadCloud size={32} color="#1a4d3e" />
+                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: 'var(--index-hover-bg)', marginBottom: '1rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+                                                                                        <UploadCloud size={32} color="var(--index-primary-color)" />
                                                                                     </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#1a4d3e' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
-                                                                                    <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
-                                                                                        <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: '#10b981', transition: 'width 0.3s ease' }}></div>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: 'var(--index-primary-color)' }}>Uploading... {uploadProgress[lesson.id] || 0}%</h5>
+                                                                                    <div style={{ width: '100%', height: '8px', background: 'var(--index-border-color)', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
+                                                                                        <div style={{ width: `${uploadProgress[lesson.id] || 0}%`, height: '100%', background: 'var(--lgl-success)', transition: 'width 0.3s ease' }}></div>
                                                                                     </div>
                                                                                 </div>
                                                                             ) : lesson.fileToUpload ? (
                                                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#fffbeb', marginBottom: '1rem', border: '1.5px dashed #f59e0b' }}>
-                                                                                        <Clock size={32} color="#f59e0b" />
+                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: 'color-mix(in srgb, var(--lgl-warning) 12%, transparent)', marginBottom: '1rem', border: '1.5px dashed var(--lgl-warning)' }}>
+                                                                                        <Clock size={32} color="var(--lgl-warning)" />
                                                                                     </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#f59e0b' }}>Pending Upload</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>{lesson.fileToUpload.name}</p>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: 'var(--lgl-warning)' }}>Pending Upload</h5>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--index-text-secondary)', fontWeight: 700 }}>{lesson.fileToUpload.name}</p>
                                                                                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
                                                                                         <button
                                                                                             onClick={(e: any) => {
@@ -1653,7 +1653,7 @@ export default function CreateCourse() {
                                                                                                     setPreviewAsset({ url, type: isPdf ? 'pdf' : 'image' });
                                                                                                 }
                                                                                             }}
-                                                                                            style={{ padding: '8px 16px', background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '8px', color: '#b45309', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                            style={{ padding: '8px 16px', background: 'color-mix(in srgb, var(--lgl-warning) 12%, transparent)', border: '1.5px solid color-mix(in srgb, var(--lgl-warning) 40%, transparent)', borderRadius: '8px', color: 'var(--lgl-warning)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                         >
                                                                                             <Eye size={16} /> Preview
                                                                                         </button>
@@ -1664,7 +1664,7 @@ export default function CreateCourse() {
                                                                                                 const fileInput = document.getElementById(`file-upload-${lesson.id}`) as HTMLInputElement;
                                                                                                 if (fileInput) fileInput.value = '';
                                                                                             }}
-                                                                                            style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                            style={{ padding: '8px 16px', background: 'var(--index-danger-bg-soft)', border: '1px solid color-mix(in srgb, var(--lgl-error) 25%, transparent)', color: 'var(--lgl-error)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                         >
                                                                                             <X size={16} /> Remove
                                                                                         </button>
@@ -1672,11 +1672,11 @@ export default function CreateCourse() {
                                                                                 </div>
                                                                             ) : lesson.fileUrl ? (
                                                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: '#f0fdf4', marginBottom: '1rem' }}>
-                                                                                        <CheckCircle2 size={32} color="#10b981" />
+                                                                                    <div style={{ padding: '12px', borderRadius: '50%', background: 'var(--index-accent-soft-bg)', marginBottom: '1rem' }}>
+                                                                                        <CheckCircle2 size={32} color="var(--lgl-success)" />
                                                                                     </div>
-                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: '#10b981' }}>File Ready</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>{lesson.fileName || 'Resource Document'}</p>
+                                                                                    <h5 style={{ margin: '0 0 8px 0', fontWeight: 800, color: 'var(--lgl-success)' }}>File Ready</h5>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--index-text-secondary)', fontWeight: 700 }}>{lesson.fileName || 'Resource Document'}</p>
                                                                                     <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
                                                                                         <button
                                                                                             onClick={(e: any) => {
@@ -1685,7 +1685,7 @@ export default function CreateCourse() {
                                                                                                 const isPdf = url.toLowerCase().endsWith('.pdf') || lesson.fileName?.toLowerCase().endsWith('.pdf');
                                                                                                 setPreviewAsset({ url, type: isPdf ? 'pdf' : 'image' });
                                                                                             }}
-                                                                                            style={{ padding: '8px 16px', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '8px', color: '#1a4d3e', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                            style={{ padding: '8px 16px', background: 'var(--index-hover-bg)', border: '1.5px solid var(--index-border-color)', borderRadius: '8px', color: 'var(--index-primary-color)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                         >
                                                                                             <Eye size={16} /> Preview
                                                                                         </button>
@@ -1694,7 +1694,7 @@ export default function CreateCourse() {
                                                                                                 e.stopPropagation();
                                                                                                 handleDeleteVideo(mod.id, lesson.id, lesson.fileUrl || '');
                                                                                             }}
-                                                                                            style={{ padding: '8px 16px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                                            style={{ padding: '8px 16px', background: 'var(--index-danger-bg-soft)', border: '1px solid color-mix(in srgb, var(--lgl-error) 25%, transparent)', color: 'var(--lgl-error)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                                                                                         >
                                                                                             <Trash2 size={16} /> Delete
                                                                                         </button>
@@ -1702,12 +1702,12 @@ export default function CreateCourse() {
                                                                                 </div>
                                                                             ) : (
                                                                                 <>
-                                                                                    <FileText size={40} color="#020617" style={{ marginBottom: '1rem' }} />
+                                                                                    <FileText size={40} color="var(--lgl-charcoal)" style={{ marginBottom: '1rem' }} />
                                                                                     <h5 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>Deploy Document Resource</h5>
-                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Upload PDFs, Slides, or Blueprint assets (Max 50MB)</p>
+                                                                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--index-text-secondary)' }}>Upload PDFs, Slides, or Blueprint assets (Max 50MB)</p>
                                                                                     <button
                                                                                         className="btn-standard"
-                                                                                        style={{ marginTop: '1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#020617' }}
+                                                                                        style={{ marginTop: '1.5rem', background: 'var(--index-hover-bg)', border: '1px solid var(--index-border-color)', color: 'var(--lgl-charcoal)' }}
                                                                                         onClick={() => document.getElementById(`file-upload-${lesson.id}`)?.click()}
                                                                                     >
                                                                                         Browse Files
@@ -1728,22 +1728,22 @@ export default function CreateCourse() {
                                                                         </div>
 
                                                                         {/* Document Questions Integration */}
-                                                                        <div style={{ marginTop: '2.5rem', padding: '2.5rem', background: 'white', borderRadius: '28px', border: '1.5px solid rgba(26, 77, 62, 0.12)', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.02)' }}>
+                                                                        <div style={{ marginTop: '2.5rem', padding: '2.5rem', background: 'var(--index-card-bg)', borderRadius: '28px', border: '1.5px solid color-mix(in srgb, var(--index-primary-color) 12%, transparent)', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.02)' }}>
                                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-                                                                                <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a4d3e' }}>
+                                                                                <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--index-accent-soft-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--index-primary-color)' }}>
                                                                                     <HelpCircle size={20} />
                                                                                 </div>
-                                                                                <h5 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem', color: '#0f172a' }}>Material-Linked Questions</h5>
+                                                                                <h5 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem', color: 'var(--index-text-heading)' }}>Material-Linked Questions</h5>
                                                                             </div>
-                                                                            <p style={{ margin: '0 0 1.75rem 0', fontSize: '0.875rem', color: '#64748b', fontWeight: 600, lineHeight: '1.5' }}>
+                                                                            <p style={{ margin: '0 0 1.75rem 0', fontSize: '0.875rem', color: 'var(--index-text-secondary)', fontWeight: 600, lineHeight: '1.5' }}>
                                                                                 Require students to pass a validation quiz immediately after studying this document to confirm comprehension.
                                                                             </p>
 
                                                                             <div className="evaluation-grid-material" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-                                                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1.25rem', borderBottom: lesson.quizData ? '1px solid #f1f5f9' : 'none' }}>
+                                                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1.25rem', borderBottom: lesson.quizData ? '1px solid var(--index-hover-bg)' : 'none' }}>
                                                                                     <div>
-                                                                                        <label className="input-label" style={{ marginBottom: '4px', fontSize: '0.85rem', fontWeight: 800, color: '#475569' }}>Validation Quiz</label>
-                                                                                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>Toggle assessment requirements</p>
+                                                                                        <label className="input-label" style={{ marginBottom: '4px', fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-secondary)' }}>Validation Quiz</label>
+                                                                                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--index-text-faint)' }}>Toggle assessment requirements</p>
                                                                                     </div>
                                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                                                         <div
@@ -1756,18 +1756,18 @@ export default function CreateCourse() {
                                                                                             style={{
                                                                                                 width: '56px',
                                                                                                 height: '30px',
-                                                                                                background: lesson.quizData ? '#1a4d3e' : '#e2e8f0',
+                                                                                                background: lesson.quizData ? 'var(--index-primary-color)' : 'var(--index-border-color)',
                                                                                                 borderRadius: '99px',
                                                                                                 position: 'relative',
                                                                                                 cursor: 'pointer',
                                                                                                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                                                                boxShadow: lesson.quizData ? '0 4px 12px rgba(26, 77, 62, 0.2)' : 'none'
+                                                                                                boxShadow: lesson.quizData ? '0 4px 12px color-mix(in srgb, var(--index-primary-color) 20%, transparent)' : 'none'
                                                                                             }}
                                                                                         >
                                                                                             <div style={{
                                                                                                 width: '22px',
                                                                                                 height: '22px',
-                                                                                                background: 'white',
+                                                                                                background: 'var(--index-card-bg)',
                                                                                                 borderRadius: '50%',
                                                                                                 position: 'absolute',
                                                                                                 top: '4px',
@@ -1776,7 +1776,7 @@ export default function CreateCourse() {
                                                                                                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                                                                                             }}></div>
                                                                                         </div>
-                                                                                        <span style={{ fontSize: '0.9rem', fontWeight: 800, color: lesson.quizData ? '#1a4d3e' : '#64748b', minWidth: '70px' }}>
+                                                                                        <span style={{ fontSize: '0.9rem', fontWeight: 800, color: lesson.quizData ? 'var(--index-primary-color)' : 'var(--index-text-secondary)', minWidth: '70px' }}>
                                                                                             {lesson.quizData ? 'Enabled' : 'Disabled'}
                                                                                         </span>
                                                                                     </div>
@@ -1793,7 +1793,7 @@ export default function CreateCourse() {
                                                                                             }
                                                                                         `}</style>
                                                                                         <div>
-                                                                                            <label className="input-label" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>Minimum Passing Score</label>
+                                                                                            <label className="input-label" style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-secondary)', marginBottom: '8px' }}>Minimum Passing Score</label>
                                                                                             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                                                                                                 <input
                                                                                                     type="number"
@@ -1814,7 +1814,7 @@ export default function CreateCourse() {
                                                                                                         });
                                                                                                     }}
                                                                                                 />
-                                                                                                <span style={{ position: 'absolute', right: '1.25rem', fontWeight: 800, color: '#94a3b8', fontSize: '0.95rem' }}>%</span>
+                                                                                                <span style={{ position: 'absolute', right: '1.25rem', fontWeight: 800, color: 'var(--index-text-faint)', fontSize: '0.95rem' }}>%</span>
                                                                                             </div>
                                                                                         </div>
                                                                                         <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
@@ -1822,7 +1822,7 @@ export default function CreateCourse() {
                                                                                                 type="button"
                                                                                                 className="btn-standard"
                                                                                                 style={{
-                                                                                                    background: lesson.quizData.questions?.length > 0 ? '#1a4d3e' : '#e28743',
+                                                                                                    background: lesson.quizData.questions?.length > 0 ? 'var(--index-primary-color)' : 'var(--lgl-warning)',
                                                                                                     color: 'white',
                                                                                                     fontWeight: 900,
                                                                                                     border: 'none',
@@ -1835,7 +1835,7 @@ export default function CreateCourse() {
                                                                                                     gap: '8px',
                                                                                                     flex: 1,
                                                                                                     transition: 'all 0.2s',
-                                                                                                    boxShadow: lesson.quizData.questions?.length > 0 ? '0 4px 12px rgba(26, 77, 62, 0.15)' : '0 4px 12px rgba(226, 135, 67, 0.15)',
+                                                                                                    boxShadow: lesson.quizData.questions?.length > 0 ? '0 4px 12px color-mix(in srgb, var(--index-primary-color) 15%, transparent)' : '0 4px 12px rgba(226, 135, 67, 0.15)',
                                                                                                     whiteSpace: 'nowrap'
                                                                                                 }}
                                                                                                 onClick={() => setDesigningQuiz({ moduleId: mod.id, lessonId: lesson.id })}
@@ -1843,16 +1843,16 @@ export default function CreateCourse() {
                                                                                                 <HelpCircle size={18} />
                                                                                                 <span>Configure Questions ({lesson.quizData.questions?.length || 0})</span>
                                                                                                 {lesson.quizData.questions?.length === 0 && (
-                                                                                                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white', display: 'inline-block', marginLeft: '4px', animation: 'pulse 1.5s infinite' }}></span>
+                                                                                                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--index-card-bg)', display: 'inline-block', marginLeft: '4px', animation: 'pulse 1.5s infinite' }}></span>
                                                                                                 )}
                                                                                             </button>
                                                                                             <button
                                                                                                 type="button"
                                                                                                 className="btn-standard"
                                                                                                 style={{
-                                                                                                    background: 'white',
-                                                                                                    border: '2px solid #e2e8f0',
-                                                                                                    color: '#475569',
+                                                                                                    background: 'var(--index-card-bg)',
+                                                                                                    border: '2px solid var(--index-border-color)',
+                                                                                                    color: 'var(--index-text-secondary)',
                                                                                                     fontWeight: 800,
                                                                                                     borderRadius: '16px',
                                                                                                     padding: '1rem 1.5rem',
@@ -1878,18 +1878,18 @@ export default function CreateCourse() {
                                                                 )}
 
                                                                 {lesson.type === 'quiz' && (
-                                                                    <div style={{ marginTop: '2.5rem', padding: '2.5rem', background: 'white', borderRadius: '28px', border: '1.5px solid rgba(217, 119, 6, 0.12)', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.02)' }}>
+                                                                    <div style={{ marginTop: '2.5rem', padding: '2.5rem', background: 'var(--index-card-bg)', borderRadius: '28px', border: '1.5px solid color-mix(in srgb, var(--lgl-warning) 12%, transparent)', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.02)' }}>
                                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-                                                                            <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d97706' }}>
+                                                                            <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--lgl-warning)' }}>
                                                                                 <HelpCircle size={20} />
                                                                             </div>
-                                                                            <h5 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem', color: '#0f172a' }}>Evaluation Settings</h5>
+                                                                            <h5 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem', color: 'var(--index-text-heading)' }}>Evaluation Settings</h5>
                                                                         </div>
-                                                                        <p style={{ margin: '0 0 1.75rem 0', fontSize: '0.875rem', color: '#64748b', fontWeight: 600, lineHeight: '1.5' }}>Configure passing criteria and question items for this standalone assessment lesson.</p>
+                                                                        <p style={{ margin: '0 0 1.75rem 0', fontSize: '0.875rem', color: 'var(--index-text-secondary)', fontWeight: 600, lineHeight: '1.5' }}>Configure passing criteria and question items for this standalone assessment lesson.</p>
                                                                         
                                                                         <div className="evaluation-fields-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem', alignItems: 'flex-end' }}>
                                                                             <div>
-                                                                                <label className="input-label" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>Minimum Passing Score</label>
+                                                                                <label className="input-label" style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-secondary)', marginBottom: '8px' }}>Minimum Passing Score</label>
                                                                                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                                                                                     <input
                                                                                         type="number"
@@ -1910,7 +1910,7 @@ export default function CreateCourse() {
                                                                                             });
                                                                                         }}
                                                                                     />
-                                                                                    <span style={{ position: 'absolute', right: '1.25rem', fontWeight: 800, color: '#94a3b8', fontSize: '0.95rem' }}>%</span>
+                                                                                    <span style={{ position: 'absolute', right: '1.25rem', fontWeight: 800, color: 'var(--index-text-faint)', fontSize: '0.95rem' }}>%</span>
                                                                                 </div>
                                                                             </div>
                                                                             <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
@@ -1918,7 +1918,7 @@ export default function CreateCourse() {
                                                                                     type="button"
                                                                                     className="btn-standard"
                                                                                     style={{
-                                                                                        background: '#d97706',
+                                                                                        background: 'var(--lgl-warning)',
                                                                                         color: 'white',
                                                                                         fontWeight: 900,
                                                                                         border: 'none',
@@ -1931,7 +1931,7 @@ export default function CreateCourse() {
                                                                                         gap: '8px',
                                                                                         flex: 1,
                                                                                         transition: 'all 0.2s',
-                                                                                        boxShadow: '0 4px 12px rgba(217, 119, 6, 0.15)',
+                                                                                        boxShadow: '0 4px 12px color-mix(in srgb, var(--lgl-warning) 15%, transparent)',
                                                                                         whiteSpace: 'nowrap'
                                                                                     }}
                                                                                     onClick={() => setDesigningQuiz({ moduleId: mod.id, lessonId: lesson.id })}
@@ -1939,16 +1939,16 @@ export default function CreateCourse() {
                                                                                     <HelpCircle size={18} />
                                                                                     <span>Configure Questions ({lesson.quizData?.questions?.length || 0})</span>
                                                                                     {lesson.quizData?.questions?.length === 0 && (
-                                                                                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'white', display: 'inline-block', marginLeft: '4px', animation: 'pulse 1.5s infinite' }}></span>
+                                                                                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--index-card-bg)', display: 'inline-block', marginLeft: '4px', animation: 'pulse 1.5s infinite' }}></span>
                                                                                     )}
                                                                                 </button>
                                                                                 <button
                                                                                     type="button"
                                                                                     className="btn-standard"
                                                                                     style={{
-                                                                                        background: 'white',
-                                                                                        border: '2px solid #e2e8f0',
-                                                                                        color: '#475569',
+                                                                                        background: 'var(--index-card-bg)',
+                                                                                        border: '2px solid var(--index-border-color)',
+                                                                                        color: 'var(--index-text-secondary)',
                                                                                         fontWeight: 800,
                                                                                         borderRadius: '16px',
                                                                                         padding: '1rem 1.5rem',
@@ -1970,9 +1970,9 @@ export default function CreateCourse() {
                                                                     </div>
                                                                 )}
 
-                                                                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', borderTop: '1px solid #f1f5f9', paddingTop: '2rem' }}>
+                                                                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--index-border-subtle)', paddingTop: '2rem' }}>
                                                                     <div style={{ display: 'flex', gap: '1rem' }}>
-                                                                        <button onClick={() => setEditingLessonId(null)} className="btn-standard" style={{ background: '#1a4d3e' }}>Finish Setup</button>
+                                                                        <button onClick={() => setEditingLessonId(null)} className="btn-standard" style={{ background: 'var(--index-primary-color)' }}>Finish Setup</button>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2000,11 +2000,11 @@ export default function CreateCourse() {
             {step === 4 && (
                 <div className="form-section-card animate-fade-in-up">
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <div style={{ width: '80px', height: '80px', background: '#f0fdf4', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem auto' }}>
-                            <CheckCircle2 size={40} color="#1a4d3e" />
+                        <div style={{ width: '80px', height: '80px', background: 'var(--index-accent-soft-bg)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem auto' }}>
+                            <CheckCircle2 size={40} color="var(--index-primary-color)" />
                         </div>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#0f172a', margin: '0 0 1rem 0' }}>Final Review</h2>
-                        <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600 }}>Verify your academic blueprint before finalizing the deployment.</p>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--index-text-heading)', margin: '0 0 1rem 0' }}>Final Review</h2>
+                        <p style={{ color: 'var(--index-text-secondary)', fontSize: '1.1rem', fontWeight: 600 }}>Verify your academic blueprint before finalizing the deployment.</p>
                     </div>
 
                     <div className="review-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
@@ -2016,29 +2016,29 @@ export default function CreateCourse() {
                                 }
                             }
                         `}</style>
-                        <div style={{ background: '#f8fafc', padding: '3rem', borderRadius: '32px', border: '1.5px solid #f1f5f9' }}>
+                        <div style={{ background: 'var(--index-hover-bg)', padding: '3rem', borderRadius: '32px', border: '1.5px solid var(--index-border-subtle)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
-                                <Users size={24} color="#1a4d3e" />
+                                <Users size={24} color="var(--index-primary-color)" />
                                 <h4 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900 }}>Cohort Operation</h4>
                             </div>
                             <div style={{ display: 'grid', gap: '1.5rem' }}>
                                 <div>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Operational Container</label>
-                                    <p style={{ margin: '8px 0 0 0', fontWeight: 900, fontSize: '1.25rem', color: '#0f172a' }}>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-faint)', textTransform: 'uppercase' }}>Operational Container</label>
+                                    <p style={{ margin: '8px 0 0 0', fontWeight: 900, fontSize: '1.25rem', color: 'var(--index-text-heading)' }}>
                                         {selectedCohortId ? cohorts.find(c => c.id === selectedCohortId)?.name : 'Library Only (No Deployment)'}
                                     </p>
                                     {selectedCohortId && (
-                                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>ID: {selectedCohortId}</span>
+                                        <span style={{ fontSize: '0.85rem', color: 'var(--index-text-secondary)' }}>ID: {selectedCohortId}</span>
                                     )}
                                 </div>
                                 <div>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Course Title</label>
-                                    <p style={{ margin: '8px 0 0 0', fontWeight: 800, fontSize: '1.25rem', color: '#0f172a' }}>{courseData.title || 'Untitled Course'}</p>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-faint)', textTransform: 'uppercase' }}>Course Title</label>
+                                    <p style={{ margin: '8px 0 0 0', fontWeight: 800, fontSize: '1.25rem', color: 'var(--index-text-heading)' }}>{courseData.title || 'Untitled Course'}</p>
                                 </div>
                                 {courseData.thumbnail && (
                                     <div>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Card Preview</label>
-                                        <div style={{ marginTop: '1rem', width: '100%', height: '160px', borderRadius: '16px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-faint)', textTransform: 'uppercase' }}>Card Preview</label>
+                                        <div style={{ marginTop: '1rem', width: '100%', height: '160px', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--index-border-color)' }}>
                                             <img
                                                 src={courseData.thumbnail}
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover', userSelect: 'none', pointerEvents: 'none' }}
@@ -2051,7 +2051,7 @@ export default function CreateCourse() {
                             </div>
                         </div>
 
-                        <div className="blueprint-card" style={{ background: 'white', padding: '3rem', border: '1.5px solid #f1f5f9', borderRadius: '32px' }}>
+                        <div className="blueprint-card" style={{ background: 'var(--index-card-bg)', padding: '3rem', border: '1.5px solid var(--index-border-subtle)', borderRadius: '32px' }}>
                             <style>{`
                                 @media (max-width: 768px) {
                                     .staff-scope .blueprint-card {
@@ -2060,29 +2060,29 @@ export default function CreateCourse() {
                                 }
                             `}</style>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
-                                <BookOpen size={24} color="#1a4d3e" />
+                                <BookOpen size={24} color="var(--index-primary-color)" />
                                 <h4 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900 }}>Intellectual Blueprint</h4>
                             </div>
                             <div style={{ display: 'grid', gap: '1.5rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <div>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Architecture</label>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-faint)', textTransform: 'uppercase' }}>Architecture</label>
                                         <p style={{ margin: '8px 0 0 0', fontWeight: 800, fontSize: '1.1rem' }}>{modules.length} Modules • {modules.flatMap(m => m.lessons).length} Units</p>
                                     </div>
                                     <div style={{ textAlign: 'right' }}>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Visibility</label>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-faint)', textTransform: 'uppercase' }}>Visibility</label>
                                         <p style={{ margin: '8px 0 0 0', fontWeight: 800, fontSize: '1.1rem' }}>Public Marketplace</p>
                                     </div>
                                 </div>
-                                <div style={{ paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
+                                <div style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--index-border-subtle)' }}>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
                                         <input
                                             type="checkbox"
-                                            style={{ width: '24px', height: '24px', accentColor: '#1a4d3e' }}
+                                            style={{ width: '24px', height: '24px', accentColor: 'var(--index-primary-color)' }}
                                             checked={confirmed}
                                             onChange={(e) => setConfirmed(e.target.checked)}
                                         />
-                                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#475569' }}>
+                                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--index-text-secondary)' }}>
                                             I confirm this cohort session is compliant with global educational standards.
                                         </span>
                                     </label>
@@ -2099,7 +2099,7 @@ export default function CreateCourse() {
                     onClick={() => setStep(Math.max(1, step - 1))}
                     disabled={step === 1 || loading}
                     className="btn-standard btn-back-nav"
-                    style={{ background: 'transparent', border: '1.5px solid #e2e8f0', color: '#475569', opacity: step === 1 ? 0 : 1, pointerEvents: (step === 1 || loading) ? 'none' : 'auto' }}
+                    style={{ background: 'transparent', border: '1.5px solid var(--index-border-color)', color: 'var(--index-text-secondary)', opacity: step === 1 ? 0 : 1, pointerEvents: (step === 1 || loading) ? 'none' : 'auto' }}
                 >
                     <ChevronLeft size={20} /> <span className="hide-mobile">Back</span>
                 </button>
@@ -2121,7 +2121,7 @@ export default function CreateCourse() {
                                     icon: 'warning',
                                     title: 'Required Information',
                                     text: errorMsg,
-                                    confirmButtonColor: '#1a4d3e'
+                                    confirmButtonColor: 'var(--index-primary-color)'
                                 });
                                 return;
                             }
@@ -2146,14 +2146,14 @@ export default function CreateCourse() {
                     <div
                         className="modal-overlay animate-fade-in"
                         onClick={() => setViewingLesson(null)}
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--lgl-charcoal) 60%, transparent)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                         <div
                             className="animate-scale-up"
                             onClick={e => e.stopPropagation()}
-                            style={{ background: 'white', width: '100%', height: '100%', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column' }}
+                            style={{ background: 'var(--index-card-bg)', width: '100%', height: '100%', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column' }}
                         >
-                            <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                            <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--index-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--index-hover-bg)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                                     <div className={`lesson-type-badge type-${viewingLesson.type}`} style={{ transform: 'scale(1.1)' }}>
                                         {viewingLesson.type === 'video' && <Video size={16} />}
@@ -2161,15 +2161,15 @@ export default function CreateCourse() {
                                         {viewingLesson.type === 'material' && <FileText size={16} />}
                                         {viewingLesson.type === 'quiz' && <HelpCircle size={16} />}
                                     </div>
-                                    <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem', color: '#0f172a' }}>{viewingLesson.title}</h3>
+                                    <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem', color: 'var(--index-text-heading)' }}>{viewingLesson.title}</h3>
                                 </div>
-                                <button onClick={() => setViewingLesson(null)} style={{ background: '#f1f5f9', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <button onClick={() => setViewingLesson(null)} style={{ background: 'var(--index-hover-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: 'var(--index-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <X size={20} />
                                 </button>
                             </div>
                             <div style={{ flex: 1, padding: '0', textAlign: 'center', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                                 {viewingLesson.type === 'video' && (
-                                    <div style={{ width: '100%', height: '100%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexDirection: 'column', overflow: 'hidden' }}>
+                                    <div style={{ width: '100%', height: '100%', background: 'var(--index-text-heading)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexDirection: 'column', overflow: 'hidden' }}>
                                         {viewingLesson.videoUrl || viewingLesson.fileToUpload ? (
                                             <>
                                                 {(() => {
@@ -2231,22 +2231,22 @@ export default function CreateCourse() {
                                             <>
                                                 <Video size={48} opacity={0.5} style={{ marginBottom: '1.5rem' }} />
                                                 <p style={{ fontWeight: 800, margin: 0 }}>Video Stream Simulator</p>
-                                                <span style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '8px' }}>No video uploaded yet</span>
+                                                <span style={{ fontSize: '0.85rem', color: 'var(--index-text-faint)', marginTop: '8px' }}>No video uploaded yet</span>
                                             </>
                                         )}
                                     </div>
                                 )}
                                 {viewingLesson.type === 'live' && (
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', background: '#f0fdf4' }}>
-                                        <Users size={64} color="#1a4d3e" style={{ marginBottom: '1.5rem' }} />
-                                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1.75rem', fontWeight: 900, color: '#1a4d3e' }}>Live Class Scheduled</h4>
-                                        <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#64748b' }}>{viewingLesson.liveDate} at {viewingLesson.liveTime}</p>
-                                        <p style={{ margin: '8px 0 2rem 0', fontSize: '1rem', color: '#94a3b8' }}>Platform: {viewingLesson.livePlatform}</p>
-                                        <button className="btn-standard" style={{ background: '#1a4d3e', padding: '0 3rem', height: '56px', fontSize: '1.1rem' }}>Join Preview Link</button>
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', background: 'var(--index-accent-soft-bg)' }}>
+                                        <Users size={64} color="var(--index-primary-color)" style={{ marginBottom: '1.5rem' }} />
+                                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1.75rem', fontWeight: 900, color: 'var(--index-primary-color)' }}>Live Class Scheduled</h4>
+                                        <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--index-text-secondary)' }}>{viewingLesson.liveDate} at {viewingLesson.liveTime}</p>
+                                        <p style={{ margin: '8px 0 2rem 0', fontSize: '1rem', color: 'var(--index-text-faint)' }}>Platform: {viewingLesson.livePlatform}</p>
+                                        <button className="btn-standard" style={{ background: 'var(--index-primary-color)', padding: '0 3rem', height: '56px', fontSize: '1.1rem' }}>Join Preview Link</button>
                                     </div>
                                 )}
                                 {viewingLesson.type === 'material' && (
-                                    <div style={{ width: '100%', height: '100%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+                                    <div style={{ width: '100%', height: '100%', background: 'var(--index-accent-soft-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--index-primary-color)', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
                                         {viewingLesson.fileUrl || viewingLesson.fileToUpload ? (
                                             <>
                                                 {(() => {
@@ -2263,7 +2263,7 @@ export default function CreateCourse() {
                                                         <div style={{ textAlign: 'center', padding: '2rem' }}>
                                                             <FileText size={64} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
                                                             <p style={{ fontWeight: 800, fontSize: '1.25rem', margin: 0 }}>Document Unit Ready</p>
-                                                            <span style={{ fontSize: '1rem', color: '#94a3b8', marginTop: '10px', display: 'block' }}>{fileName}</span>
+                                                            <span style={{ fontSize: '1rem', color: 'var(--index-text-faint)', marginTop: '10px', display: 'block' }}>{fileName}</span>
                                                         </div>
                                                     );
                                                 })()}
@@ -2271,11 +2271,11 @@ export default function CreateCourse() {
                                         ) : (
                                             <>
                                                 <FileText size={64} opacity={0.5} style={{ marginBottom: '1.5rem' }} />
-                                                <h4 style={{ margin: '0 0 10px 0', fontSize: '1.75rem', fontWeight: 900, color: '#2563eb' }}>Document Hub Unit</h4>
-                                                <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#64748b' }}>PDF/Slides Asset Ready</p>
+                                                <h4 style={{ margin: '0 0 10px 0', fontSize: '1.75rem', fontWeight: 900, color: 'var(--index-primary-color)' }}>Document Hub Unit</h4>
+                                                <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--index-text-secondary)' }}>PDF/Slides Asset Ready</p>
                                             </>
                                         )}
-                                        <button className="btn-standard" style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: '#2563eb', padding: '0 2.5rem', zIndex: 10 }} onClick={() => {
+                                        <button className="btn-standard" style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: 'var(--index-primary-color)', padding: '0 2.5rem', zIndex: 10 }} onClick={() => {
                                             const url = viewingLesson.fileToUpload ? URL.createObjectURL(viewingLesson.fileToUpload) : viewingLesson.fileUrl;
                                             if (url) window.open(url, '_blank');
                                         }}>
@@ -2284,19 +2284,19 @@ export default function CreateCourse() {
                                     </div>
                                 )}
                                 {viewingLesson.type === 'quiz' && (
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', background: '#fefce8' }}>
-                                        <HelpCircle size={64} color="#ca8a04" style={{ marginBottom: '1.5rem' }} />
-                                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1.75rem', fontWeight: 900, color: '#ca8a04' }}>Knowledge Validation</h4>
-                                        <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#64748b' }}>Curriculum Evaluation Node</p>
-                                        <button className="btn-standard" style={{ background: '#ca8a04', padding: '0 3rem', height: '56px', fontSize: '1.1rem', marginTop: '2rem' }}>Start Simulator</button>
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', background: 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)' }}>
+                                        <HelpCircle size={64} color="var(--lgl-warning)" style={{ marginBottom: '1.5rem' }} />
+                                        <h4 style={{ margin: '0 0 10px 0', fontSize: '1.75rem', fontWeight: 900, color: 'var(--lgl-warning)' }}>Knowledge Validation</h4>
+                                        <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--index-text-secondary)' }}>Curriculum Evaluation Node</p>
+                                        <button className="btn-standard" style={{ background: 'var(--lgl-warning)', padding: '0 3rem', height: '56px', fontSize: '1.1rem', marginTop: '2rem' }}>Start Simulator</button>
                                     </div>
                                 )}
-                                <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', padding: '1.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: viewingLesson.isLocked ? '#ef4444' : '#10b981', fontWeight: 800, fontSize: '0.85rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', padding: '1.5rem', borderTop: '1px solid var(--index-border-subtle)', background: 'var(--index-hover-bg)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: viewingLesson.isLocked ? 'var(--lgl-error)' : 'var(--lgl-success)', fontWeight: 800, fontSize: '0.85rem' }}>
                                         {viewingLesson.isLocked ? <Lock size={14} /> : <CheckCircle2 size={14} />}
                                         {viewingLesson.isLocked ? 'Locked for Students' : 'Free Access'}
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: viewingLesson.isPreview ? '#1a4d3e' : '#64748b', fontWeight: 800, fontSize: '0.85rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: viewingLesson.isPreview ? 'var(--index-primary-color)' : 'var(--index-text-secondary)', fontWeight: 800, fontSize: '0.85rem' }}>
                                         <Eye size={14} />
                                         {viewingLesson.isPreview ? 'Publicly Previewable' : 'Enrollment Required'}
                                     </div>
@@ -2313,7 +2313,7 @@ export default function CreateCourse() {
                     style={{
                         position: 'fixed',
                         inset: 0,
-                        background: 'rgba(15, 23, 42, 0.4)',
+                        background: 'color-mix(in srgb, var(--lgl-charcoal) 40%, transparent)',
                         backdropFilter: 'blur(20px)',
                         zIndex: 2000,
                         display: 'flex',
@@ -2338,40 +2338,40 @@ export default function CreateCourse() {
                         }}
                     >
                         {/* Decorative background element */}
-                        <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '200px', height: '200px', background: 'rgba(26, 77, 62, 0.05)', borderRadius: '50%', filter: 'blur(40px)' }}></div>
+                        <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '200px', height: '200px', background: 'color-mix(in srgb, var(--index-primary-color) 5%, transparent)', borderRadius: '50%', filter: 'blur(40px)' }}></div>
 
                         <div style={{ position: 'relative', zIndex: 1 }}>
                             {showSuccess ? (
                                 <div className="animate-slide-up">
-                                    <div style={{ width: '100px', height: '100px', background: '#10b981', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto', boxShadow: '0 20px 40px -10px rgba(16, 185, 129, 0.4)' }}>
+                                    <div style={{ width: '100px', height: '100px', background: 'var(--lgl-success)', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto', boxShadow: '0 20px 40px -10px color-mix(in srgb, var(--lgl-success) 40%, transparent)' }}>
                                         <CheckCircle2 size={44} color="white" />
                                     </div>
-                                    <h2 style={{ fontSize: '2.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.75rem 0', letterSpacing: '-0.03em' }}>
+                                    <h2 style={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--index-text-heading)', margin: '0 0 0.75rem 0', letterSpacing: '-0.03em' }}>
                                         Launch Complete
                                     </h2>
-                                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>
+                                    <p style={{ color: 'var(--index-text-secondary)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>
                                         Your academic curriculum is now live and operational.
                                     </p>
-                                    <div style={{ background: '#f0fdf4', padding: '1.5rem', borderRadius: '24px', border: '1.5px solid #10b98120', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
-                                        <span style={{ fontWeight: 800, fontSize: '1rem', color: '#059669' }}>Redirecting to Course Management...</span>
-                                        <Loader2 size={20} className="animate-spin" color="#059669" />
+                                    <div style={{ background: 'var(--index-accent-soft-bg)', padding: '1.5rem', borderRadius: '24px', border: '1.5px solid var(--lgl-success)20', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                                        <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--lgl-success)' }}>Redirecting to Course Management...</span>
+                                        <Loader2 size={20} className="animate-spin" color="var(--lgl-success)" />
                                     </div>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="animate-float" style={{ width: '100px', height: '100px', background: '#1a4d3e', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto', boxShadow: '0 20px 40px -10px rgba(26, 77, 62, 0.4)' }}>
+                                    <div className="animate-float" style={{ width: '100px', height: '100px', background: 'var(--index-primary-color)', borderRadius: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem auto', boxShadow: '0 20px 40px -10px color-mix(in srgb, var(--index-primary-color) 40%, transparent)' }}>
                                         <UploadCloud size={44} color="white" />
                                     </div>
 
-                                    <h2 style={{ fontSize: '2.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.75rem 0', letterSpacing: '-0.03em' }}>
+                                    <h2 style={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--index-text-heading)', margin: '0 0 0.75rem 0', letterSpacing: '-0.03em' }}>
                                         Launching Curriculum
                                     </h2>
-                                    <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>
+                                    <p style={{ color: 'var(--index-text-secondary)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '2.5rem' }}>
                                         {loadingText || 'Architecting your academic environment...'}
                                     </p>
 
                                     {/* Main Progress Tube */}
-                                    <div style={{ background: '#f1f5f9', height: '16px', borderRadius: '20px', overflow: 'hidden', marginBottom: '1rem', border: '1px solid #f1f5f9' }}>
+                                    <div style={{ background: 'var(--index-hover-bg)', height: '16px', borderRadius: '20px', overflow: 'hidden', marginBottom: '1rem', border: '1px solid var(--index-border-subtle)' }}>
                                         <div
                                             className="shimmer-progress"
                                             style={{
@@ -2384,35 +2384,35 @@ export default function CreateCourse() {
                                     </div>
 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3rem' }}>
-                                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>System Integrity Check</span>
+                                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--index-text-faint)', textTransform: 'uppercase' }}>System Integrity Check</span>
                                         {Math.round(Object.keys(uploadProgress).length > 0 ? ((Object.values(uploadProgress) as number[]).reduce((a: number, b: number) => a + b, 0) / Object.keys(uploadProgress).length) : (loadingText.includes('blueprint') ? 95 : 10))}%
                                     </div>
 
                                     {/* Active Uploads List */}
                                     <div style={{ textAlign: 'left', maxHeight: '180px', overflowY: 'auto', paddingRight: '10px' }} className="custom-scrollbar">
                                         {modules.flatMap(m => m.lessons).filter(l => uploadingVideos[l.id]).map(l => (
-                                            <div key={l.id} style={{ marginBottom: '1.25rem', background: '#f8fafc', padding: '1.25rem', borderRadius: '24px', border: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ width: '40px', height: '40px', background: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                                                    <Video size={18} color="#1a4d3e" />
+                                            <div key={l.id} style={{ marginBottom: '1.25rem', background: 'var(--index-hover-bg)', padding: '1.25rem', borderRadius: '24px', border: '1.5px solid var(--index-border-subtle)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ width: '40px', height: '40px', background: 'var(--index-card-bg)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                                                    <Video size={18} color="var(--index-primary-color)" />
                                                 </div>
                                                 <div style={{ flex: 1 }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                                        <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#334155' }}>{l.title}</span>
-                                                        <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#1a4d3e' }}>{uploadProgress[l.id] || 0}%</span>
+                                                        <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--index-text-secondary)' }}>{l.title}</span>
+                                                        <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--index-primary-color)' }}>{uploadProgress[l.id] || 0}%</span>
                                                     </div>
-                                                    <div style={{ background: '#e2e8f0', height: '5px', borderRadius: '10px', overflow: 'hidden' }}>
-                                                        <div style={{ width: `${uploadProgress[l.id] || 0}%`, height: '100%', background: '#1a4d3e', transition: 'width 0.4s ease' }}></div>
+                                                    <div style={{ background: 'var(--index-border-color)', height: '5px', borderRadius: '10px', overflow: 'hidden' }}>
+                                                        <div style={{ width: `${uploadProgress[l.id] || 0}%`, height: '100%', background: 'var(--index-primary-color)', transition: 'width 0.4s ease' }}></div>
                                                     </div>
                                                 </div>
                                             </div>
                                         ))}
 
                                         {loadingText.includes('blueprint') && (
-                                            <div className="animate-pulse" style={{ background: '#f0fdf4', padding: '1.25rem', borderRadius: '24px', border: '1.5px solid #1a4d3e20', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ width: '40px', height: '40px', background: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <Save size={18} color="#1a4d3e" />
+                                            <div className="animate-pulse" style={{ background: 'var(--index-accent-soft-bg)', padding: '1.25rem', borderRadius: '24px', border: '1.5px solid var(--index-primary-color)20', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ width: '40px', height: '40px', background: 'var(--index-card-bg)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <Save size={18} color="var(--index-primary-color)" />
                                                 </div>
-                                                <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#1a4d3e' }}>Finalizing Course Blueprint...</span>
+                                                <span style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--index-primary-color)' }}>Finalizing Course Blueprint...</span>
                                             </div>
                                         )}
                                     </div>
@@ -2425,19 +2425,19 @@ export default function CreateCourse() {
 
             {/* Asset Preview Modal */}
             {previewAsset && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(8px)', padding: isMaximized ? 0 : '2rem' }}>
-                    <div style={{ background: 'white', borderRadius: isMaximized ? 0 : '32px', overflow: 'hidden', width: '100%', height: '100%', maxWidth: isMaximized ? 'none' : '1000px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                        <div style={{ padding: '1.25rem 2rem', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfe' }}>
+                <div style={{ position: 'fixed', inset: 0, zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'color-mix(in srgb, var(--lgl-charcoal) 85%, transparent)', backdropFilter: 'blur(8px)', padding: isMaximized ? 0 : '2rem' }}>
+                    <div style={{ background: 'var(--index-card-bg)', borderRadius: isMaximized ? 0 : '32px', overflow: 'hidden', width: '100%', height: '100%', maxWidth: isMaximized ? 'none' : '1000px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                        <div style={{ padding: '1.25rem 2rem', borderBottom: '1.5px solid var(--index-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--index-hover-bg)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <div style={{ padding: '8px', borderRadius: '12px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {previewAsset.type === 'pdf' ? <FileText size={20} color="#1a4d3e" /> : <Eye size={20} color="#1a4d3e" />}
+                                <div style={{ padding: '8px', borderRadius: '12px', background: 'var(--index-accent-soft-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {previewAsset.type === 'pdf' ? <FileText size={20} color="var(--index-primary-color)" /> : <Eye size={20} color="var(--index-primary-color)" />}
                                 </div>
-                                <h3 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>Material Intelligence Preview</h3>
+                                <h3 style={{ margin: 0, fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.1rem' }}>Material Intelligence Preview</h3>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <button
                                     onClick={() => setIsMaximized(!isMaximized)}
-                                    style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: 'white', border: '1.5px solid #e2e8f0', color: '#64748b', cursor: 'pointer' }}
+                                    style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: 'var(--index-card-bg)', border: '1.5px solid var(--index-border-color)', color: 'var(--index-text-secondary)', cursor: 'pointer' }}
                                     title={isMaximized ? "Restore" : "Fullscreen"}
                                 >
                                     <Eye size={20} />
@@ -2448,24 +2448,24 @@ export default function CreateCourse() {
                                         setIframeLoading(true);
                                         setIsMaximized(false);
                                     }}
-                                    style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                                    style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px', background: 'var(--index-hover-bg)', border: 'none', color: 'var(--index-text-secondary)', cursor: 'pointer', transition: 'all 0.2s ease' }}
                                 >
                                     <X size={20} />
                                 </button>
                             </div>
                         </div>
 
-                        <div style={{ flex: 1, padding: '0', background: '#f8fafc', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                        <div style={{ flex: 1, padding: '0', background: 'var(--index-hover-bg)', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
                             {iframeLoading && previewAsset.type === 'pdf' && (
-                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', zIndex: 10 }}>
+                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--index-hover-bg)', zIndex: 10 }}>
                                     <div style={{ position: 'relative', marginBottom: '2rem' }}>
-                                        <div style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid #f1f5f9', borderTopColor: '#1a4d3e', animation: 'spin-inst 1s linear infinite' }}></div>
+                                        <div style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid var(--index-border-subtle)', borderTopColor: 'var(--index-primary-color)', animation: 'spin-inst 1s linear infinite' }}></div>
                                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <FileText size={32} color="#1a4d3e" opacity={0.3} />
+                                            <FileText size={32} color="var(--index-primary-color)" opacity={0.3} />
                                         </div>
                                     </div>
-                                    <h4 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>Architecting Secure View...</h4>
-                                    <p style={{ marginTop: '0.75rem', fontWeight: 600, color: '#64748b', fontSize: '0.9rem' }}>Preparing high-fidelity instructional workspace</p>
+                                    <h4 style={{ margin: 0, fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.25rem' }}>Architecting Secure View...</h4>
+                                    <p style={{ marginTop: '0.75rem', fontWeight: 600, color: 'var(--index-text-secondary)', fontSize: '0.9rem' }}>Preparing high-fidelity instructional workspace</p>
                                     <style>{`
                                         @keyframes spin-inst { to { transform: rotate(360deg); } }
                                     `}</style>
@@ -2500,40 +2500,40 @@ export default function CreateCourse() {
                 return (
                     <div
                         className="modal-overlay animate-fade-in"
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
+                        style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--lgl-charcoal) 65%, transparent)', backdropFilter: 'blur(12px)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
                     >
                         <div
                             className="quiz-modal animate-scale-up"
-                            style={{ background: 'white', width: '100%', maxWidth: '950px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 30px 60px -15px rgba(15, 23, 42, 0.3)', borderRadius: '32px' }}
+                            style={{ background: 'var(--index-card-bg)', width: '100%', maxWidth: '950px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 30px 60px -15px color-mix(in srgb, var(--lgl-charcoal) 30%, transparent)', borderRadius: '32px' }}
                         >
-                            <div className="quiz-header" style={{ borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcfdfe', padding: '2rem 2.5rem' }}>
+                            <div className="quiz-header" style={{ borderBottom: '1px solid var(--index-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--index-hover-bg)', padding: '2rem 2.5rem' }}>
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
-                                        <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: '#1a4d3e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                                        <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--index-primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                                             <HelpCircle size={20} />
                                         </div>
-                                        <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.35rem', color: '#0f172a', letterSpacing: '-0.02em' }}>Evaluation Intelligence Designer</h3>
+                                        <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.35rem', color: 'var(--index-text-heading)', letterSpacing: '-0.02em' }}>Evaluation Intelligence Designer</h3>
                                     </div>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Crafting validation units for: <span style={{ color: '#1a4d3e', fontWeight: 800 }}>{lesson?.title}</span></p>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>Crafting validation units for: <span style={{ color: 'var(--index-primary-color)', fontWeight: 800 }}>{lesson?.title}</span></p>
                                 </div>
                                 <button
                                     onClick={() => setDesigningQuiz(null)}
-                                    style={{ background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                                    onMouseOver={(e) => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
-                                    onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
+                                    style={{ background: 'var(--index-hover-bg)', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', color: 'var(--index-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                    onMouseOver={(e) => { e.currentTarget.style.background = 'var(--index-danger-bg-soft)'; e.currentTarget.style.color = 'var(--lgl-error)'; }}
+                                    onMouseOut={(e) => { e.currentTarget.style.background = 'var(--index-hover-bg)'; e.currentTarget.style.color = 'var(--index-text-secondary)'; }}
                                 >
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="quiz-body" style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', background: '#f8fafc' }}>
+                            <div className="quiz-body" style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', background: 'var(--index-hover-bg)' }}>
                                 {quizData.questions.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '5rem 2rem', background: 'white', borderRadius: '24px', border: '2px dashed #cbd5e1' }}>
-                                        <div style={{ width: '80px', height: '80px', borderRadius: '28px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: '#1a4d3e' }}>
+                                    <div style={{ textAlign: 'center', padding: '5rem 2rem', background: 'var(--index-card-bg)', borderRadius: '24px', border: '2px dashed var(--index-border-color)' }}>
+                                        <div style={{ width: '80px', height: '80px', borderRadius: '28px', background: 'var(--index-accent-soft-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'var(--index-primary-color)' }}>
                                             <Plus size={36} />
                                         </div>
-                                        <h4 style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.2rem', marginBottom: '8px' }}>Empty Evaluation Pipeline</h4>
-                                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2rem', maxWidth: '380px', margin: '0 auto 2rem auto', lineHeight: '1.6' }}>Initialize assessment items for this lesson. Define multi-choice validation keys.</p>
+                                        <h4 style={{ fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.2rem', marginBottom: '8px' }}>Empty Evaluation Pipeline</h4>
+                                        <p style={{ color: 'var(--index-text-secondary)', fontSize: '0.9rem', marginBottom: '2rem', maxWidth: '380px', margin: '0 auto 2rem auto', lineHeight: '1.6' }}>Initialize assessment items for this lesson. Define multi-choice validation keys.</p>
                                         <button
                                             onClick={() => {
                                                 updateLesson(designingQuiz.moduleId, designingQuiz.lessonId, {
@@ -2544,7 +2544,7 @@ export default function CreateCourse() {
                                                 });
                                             }}
                                             className="btn-primary-forest"
-                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.85rem 2rem', borderRadius: '14px', border: 'none', background: '#1a4d3e', color: 'white', fontWeight: 900, cursor: 'pointer' }}
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.85rem 2rem', borderRadius: '14px', border: 'none', background: 'var(--index-primary-color)', color: 'white', fontWeight: 900, cursor: 'pointer' }}
                                         >
                                             <Plus size={18} /> Initialize First Question
                                         </button>
@@ -2552,8 +2552,8 @@ export default function CreateCourse() {
                                 ) : (
                                     <div style={{ display: 'grid', gap: '3rem' }}>
                                         {quizData.questions.map((q, qIdx) => (
-                                            <div key={q.id} className="question-card" style={{ background: 'white', borderRadius: '28px', border: '1.5px solid #e2e8f0', padding: '2.5rem', position: 'relative', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.02)' }}>
-                                                <div style={{ position: 'absolute', top: '-14px', left: '2rem', background: '#1a4d3e', color: 'white', padding: '5px 16px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.05em', boxShadow: '0 4px 10px rgba(26, 77, 62, 0.2)' }}>
+                                            <div key={q.id} className="question-card" style={{ background: 'var(--index-card-bg)', borderRadius: '28px', border: '1.5px solid var(--index-border-color)', padding: '2.5rem', position: 'relative', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.02)' }}>
+                                                <div style={{ position: 'absolute', top: '-14px', left: '2rem', background: 'var(--index-primary-color)', color: 'white', padding: '5px 16px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.05em', boxShadow: '0 4px 10px color-mix(in srgb, var(--index-primary-color) 20%, transparent)' }}>
                                                     QUESTION {qIdx + 1}
                                                 </div>
                                                 <button
@@ -2564,16 +2564,16 @@ export default function CreateCourse() {
                                                             quizData: { ...quizData, questions: newQuestions }
                                                         });
                                                     }}
-                                                    style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: '#fff1f2', border: 'none', color: '#e11d48', width: '38px', height: '38px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                                                    onMouseOver={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = 'white'; }}
-                                                    onMouseOut={(e) => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
+                                                    style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'var(--index-danger-bg-soft)', border: 'none', color: 'var(--lgl-error)', width: '38px', height: '38px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                                    onMouseOver={(e) => { e.currentTarget.style.background = 'var(--lgl-error)'; e.currentTarget.style.color = 'white'; }}
+                                                    onMouseOut={(e) => { e.currentTarget.style.background = 'var(--index-danger-bg-soft)'; e.currentTarget.style.color = 'var(--lgl-error)'; }}
                                                     title="Delete Question"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
 
                                                 <div style={{ marginBottom: '2rem', marginTop: '0.5rem' }}>
-                                                    <label className="input-label" style={{ fontWeight: 800, color: '#475569', fontSize: '0.85rem' }}>Question Statement</label>
+                                                    <label className="input-label" style={{ fontWeight: 800, color: 'var(--index-text-secondary)', fontSize: '0.85rem' }}>Question Statement</label>
                                                     <textarea
                                                         className="custom-input"
                                                         rows={2}
@@ -2591,7 +2591,7 @@ export default function CreateCourse() {
                                                 </div>
 
                                                 <div style={{ display: 'grid', gap: '1rem' }}>
-                                                    <label className="input-label" style={{ fontWeight: 800, color: '#475569', fontSize: '0.85rem', marginBottom: '4px' }}>Answers and Options (Select correct option)</label>
+                                                    <label className="input-label" style={{ fontWeight: 800, color: 'var(--index-text-secondary)', fontSize: '0.85rem', marginBottom: '4px' }}>Answers and Options (Select correct option)</label>
                                                     {q.options.map((opt: string, oIdx: number) => {
                                                         const isCorrect = q.correct_answer === oIdx;
                                                         return (
@@ -2609,8 +2609,8 @@ export default function CreateCourse() {
                                                                         height: '36px',
                                                                         borderRadius: '50%',
                                                                         border: '2px solid',
-                                                                        borderColor: isCorrect ? '#1a4d3e' : '#cbd5e1',
-                                                                        background: isCorrect ? '#f0fdf4' : 'white',
+                                                                        borderColor: isCorrect ? 'var(--index-primary-color)' : 'var(--index-border-color)',
+                                                                        background: isCorrect ? 'var(--index-accent-soft-bg)' : 'var(--index-card-bg)',
                                                                         cursor: 'pointer',
                                                                         display: 'flex',
                                                                         alignItems: 'center',
@@ -2623,7 +2623,7 @@ export default function CreateCourse() {
                                                                         width: '14px',
                                                                         height: '14px',
                                                                         borderRadius: '50%',
-                                                                        background: '#1a4d3e',
+                                                                        background: 'var(--index-primary-color)',
                                                                         transform: isCorrect ? 'scale(1)' : 'scale(0)',
                                                                         transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
                                                                     }} />
@@ -2634,9 +2634,9 @@ export default function CreateCourse() {
                                                                     style={{
                                                                         flex: 1,
                                                                         padding: '0.85rem 1.25rem',
-                                                                        background: isCorrect ? '#fcfdfd' : '#f8fafc',
+                                                                        background: isCorrect ? 'var(--index-accent-soft-bg)' : 'var(--index-hover-bg)',
                                                                         borderWidth: '1.5px',
-                                                                        borderColor: isCorrect ? '#1a4d3e60' : '#e2e8f0',
+                                                                        borderColor: isCorrect ? 'var(--index-primary-color)60' : 'var(--index-border-color)',
                                                                         fontWeight: isCorrect ? 700 : 600
                                                                     }}
                                                                     value={opt}
@@ -2661,9 +2661,9 @@ export default function CreateCourse() {
                                                                                 quizData: { ...quizData, questions: newQuestions }
                                                                             });
                                                                         }}
-                                                                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '6px', transition: 'color 0.2s' }}
-                                                                        onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
-                                                                        onMouseOut={(e) => e.currentTarget.style.color = '#94a3b8'}
+                                                                        style={{ background: 'none', border: 'none', color: 'var(--index-text-faint)', cursor: 'pointer', padding: '6px', transition: 'color 0.2s' }}
+                                                                        onMouseOver={(e) => e.currentTarget.style.color = 'var(--lgl-error)'}
+                                                                        onMouseOut={(e) => e.currentTarget.style.color = 'var(--index-text-faint)'}
                                                                         title="Remove Option"
                                                                     >
                                                                         <X size={18} />
@@ -2682,11 +2682,11 @@ export default function CreateCourse() {
                                                                 });
                                                             }}
                                                             style={{
-                                                                background: 'white',
-                                                                border: '1.5px dashed #cbd5e1',
+                                                                background: 'var(--index-card-bg)',
+                                                                border: '1.5px dashed var(--index-border-color)',
                                                                 padding: '0.85rem',
                                                                 borderRadius: '14px',
-                                                                color: '#64748b',
+                                                                color: 'var(--index-text-secondary)',
                                                                 fontSize: '0.85rem',
                                                                 fontWeight: 800,
                                                                 cursor: 'pointer',
@@ -2697,8 +2697,8 @@ export default function CreateCourse() {
                                                                 gap: '8px',
                                                                 transition: 'all 0.2s'
                                                             }}
-                                                            onMouseOver={(e) => { e.currentTarget.style.borderColor = '#1a4d3e'; e.currentTarget.style.color = '#1a4d3e'; }}
-                                                            onMouseOut={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#64748b'; }}
+                                                            onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--index-primary-color)'; e.currentTarget.style.color = 'var(--index-primary-color)'; }}
+                                                            onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--index-border-color)'; e.currentTarget.style.color = 'var(--index-text-secondary)'; }}
                                                         >
                                                             <Plus size={14} /> Add Option Choice
                                                         </button>
@@ -2731,9 +2731,9 @@ export default function CreateCourse() {
                                         style={{
                                             width: '100%',
                                             marginTop: '2.5rem',
-                                            background: 'white',
-                                            border: '2px dashed #1a4d3e50',
-                                            color: '#1a4d3e',
+                                            background: 'var(--index-card-bg)',
+                                            border: '2px dashed var(--index-primary-color)50',
+                                            color: 'var(--index-primary-color)',
                                             height: '64px',
                                             fontWeight: 900,
                                             fontSize: '1rem',
@@ -2745,21 +2745,21 @@ export default function CreateCourse() {
                                             gap: '12px',
                                             transition: 'all 0.3s'
                                         }}
-                                        onMouseOver={(e) => { e.currentTarget.style.background = '#f0fdf4'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                                        onMouseOut={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                        onMouseOver={(e) => { e.currentTarget.style.background = 'var(--index-accent-soft-bg)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                                        onMouseOut={(e) => { e.currentTarget.style.background = 'var(--index-card-bg)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                                     >
                                         <Plus size={20} /> Deploy New Validation Question
                                     </button>
                                 )}
                             </div>
 
-                            <div style={{ padding: '2rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#fcfdfe', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                            <div style={{ padding: '2rem 2.5rem', borderTop: '1px solid var(--index-border-subtle)', background: 'var(--index-hover-bg)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
                                 {quizData.questions.length > 0 && (
                                     <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }} className="answer-key-tracker">
-                                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#64748b' }}>Key Check:</span>
+                                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-secondary)' }}>Key Check:</span>
                                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                                             {quizData.questions.map((q, idx) => (
-                                                <span key={q.id} style={{ fontSize: '0.75rem', fontWeight: 900, background: '#f0fdf4', color: '#1a4d3e', padding: '4px 8px', borderRadius: '8px', border: '1px solid rgba(26,77,62,0.1)' }}>
+                                                <span key={q.id} style={{ fontSize: '0.75rem', fontWeight: 900, background: 'var(--index-accent-soft-bg)', color: 'var(--index-primary-color)', padding: '4px 8px', borderRadius: '8px', border: '1px solid color-mix(in srgb, var(--index-primary-color) 10%, transparent)' }}>
                                                     Q{idx + 1}: {String.fromCharCode(65 + q.correct_answer)}
                                                 </span>
                                             ))}
@@ -2770,24 +2770,24 @@ export default function CreateCourse() {
                                     onClick={() => setDesigningQuiz(null)}
                                     className="btn-standard"
                                     style={{
-                                        background: 'white',
-                                        border: '1.5px solid #cbd5e1',
-                                        color: '#64748b',
+                                        background: 'var(--index-card-bg)',
+                                        border: '1.5px solid var(--index-border-color)',
+                                        color: 'var(--index-text-secondary)',
                                         padding: '1rem 3rem',
                                         borderRadius: '18px',
                                         fontWeight: 900,
                                         cursor: 'pointer',
                                         transition: 'all 0.2s'
                                     }}
-                                    onMouseOver={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#475569'; }}
-                                    onMouseOut={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748b'; }}
+                                    onMouseOver={(e) => { e.currentTarget.style.background = 'var(--index-hover-bg)'; e.currentTarget.style.color = 'var(--index-text-secondary)'; }}
+                                    onMouseOut={(e) => { e.currentTarget.style.background = 'var(--index-card-bg)'; e.currentTarget.style.color = 'var(--index-text-secondary)'; }}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={() => setDesigningQuiz(null)}
                                     className="btn-standard"
-                                    style={{ background: '#1a4d3e', color: 'white', padding: '1rem 3rem', borderRadius: '18px', fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 10px 15px -3px rgba(26, 77, 62, 0.2)' }}
+                                    style={{ background: 'var(--index-primary-color)', color: 'white', padding: '1rem 3rem', borderRadius: '18px', fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 20%, transparent)' }}
                                 >
                                     Finalize Validation Design
                                 </button>
@@ -2804,33 +2804,33 @@ export default function CreateCourse() {
                 const questions = lesson?.quizData?.questions || [];
 
                 return (
-                    <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-                        <div style={{ background: 'white', width: '100%', maxWidth: '850px', maxHeight: '90vh', borderRadius: '32px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 30px 60px -15px rgba(15, 23, 42, 0.3)' }}>
-                            <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcfdfe' }}>
+                    <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--lgl-charcoal) 65%, transparent)', backdropFilter: 'blur(12px)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+                        <div style={{ background: 'var(--index-card-bg)', width: '100%', maxWidth: '850px', maxHeight: '90vh', borderRadius: '32px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 30px 60px -15px color-mix(in srgb, var(--lgl-charcoal) 30%, transparent)' }}>
+                            <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid var(--index-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--index-hover-bg)' }}>
                                 <div>
-                                    <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.35rem', color: '#0f172a', letterSpacing: '-0.02em' }}>Evaluation Intelligence: Answer Key</h3>
-                                    <p style={{ margin: '4px 0 0 0', color: '#1a4d3e', fontWeight: 800, fontSize: '0.85rem' }}>{lesson?.title} • {questions.length} Validation Units</p>
+                                    <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.35rem', color: 'var(--index-text-heading)', letterSpacing: '-0.02em' }}>Evaluation Intelligence: Answer Key</h3>
+                                    <p style={{ margin: '4px 0 0 0', color: 'var(--index-primary-color)', fontWeight: 800, fontSize: '0.85rem' }}>{lesson?.title} • {questions.length} Validation Units</p>
                                 </div>
-                                <button onClick={() => setViewingQuizKey(null)} style={{ background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+                                <button onClick={() => setViewingQuizKey(null)} style={{ background: 'var(--index-hover-bg)', border: 'none', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', color: 'var(--index-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', background: '#f8fafc' }}>
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', background: 'var(--index-hover-bg)' }}>
                                 {questions.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '5rem 0', background: 'white', borderRadius: '24px', border: '1.5px dashed #cbd5e1' }}>
-                                        <HelpCircle size={48} color="#cbd5e1" style={{ marginBottom: '1.25rem' }} />
-                                        <p style={{ color: '#64748b', fontWeight: 800, margin: 0 }}>No validation questions defined yet.</p>
+                                    <div style={{ textAlign: 'center', padding: '5rem 0', background: 'var(--index-card-bg)', borderRadius: '24px', border: '1.5px dashed var(--index-border-color)' }}>
+                                        <HelpCircle size={48} color="var(--index-border-subtle)" style={{ marginBottom: '1.25rem' }} />
+                                        <p style={{ color: 'var(--index-text-secondary)', fontWeight: 800, margin: 0 }}>No validation questions defined yet.</p>
                                     </div>
                                 ) : (
                                     <div style={{ display: 'grid', gap: '2rem' }}>
                                         {questions.map((q: any, idx: number) => (
-                                            <div key={q.id} style={{ padding: '2rem', borderRadius: '24px', border: '1.5px solid #e2e8f0', background: 'white', boxShadow: '0 4px 15px rgba(0,0,0,0.01)' }}>
+                                            <div key={q.id} style={{ padding: '2rem', borderRadius: '24px', border: '1.5px solid var(--index-border-color)', background: 'var(--index-card-bg)', boxShadow: '0 4px 15px rgba(0,0,0,0.01)' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
-                                                    <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.05em' }}>Validation Unit {idx + 1}</span>
-                                                    <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(26,77,62,0.1)' }}>MASTER KEY</span>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--index-text-faint)', letterSpacing: '0.05em' }}>Validation Unit {idx + 1}</span>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--index-primary-color)', background: 'var(--index-accent-soft-bg)', padding: '4px 10px', borderRadius: '8px', border: '1px solid color-mix(in srgb, var(--index-primary-color) 10%, transparent)' }}>MASTER KEY</span>
                                                 </div>
-                                                <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: '#0f172a', lineHeight: 1.4, fontSize: '1.05rem' }}>{q.question || 'Untitled Question Statement'}</h4>
+                                                <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: 'var(--index-text-heading)', lineHeight: 1.4, fontSize: '1.05rem' }}>{q.question || 'Untitled Question Statement'}</h4>
                                                 <div style={{ display: 'grid', gap: '0.75rem' }}>
                                                     {q.options.map((opt: string, oIdx: number) => {
                                                         const isRightAnswer = q.correct_answer === oIdx;
@@ -2840,9 +2840,9 @@ export default function CreateCourse() {
                                                                 style={{
                                                                     padding: '1rem 1.25rem',
                                                                     borderRadius: '16px',
-                                                                    background: isRightAnswer ? '#f0fdf4' : 'white',
-                                                                    border: `1.5px solid ${isRightAnswer ? '#10b98150' : '#f1f5f9'}`,
-                                                                    color: isRightAnswer ? '#166534' : '#64748b',
+                                                                    background: isRightAnswer ? 'var(--index-accent-soft-bg)' : 'var(--index-card-bg)',
+                                                                    border: `1.5px solid ${isRightAnswer ? 'var(--lgl-success)50' : 'var(--index-hover-bg)'}`,
+                                                                    color: isRightAnswer ? 'var(--lgl-success)' : 'var(--index-text-secondary)',
                                                                     fontWeight: isRightAnswer ? 800 : 600,
                                                                     display: 'flex',
                                                                     alignItems: 'center',
@@ -2850,11 +2850,11 @@ export default function CreateCourse() {
                                                                     fontSize: '0.925rem'
                                                                 }}
                                                             >
-                                                                <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: isRightAnswer ? '#10b981' : '#cbd5e1' }}>
+                                                                <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: isRightAnswer ? 'var(--lgl-success)' : 'var(--index-text-faint)' }}>
                                                                     {isRightAnswer && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'currentColor' }}></div>}
                                                                 </div>
                                                                 <span>{opt || `Option ${oIdx + 1} (Empty)`}</span>
-                                                                {isRightAnswer && <CheckCircle2 size={18} color="#10b981" style={{ marginLeft: 'auto' }} />}
+                                                                {isRightAnswer && <CheckCircle2 size={18} color="var(--lgl-success)" style={{ marginLeft: 'auto' }} />}
                                                             </div>
                                                         );
                                                     })}
@@ -2865,22 +2865,22 @@ export default function CreateCourse() {
                                 )}
                             </div>
 
-                            <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#fcfdfe', display: 'flex', justifyContent: 'flex-end' }}>
-                                <button onClick={() => setViewingQuizKey(null)} className="btn-standard" style={{ background: '#0f172a', color: 'white', border: 'none', padding: '0.85rem 2.5rem', borderRadius: '14px', fontWeight: 900, cursor: 'pointer' }}>Close Master Key</button>
+                            <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid var(--index-border-subtle)', background: 'var(--index-hover-bg)', display: 'flex', justifyContent: 'flex-end' }}>
+                                <button onClick={() => setViewingQuizKey(null)} className="btn-standard" style={{ background: 'var(--index-text-heading)', color: 'white', border: 'none', padding: '0.85rem 2.5rem', borderRadius: '14px', fontWeight: 900, cursor: 'pointer' }}>Close Master Key</button>
                             </div>
                         </div>
                     </div>
                 );
             })()}
             {isBrowsingVideos && (
-                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)', zIndex: 1210, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-                    <div style={{ background: 'white', width: '100%', maxWidth: '900px', maxHeight: '90vh', borderRadius: '32px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-                        <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, var(--lgl-charcoal) 60%, transparent)', backdropFilter: 'blur(8px)', zIndex: 1210, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                    <div style={{ background: 'var(--index-card-bg)', width: '100%', maxWidth: '900px', maxHeight: '90vh', borderRadius: '32px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+                        <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid var(--index-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--index-hover-bg)' }}>
                             <div>
                                 <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.4rem' }}>Cloud Repository: Course Videos</h3>
-                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontWeight: 600, fontSize: '0.9rem' }}>Deploy existing assets without re-uploading.</p>
+                                <p style={{ margin: '4px 0 0 0', color: 'var(--index-text-secondary)', fontWeight: 600, fontSize: '0.9rem' }}>Deploy existing assets without re-uploading.</p>
                             </div>
-                            <button onClick={() => setIsBrowsingVideos(false)} style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <button onClick={() => setIsBrowsingVideos(false)} style={{ background: 'var(--index-card-bg)', border: '1.5px solid var(--index-border-color)', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <X size={20} />
                             </button>
                         </div>
@@ -2888,32 +2888,32 @@ export default function CreateCourse() {
                         <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
                             {existingVideos.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '5rem 0' }}>
-                                    <CloudOff size={60} color="#cbd5e1" style={{ marginBottom: '1.5rem' }} />
+                                    <CloudOff size={60} color="var(--index-border-subtle)" style={{ marginBottom: '1.5rem' }} />
                                     <h4 style={{ margin: '0 0 8px 0', fontWeight: 800 }}>No assets detected in repository.</h4>
-                                    <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.95rem' }}>Upload original content to populate your cloud vault.</p>
+                                    <p style={{ margin: 0, color: 'var(--index-text-faint)', fontSize: '0.95rem' }}>Upload original content to populate your cloud vault.</p>
                                 </div>
                             ) : (
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' }}>
                                     {existingVideos.map((video, idx) => (
-                                        <div key={idx} className="video-asset-card" style={{ background: 'white', border: '1.5px solid #f1f5f9', borderRadius: '24px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer', position: 'relative' }}>
-                                            <div style={{ aspectRatio: '16/9', background: '#0f172a', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <Video size={40} color="#334155" style={{ opacity: 0.3 }} />
+                                        <div key={idx} className="video-asset-card" style={{ background: 'var(--index-card-bg)', border: '1.5px solid var(--index-border-subtle)', borderRadius: '24px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer', position: 'relative' }}>
+                                            <div style={{ aspectRatio: '16/9', background: 'var(--index-text-heading)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Video size={40} color="var(--index-text-faint)" style={{ opacity: 0.3 }} />
                                                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '1.25rem' }}>
                                                     <span style={{ color: 'white', fontSize: '0.7rem', fontWeight: 900, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)', padding: '4px 8px', borderRadius: '6px' }}>
                                                         {video.size}
                                                     </span>
-                                                    <span style={{ color: 'white', fontSize: '0.65rem', fontWeight: 900, background: video.source === 'bunny' ? '#3b82f6' : '#10b981', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                                                    <span style={{ color: 'white', fontSize: '0.65rem', fontWeight: 900, background: video.source === 'bunny' ? 'var(--index-primary-color)' : 'var(--lgl-success)', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
                                                         {video.source || 'Local'}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div style={{ padding: '1.25rem' }}>
-                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 850, fontSize: '0.9rem', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{video.name}</h5>
-                                                <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Modified: {new Date(video.last_modified).toLocaleDateString()}</p>
+                                                <h5 style={{ margin: '0 0 8px 0', fontWeight: 850, fontSize: '0.9rem', color: 'var(--index-text-heading)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{video.name}</h5>
+                                                <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.75rem', color: 'var(--index-text-faint)', fontWeight: 600 }}>Modified: {new Date(video.last_modified).toLocaleDateString()}</p>
                                                 <button
                                                     onClick={() => selectExistingVideo(video.url)}
                                                     className="btn-standard"
-                                                    style={{ width: '100%', background: '#0f172a', color: 'white', height: '40px', fontWeight: 800, fontSize: '0.85rem' }}
+                                                    style={{ width: '100%', background: 'var(--index-text-heading)', color: 'white', height: '40px', fontWeight: 800, fontSize: '0.85rem' }}
                                                 >
                                                     Deploy Asset
                                                 </button>
@@ -2924,8 +2924,8 @@ export default function CreateCourse() {
                             )}
                         </div>
 
-                        <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
-                            <button onClick={() => setIsBrowsingVideos(false)} className="btn-standard" style={{ background: 'white', color: '#64748b', border: '1.5px solid #e2e8f0', padding: '0 2rem' }}>Cancel</button>
+                        <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid var(--index-border-subtle)', background: 'var(--index-hover-bg)', display: 'flex', justifyContent: 'flex-end' }}>
+                            <button onClick={() => setIsBrowsingVideos(false)} className="btn-standard" style={{ background: 'var(--index-card-bg)', color: 'var(--index-text-secondary)', border: '1.5px solid var(--index-border-color)', padding: '0 2rem' }}>Cancel</button>
                         </div>
                     </div>
                 </div>

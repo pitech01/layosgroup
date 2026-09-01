@@ -110,7 +110,7 @@ export default function EditCohort() {
                 icon: 'error',
                 title: 'Oops...',
                 text: errorMsg,
-                confirmButtonColor: '#1a4d3e'
+                confirmButtonColor: 'var(--index-primary-color)'
             });
         } finally {
             setUpdating(false);
@@ -120,8 +120,8 @@ export default function EditCohort() {
     if (loading) {
         return (
             <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
-                <Loader2 className="animate-spin" size={48} color="#1a4d3e" />
-                <p style={{ fontWeight: 800, color: '#64748b', fontSize: '1.1rem' }}>Loading Settings...</p>
+                <Loader2 className="animate-spin" size={48} color="var(--index-primary-color)" />
+                <p style={{ fontWeight: 800, color: 'var(--index-text-secondary)', fontSize: '1.1rem' }}>Loading Settings...</p>
             </div>
         );
     }
@@ -139,7 +139,7 @@ export default function EditCohort() {
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     text-decoration: none;
                     font-weight: 700;
                     font-size: 0.9rem;
@@ -147,7 +147,7 @@ export default function EditCohort() {
                     transition: color 0.2s;
                 }
 
-            .staff-scope .breadcrumb-back:hover { color: #1a4d3e; }
+            .staff-scope .breadcrumb-back:hover { color: var(--index-primary-color); }
 
             .staff-scope     .form-header-premium {
                     margin-bottom: 3rem;
@@ -156,14 +156,14 @@ export default function EditCohort() {
                 .staff-scope .form-header-premium h1 {
                     font-size: 2.5rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     letter-spacing: -0.04em;
                     margin: 0 0 0.5rem 0;
                 }
 
              .staff-scope    .cohort-form-card {
                     background: white;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 32px;
                     padding: 3rem;
                     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
@@ -177,7 +177,7 @@ export default function EditCohort() {
                     display: block;
                     font-size: 0.85rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                     margin-bottom: 12px;
@@ -186,22 +186,22 @@ export default function EditCohort() {
               .staff-scope   .input-premium {
                     width: 100%;
                     height: 56px;
-                    background: #f8fafc;
-                    border: 2px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 16px;
                     padding: 0 1.25rem;
                     font-size: 1rem;
                     font-weight: 600;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     transition: all 0.3s;
                     box-sizing: border-box;
                 }
 
               .staff-scope   .input-premium:focus {
                     background: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     outline: none;
-                    box-shadow: 0 0 0 5px rgba(26, 77, 62, 0.05);
+                    box-shadow: 0 0 0 5px color-mix(in srgb, var(--index-primary-color) 5%, transparent);
                 }
 
                 .staff-scope .form-grid-2 {
@@ -213,7 +213,7 @@ export default function EditCohort() {
                 .staff-scope .submit-btn-premium {
                     width: 100%;
                     height: 64px;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     border: none;
                     border-radius: 20px;
@@ -225,13 +225,13 @@ export default function EditCohort() {
                     justify-content: center;
                     gap: 12px;
                     margin-top: 1rem;
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 20%, transparent);
                     transition: all 0.3s;
                 }
 
                 .staff-scope .submit-btn-premium:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.25);
+                    box-shadow: 0 20px 25px -5px color-mix(in srgb, var(--index-primary-color) 25%, transparent);
                 }
 
                 .staff-scope .section-tile {
@@ -241,13 +241,13 @@ export default function EditCohort() {
                     margin-bottom: 2rem;
                     margin-top: 1rem;
                     padding-bottom: 1rem;
-                    border-bottom: 1px solid #f1f5f9;
+                    border-bottom: 1px solid var(--index-hover-bg);
                 }
 
                 .staff-scope .section-tile span {
                     font-size: 1.1rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
             `}</style>
 
@@ -257,7 +257,7 @@ export default function EditCohort() {
 
             <div className="form-header-premium" style={{ marginBottom: '2.5rem' }}>
                 <h1>Cohort Settings</h1>
-                <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem' }}>
+                <p style={{ color: 'var(--index-text-secondary)', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem' }}>
                     Adjust configuration for <strong>{formData.name}</strong>
                 </p>
             </div>
@@ -271,22 +271,22 @@ export default function EditCohort() {
                     width: 'calc(100% - 4rem)',
                     zIndex: 9999,
                     padding: '1rem 1.25rem',
-                    background: '#fff1f2',
-                    border: '1px solid #ffe4e6',
-                    color: '#e11d48',
+                    background: 'var(--index-danger-bg-soft)',
+                    border: '1px solid var(--index-danger-bg-soft)',
+                    color: 'var(--lgl-error)',
                     borderRadius: '16px',
                     fontSize: '0.95rem',
                     fontWeight: 500,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.75rem',
-                    boxShadow: '0 10px 25px rgba(225, 29, 72, 0.15)'
+                    boxShadow: '0 10px 25px color-mix(in srgb, var(--lgl-error) 15%, transparent)'
                 }}>
                     <AlertCircle size={20} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                     <span style={{ flex: 1 }}>{error}</span>
                     <button
                         onClick={() => setError(null)}
-                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px', flexShrink: 0 }}
+                        style={{ background: 'none', border: 'none', color: 'var(--lgl-error)', cursor: 'pointer', display: 'flex', padding: '4px', flexShrink: 0 }}
                     >
                         <X size={16} />
                     </button>
@@ -295,7 +295,7 @@ export default function EditCohort() {
 
             <form className="cohort-form-card shadow-premium" onSubmit={handleSubmit}>
                 <div className="section-tile">
-                    <Shield size={20} color="#1a4d3e" />
+                    <Shield size={20} color="var(--index-primary-color)" />
                     <span>Cohort Configuration</span>
                 </div>
 

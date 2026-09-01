@@ -14,7 +14,7 @@ const Preloader: React.FC = () => {
                 </div>
                 
                 {/* Modern, smooth LMS spinner */}
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-brand-emerald dark:border-slate-700 dark:border-t-indigo-400" />
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-border border-t-brand-emerald dark:border-slate-700 dark:border-t-brand-emerald" />
                 
                 {/* Micro-copy to enhance UX */}
                 <p className="text-sm font-medium tracking-wide text-slate-500 dark:text-slate-400 animate-pulse">

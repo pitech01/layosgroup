@@ -1,0 +1,24 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # ----------------------------------------------------------------------
+  # 1. Old Domain 301 Redirect to New LMS Domain
+  # Triggers only when visiting from the old domain (layosgroupllc.com / lms.layosgroupllc.com)
+  # Prevents redirection loops by ensuring HTTP_HOST is not already lms.lglconsultingllc.com
+  # ----------------------------------------------------------------------
+  RewriteCond %{HTTP_HOST} (?:^|\.)layosgroupllc\.com$ [NC]
+  RewriteCond %{HTTP_HOST} !^lms\.lglconsultingllc\.com$ [NC]
+  RewriteRule ^(.*)$ https://lms.lglconsultingllc.com/$1 [R=301,L]
+
+  # ----------------------------------------------------------------------
+  # 2. Single Page Application (SPA) Routing for React Router
+  # Serve existing files/directories (images, fonts, assets, scripts)
+  # ----------------------------------------------------------------------
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Everything else falls back to index.html
+  RewriteRule ^ index.html [L]
+</IfModule>

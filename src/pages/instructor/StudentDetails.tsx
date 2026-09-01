@@ -24,7 +24,17 @@ import {
     Plus,
     Layers,
     Info,
-    RotateCcw
+    RotateCcw,
+    GraduationCap,
+    XCircle,
+    Key,
+    Send,
+    Edit,
+    DollarSign,
+    CreditCard,
+    Tag,
+    FileText,
+    ExternalLink
 } from 'lucide-react';
 
 export default function StudentDetails() {
@@ -46,19 +56,16 @@ export default function StudentDetails() {
                 icon: notif.type,
                 title: notif.type === 'success' ? 'Success' : 'Error',
                 text: notif.message,
-                confirmButtonColor: '#1a4d3e',
+                confirmButtonColor: 'var(--index-primary-color)',
                 timer: notif.type === 'success' ? 2500 : undefined,
                 showConfirmButton: notif.type !== 'success'
             });
         }
     };
 
-    // Zelle receipt preview & approval states
-    const [previewReceipt, setPreviewReceipt] = useState<string | null>(null);
-    const [approving, setApproving] = useState(false);
-    const [rejecting, setRejecting] = useState(false);
-    const [showApproveModal, setShowApproveModal] = useState(false);
-    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [sendingCredentials, setSendingCredentials] = useState(false);
+    const [updatingPlan, setUpdatingPlan] = useState(false);
+    const [updatingStatus, setUpdatingStatus] = useState(false);
 
     // Cohort Assignment states
     const [showAssignCohortModal, setShowAssignCohortModal] = useState(false);
@@ -79,6 +86,244 @@ export default function StudentDetails() {
         issuedAt: '',
         issuedBy: ''
     });
+
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+    const handleApprovePayment = async () => {
+        if (!student) return;
+        const result = await Swal.fire({
+            title: 'Approve Registration & Payment',
+            html: `
+                <div style="text-align: left; font-size: 0.88rem; line-height: 1.6; color: var(--index-text-secondary);">
+                    <p style="margin-bottom: 0.75rem;">This will mark the student's status as <strong style="color: var(--lgl-success);">Approved / Verified</strong> and unlock full platform features.</p>
+                    <div style="margin-top: 1rem; padding: 0.85rem 1rem; background: var(--index-hover-bg); border-radius: 12px; border: 1.5px solid var(--index-border-subtle);">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 750; font-size: 0.85rem; color: var(--index-text-heading);">
+                            <input type="checkbox" id="swal-send-email" checked style="width: 17px; height: 17px; accent-color: var(--index-primary-color); cursor: pointer;" />
+                            Send Welcome Email with login credentials to ${student.email}
+                        </label>
+                        <p style="margin: 4px 0 0 27px; font-size: 0.75rem; color: var(--index-text-faint);">Uncheck if you want to approve silently without emailing the student.</p>
+                    </div>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm Approval',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: 'var(--lgl-success)',
+            cancelButtonColor: 'var(--index-text-faint)',
+            preConfirm: () => {
+                const checkbox = document.getElementById('swal-send-email') as HTMLInputElement;
+                return { sendEmail: checkbox ? checkbox.checked : false };
+            }
+        });
+
+        if (!result.isConfirmed) return;
+        const sendEmail = result.value?.sendEmail ?? false;
+
+        setUpdatingStatus(true);
+        try {
+            const response = await fetch(`${API_URL}/instructor/students/${id}/approve-payment`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    send_email: sendEmail,
+                    password: 'password123'
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({
+                    type: 'success',
+                    message: data.message || (sendEmail ? 'Registration approved and welcome email dispatched!' : 'Registration approved silently without sending email.')
+                });
+                fetchStudentData();
+            } else {
+                throw new Error(data.message || 'Failed to approve payment.');
+            }
+        } catch (err: any) {
+            setNotification({ type: 'error', message: err.message });
+        } finally {
+            setUpdatingStatus(false);
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
+
+    const handleRejectPayment = async () => {
+        if (!student) return;
+        const result = await Swal.fire({
+            title: 'Decline / Reject Registration?',
+            text: `This will mark the student's status as Rejected and lock platform features for ${student.name}.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Reject Payment',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: 'var(--lgl-error)',
+            cancelButtonColor: 'var(--index-text-faint)'
+        });
+
+        if (!result.isConfirmed) return;
+
+        setUpdatingStatus(true);
+        try {
+            const response = await fetch(`${API_URL}/instructor/students/${id}/reject-payment`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({ type: 'success', message: data.message || 'Registration marked as rejected.' });
+                fetchStudentData();
+            } else {
+                throw new Error(data.message || 'Failed to reject payment.');
+            }
+        } catch (err: any) {
+            setNotification({ type: 'error', message: err.message });
+        } finally {
+            setUpdatingStatus(false);
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
+
+    const handleChangePaymentStatus = async (newStatus: string) => {
+        if (!student || student.payment_status === newStatus) return;
+
+        setUpdatingStatus(true);
+        try {
+            const response = await fetch(`${API_URL}/students/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    name: student.name,
+                    email: student.email,
+                    payment_status: newStatus,
+                    payment_plan: student.payment_plan || 'full',
+                    payment_tracking_enabled: (student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%'),
+                    cohorts: student.cohorts?.map((c: any) => c.id) || []
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({
+                    type: 'success',
+                    message: `Registration status updated to "${newStatus.toUpperCase()}".`
+                });
+                fetchStudentData();
+            } else {
+                throw new Error(data.message || 'Failed to update payment status.');
+            }
+        } catch (err: any) {
+            setNotification({ type: 'error', message: err.message });
+        } finally {
+            setUpdatingStatus(false);
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
+
+    const handleSendCredentials = async () => {
+        if (!student) return;
+        const result = await Swal.fire({
+            title: 'Send Login Credentials?',
+            text: `This will set the temporary password to "password123" and email login instructions to ${student.email}.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Send Email',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: 'var(--index-primary-color)'
+        });
+
+        if (!result.isConfirmed) return;
+
+        setSendingCredentials(true);
+        try {
+            const response = await fetch(`${API_URL}/instructor/students/${id}/send-credentials`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ password: 'password123' })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({ type: 'success', message: data.message || 'Login credentials email dispatched successfully!' });
+            } else {
+                throw new Error(data.message || 'Failed to send credentials.');
+            }
+        } catch (err: any) {
+            setNotification({ type: 'error', message: err.message });
+        } finally {
+            setSendingCredentials(false);
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
+
+    const handleTogglePaymentPlan = async (newPlan: 'full' | 'installment') => {
+        if (!student) return;
+        const isInstallment = newPlan === 'installment';
+        const result = await Swal.fire({
+            title: isInstallment ? 'Switch to 50% Installment Plan?' : 'Mark as 100% Fully Paid?',
+            text: isInstallment
+                ? 'This will enable tuition tracking and activate the deadline reminder on the student dashboard.'
+                : 'This will mark the student as fully paid and clear the tuition reminder countdown.',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: isInstallment ? 'Enable 50% Tracking' : 'Confirm 100% Paid',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: isInstallment ? '#d97706' : 'var(--lgl-success)'
+        });
+
+        if (!result.isConfirmed) return;
+
+        setUpdatingPlan(true);
+        try {
+            const response = await fetch(`${API_URL}/students/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    name: student.name,
+                    email: student.email,
+                    payment_plan: newPlan,
+                    payment_tracking_enabled: isInstallment,
+                    payment_status: 'approved',
+                    cohorts: student.cohorts?.map((c: any) => c.id) || []
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({
+                    type: 'success',
+                    message: isInstallment
+                        ? 'Updated to 50% Installment Plan. Tuition reminder active.'
+                        : 'Updated to 100% Full Payment. Tuition reminder cleared!'
+                });
+                fetchStudentData();
+            } else {
+                throw new Error(data.message || 'Failed to update payment plan.');
+            }
+        } catch (err: any) {
+            setNotification({ type: 'error', message: err.message });
+        } finally {
+            setUpdatingPlan(false);
+            setTimeout(() => setNotification(null), 4000);
+        }
+    };
 
     const fetchCertificates = async () => {
         try {
@@ -125,11 +370,8 @@ export default function StudentDetails() {
     const handleIssueCertificate = async () => {
         if (!selectedCohortForCert) return;
         setIssuingCert(true);
-        const endpoint = isReassign
-            ? `${API_URL}/instructor/certificates/reassign`
-            : `${API_URL}/instructor/certificates/generate-manual`;
         try {
-            const response = await fetch(endpoint, {
+            const response = await fetch(`${API_URL}/instructor/certificates/generate-manual`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -138,6 +380,7 @@ export default function StudentDetails() {
                 },
                 body: JSON.stringify({
                     course_id: selectedCohortForCert.course_id || selectedCohortForCert.course?.id,
+                    cohort_id: selectedCohortForCert.id,
                     user_id: student.id,
                     full_name: certForm.fullName,
                     course_title: certForm.courseTitle,
@@ -157,62 +400,6 @@ export default function StudentDetails() {
             setNotification({ type: 'error', message: err.message });
         } finally {
             setIssuingCert(false);
-            setTimeout(() => setNotification(null), 4000);
-        }
-    };
-
-    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-
-    const handleApprovePayment = async () => {
-        setShowApproveModal(false);
-        setApproving(true);
-        try {
-            const response = await fetch(`${API_URL}/instructor/students/${id}/approve-payment`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setNotification({ type: 'success', message: data.message || 'Payment approved and welcome email sent!' });
-                fetchStudentData();
-            } else {
-                throw new Error(data.message || 'Failed to approve payment.');
-            }
-        } catch (err: any) {
-            setNotification({ type: 'error', message: err.message });
-        } finally {
-            setApproving(false);
-            setTimeout(() => setNotification(null), 4000);
-        }
-    };
-
-    const handleRejectPayment = async () => {
-        setShowRejectModal(false);
-        setRejecting(true);
-        try {
-            const response = await fetch(`${API_URL}/instructor/students/${id}/reject-payment`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setNotification({ type: 'success', message: data.message || 'Payment status updated to rejected.' });
-                fetchStudentData();
-            } else {
-                throw new Error(data.message || 'Failed to reject payment.');
-            }
-        } catch (err: any) {
-            setNotification({ type: 'error', message: err.message });
-        } finally {
-            setRejecting(false);
             setTimeout(() => setNotification(null), 4000);
         }
     };
@@ -400,15 +587,15 @@ export default function StudentDetails() {
                 }
                 .approve-btn-premium:hover {
                     transform: translateY(-2px);
-                    background: #059669 !important;
-                    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3) !important;
+                    background: var(--lgl-success) !important;
+                    box-shadow: 0 6px 16px color-mix(in srgb, var(--index-primary-color) 30%, transparent) !important;
                 }
                 .approve-btn-premium:active {
                     transform: translateY(0);
                 }
                 .reject-btn-premium:hover {
-                    background: #fef2f2 !important;
-                    border-color: #fca5a5 !important;
+                    background: var(--index-danger-bg-soft) !important;
+                    border-color: color-mix(in srgb, var(--lgl-error) 45%, transparent) !important;
                 }
 
                 .staff-scope .student-details-container {
@@ -421,7 +608,7 @@ export default function StudentDetails() {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     text-decoration: none;
                     font-weight: 800;
                     font-size: 0.9rem;
@@ -434,13 +621,13 @@ export default function StudentDetails() {
                 }
 
                 .back-link:hover {
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     transform: translateX(-4px);
                 }
 
                 .staff-scope .profile-header-premium {
                     background: white;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 32px;
                     padding: 3rem;
                     display: flex;
@@ -453,7 +640,7 @@ export default function StudentDetails() {
                 .staff-scope .avatar-massive {
                     width: 140px;
                     height: 140px;
-                    background: linear-gradient(135deg, #1a4d3e, #2d5a4c);
+                    background: linear-gradient(135deg, var(--index-primary-color), var(--index-primary-hover));
                     border-radius: 45px;
                     display: flex;
                     align-items: center;
@@ -461,14 +648,14 @@ export default function StudentDetails() {
                     color: white;
                     font-size: 3.5rem;
                     font-weight: 950;
-                    box-shadow: 0 20px 40px -10px rgba(26, 77, 62, 0.3);
+                    box-shadow: 0 20px 40px -10px color-mix(in srgb, var(--index-primary-color) calc(0.3 * 100%), transparent);
                 }
 
                 .profile-info h1 {
                     margin: 0 0 0.5rem 0;
                     font-size: 2.5rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     letter-spacing: -0.04em;
                 }
 
@@ -477,8 +664,8 @@ export default function StudentDetails() {
                     align-items: center;
                     gap: 6px;
                     padding: 6px 16px;
-                    background: #f0fdf4;
-                    color: #1a4d3e;
+                    background: color-mix(in srgb, var(--lgl-success) 12%, transparent);
+                    color: var(--index-primary-color);
                     border-radius: 12px;
                     font-size: 0.85rem;
                     font-weight: 950;
@@ -495,7 +682,7 @@ export default function StudentDetails() {
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-size: 0.95rem;
                     font-weight: 600;
                 }
@@ -508,7 +695,7 @@ export default function StudentDetails() {
 
                 .staff-scope .card-premium-records {
                     background: white;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 28px;
                     padding: 2.5rem;
                     margin-bottom: 2.5rem;
@@ -525,7 +712,7 @@ export default function StudentDetails() {
                     margin: 0;
                     font-size: 1.25rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     display: flex;
                     align-items: center;
                     gap: 12px;
@@ -536,15 +723,15 @@ export default function StudentDetails() {
                     align-items: center;
                     gap: 1.5rem;
                     padding: 1.5rem;
-                    background: #fcfdfe;
-                    border: 1.5px solid #f1f5f9;
+                    background: var(--index-card-bg);
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 20px;
                     margin-bottom: 1rem;
                     transition: all 0.3s;
                 }
 
                 .enrollment-row:hover {
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     background: white;
                     transform: translateY(-2px);
                 }
@@ -553,11 +740,11 @@ export default function StudentDetails() {
                     width: 50px;
                     height: 50px;
                     border-radius: 14px;
-                    background: #f0fdf4;
+                    background: color-mix(in srgb, var(--lgl-success) 12%, transparent);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #1a4d3e;
+                    color: var(--index-primary-color);
                     font-weight: 950;
                     font-size: 0.9rem;
                 }
@@ -566,7 +753,7 @@ export default function StudentDetails() {
                     display: flex;
                     gap: 16px;
                     padding-bottom: 1.5rem;
-                    border-left: 2px solid #f1f5f9;
+                    border-left: 2px solid var(--index-hover-bg);
                     margin-left: 10px;
                     padding-left: 20px;
                     position: relative;
@@ -580,26 +767,26 @@ export default function StudentDetails() {
                     width: 12px;
                     height: 12px;
                     background: white;
-                    border: 2px solid #1a4d3e;
+                    border: 2px solid var(--index-primary-color);
                     border-radius: 50%;
                 }
 
                 .activity-content div {
                     font-weight: 850;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     font-size: 0.95rem;
                 }
 
                 .activity-content span {
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     font-size: 0.8rem;
                     font-weight: 700;
                 }
 
                 .staff-scope .btn-secondary-outline {
                     background: transparent;
-                    color: #475569;
-                    border: 1.5px solid #f1f5f9;
+                    color: var(--index-text-secondary);
+                    border: 1.5px solid var(--index-hover-bg);
                     padding: 0.6rem 1.2rem;
                     border-radius: 12px;
                     font-weight: 800;
@@ -612,14 +799,14 @@ export default function StudentDetails() {
                 }
 
                 .btn-secondary-outline:hover {
-                    background: #f8fafc;
-                    border-color: #cbd5e1;
+                    background: var(--index-hover-bg);
+                    border-color: var(--index-text-faint);
                 }
 
                 .staff-scope .btn-toggle-active {
-                    background: #f0fdf4;
-                    color: #1a4d3e;
-                    border: 1.5px solid #dcfce7;
+                    background: color-mix(in srgb, var(--lgl-success) 12%, transparent);
+                    color: var(--index-primary-color);
+                    border: 1.5px solid color-mix(in srgb, var(--lgl-success) 15%, transparent);
                     padding: 0.6rem 1.2rem;
                     border-radius: 12px;
                     font-weight: 800;
@@ -629,13 +816,13 @@ export default function StudentDetails() {
                 }
 
                 .btn-toggle-active:hover {
-                    background: #dcfce7;
+                    background: color-mix(in srgb, var(--lgl-success) 15%, transparent);
                 }
 
                 .staff-scope .btn-toggle-inactive {
-                    background: #fef2f2;
-                    color: #b91c1c;
-                    border: 1.5px solid #fee2e2;
+                    background: var(--index-danger-bg-soft);
+                    color: var(--lgl-error);
+                    border: 1.5px solid var(--index-danger-bg-soft);
                     padding: 0.6rem 1.2rem;
                     border-radius: 12px;
                     font-weight: 800;
@@ -645,7 +832,7 @@ export default function StudentDetails() {
                 }
 
                 .btn-toggle-inactive:hover {
-                    background: #fee2e2;
+                    background: var(--index-danger-bg-soft);
                 }
 
                 .staff-scope .modal-overlay {
@@ -674,7 +861,7 @@ export default function StudentDetails() {
                 .modal-box h3 {
                     margin: 0 0 1rem 0;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     font-size: 1.5rem;
                 }
 
@@ -682,7 +869,7 @@ export default function StudentDetails() {
                     width: 100%;
                     height: 120px;
                     padding: 1rem;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 16px;
                     margin-bottom: 1.5rem;
                     font-family: inherit;
@@ -691,7 +878,7 @@ export default function StudentDetails() {
 
                 .modal-box textarea:focus {
                     outline: none;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                 }
 
                 .staff-scope .modal-actions {
@@ -701,7 +888,7 @@ export default function StudentDetails() {
                 }
 
                 .staff-scope .btn-confirm {
-                    background: #ef4444;
+                    background: var(--lgl-error);
                     color: white;
                     border: none;
                     padding: 0.75rem 1.5rem;
@@ -711,8 +898,8 @@ export default function StudentDetails() {
                 }
 
                 .staff-scope .btn-cancel {
-                    background: #f1f5f9;
-                    color: #64748b;
+                    background: var(--index-hover-bg);
+                    color: var(--index-text-secondary);
                     border: none;
                     padding: 0.75rem 1.5rem;
                     border-radius: 12px;
@@ -801,9 +988,9 @@ export default function StudentDetails() {
                     right: '2rem',
                     zIndex: 1000,
                     padding: '1rem 1.5rem',
-                    background: notification.type === 'success' ? '#f0fdf4' : '#fff1f2',
-                    border: `1px solid ${notification.type === 'success' ? '#bbf7d0' : '#ffe4e6'}`,
-                    color: notification.type === 'success' ? '#166534' : '#e11d48',
+                    background: notification.type === 'success' ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : 'var(--index-danger-bg-soft)',
+                    border: `1px solid ${notification.type === 'success' ? 'color-mix(in srgb, var(--lgl-success) 35%, transparent)' : 'var(--index-danger-bg-soft)'}`,
+                    color: notification.type === 'success' ? 'var(--lgl-success)' : 'var(--lgl-error)',
                     borderRadius: '16px',
                     display: 'flex',
                     alignItems: 'center',
@@ -814,21 +1001,21 @@ export default function StudentDetails() {
                     {notification.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
                     <span>{notification.message}</span>
                     <button onClick={() => setNotification(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
-                        <X size={16} color={notification.type === 'success' ? '#166534' : '#e11d48'} />
+                        <X size={16} color={notification.type === 'success' ? 'var(--lgl-success)' : 'var(--lgl-error)'} />
                     </button>
                 </div>
             )}
 
             {loading ? (
                 <div style={{ padding: '8rem 0', textAlign: 'center' }}>
-                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
-                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#64748b' }}>Loading Profile...</p>
+                    <Loader2 className="animate-spin" size={48} color="var(--index-primary-color)" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: 'var(--index-text-secondary)' }}>Loading Profile...</p>
                 </div>
             ) : error || !student ? (
-                <div style={{ padding: '4rem', background: '#fff1f2', borderRadius: '32px', border: '1.5px solid #ffe4e6', textAlign: 'center' }}>
-                    <AlertCircle size={40} color="#e11d48" style={{ margin: '0 auto 1rem' }} />
-                    <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 950 }}>Student Not Found</h3>
-                    <p style={{ color: '#64748b', fontWeight: 600, margin: '8px 0 2rem' }}>{error || 'Unable to load student details.'}</p>
+                <div style={{ padding: '4rem', background: 'var(--index-danger-bg-soft)', borderRadius: '32px', border: '1.5px solid var(--index-danger-bg-soft)', textAlign: 'center' }}>
+                    <AlertCircle size={40} color="var(--lgl-error)" style={{ margin: '0 auto 1rem' }} />
+                    <h3 style={{ margin: 0, color: 'var(--index-text-heading)', fontWeight: 950 }}>Student Not Found</h3>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, margin: '8px 0 2rem' }}>{error || 'Unable to load student details.'}</p>
                     <button onClick={fetchStudentData} className="back-link" style={{ margin: '0 auto' }}>Try Again</button>
                 </div>
             ) : (
@@ -838,16 +1025,50 @@ export default function StudentDetails() {
                             {student.name.charAt(0)}
                         </div>
                         <div className="profile-info">
-                            <div className="status-pill">
-                                <ShieldCheck size={16} /> Verified Student
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                                <div className="status-pill" style={{
+                                    background: student.payment_status === 'approved' ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : student.payment_status === 'rejected' ? 'var(--index-danger-bg-soft)' : 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)',
+                                    color: student.payment_status === 'approved' ? 'var(--lgl-success)' : student.payment_status === 'rejected' ? 'var(--lgl-error)' : 'var(--lgl-warning)',
+                                    borderColor: student.payment_status === 'approved' ? 'color-mix(in srgb, var(--lgl-success) 35%, transparent)' : 'transparent'
+                                }}>
+                                    <ShieldCheck size={16} /> {student.payment_status === 'approved' ? 'Verified Active Student' : student.payment_status === 'rejected' ? 'Declined / Inactive' : 'Pending Verification'}
+                                </div>
+                                <div className="status-pill" style={{ background: 'color-mix(in srgb, var(--index-primary-color) 12%, transparent)', color: 'var(--index-primary-color)', borderColor: 'color-mix(in srgb, var(--index-primary-color) 25%, transparent)' }}>
+                                    <BookOpen size={16} /> {student.course_name || 'General Program'}
+                                </div>
+                                <div className="status-pill" style={{ background: 'var(--index-hover-bg)', color: 'var(--index-text-heading)' }}>
+                                    <GraduationCap size={16} /> {student.education_level || 'Education Unspecified'}
+                                </div>
+                                <div className="status-pill" style={{
+                                    background: (student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%')
+                                        ? 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)'
+                                        : 'color-mix(in srgb, var(--lgl-success) 12%, transparent)',
+                                    color: (student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%')
+                                        ? 'var(--lgl-warning)'
+                                        : 'var(--lgl-success)',
+                                    borderColor: (student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%')
+                                        ? 'color-mix(in srgb, var(--lgl-warning) 35%, transparent)'
+                                        : 'color-mix(in srgb, var(--lgl-success) 35%, transparent)'
+                                }}>
+                                    <Clock size={16} /> {(student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%') ? '50% Installment (Reminder Active)' : '100% Fully Paid'}
+                                </div>
                             </div>
                             <h1>{student.name}</h1>
                             <div className="contact-grid-mini">
                                 <div className="contact-item-mini"><Mail size={18} /> {student.email}</div>
                                 {student.phone && <div className="contact-item-mini"><Phone size={18} /> {student.phone}</div>}
                                 <div className="contact-item-mini"><Calendar size={18} /> Member since {new Date(student.created_at).toLocaleDateString()}</div>
-                                <div className="contact-item-mini"><MapPin size={18} /> Student Access</div>
+                                <div className="contact-item-mini"><MapPin size={18} /> {[student.city, student.state, student.country].filter(Boolean).join(', ') || 'Student Access'}</div>
                             </div>
+                        </div>
+                        <div style={{ marginLeft: 'auto', alignSelf: 'center' }}>
+                            <button
+                                onClick={() => navigate(`/instructor/students/${id}/edit`)}
+                                className="btn-secondary-outline"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.75rem 1.4rem', borderRadius: '16px', fontWeight: 850, fontSize: '0.9rem', background: 'var(--index-card-bg)' }}
+                            >
+                                <Edit size={16} /> Edit Student
+                            </button>
                         </div>
                     </div>
 
@@ -855,7 +1076,7 @@ export default function StudentDetails() {
                         <div className="main-records">
                             <div className="card-premium-records shadow-premium">
                                 <div className="card-title-records">
-                                    <h3><BookOpen size={20} color="#1a4d3e" /> Academic Enrollments</h3>
+                                    <h3><BookOpen size={20} color="var(--index-primary-color)" /> Academic Enrollments</h3>
                                     {student?.payment_status !== 'rejected' && (
                                         <button 
                                             className="btn-secondary-outline" 
@@ -863,7 +1084,7 @@ export default function StudentDetails() {
                                                 setShowAssignCohortModal(true);
                                                 fetchCohorts();
                                             }}
-                                            style={{ display: 'flex', alignItems: 'center', gap: '6px', borderColor: '#10b981', color: '#1a4d3e', background: '#f0fdf4' }}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '6px', borderColor: 'var(--lgl-success)', color: 'var(--index-primary-color)', background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' }}
                                         >
                                             <Plus size={16} /> Assign Cohort
                                         </button>
@@ -872,21 +1093,22 @@ export default function StudentDetails() {
 
                                 {student.cohorts && student.cohorts.length > 0 ? student.cohorts.map((cohort: any) => {
                                     const matchingCert = certificates.find((c: any) => c.course_id === cohort.course?.id);
+                                    const examSubmission = student.exam_submissions?.find((s: any) => s.cohort_id === cohort.id);
                                     return (
                                         <div key={cohort.id} style={{ marginBottom: '1rem' }}>
                                             <div className="enrollment-row" style={{ marginBottom: 0, borderRadius: expandedCohortMap[cohort.id] ? '20px 20px 0 0' : '20px' }}>
                                                 <div className="progress-ring-mini">{Math.round(cohort.pivot?.progress || 0)}%</div>
                                                 <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 950, color: '#0f172a', fontSize: '1.1rem' }}>{cohort.name}</div>
-                                                    <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
+                                                    <div style={{ fontWeight: 950, color: 'var(--index-text-heading)', fontSize: '1.1rem' }}>{cohort.name}</div>
+                                                    <div style={{ color: 'var(--index-text-secondary)', fontSize: '0.9rem', fontWeight: 600 }}>
                                                         {cohort.course?.title || 'General Curriculum'} • Joined {new Date(cohort.pivot?.created_at).toLocaleDateString()}
                                                     </div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                                                         <div style={{
                                                             fontSize: '0.75rem',
                                                             fontWeight: 850,
-                                                            color: cohort.pivot?.status === 'inactive' ? '#ef4444' : '#10b981',
-                                                            background: cohort.pivot?.status === 'inactive' ? '#fef2f2' : '#f0fdf4',
+                                                            color: cohort.pivot?.status === 'inactive' ? 'var(--lgl-error)' : 'var(--lgl-success)',
+                                                            background: cohort.pivot?.status === 'inactive' ? 'var(--index-danger-bg-soft)' : 'color-mix(in srgb, var(--lgl-success) 12%, transparent)',
                                                             padding: '2px 8px',
                                                             borderRadius: '4px'
                                                         }}>
@@ -896,8 +1118,8 @@ export default function StudentDetails() {
                                                             <div style={{
                                                                 fontSize: '0.75rem',
                                                                 fontWeight: 850,
-                                                                color: '#0369a1',
-                                                                background: '#e0f2fe',
+                                                                color: 'var(--lgl-cyan-dark)',
+                                                                background: 'var(--index-accent-soft-bg)',
                                                                 padding: '2px 8px',
                                                                 borderRadius: '4px',
                                                                 display: 'flex',
@@ -906,6 +1128,38 @@ export default function StudentDetails() {
                                                             }}>
                                                                 <Award size={12} /> CERTIFICATE ISSUED
                                                             </div>
+                                                        )}
+                                                        {cohort.exam_enabled && (
+                                                            examSubmission ? (
+                                                                <div style={{
+                                                                    fontSize: '0.75rem',
+                                                                    fontWeight: 850,
+                                                                    color: examSubmission.passed ? 'var(--lgl-success)' : 'var(--lgl-error)',
+                                                                    background: examSubmission.passed ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : 'var(--index-danger-bg-soft)',
+                                                                    padding: '2px 8px',
+                                                                    borderRadius: '4px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '4px'
+                                                                }}>
+                                                                    {examSubmission.passed ? <GraduationCap size={12} /> : <XCircle size={12} />}
+                                                                    {examSubmission.passed ? 'EXAM PASSED' : 'EXAM FAILED'} ({examSubmission.score}%)
+                                                                </div>
+                                                            ) : (
+                                                                <div style={{
+                                                                    fontSize: '0.75rem',
+                                                                    fontWeight: 850,
+                                                                    color: 'var(--lgl-warning)',
+                                                                    background: 'color-mix(in srgb, var(--lgl-warning) 12%, transparent)',
+                                                                    padding: '2px 8px',
+                                                                    borderRadius: '4px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '4px'
+                                                                }}>
+                                                                    <GraduationCap size={12} /> EXAM PENDING
+                                                                </div>
+                                                            )
                                                         )}
                                                     </div>
                                                 </div>
@@ -917,7 +1171,7 @@ export default function StudentDetails() {
                                                                 target="_blank" 
                                                                 rel="noreferrer" 
                                                                 className="btn-secondary-outline"
-                                                                style={{ textDecoration: 'none', background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                                style={{ textDecoration: 'none', background: 'var(--index-accent-soft-bg)', color: 'var(--lgl-cyan-dark)', borderColor: 'color-mix(in srgb, var(--lgl-cyan-dark) 35%, transparent)', display: 'flex', alignItems: 'center', gap: '6px' }}
                                                             >
                                                                 View Cert <Award size={14} />
                                                             </a>
@@ -925,16 +1179,16 @@ export default function StudentDetails() {
                                                                 className="btn-secondary-outline"
                                                                 onClick={() => handleOpenReassignModal(cohort, matchingCert)}
                                                                 title="Regenerate and reassign this certificate"
-                                                                style={{ background: '#fffbeb', color: '#b45309', borderColor: '#fde68a', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                                style={{ background: 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)', color: 'var(--lgl-warning)', borderColor: 'color-mix(in srgb, var(--lgl-warning) 35%, transparent)', display: 'flex', alignItems: 'center', gap: '6px' }}
                                                             >
                                                                 Reassign <RotateCcw size={14} />
                                                             </button>
                                                         </>
                                                     ) : cohort.course ? (
                                                         <button 
-                                                            className="btn-secondary-outline"
+                                                            className="btn-secondary-outline" 
                                                             onClick={() => handleOpenIssueCertModal(cohort)}
-                                                            style={{ background: '#fffbeb', color: '#b45309', borderColor: '#fde68a', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                            style={{ background: 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)', color: 'var(--lgl-warning)', borderColor: 'color-mix(in srgb, var(--lgl-warning) 35%, transparent)', display: 'flex', alignItems: 'center', gap: '6px' }}
                                                         >
                                                             Issue Cert <Award size={14} />
                                                         </button>
@@ -951,75 +1205,75 @@ export default function StudentDetails() {
                                                 </div>
                                             </div>
                                             {expandedCohortMap[cohort.id] && (
-                                                <div className="animate-fade-in-up" style={{ padding: '2.5rem', background: '#fcfdfe', border: '1.5px solid #f1f5f9', borderTop: 'none', borderRadius: '0 0 20px 20px', boxShadow: 'inset 0 4px 6px -4px rgba(0,0,0,0.02)' }}>
-                                                    <h4 style={{ margin: '0 0 1.5rem 0', color: '#0f172a', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <CheckCircle2 size={18} color="#1a4d3e" /> Curriculum Override Access
+                                                <div className="animate-fade-in-up" style={{ padding: '2.5rem', background: 'var(--index-hover-bg)', border: '1.5px solid var(--index-border-subtle)', borderTop: 'none', borderRadius: '0 0 20px 20px', boxShadow: 'inset 0 4px 6px -4px rgba(0,0,0,0.02)' }}>
+                                                    <h4 style={{ margin: '0 0 1.5rem 0', color: 'var(--index-text-heading)', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <CheckCircle2 size={18} color="var(--index-primary-color)" /> Curriculum Override Access
                                                     </h4>
-                                                    <p style={{ margin: '0 0 2rem 0', color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>Toggle the checkboxes below to manually apply or revoke completion status for a specific resource. This persists immediately to the backend and adjusts percentages automatically.</p>
+                                                    <p style={{ margin: '0 0 2rem 0', color: 'var(--index-text-secondary)', fontSize: '0.85rem', fontWeight: 600 }}>Toggle the checkboxes below to manually apply or revoke completion status for a specific resource. This persists immediately to the backend and adjusts percentages automatically.</p>
                                                     
                                                     {cohort.course?.modules?.map((mod: any) => (
-                                                        <div key={mod.id} style={{ marginBottom: '1.5rem', background: 'white', border: '1.5px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden' }}>
-                                                            <div style={{ fontWeight: 800, color: '#1a4d3e', padding: '1rem 1.5rem', background: '#f8fafc', fontSize: '0.95rem', borderBottom: '1px solid #e2e8f0' }}>{mod.title}</div>
+                                                        <div key={mod.id} style={{ marginBottom: '1.5rem', background: 'var(--index-card-bg)', border: '1.5px solid var(--index-border-color)', borderRadius: '16px', overflow: 'hidden' }}>
+                                                            <div style={{ fontWeight: 800, color: 'var(--index-primary-color)', padding: '1rem 1.5rem', background: 'var(--index-hover-bg)', fontSize: '0.95rem', borderBottom: '1px solid var(--index-border-color)' }}>{mod.title}</div>
                                                             <div style={{ display: 'grid', padding: '1rem' }}>
                                                                 {mod.lessons?.map((lesson: any) => {
                                                                     const isCompleted = student?.completed_lessons?.some((cl: any) => cl.id === lesson.id);
                                                                     return (
-                                                                        <div key={lesson.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f1f5f9' }}>
+                                                                        <div key={lesson.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--index-border-subtle)' }}>
                                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                                                                 <button 
                                                                                     onClick={() => toggleLessonCompletion(lesson.id, !!isCompleted)}
-                                                                                    style={{ width: '26px', height: '26px', borderRadius: '8px', border: `2px solid ${isCompleted ? '#10b981' : '#cbd5e1'}`, background: isCompleted ? '#10b981' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, transition: 'all 0.2s' }}
+                                                                                    style={{ width: '26px', height: '26px', borderRadius: '8px', border: `2px solid ${isCompleted ? 'var(--lgl-success)' : 'var(--index-text-faint)'}`, background: isCompleted ? 'var(--lgl-success)' : 'var(--index-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, transition: 'all 0.2s' }}
                                                                                 >
                                                                                     {isCompleted && <CheckCircle2 size={16} color="white" />}
                                                                                 </button>
-                                                                                <span style={{ fontWeight: 700, color: isCompleted ? '#94a3b8' : '#334155', fontSize: '0.9rem', textDecoration: isCompleted ? 'line-through' : 'none', transition: 'all 0.2s' }}>{lesson.title}</span>
+                                                                                <span style={{ fontWeight: 700, color: isCompleted ? 'var(--index-text-faint)' : 'var(--index-text-secondary)', fontSize: '0.9rem', textDecoration: isCompleted ? 'line-through' : 'none', transition: 'all 0.2s' }}>{lesson.title}</span>
                                                                             </div>
-                                                                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px' }}>{lesson.type}</span>
+                                                                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--index-text-secondary)', textTransform: 'uppercase', background: 'var(--index-hover-bg)', padding: '4px 8px', borderRadius: '6px' }}>{lesson.type}</span>
                                                                         </div>
                                                                     );
                                                                 })}
                                                                 {(!mod.lessons || mod.lessons.length === 0) && (
-                                                                    <p style={{ margin: '0.5rem 1rem', color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic', fontWeight: 600 }}>No lessons active in module...</p>
+                                                                    <p style={{ margin: '0.5rem 1rem', color: 'var(--index-text-faint)', fontSize: '0.85rem', fontStyle: 'italic', fontWeight: 600 }}>No lessons active in module...</p>
                                                                 )}
                                                             </div>
                                                         </div>
                                                     ))}
                                                     {(!cohort.course?.modules || cohort.course.modules.length === 0) && (
-                                                        <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>No curriculum data bound to this record.</p>
+                                                        <p style={{ color: 'var(--index-text-secondary)', fontSize: '0.9rem', fontWeight: 600 }}>No curriculum data bound to this record.</p>
                                                     )}
                                                 </div>
                                             )}
                                         </div>
                                     );
                                 }) : (
-                                    <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>
-                                        <BookOpen size={32} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
-                                        <p style={{ color: '#64748b', fontWeight: 600 }}>No course enrollments found for this student.</p>
+                                    <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--index-hover-bg)', borderRadius: '24px', border: '2px dashed var(--index-border-color)' }}>
+                                        <BookOpen size={32} color="var(--index-text-faint)" style={{ marginBottom: '1rem' }} />
+                                        <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>No course enrollments found for this student.</p>
                                     </div>
                                 )}
                             </div>
 
                             <div className="card-premium-records shadow-premium">
                                 <div className="card-title-records">
-                                    <h3><Award size={20} color="#1a4d3e" /> Learning Metrics</h3>
+                                    <h3><Award size={20} color="var(--index-primary-color)" /> Learning Metrics</h3>
                                 </div>
                                 <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
-                                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', textAlign: 'center' }}>
-                                        <TrendingUp size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
-                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Completion</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>
+                                    <div style={{ padding: '1.5rem', background: 'var(--index-hover-bg)', borderRadius: '20px', textAlign: 'center' }}>
+                                        <TrendingUp size={24} color="var(--index-primary-color)" style={{ marginBottom: '0.5rem' }} />
+                                        <div style={{ color: 'var(--index-text-faint)', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Completion</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--index-text-heading)' }}>
                                             {avgCompletion}%
                                         </div>
                                     </div>
-                                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', textAlign: 'center' }}>
-                                        <Clock size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
-                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Total Cohorts</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>{student.cohorts?.length || 0}</div>
+                                    <div style={{ padding: '1.5rem', background: 'var(--index-hover-bg)', borderRadius: '20px', textAlign: 'center' }}>
+                                        <Clock size={24} color="var(--index-primary-color)" style={{ marginBottom: '0.5rem' }} />
+                                        <div style={{ color: 'var(--index-text-faint)', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Total Cohorts</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--index-text-heading)' }}>{student.cohorts?.length || 0}</div>
                                     </div>
-                                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '20px', textAlign: 'center' }}>
-                                        <Activity size={24} color="#1a4d3e" style={{ marginBottom: '0.5rem' }} />
-                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Quiz Score</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: '#0f172a' }}>
+                                    <div style={{ padding: '1.5rem', background: 'var(--index-hover-bg)', borderRadius: '20px', textAlign: 'center' }}>
+                                        <Activity size={24} color="var(--index-primary-color)" style={{ marginBottom: '0.5rem' }} />
+                                        <div style={{ color: 'var(--index-text-faint)', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>Avg. Quiz Score</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--index-text-heading)' }}>
                                             {avgQuizScore}{avgQuizScore !== 'N/A' ? '%' : ''}
                                         </div>
                                     </div>
@@ -1028,19 +1282,19 @@ export default function StudentDetails() {
 
                             <div className="card-premium-records shadow-premium">
                                 <div className="card-title-records">
-                                    <h3><HelpCircle size={20} color="#1a4d3e" /> Quiz Submissions</h3>
+                                    <h3><HelpCircle size={20} color="var(--index-primary-color)" /> Quiz Submissions</h3>
                                 </div>
 
                                  {student.completed_lessons && student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.quiz_data && l.quiz_data !== 'null' && l.quiz_data !== '{}') || l.pivot?.score != null).length > 0 ? (
                                     <div style={{ display: 'grid', gap: '1rem' }}>
                                         {student.completed_lessons.filter((l: any) => l.type === 'quiz' || (l.quiz_data && l.quiz_data !== 'null' && l.quiz_data !== '{}') || l.pivot?.score != null).map((lesson: any) => (
                                             <div key={lesson.id} className="enrollment-row" style={{ marginBottom: 0 }}>
-                                                <div className="progress-ring-mini" style={{ background: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#f0fdf4' : '#fef2f2', color: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? '#1a4d3e' : '#ef4444' }}>
+                                                <div className="progress-ring-mini" style={{ background: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : 'var(--index-danger-bg-soft)', color: (lesson.pivot?.score || 0) >= (lesson.quiz_data?.pass_mark || 80) ? 'var(--index-primary-color)' : 'var(--lgl-error)' }}>
                                                     {lesson.pivot?.score || 0}%
                                                 </div>
                                                 <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 950, color: '#0f172a', fontSize: '1.05rem' }}>{lesson.title}</div>
-                                                    <div style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 700 }}>
+                                                    <div style={{ fontWeight: 950, color: 'var(--index-text-heading)', fontSize: '1.05rem' }}>{lesson.title}</div>
+                                                    <div style={{ color: 'var(--index-text-secondary)', fontSize: '0.85rem', fontWeight: 700 }}>
                                                         Submitted on {new Date(lesson.pivot?.updated_at).toLocaleDateString()}
                                                     </div>
                                                 </div>
@@ -1058,268 +1312,456 @@ export default function StudentDetails() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div style={{ textAlign: 'center', padding: '2rem', background: '#f8fafc', borderRadius: '20px', border: '2px dashed #e2e8f0' }}>
-                                        <HelpCircle size={24} color="#cbd5e1" style={{ marginBottom: '0.5rem' }} />
-                                        <p style={{ color: '#64748b', fontWeight: 600, fontSize: '0.9rem' }}>No quiz submissions available yet.</p>
+                                    <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--index-hover-bg)', borderRadius: '20px', border: '2px dashed var(--index-border-color)' }}>
+                                        <HelpCircle size={24} color="var(--index-text-faint)" style={{ marginBottom: '0.5rem' }} />
+                                        <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, fontSize: '0.9rem' }}>No quiz submissions available yet.</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         <div className="sidebar-records">
+                            {/* Card 1: Registration & Payment */}
                             <div className="card-premium-records shadow-premium" style={{ padding: '2rem', marginBottom: '2rem' }}>
-                                <div className="card-title-records" style={{ marginBottom: '1.5rem' }}>
+                                <div className="card-title-records" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <h3>
-                                        <ShieldCheck size={20} color="#1a4d3e" />
+                                        <CreditCard size={20} color="var(--index-primary-color)" />
                                         Registration & Payment
                                     </h3>
+                                    {updatingStatus && <Loader2 size={18} className="animate-spin" color="var(--index-primary-color)" />}
                                 </div>
                                 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                    {/* Payment Status Badge */}
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
-                                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#64748b' }}>Status</span>
-                                        <span style={{
+                                    {/* Payment Status Badge & Quick Dropdown Switcher */}
+                                    <div style={{ background: 'var(--index-hover-bg)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--index-border-subtle)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-secondary)' }}>Current Status</span>
+                                            <span style={{
+                                                fontSize: '0.8rem',
+                                                fontWeight: 950,
+                                                padding: '6px 14px',
+                                                borderRadius: '10px',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.025em',
+                                                ...(student.payment_status === 'approved' ? {
+                                                    background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)',
+                                                    color: 'var(--index-primary-color)',
+                                                    border: '1px solid color-mix(in srgb, var(--lgl-success) 35%, transparent)'
+                                                } : student.payment_status === 'rejected' ? {
+                                                    background: 'var(--index-danger-bg-soft)',
+                                                    color: 'var(--lgl-error)',
+                                                    border: '1px solid color-mix(in srgb, var(--lgl-error) 35%, transparent)'
+                                                } : {
+                                                    background: 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)',
+                                                    color: 'var(--lgl-warning)',
+                                                    border: '1px solid color-mix(in srgb, var(--lgl-warning) 35%, transparent)'
+                                                })
+                                            }}>
+                                                {student.payment_status === 'approved' ? 'Approved / Active' : student.payment_status === 'rejected' ? 'Rejected' : 'Pending Review'}
+                                            </span>
+                                        </div>
+
+                                        {/* Status Switcher Dropdown */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--index-text-faint)' }}>Change Status</label>
+                                            <select
+                                                value={student.payment_status || 'pending'}
+                                                onChange={(e) => handleChangePaymentStatus(e.target.value)}
+                                                disabled={updatingStatus}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.65rem 0.85rem',
+                                                    borderRadius: '10px',
+                                                    border: '1.5px solid var(--index-border-color)',
+                                                    background: 'var(--index-card-bg)',
+                                                    color: 'var(--index-text-heading)',
+                                                    fontWeight: 800,
+                                                    fontSize: '0.85rem',
+                                                    cursor: updatingStatus ? 'not-allowed' : 'pointer'
+                                                }}
+                                            >
+                                                <option value="approved">Approved / Verified (Full Access)</option>
+                                                <option value="pending">Pending Verification / Review</option>
+                                                <option value="rejected">Rejected / Inactive (Lock Access)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons: Quick Approve & Quick Reject */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                        {student.payment_status !== 'approved' && (
+                                            <button
+                                                onClick={handleApprovePayment}
+                                                disabled={updatingStatus}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'var(--lgl-success)',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '0.8rem 1.25rem',
+                                                    borderRadius: '14px',
+                                                    fontWeight: 850,
+                                                    fontSize: '0.88rem',
+                                                    cursor: updatingStatus ? 'not-allowed' : 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '8px',
+                                                    boxShadow: '0 4px 12px color-mix(in srgb, var(--lgl-success) 25%, transparent)',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {updatingStatus ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={18} />}
+                                                <span>Approve & Activate Registration</span>
+                                            </button>
+                                        )}
+
+                                        {student.payment_status !== 'rejected' && (
+                                            <button
+                                                onClick={handleRejectPayment}
+                                                disabled={updatingStatus}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'var(--index-danger-bg-soft)',
+                                                    color: 'var(--lgl-error)',
+                                                    border: '1.5px solid color-mix(in srgb, var(--lgl-error) 25%, transparent)',
+                                                    padding: '0.7rem 1.25rem',
+                                                    borderRadius: '14px',
+                                                    fontWeight: 800,
+                                                    fontSize: '0.84rem',
+                                                    cursor: updatingStatus ? 'not-allowed' : 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '8px',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {updatingStatus ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
+                                                <span>Decline / Reject Registration</span>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Rejected Warning Notice */}
+                                    {student.payment_status === 'rejected' && (
+                                        <div style={{
+                                            padding: '0.85rem 1rem',
+                                            borderRadius: '12px',
+                                            background: 'var(--index-danger-bg-soft)',
+                                            border: '1px solid color-mix(in srgb, var(--lgl-error) 25%, transparent)',
+                                            color: 'var(--lgl-error)',
                                             fontSize: '0.8rem',
-                                            fontWeight: 950,
-                                            padding: '6px 14px',
-                                            borderRadius: '10px',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.025em',
-                                            ...(student.payment_status === 'approved' ? {
-                                                background: '#f0fdf4',
-                                                color: '#1a4d3e',
-                                                border: '1px solid #bbf7d0'
-                                            } : student.payment_status === 'rejected' ? {
-                                                background: '#fef2f2',
-                                                color: '#b91c1c',
-                                                border: '1px solid #fecaca'
-                                            } : {
-                                                background: '#fffbeb',
-                                                color: '#b45309',
-                                                border: '1px solid #fde68a'
-                                            })
+                                            fontWeight: 700,
+                                            lineHeight: 1.4
                                         }}>
-                                            {student.payment_status || 'Pending'}
+                                            ⚠️ This student's registration is declined. Platform access and cohort enrollments are locked. Click "Approve & Activate Registration" above to restore access.
+                                        </div>
+                                    )}
+
+                                    {/* Payment Receipt Inspection Box */}
+                                    <div style={{ background: 'var(--index-hover-bg)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--index-border-subtle)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--index-text-faint)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Official Receipt</span>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {student.receipt_url && (
+                                                <a
+                                                    href={student.receipt_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        flex: 1,
+                                                        minWidth: '130px',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: '6px',
+                                                        padding: '0.6rem 0.85rem',
+                                                        borderRadius: '10px',
+                                                        background: 'var(--index-card-bg)',
+                                                        border: '1px solid var(--index-border-color)',
+                                                        color: 'var(--index-primary-color)',
+                                                        textDecoration: 'none',
+                                                        fontSize: '0.8rem',
+                                                        fontWeight: 800
+                                                    }}
+                                                >
+                                                    <FileText size={15} /> Attached Receipt <ExternalLink size={13} />
+                                                </a>
+                                            )}
+                                            <a
+                                                href={`${API_URL}/receipts/${student.id}/image`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    flex: 1,
+                                                    minWidth: '130px',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '6px',
+                                                    padding: '0.6rem 0.85rem',
+                                                    borderRadius: '10px',
+                                                    background: 'color-mix(in srgb, var(--index-primary-color) 8%, transparent)',
+                                                    border: '1px solid color-mix(in srgb, var(--index-primary-color) 25%, transparent)',
+                                                    color: 'var(--index-primary-color)',
+                                                    textDecoration: 'none',
+                                                    fontSize: '0.8rem',
+                                                    fontWeight: 800
+                                                }}
+                                            >
+                                                <CreditCard size={15} /> Digital Receipt <ExternalLink size={13} />
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    {/* Selected Plan */}
+                                    <div style={{ background: 'var(--index-hover-bg)', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid var(--index-border-subtle)' }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--index-text-faint)', display: 'block', marginBottom: '2px' }}>Tuition Plan</span>
+                                        <span style={{ fontSize: '0.95rem', fontWeight: 850, color: 'var(--index-text-heading)', textTransform: 'capitalize' }}>
+                                            {(student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%') ? '50% Installment Payment' : '100% Full Payment'}
                                         </span>
                                     </div>
 
-                                    {/* Selected Plan and Method */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                                        <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Plan</span>
-                                            <span style={{ fontSize: '0.9rem', fontWeight: 850, color: '#0f172a', textTransform: 'capitalize' }}>
-                                                {student.payment_plan ? student.payment_plan.replace('_', ' ') : 'N/A'}
+                                    {/* Coupon Code if exists */}
+                                    {student.coupon_code && (
+                                        <div style={{ background: 'var(--index-hover-bg)', padding: '0.75rem 1rem', borderRadius: '14px', border: '1px solid var(--index-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '0.8rem', fontWeight: 750, color: 'var(--index-text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <Tag size={14} color="var(--index-primary-color)" /> Coupon Applied
                                             </span>
-                                        </div>
-                                        <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Method</span>
-                                            <span style={{ fontSize: '0.9rem', fontWeight: 850, color: '#0f172a', textTransform: 'capitalize' }}>
-                                                {student.payment_method ? student.payment_method : 'N/A'}
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--index-primary-color)', background: 'color-mix(in srgb, var(--index-primary-color) 10%, transparent)', padding: '2px 8px', borderRadius: '6px' }}>
+                                                {student.coupon_code}
                                             </span>
-                                        </div>
-                                    </div>
-
-
-
-
-
-                                    {/* Receipt Thumbnail */}
-                                    {student.receipt_url && (
-                                        <div style={{ marginTop: '0.5rem' }}>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Payment Receipt Image</span>
-                                            <div 
-                                                onClick={() => setPreviewReceipt(student.receipt_url)}
-                                                style={{
-                                                    position: 'relative',
-                                                    borderRadius: '16px',
-                                                    overflow: 'hidden',
-                                                    cursor: 'pointer',
-                                                    border: '1.5px solid #e2e8f0',
-                                                    height: '140px',
-                                                    background: '#f8fafc',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    transition: 'all 0.3s'
-                                                }}
-                                                className="receipt-thumbnail-hover"
-                                            >
-                                                <img 
-                                                    src={student.receipt_url} 
-                                                    alt="Payment Receipt" 
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                                                />
-                                                <div style={{
-                                                    position: 'absolute',
-                                                    inset: 0,
-                                                    background: 'rgba(26, 77, 62, 0.4)',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    color: 'white',
-                                                    opacity: 0,
-                                                    transition: 'opacity 0.3s',
-                                                    fontWeight: 900,
-                                                    fontSize: '0.85rem',
-                                                    gap: '6px'
-                                                }} className="receipt-overlay">
-                                                    <Eye size={18} />
-                                                    <span>Inspect Receipt</span>
-                                                </div>
-                                            </div>
                                         </div>
                                     )}
-                                    {/* Action Triggers */}
-                                    {(student.payment_status === 'pending' || student.payment_status === 'rejected') && (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
-                                            <button
-                                                onClick={() => setShowApproveModal(true)}
-                                                disabled={approving || rejecting}
-                                                style={{
-                                                    width: '100%',
-                                                    background: approving ? '#9ae6b4' : '#10b981',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    padding: '0.85rem 1.25rem',
-                                                    borderRadius: '16px',
-                                                    fontWeight: 900,
-                                                    fontSize: '0.9rem',
-                                                    cursor: approving || rejecting ? 'not-allowed' : 'pointer',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    gap: '10px',
-                                                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)',
-                                                    transition: 'all 0.3s'
-                                                }}
-                                                className="approve-btn-premium"
-                                            >
-                                                {approving ? (
-                                                    <>
-                                                        <Loader2 className="animate-spin" size={18} />
-                                                        <span>Approving Payment...</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Check size={18} />
-                                                        <span>Approve Payment & Send Email</span>
-                                                    </>
-                                                )}
-                                            </button>
 
-                                            {student.payment_status === 'pending' && (
-                                                <button
-                                                    onClick={() => setShowRejectModal(true)}
-                                                    disabled={approving || rejecting}
-                                                    style={{
-                                                        width: '100%',
-                                                        background: 'transparent',
-                                                        color: '#ef4444',
-                                                        border: '1.5px solid #fee2e2',
-                                                        padding: '0.85rem 1.25rem',
-                                                        borderRadius: '16px',
-                                                        fontWeight: 900,
-                                                        fontSize: '0.9rem',
-                                                        cursor: approving || rejecting ? 'not-allowed' : 'pointer',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        gap: '10px',
-                                                        transition: 'all 0.3s'
-                                                    }}
-                                                    className="reject-btn-premium"
-                                                >
-                                                    {rejecting ? (
-                                                        <>
-                                                            <Loader2 className="animate-spin" size={18} />
-                                                            <span>Rejecting...</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <X size={18} />
-                                                            <span>Reject Payment</span>
-                                                        </>
-                                                    )}
-                                                </button>
+                                    {/* Tuition Reminder State & Quick Switch Box */}
+                                    <div style={{
+                                        padding: '1.25rem',
+                                        borderRadius: '18px',
+                                        border: '1.5px solid',
+                                        borderColor: (student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%')
+                                            ? 'color-mix(in srgb, var(--lgl-warning) 35%, transparent)'
+                                            : 'color-mix(in srgb, var(--lgl-success) 35%, transparent)',
+                                        background: (student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%')
+                                            ? 'color-mix(in srgb, var(--lgl-warning) 8%, transparent)'
+                                            : 'color-mix(in srgb, var(--lgl-success) 8%, transparent)'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                            {(student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%') ? (
+                                                <>
+                                                    <Clock size={18} color="var(--lgl-warning)" />
+                                                    <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'var(--lgl-warning)' }}>50% Installment Reminder Active</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <CheckCircle2 size={18} color="var(--lgl-success)" />
+                                                    <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'var(--lgl-success)' }}>100% Fully Paid (No Reminders)</span>
+                                                </>
                                             )}
                                         </div>
-                                    )}
+                                        <p style={{ margin: '0 0 1rem 0', fontSize: '0.8rem', color: 'var(--index-text-secondary)', lineHeight: 1.45, fontWeight: 600 }}>
+                                            {(student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%')
+                                                ? "This student paid 50% down. The remaining tuition countdown reminder and balance checkout are currently active on their student dashboard."
+                                                : "This student is fully paid. No balance countdown or access locks apply to their account."}
+                                        </p>
+                                        
+                                        {(student.payment_plan === 'installment' || student.payment_plan === '50_percent' || student.payment_plan === '50%') ? (
+                                            <button
+                                                onClick={() => handleTogglePaymentPlan('full')}
+                                                disabled={updatingPlan}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'var(--lgl-success)',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '0.7rem 1rem',
+                                                    borderRadius: '12px',
+                                                    fontWeight: 850,
+                                                    fontSize: '0.825rem',
+                                                    cursor: updatingPlan ? 'not-allowed' : 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '8px'
+                                                }}
+                                            >
+                                                {updatingPlan ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                                                <span>Mark as 100% Fully Paid (Clear Reminder)</span>
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleTogglePaymentPlan('installment')}
+                                                disabled={updatingPlan}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'transparent',
+                                                    color: 'var(--lgl-warning)',
+                                                    border: '1.5px solid var(--lgl-warning)',
+                                                    padding: '0.7rem 1rem',
+                                                    borderRadius: '12px',
+                                                    fontWeight: 850,
+                                                    fontSize: '0.825rem',
+                                                    cursor: updatingPlan ? 'not-allowed' : 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '8px'
+                                                }}
+                                            >
+                                                {updatingPlan ? <Loader2 size={16} className="animate-spin" /> : <Clock size={16} />}
+                                                <span>Switch to 50% Installment Plan</span>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Send Credentials Button */}
+                                    <button
+                                        onClick={handleSendCredentials}
+                                        disabled={sendingCredentials}
+                                        style={{
+                                            width: '100%',
+                                            background: 'var(--index-hover-bg)',
+                                            color: 'var(--index-text-heading)',
+                                            border: '1.5px solid var(--index-border-color)',
+                                            padding: '0.85rem 1.25rem',
+                                            borderRadius: '16px',
+                                            fontWeight: 850,
+                                            fontSize: '0.88rem',
+                                            cursor: sendingCredentials ? 'not-allowed' : 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {sendingCredentials ? (
+                                            <>
+                                                <Loader2 className="animate-spin" size={16} />
+                                                <span>Dispatching Credentials...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Key size={16} color="var(--index-primary-color)" />
+                                                <span>Send / Resend Login Credentials</span>
+                                            </>
+                                        )}
+                                    </button>
                                 </div>
                             </div>
 
+                            {/* Card 2: Academic & Student Profile Details */}
                             <div className="card-premium-records shadow-premium" style={{ padding: '2rem', marginBottom: '2rem' }}>
-                                <div className="card-title-records" style={{ marginBottom: '1.5rem' }}>
+                                <div className="card-title-records" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <h3>
-                                        <Info size={20} color="#1a4d3e" />
-                                        Registration & Referral Details
+                                        <Info size={20} color="var(--index-primary-color)" />
+                                        Academic & Profile Details
                                     </h3>
+                                    <button 
+                                        onClick={() => navigate(`/instructor/students/${id}/edit`)}
+                                        style={{ background: 'none', border: 'none', color: 'var(--index-primary-color)', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                    >
+                                        <Edit size={14} /> Edit
+                                    </button>
                                 </div>
                                 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                                    {/* Program Track */}
+                                    <div style={{ background: 'var(--index-hover-bg)', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid var(--index-border-subtle)' }}>
+                                        <span style={{ fontSize: '0.725rem', fontWeight: 800, color: 'var(--index-text-faint)', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>Course / Program Track</span>
+                                        <span style={{ fontSize: '0.95rem', fontWeight: 850, color: 'var(--index-text-heading)' }}>
+                                            {student.course_name || 'Foundation Academy'}
+                                        </span>
+                                    </div>
+
                                     {/* Education Level */}
-                                    <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
-                                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>Education Level</span>
-                                        <span style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a' }}>
+                                    <div style={{ background: 'var(--index-hover-bg)', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid var(--index-border-subtle)' }}>
+                                        <span style={{ fontSize: '0.725rem', fontWeight: 800, color: 'var(--index-text-faint)', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>Education Level</span>
+                                        <span style={{ fontSize: '0.95rem', fontWeight: 850, color: 'var(--index-text-heading)' }}>
                                             {student.education_level || 'Not provided'}
                                         </span>
                                     </div>
 
+                                    {/* Phone Number */}
+                                    {student.phone && (
+                                        <div style={{ background: 'var(--index-hover-bg)', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid var(--index-border-subtle)' }}>
+                                            <span style={{ fontSize: '0.725rem', fontWeight: 800, color: 'var(--index-text-faint)', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>Telephone</span>
+                                            <span style={{ fontSize: '0.95rem', fontWeight: 850, color: 'var(--index-text-heading)' }}>
+                                                {student.phone}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Address Details */}
+                                    {(student.address_line1 || student.city || student.country) && (
+                                        <div style={{ background: 'var(--index-hover-bg)', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid var(--index-border-subtle)' }}>
+                                            <span style={{ fontSize: '0.725rem', fontWeight: 800, color: 'var(--index-text-faint)', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Residential Address</span>
+                                            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--index-text-heading)', lineHeight: 1.45, display: 'block' }}>
+                                                {[student.address_line1, student.address_line2, student.city, student.state, student.zip, student.country].filter(Boolean).join(', ')}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     {/* How Heard */}
-                                    <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
-                                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>How Heard</span>
-                                        <span style={{ fontSize: '0.95rem', fontWeight: 850, color: '#0f172a', textTransform: 'capitalize' }}>
+                                    <div style={{ background: 'var(--index-hover-bg)', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid var(--index-border-subtle)' }}>
+                                        <span style={{ fontSize: '0.725rem', fontWeight: 800, color: 'var(--index-text-faint)', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>Discovery Channel</span>
+                                        <span style={{ fontSize: '0.95rem', fontWeight: 850, color: 'var(--index-text-heading)', textTransform: 'capitalize' }}>
                                             {student.hear_source ? (student.hear_source === 'referral' ? 'Friend / Referral' : student.hear_source) : 'Not specified'}
                                         </span>
                                     </div>
 
                                     {/* Referral Information Card */}
                                     {(student.referral_name || student.referral_email || student.hear_source === 'referral') && (
-                                        <div style={{ background: 'rgba(52, 121, 127, 0.04)', padding: '1rem', borderRadius: '16px', border: '1.5px dashed rgba(52, 121, 127, 0.25)' }}>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#1a4d3e', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.75rem' }}>
-                                                Friend / Referral Info
+                                        <div style={{ background: 'color-mix(in srgb, var(--index-primary-color) 4%, transparent)', padding: '1rem', borderRadius: '16px', border: '1.5px dashed color-mix(in srgb, var(--index-primary-color) 25%, transparent)' }}>
+                                            <span style={{ fontSize: '0.725rem', fontWeight: 900, color: 'var(--index-primary-color)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.6rem' }}>
+                                                Referral Details
                                             </span>
                                             
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                                 <div>
-                                                    <span style={{ fontSize: '0.725rem', fontWeight: 700, color: '#64748b', display: 'block' }}>Friend's Name:</span>
-                                                    <span style={{ fontSize: '0.925rem', fontWeight: 850, color: '#0f172a' }}>
+                                                    <span style={{ fontSize: '0.725rem', fontWeight: 700, color: 'var(--index-text-secondary)', display: 'block' }}>Referred by:</span>
+                                                    <span style={{ fontSize: '0.9rem', fontWeight: 850, color: 'var(--index-text-heading)' }}>
                                                         {student.referral_name || 'N/A'}
                                                     </span>
                                                 </div>
                                                 <div>
-                                                    <span style={{ fontSize: '0.725rem', fontWeight: 700, color: '#64748b', display: 'block' }}>Friend's Email:</span>
+                                                    <span style={{ fontSize: '0.725rem', fontWeight: 700, color: 'var(--index-text-secondary)', display: 'block' }}>Referee Email:</span>
                                                     {student.referral_email ? (
                                                         <a 
                                                             href={`mailto:${student.referral_email}`}
-                                                            style={{ fontSize: '0.925rem', fontWeight: 850, color: '#0284c7', textDecoration: 'none' }}
+                                                            style={{ fontSize: '0.9rem', fontWeight: 850, color: 'var(--lgl-cyan-dark)', textDecoration: 'none' }}
                                                         >
                                                             {student.referral_email}
                                                         </a>
                                                     ) : (
-                                                        <span style={{ fontSize: '0.925rem', fontWeight: 850, color: '#0f172a' }}>N/A</span>
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: 850, color: 'var(--index-text-heading)' }}>N/A</span>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* Address Details */}
-                                    {(student.address_line1 || student.city || student.country) && (
-                                        <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '14px', border: '1px solid #f1f5f9' }}>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', display: 'block', textTransform: 'uppercase', marginBottom: '4px' }}>Address</span>
-                                            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.45, display: 'block' }}>
-                                                {[student.address_line1, student.address_line2, student.city, student.state, student.zip, student.country].filter(Boolean).join(', ')}
+                                    {/* Terms & Security Info */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginTop: '0.25rem' }}>
+                                        <div style={{ background: 'var(--index-hover-bg)', padding: '0.65rem 0.85rem', borderRadius: '12px', border: '1px solid var(--index-border-subtle)' }}>
+                                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--index-text-faint)', display: 'block' }}>Terms Policy</span>
+                                            <span style={{ fontSize: '0.8rem', fontWeight: 850, color: student.agree_terms ? 'var(--lgl-success)' : 'var(--index-text-secondary)' }}>
+                                                {student.agree_terms ? '✓ Agreed' : 'Standard'}
                                             </span>
                                         </div>
-                                    )}
+                                        <div style={{ background: 'var(--index-hover-bg)', padding: '0.65rem 0.85rem', borderRadius: '12px', border: '1px solid var(--index-border-subtle)' }}>
+                                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--index-text-faint)', display: 'block' }}>Two-Factor (2FA)</span>
+                                            <span style={{ fontSize: '0.8rem', fontWeight: 850, color: student.two_factor_enabled ? 'var(--lgl-success)' : 'var(--index-text-secondary)' }}>
+                                                {student.two_factor_enabled ? '✓ Enabled' : 'Disabled'}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="card-premium-records shadow-premium" style={{ padding: '2rem' }}>
                                 <div className="card-title-records">
-                                    <h3><Activity size={20} color="#1a4d3e" /> History Log</h3>
+                                    <h3><Activity size={20} color="var(--index-primary-color)" /> History Log</h3>
                                 </div>
                                 <div style={{ marginTop: '1.5rem' }}>
                                     <div className="activity-item">
@@ -1347,7 +1789,7 @@ export default function StudentDetails() {
                 <div className="modal-overlay">
                     <div className="modal-box animate-fade-in-up">
                         <h3>Deactivate Access</h3>
-                        <p style={{ color: '#64748b', fontWeight: 600, marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                        <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, marginBottom: '1.5rem', fontSize: '0.9rem' }}>
                             You are about to deactivate access for <strong>{student?.name}</strong>. Input a message explaining why (this will be sent to their email).
                         </p>
                         <textarea
@@ -1370,14 +1812,14 @@ export default function StudentDetails() {
             {viewingQuizResult && (
                 <div className="modal-overlay" style={{ zIndex: 1100 }}>
                     <div className="modal-box animate-fade-in-up" style={{ maxWidth: '800px', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 0 }}>
-                        <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', borderTopLeftRadius: '28px', borderTopRightRadius: '28px' }}>
+                        <div style={{ padding: '2rem 2.5rem', borderBottom: '1px solid var(--index-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--index-hover-bg)', borderTopLeftRadius: '28px', borderTopRightRadius: '28px' }}>
                             <div>
                                 <h3 style={{ margin: 0, fontSize: '1.4rem' }}>Evaluation Intelligence Analysis</h3>
-                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontWeight: 700, fontSize: '0.9rem' }}>
-                                    {viewingQuizResult.title} • Score: <span style={{ color: viewingQuizResult.pivot.score >= (viewingQuizResult.quiz_data?.pass_mark || 80) ? '#10b981' : '#ef4444' }}>{viewingQuizResult.pivot.score}%</span>
+                                <p style={{ margin: '4px 0 0 0', color: 'var(--index-text-secondary)', fontWeight: 700, fontSize: '0.9rem' }}>
+                                    {viewingQuizResult.title} • Score: <span style={{ color: viewingQuizResult.pivot.score >= (viewingQuizResult.quiz_data?.pass_mark || 80) ? 'var(--lgl-success)' : 'var(--lgl-error)' }}>{viewingQuizResult.pivot.score}%</span>
                                 </p>
                             </div>
-                            <button onClick={() => setViewingQuizResult(null)} style={{ background: 'white', border: '1.5px solid #e2e8f0', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <button onClick={() => setViewingQuizResult(null)} style={{ background: 'var(--index-card-bg)', border: '1.5px solid var(--index-border-color)', width: '40px', height: '40px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <X size={20} />
                             </button>
                         </div>
@@ -1388,14 +1830,14 @@ export default function StudentDetails() {
                                 const isCorrect = studentAnswer === q.correct_answer;
                                 
                                 return (
-                                    <div key={idx} style={{ marginBottom: '2rem', padding: '1.5rem', borderRadius: '20px', border: `1.5px solid ${isCorrect ? '#f0fdf4' : '#fef2f2'}`, background: isCorrect ? '#fcfdfe' : '#fffbff' }}>
+                                    <div key={idx} style={{ marginBottom: '2rem', padding: '1.5rem', borderRadius: '20px', border: `1.5px solid ${isCorrect ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : 'var(--index-danger-bg-soft)'}`, background: isCorrect ? 'var(--index-hover-bg)' : 'var(--index-danger-bg-soft)' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8' }}>Question {idx + 1}</span>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: isCorrect ? '#10b981' : '#ef4444', background: isCorrect ? '#f0fdf4' : '#fef2f2', padding: '4px 10px', borderRadius: '8px' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--index-text-faint)' }}>Question {idx + 1}</span>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: isCorrect ? 'var(--lgl-success)' : 'var(--lgl-error)', background: isCorrect ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : 'var(--index-danger-bg-soft)', padding: '4px 10px', borderRadius: '8px' }}>
                                                 {isCorrect ? 'VALIDATED' : 'ERRONEOUS'}
                                             </span>
                                         </div>
-                                        <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: '#0f172a', lineHeight: 1.4 }}>{q.question}</h4>
+                                        <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 850, color: 'var(--index-text-heading)', lineHeight: 1.4 }}>{q.question}</h4>
                                         <div style={{ display: 'grid', gap: '0.75rem' }}>
                                             {q.options.map((opt: string, oIdx: number) => {
                                                 const isStudentPick = studentAnswer === oIdx;
@@ -1407,9 +1849,9 @@ export default function StudentDetails() {
                                                         style={{ 
                                                             padding: '1rem', 
                                                             borderRadius: '12px', 
-                                                            background: isRightAnswer ? '#f0fdf4' : isStudentPick ? '#fef2f2' : 'white',
-                                                            border: `1.2px solid ${isRightAnswer ? '#10b98140' : isStudentPick ? '#ef444440' : '#f1f5f9'}`,
-                                                            color: isRightAnswer ? '#166534' : isStudentPick ? '#991b1b' : '#334155',
+                                                            background: isRightAnswer ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : isStudentPick ? 'var(--index-danger-bg-soft)' : 'var(--index-card-bg)',
+                                                            border: `1.2px solid ${isRightAnswer ? 'color-mix(in srgb, var(--lgl-success) 25%, transparent)' : isStudentPick ? 'color-mix(in srgb, var(--lgl-error) 25%, transparent)' : 'var(--index-hover-bg)'}`,
+                                                            color: isRightAnswer ? 'var(--lgl-success)' : isStudentPick ? 'var(--lgl-error)' : 'var(--index-text-secondary)',
                                                             fontWeight: (isStudentPick || isRightAnswer) ? 800 : 500,
                                                             fontSize: '0.9rem',
                                                             display: 'flex',
@@ -1432,164 +1874,8 @@ export default function StudentDetails() {
                             })}
                         </div>
                         
-                        <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', borderBottomLeftRadius: '28px', borderBottomRightRadius: '28px' }}>
-                            <button onClick={() => setViewingQuizResult(null)} className="btn-confirm" style={{ background: '#0f172a' }}>Close Analysis</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {previewReceipt && (
-                <div 
-                    className="modal-overlay" 
-                    style={{ zIndex: 1200 }}
-                    onClick={() => setPreviewReceipt(null)}
-                >
-                    <div 
-                        className="modal-box animate-fade-in-up" 
-                        style={{ 
-                            maxWidth: '700px', 
-                            maxHeight: '90vh', 
-                            overflow: 'hidden', 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            padding: 0,
-                            background: 'transparent',
-                            boxShadow: 'none'
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-                            <button 
-                                onClick={() => setPreviewReceipt(null)} 
-                                style={{ 
-                                    background: 'rgba(15, 23, 42, 0.8)', 
-                                    border: 'none', 
-                                    color: 'white',
-                                    width: '40px', 
-                                    height: '40px', 
-                                    borderRadius: '50%', 
-                                    cursor: 'pointer', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                                }}
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-                        
-                        <div style={{ 
-                            flex: 1, 
-                            overflow: 'auto', 
-                            background: 'white', 
-                            borderRadius: '24px', 
-                            padding: '1rem',
-                            border: '1.5px solid #e2e8f0',
-                            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <img 
-                                src={previewReceipt} 
-                                alt="Zelle Payment Receipt Full" 
-                                style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '16px' }} 
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showApproveModal && (
-                <div className="modal-overlay" style={{ zIndex: 1150 }}>
-                    <div className="modal-box animate-fade-in-up" style={{ maxWidth: '480px' }}>
-                        <div style={{
-                            width: '56px',
-                            height: '56px',
-                            borderRadius: '16px',
-                            background: '#f0fdf4',
-                            color: '#1a4d3e',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginBottom: '1.5rem',
-                            border: '1.5px solid #dcfce7'
-                        }}>
-                            <ShieldCheck size={28} />
-                        </div>
-                        <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.4rem', fontWeight: 950, color: '#0f172a' }}>
-                            Authorize Enrollment & Access
-                        </h3>
-                        <p style={{ color: '#64748b', fontWeight: 600, lineHeight: 1.5, marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-                            You are about to approve <strong>{student.name}</strong>'s payment. This will activate their profile and automatically trigger the following onboarding steps:
-                        </p>
-                        <div style={{ 
-                            background: '#f8fafc', 
-                            padding: '1rem 1.25rem', 
-                            borderRadius: '16px', 
-                            border: '1px solid #f1f5f9', 
-                            marginBottom: '1.5rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.75rem'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: '#334155', fontWeight: 700 }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }}></div>
-                                <span>Update payment status to <strong>Approved</strong></span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: '#334155', fontWeight: 700 }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }}></div>
-                                <span>Generate secure login dashboard password</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: '#334155', fontWeight: 700 }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }}></div>
-                                <span>Send email containing credentials & WhatsApp link</span>
-                            </div>
-                        </div>
-                        <div className="modal-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                            <button className="btn-cancel" onClick={() => setShowApproveModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '48px', margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
-                                Cancel
-                            </button>
-                            <button className="btn-confirm" onClick={handleApprovePayment} style={{ background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '48px', margin: 0, fontSize: '0.9rem', fontWeight: 850, boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)' }}>
-                                Approve & Dispatch
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showRejectModal && (
-                <div className="modal-overlay" style={{ zIndex: 1150 }}>
-                    <div className="modal-box animate-fade-in-up" style={{ maxWidth: '480px' }}>
-                        <div style={{
-                            width: '56px',
-                            height: '56px',
-                            borderRadius: '16px',
-                            background: '#fef2f2',
-                            color: '#ef4444',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginBottom: '1.5rem',
-                            border: '1.5px solid #fee2e2'
-                        }}>
-                            <AlertCircle size={28} />
-                        </div>
-                        <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1.4rem', fontWeight: 950, color: '#0f172a' }}>
-                            Reject Payment Receipt
-                        </h3>
-                        <p style={{ color: '#64748b', fontWeight: 600, lineHeight: 1.5, marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                            Are you sure you want to mark <strong>{student.name}</strong>'s payment as rejected? This restricts access immediately. You can review and re-verify their file later if a new Zelle screenshot is uploaded.
-                        </p>
-                        <div className="modal-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                            <button className="btn-cancel" onClick={() => setShowRejectModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '48px', margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
-                                Cancel
-                            </button>
-                            <button className="btn-confirm" onClick={handleRejectPayment} style={{ background: '#ef4444', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '48px', margin: 0, fontSize: '0.9rem', fontWeight: 850, boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)' }}>
-                                Yes, Reject
-                            </button>
+                        <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid var(--index-border-subtle)', background: 'var(--index-hover-bg)', display: 'flex', justifyContent: 'flex-end', borderBottomLeftRadius: '28px', borderBottomRightRadius: '28px' }}>
+                            <button onClick={() => setViewingQuizResult(null)} className="btn-confirm" style={{ background: 'var(--index-text-heading)' }}>Close Analysis</button>
                         </div>
                     </div>
                 </div>
@@ -1604,20 +1890,20 @@ export default function StudentDetails() {
                                     width: '42px',
                                     height: '42px',
                                     borderRadius: '12px',
-                                    background: '#f0fdf4',
-                                    color: '#1a4d3e',
+                                    background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)',
+                                    color: 'var(--index-primary-color)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    border: '1.5px solid #dcfce7'
+                                    border: '1.5px solid color-mix(in srgb, var(--lgl-success) 15%, transparent)'
                                 }}>
                                     <Layers size={20} />
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 950, color: '#0f172a' }}>
+                                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 950, color: 'var(--index-text-heading)' }}>
                                         Assign Academic Cohort
                                     </h3>
-                                    <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
+                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>
                                         Enroll {student.name} in standard learning programs
                                     </p>
                                 </div>
@@ -1627,7 +1913,7 @@ export default function StudentDetails() {
                                     setShowAssignCohortModal(false);
                                     setSelectedCohortIds([]);
                                 }} 
-                                style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                style={{ background: 'var(--index-hover-bg)', border: '1.5px solid var(--index-border-color)', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
                                 <X size={18} />
                             </button>
@@ -1635,8 +1921,8 @@ export default function StudentDetails() {
 
                         {loadingCohorts ? (
                             <div style={{ padding: '3rem 0', textAlign: 'center' }}>
-                                <Loader2 className="animate-spin" size={32} color="#1a4d3e" style={{ margin: '0 auto' }} />
-                                <p style={{ marginTop: '1rem', fontWeight: 800, color: '#64748b', fontSize: '0.85rem' }}>Loading active cohorts...</p>
+                                <Loader2 className="animate-spin" size={32} color="var(--index-primary-color)" style={{ margin: '0 auto' }} />
+                                <p style={{ marginTop: '1rem', fontWeight: 800, color: 'var(--index-text-secondary)', fontSize: '0.85rem' }}>Loading active cohorts...</p>
                             </div>
                         ) : (
                             <>
@@ -1657,8 +1943,8 @@ export default function StudentDetails() {
                                                         alignItems: 'center',
                                                         gap: '12px',
                                                         padding: '12px 16px',
-                                                        background: isSelected ? '#f0fdf4' : 'white',
-                                                        border: `1.5px solid ${isSelected ? '#10b981' : '#f1f5f9'}`,
+                                                        background: isSelected ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : 'var(--index-card-bg)',
+                                                        border: `1.5px solid ${isSelected ? 'var(--lgl-success)' : 'var(--index-hover-bg)'}`,
                                                         borderRadius: '16px',
                                                         marginBottom: '8px',
                                                         cursor: 'pointer',
@@ -1669,8 +1955,8 @@ export default function StudentDetails() {
                                                         width: '20px',
                                                         height: '20px',
                                                         borderRadius: '6px',
-                                                        border: `2px solid ${isSelected ? '#10b981' : '#cbd5e1'}`,
-                                                        background: isSelected ? '#10b981' : 'white',
+                                                        border: `2px solid ${isSelected ? 'var(--lgl-success)' : 'var(--index-text-faint)'}`,
+                                                        background: isSelected ? 'var(--lgl-success)' : 'var(--index-card-bg)',
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
@@ -1679,8 +1965,8 @@ export default function StudentDetails() {
                                                         {isSelected && <Check size={14} color="white" strokeWidth={3} />}
                                                     </div>
                                                     <div style={{ flex: 1 }}>
-                                                        <div style={{ fontWeight: 850, color: '#0f172a', fontSize: '0.9rem' }}>{cohort.name}</div>
-                                                        <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 650 }}>
+                                                        <div style={{ fontWeight: 850, color: 'var(--index-text-heading)', fontSize: '0.9rem' }}>{cohort.name}</div>
+                                                        <div style={{ color: 'var(--index-text-secondary)', fontSize: '0.8rem', fontWeight: 650 }}>
                                                             {cohort.course?.title || 'General Curriculum'}
                                                         </div>
                                                     </div>
@@ -1688,10 +1974,10 @@ export default function StudentDetails() {
                                             );
                                         })
                                     ) : (
-                                        <div style={{ textAlign: 'center', padding: '2.5rem 1.5rem', background: '#f8fafc', borderRadius: '20px', border: '1.5px dashed #e2e8f0' }}>
-                                            <Info size={24} color="#94a3b8" style={{ marginBottom: '0.5rem' }} />
-                                            <p style={{ color: '#64748b', fontWeight: 700, fontSize: '0.85rem', margin: 0 }}>No other cohorts available</p>
-                                            <p style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.75rem', marginTop: '4px' }}>This student is already enrolled in all eligible cohorts.</p>
+                                        <div style={{ textAlign: 'center', padding: '2.5rem 1.5rem', background: 'var(--index-hover-bg)', borderRadius: '20px', border: '1.5px dashed var(--index-border-color)' }}>
+                                            <Info size={24} color="var(--index-text-faint)" style={{ marginBottom: '0.5rem' }} />
+                                            <p style={{ color: 'var(--index-text-secondary)', fontWeight: 700, fontSize: '0.85rem', margin: 0 }}>No other cohorts available</p>
+                                            <p style={{ color: 'var(--index-text-faint)', fontWeight: 600, fontSize: '0.75rem', marginTop: '4px' }}>This student is already enrolled in all eligible cohorts.</p>
                                         </div>
                                     )}
                                 </div>
@@ -1712,7 +1998,7 @@ export default function StudentDetails() {
                                         disabled={selectedCohortIds.length === 0 || assigningCohorts}
                                         onClick={handleAssignCohorts} 
                                         style={{ 
-                                            background: selectedCohortIds.length === 0 ? '#cbd5e1' : '#10b981', 
+                                            background: selectedCohortIds.length === 0 ? 'var(--index-text-faint)' : 'var(--lgl-success)', 
                                             color: 'white', 
                                             display: 'flex', 
                                             alignItems: 'center', 
@@ -1721,7 +2007,7 @@ export default function StudentDetails() {
                                             margin: 0, 
                                             fontSize: '0.85rem', 
                                             fontWeight: 850, 
-                                            boxShadow: selectedCohortIds.length === 0 ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.2)',
+                                            boxShadow: selectedCohortIds.length === 0 ? 'none' : '0 4px 12px color-mix(in srgb, var(--lgl-success) 20%, transparent)',
                                             cursor: selectedCohortIds.length === 0 || assigningCohorts ? 'not-allowed' : 'pointer'
                                         }}
                                     >
@@ -1744,28 +2030,28 @@ export default function StudentDetails() {
                 <div className="modal-overlay">
                     <div className="modal-box animate-scale-up" style={{ maxWidth: '550px', borderRadius: '24px', padding: '2.5rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 950, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                {isReassign ? <RotateCcw size={22} color="#b45309" /> : <Award size={22} color="#1a4d3e" />}
+                        <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 950, color: 'var(--index-text-heading)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {isReassign ? <RotateCcw size={22} color="var(--lgl-warning)" /> : <Award size={22} color="var(--index-primary-color)" />}
                                 {isReassign ? 'Reassign Certificate' : 'Issue Verified Certificate'}
                             </h3>
                             <button
                                 onClick={() => setShowIssueCertModal(false)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', padding: '4px' }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--index-text-secondary)', display: 'flex', padding: '4px' }}
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
-                        <p style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, marginBottom: isReassign ? '1rem' : '2rem' }}>
+                        <p style={{ color: 'var(--index-text-secondary)', fontSize: '0.85rem', fontWeight: 600, marginBottom: isReassign ? '1rem' : '2rem' }}>
                             {isReassign
                                 ? <>Regenerate the certificate for <strong>{student.name}</strong>. The old certificate will be permanently replaced and a new email will be sent to the student.</>  
                                 : <>Generate a manually verified course certificate for <strong>{student.name}</strong>. This will render a verified certificate background, assign a short verification code, and make it available for the student.</>}
                         </p>
 
                         {isReassign && (
-                            <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '12px', padding: '12px 16px', marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                                <RotateCcw size={16} color="#b45309" style={{ marginTop: '2px', flexShrink: 0 }} />
-                                <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 700, color: '#92400e', lineHeight: 1.5 }}>
+                            <div style={{ background: 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)', border: '1.5px solid color-mix(in srgb, var(--lgl-warning) 35%, transparent)', borderRadius: '12px', padding: '12px 16px', marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                                <RotateCcw size={16} color="var(--lgl-warning)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                                <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 700, color: 'var(--lgl-warning)', lineHeight: 1.5 }}>
                                     The existing certificate image will be deleted from the CDN and replaced. The verification UUID is preserved so old links remain valid.
                                 </p>
                             </div>
@@ -1773,7 +2059,7 @@ export default function StudentDetails() {
 
                         <div style={{ display: 'grid', gap: '1.5rem', marginBottom: '2.5rem' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--index-text-heading)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                                     Recipient Full Name
                                 </label>
                                 <input
@@ -1783,8 +2069,8 @@ export default function StudentDetails() {
                                     style={{
                                         width: '100%',
                                         height: '46px',
-                                        background: '#f8fafc',
-                                        border: '1.5px solid #e2e8f0',
+                                        background: 'var(--index-hover-bg)',
+                                        border: '1.5px solid var(--index-border-color)',
                                         borderRadius: '12px',
                                         padding: '0 1rem',
                                         fontSize: '0.95rem',
@@ -1795,7 +2081,7 @@ export default function StudentDetails() {
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--index-text-heading)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                                     Course Title
                                 </label>
                                 <input
@@ -1805,8 +2091,8 @@ export default function StudentDetails() {
                                     style={{
                                         width: '100%',
                                         height: '46px',
-                                        background: '#f8fafc',
-                                        border: '1.5px solid #e2e8f0',
+                                        background: 'var(--index-hover-bg)',
+                                        border: '1.5px solid var(--index-border-color)',
                                         borderRadius: '12px',
                                         padding: '0 1rem',
                                         fontSize: '0.95rem',
@@ -1818,7 +2104,7 @@ export default function StudentDetails() {
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--index-text-heading)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                                         Issue Date
                                     </label>
                                     <input
@@ -1828,8 +2114,8 @@ export default function StudentDetails() {
                                         style={{
                                             width: '100%',
                                             height: '46px',
-                                            background: '#f8fafc',
-                                            border: '1.5px solid #e2e8f0',
+                                            background: 'var(--index-hover-bg)',
+                                            border: '1.5px solid var(--index-border-color)',
                                             borderRadius: '12px',
                                             padding: '0 1rem',
                                             fontSize: '0.95rem',
@@ -1839,7 +2125,7 @@ export default function StudentDetails() {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--index-text-heading)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                                         Issued By
                                     </label>
                                     <input
@@ -1849,8 +2135,8 @@ export default function StudentDetails() {
                                         style={{
                                             width: '100%',
                                             height: '46px',
-                                            background: '#f8fafc',
-                                            border: '1.5px solid #e2e8f0',
+                                            background: 'var(--index-hover-bg)',
+                                            border: '1.5px solid var(--index-border-color)',
                                             borderRadius: '12px',
                                             padding: '0 1rem',
                                             fontSize: '0.95rem',
@@ -1875,14 +2161,14 @@ export default function StudentDetails() {
                                 disabled={issuingCert || !certForm.fullName.trim() || !certForm.courseTitle.trim()}
                                 onClick={handleIssueCertificate}
                                 style={{
-                                    background: isReassign ? '#b45309' : '#1a4d3e',
+                                    background: isReassign ? 'var(--lgl-warning)' : 'var(--index-primary-color)',
                                     color: 'white',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     height: '44px',
                                     margin: 0,
-                                    boxShadow: isReassign ? '0 4px 12px rgba(180,83,9,0.2)' : '0 4px 12px rgba(26, 77, 62, 0.2)'
+                                    boxShadow: isReassign ? '0 4px 12px color-mix(in srgb, var(--lgl-warning) 20%, transparent)' : '0 4px 12px color-mix(in srgb, var(--index-primary-color) calc(0.2 * 100%), transparent)'
                                 }}
                             >
                                 {issuingCert ? (

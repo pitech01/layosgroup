@@ -11,8 +11,7 @@ import {
     Video,
     Users,
     FileText,
-    HelpCircle,
-    UserCheck
+    HelpCircle
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -121,7 +120,7 @@ export default function CourseLibrary() {
                 .staff-scope-2 .library-header-premium h1 {
                     font-size: 2.5rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     letter-spacing: -0.04em;
                     margin: 0;
                 }
@@ -133,7 +132,7 @@ export default function CourseLibrary() {
                 }
 
                 .staff-scope-2 .library-header-premium p {
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-size: 1.1rem;
                     font-weight: 600;
                     margin: 0.5rem 0 0 0;
@@ -156,7 +155,7 @@ export default function CourseLibrary() {
                     flex: 1;
                     height: 56px;
                     background: white;
-                    border: 2px solid #f1f5f9;
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 18px;
                     padding: 0 1.5rem;
                     display: flex;
@@ -172,7 +171,7 @@ export default function CourseLibrary() {
                     width: 100%;
                     font-size: 1rem;
                     font-weight: 600;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope-2 .filter-group {
@@ -193,20 +192,20 @@ export default function CourseLibrary() {
                     width: 180px;
                     height: 56px;
                     background: white;
-                    border: 2px solid #f1f5f9;
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 18px;
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
                     padding: 0 1.5rem;
                     font-weight: 800;
-                    color: #475569;
+                    color: var(--index-text-secondary);
                     cursor: pointer;
                     transition: all 0.2s;
                     flex-shrink: 0;
                 }
 
-                .staff-scope-2 .filter-pill-premium:hover { border-color: #1a4d3e30; color: #1a4d3e; }
+                .staff-scope-2 .filter-pill-premium:hover { border-color: var(--index-primary-color)30; color: var(--index-primary-color); }
 
                 .staff-scope-2 .template-grid {
                     display: grid;
@@ -226,7 +225,7 @@ export default function CourseLibrary() {
 
                 .staff-scope-2 .template-card-premium {
                     background: white;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 28px;
                     padding: 2rem;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -237,13 +236,13 @@ export default function CourseLibrary() {
                 .staff-scope-2 .template-card-premium:hover {
                     transform: translateY(-8px);
                     box-shadow: 0 20px 30px -10px rgba(0,0,0,0.05);
-                    border-color: #1a4d3e40;
+                    border-color: var(--index-primary-color)40;
                 }
 
                 .staff-scope-2 .category-badge-library {
                     padding: 4px 10px;
-                    background: #f0fdf4;
-                    color: #1a4d3e;
+                    background: var(--index-accent-soft-bg);
+                    color: var(--index-primary-color);
                     border-radius: 8px;
                     font-size: 0.7rem;
                     font-weight: 900;
@@ -257,13 +256,13 @@ export default function CourseLibrary() {
                     font-size: 1.4rem;
                     font-weight: 950;
                     margin: 0 0 0.75rem 0;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     letter-spacing: -0.02em;
                 }
 
                 .staff-scope-2 .template-description-premium {
                     font-size: 0.95rem;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-weight: 500;
                     line-height: 1.5;
                     margin-bottom: 2rem;
@@ -279,14 +278,14 @@ export default function CourseLibrary() {
                     justify-content: space-between;
                     align-items: center;
                     padding-top: 1.5rem;
-                    border-top: 1.5px solid #f1f5f9;
+                    border-top: 1.5px solid var(--index-hover-bg);
                 }
 
                 .staff-scope-2 .meta-item-library {
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     font-size: 0.8rem;
                     font-weight: 800;
                     text-transform: uppercase;
@@ -296,50 +295,50 @@ export default function CourseLibrary() {
                 .staff-scope-2 .action-fab-library {
                     padding: 0 1rem;
                     height: 44px;
-                    background: #f8fafc;
-                    border: 1.5px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 12px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     cursor: pointer;
                     transition: all 0.2s;
                 }
 
                 .staff-scope-2 .action-fab-library:hover {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                 }
 
                 .action-fab-library.delete-btn {
-                    color: #ef4444; 
-                    background: #fff1f2;
-                    border-color: #fee2e2;
+                    color: var(--lgl-error); 
+                    background: var(--index-danger-bg-soft);
+                    border-color: var(--index-danger-bg-soft);
                 }
 
                .staff-scope-2  .action-fab-library.delete-btn:hover {
-                    background: #ef4444;
+                    background: var(--lgl-error);
                     color: white;
-                    border-color: #ef4444;
+                    border-color: var(--lgl-error);
                 }
 
                .staff-scope-2  .action-fab-library.edit-btn {
-                    color: #1a4d3e;
-                    background: #f0fdf4;
-                    border-color: #dcfce7;
+                    color: var(--index-primary-color);
+                    background: var(--index-accent-soft-bg);
+                    border-color: color-mix(in srgb, var(--lgl-success) 15%, transparent);
                 }
 
                .staff-scope-2 .action-fab-library.edit-btn:hover {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                 }
 
                 .staff-scope-2 .btn-create-master {
                     height: 60px;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     border: none;
                     border-radius: 18px;
@@ -351,7 +350,7 @@ export default function CourseLibrary() {
                     justify-content: center;
                     gap: 12px;
                     cursor: pointer;
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 20%, transparent);
                     transition: all 0.3s;
                 }
 
@@ -365,7 +364,7 @@ export default function CourseLibrary() {
 
                .staff-scope-2  .btn-create-master:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.25);
+                    box-shadow: 0 20px 25px -5px color-mix(in srgb, var(--index-primary-color) 25%, transparent);
                 }
 
                 @media (max-width: 480px) {
@@ -397,7 +396,7 @@ export default function CourseLibrary() {
 
             <div className="search-filter-belt">
                 <div className="search-pill-premium shadow-premium">
-                    <Search size={22} color="#94a3b8" />
+                    <Search size={22} color="var(--index-text-faint)" />
                     <input
                         placeholder="Search courses..."
                         value={searchQuery}
@@ -418,14 +417,14 @@ export default function CourseLibrary() {
 
             {loading ? (
                 <div style={{ padding: '5rem', textAlign: 'center' }}>
-                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
-                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: '#64748b' }}>Opening Course Catalog...</p>
+                    <Loader2 className="animate-spin" size={48} color="var(--index-primary-color)" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '1.5rem', fontWeight: 800, color: 'var(--index-text-secondary)' }}>Opening Course Catalog...</p>
                 </div>
             ) : error ? (
-                <div style={{ padding: '3rem', background: '#fff1f2', borderRadius: '24px', border: '1.5px solid #ffe4e6', textAlign: 'center' }}>
-                    <AlertCircle size={40} color="#e11d48" style={{ margin: '0 auto 1rem' }} />
-                    <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 900 }}>Database Connection Failed</h3>
-                    <p style={{ color: '#64748b', fontWeight: 600, margin: '8px 0 2rem' }}>{error}</p>
+                <div style={{ padding: '3rem', background: 'var(--index-danger-bg-soft)', borderRadius: '24px', border: '1.5px solid var(--index-danger-bg-soft)', textAlign: 'center' }}>
+                    <AlertCircle size={40} color="var(--lgl-error)" style={{ margin: '0 auto 1rem' }} />
+                    <h3 style={{ margin: 0, color: 'var(--index-text-heading)', fontWeight: 900 }}>Database Connection Failed</h3>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, margin: '8px 0 2rem' }}>{error}</p>
                     <button onClick={fetchCourses} className="btn-primary-forest" style={{ margin: '0 auto' }}>Try Connecting Again</button>
                 </div>
             ) : (
@@ -445,12 +444,12 @@ export default function CourseLibrary() {
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '6px',
-                                    background: course.category === 'live' ? '#fee2e2' :
-                                        course.category === 'material' ? '#ecfdf5' :
-                                            course.category === 'quiz' ? '#fff7ed' : '#eff6ff',
-                                    color: course.category === 'live' ? '#b91c1c' :
-                                        course.category === 'material' ? '#065f46' :
-                                            course.category === 'quiz' ? '#9a3412' : '#1d4ed8'
+                                    background: course.category === 'live' ? 'var(--index-danger-bg-soft)' :
+                                        course.category === 'material' ? 'color-mix(in srgb, var(--lgl-success) 15%, transparent)' :
+                                            course.category === 'quiz' ? 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)' : 'var(--index-accent-soft-bg)',
+                                    color: course.category === 'live' ? 'var(--lgl-error)' :
+                                        course.category === 'material' ? 'var(--lgl-success)' :
+                                            course.category === 'quiz' ? 'var(--lgl-warning)' : 'var(--index-primary-color)'
                                 }}>
                                     {course.category === 'live' ? <Users size={12} /> :
                                         course.category === 'material' ? <FileText size={12} /> :
@@ -471,9 +470,6 @@ export default function CourseLibrary() {
                                     <Link to={`/instructor/courses/${course.id}/edit`} className="action-fab-library edit-btn shadow-sm" title="Edit Course" style={{ textDecoration: 'none', flex: '1 1 auto', gap: '8px', minWidth: '100px' }}>
                                         <Edit2 size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Edit</span>
                                     </Link>
-                                    <Link to={`/instructor/courses/${course.id}/certificate-design`} className="action-fab-library shadow-sm" title="Certificate" style={{ textDecoration: 'none', flex: '1 1 auto', gap: '8px', minWidth: '100px', background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd' }}>
-                                        <UserCheck size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Cert</span>
-                                    </Link>
                                     <button
                                         className="action-fab-library delete-btn shadow-sm"
                                         style={{ flex: '1 1 auto', gap: '8px', minWidth: '100px' }}
@@ -487,10 +483,10 @@ export default function CourseLibrary() {
 
                         </div>
                     )) : (
-                        <div style={{ gridColumn: '1 / -1', padding: '5rem', background: '#f8fafc', borderRadius: '32px', textAlign: 'center', border: '2px dashed #e2e8f0' }}>
-                            <Layers size={48} color="#cbd5e1" style={{ margin: '0 auto 1.5rem' }} />
-                            <h3 style={{ margin: 0, color: '#0f172a', fontWeight: 900 }}>No Courses Found</h3>
-                            <p style={{ color: '#64748b', fontWeight: 600, marginTop: '8px' }}>Your course library is currently empty. Create your first course syllabus to get started.</p>
+                        <div style={{ gridColumn: '1 / -1', padding: '5rem', background: 'var(--index-hover-bg)', borderRadius: '32px', textAlign: 'center', border: '2px dashed var(--index-border-color)' }}>
+                            <Layers size={48} color="var(--index-border-subtle)" style={{ margin: '0 auto 1.5rem' }} />
+                            <h3 style={{ margin: 0, color: 'var(--index-text-heading)', fontWeight: 900 }}>No Courses Found</h3>
+                            <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, marginTop: '8px' }}>Your course library is currently empty. Create your first course syllabus to get started.</p>
                         </div>
                     )}
                 </div>

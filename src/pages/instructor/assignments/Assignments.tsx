@@ -121,13 +121,13 @@ export default function InstructorAssignments() {
                 .staff-scope .header-content h1 {
                     font-size: 2.5rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0 0 0.5rem 0;
                     letter-spacing: -0.04em;
                 }
 
                 .header-content p {
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-weight: 600;
                     margin: 0;
                     font-size: 1.1rem;
@@ -137,24 +137,24 @@ export default function InstructorAssignments() {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     padding: 1rem 2rem;
                     border-radius: 16px;
                     text-decoration: none;
                     font-weight: 900;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.3);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 30%, transparent);
                 }
 
                 .btn-create:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.4);
+                    box-shadow: 0 20px 25px -5px color-mix(in srgb, var(--index-primary-color) 40%, transparent);
                 }
 
                 .staff-scope .search-bar {
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 20px;
                     padding: 1.25rem;
                     margin-bottom: 2.5rem;
@@ -174,26 +174,26 @@ export default function InstructorAssignments() {
                     left: 16px;
                     top: 50%;
                     transform: translateY(-50%);
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                 }
 
                 .staff-scope .search-input {
                     width: 100%;
                     padding: 0.85rem 1rem 0.85rem 3rem;
-                    border: 1px solid #f1f5f9;
+                    border: 1px solid var(--index-hover-bg);
                     border-radius: 14px;
                     font-size: 1rem;
                     font-weight: 600;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     transition: all 0.2s;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope .search-input:focus {
                     outline: none;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     background: white;
-                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                    box-shadow: 0 0 0 4px color-mix(in srgb, var(--index-primary-color) 5%, transparent);
                 }
 
                 .staff-scope .assignment-grid {
@@ -204,7 +204,7 @@ export default function InstructorAssignments() {
 
                 .staff-scope .assignment-card {
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 28px;
                     padding: 2rem;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -215,7 +215,7 @@ export default function InstructorAssignments() {
                 }
 
                 .staff-scope .assignment-card:hover {
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     transform: translateY(-6px);
                     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
                 }
@@ -223,8 +223,8 @@ export default function InstructorAssignments() {
                 .staff-scope .cohort-badge {
                     display: inline-flex;
                     padding: 6px 14px;
-                    background: #f0fdf4;
-                    color: #166534;
+                    background: color-mix(in srgb, var(--lgl-success) 15%, transparent);
+                    color: var(--lgl-success);
                     border-radius: 10px;
                     font-size: 0.75rem;
                     font-weight: 900;
@@ -237,7 +237,7 @@ export default function InstructorAssignments() {
                 .staff-scope .assignment-title {
                     font-size: 1.4rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0 0 1rem 0;
                     line-height: 1.3;
                     letter-spacing: -0.02em;
@@ -254,7 +254,7 @@ export default function InstructorAssignments() {
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-size: 0.9rem;
                     font-weight: 600;
                 }
@@ -262,7 +262,7 @@ export default function InstructorAssignments() {
                 .staff-scope .card-footer {
                     margin-top: auto;
                     padding-top: 1.5rem;
-                    border-top: 1px solid #f1f5f9;
+                    border-top: 1px solid var(--index-hover-bg);
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -276,31 +276,31 @@ export default function InstructorAssignments() {
                 .staff-scope .submission-count {
                     font-size: 1.25rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope .submission-label {
                     font-size: 0.75rem;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     font-weight: 800;
                     text-transform: uppercase;
                 }
 
                 .staff-scope .btn-submissions {
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     width: 48px;
                     height: 48px;
                     border-radius: 16px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #1a4d3e;
+                    color: var(--index-primary-color);
                     transition: all 0.2s;
-                    border: 1px solid #f1f5f9;
+                    border: 1px solid var(--index-hover-bg);
                 }
 
                 .staff-scope .btn-submissions:hover {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     transform: scale(1.05);
                 }
@@ -309,51 +309,51 @@ export default function InstructorAssignments() {
                     position: absolute;
                     top: 2rem;
                     right: 4.5rem;
-                    color: #cbd5e1;
+                    color: var(--index-text-faint);
                 }
 
                 .staff-scope .btn-delete {
-                    background: #fff1f2;
+                    background: var(--index-danger-bg-soft);
                     width: 42px;
                     height: 42px;
                     border-radius: 14px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #dc2626;
+                    color: var(--lgl-error);
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 1px solid #fecaca;
+                    border: 1px solid color-mix(in srgb, var(--lgl-error) 30%, transparent);
                     cursor: pointer;
                     margin-left: 10px;
-                    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.05);
+                    box-shadow: 0 2px 4px color-mix(in srgb, var(--lgl-error) 5%, transparent);
                 }
 
                 .staff-scope .btn-delete:hover {
-                    background: #dc2626;
+                    background: var(--lgl-error);
                     color: white;
                     transform: scale(1.1);
-                    box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.2);
-                    border-color: #dc2626;
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--lgl-error) 20%, transparent);
+                    border-color: var(--lgl-error);
                 }
 
                 .staff-scope .btn-edit {
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     width: 42px;
                     height: 42px;
                     border-radius: 14px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #475569;
+                    color: var(--index-text-secondary);
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     cursor: pointer;
                     margin-left: 10px;
                 }
 
                 .staff-scope .btn-edit:hover {
-                    background: #e2e8f0;
-                    color: #0f172a;
+                    background: var(--index-border-color);
+                    color: var(--index-text-heading);
                     transform: scale(1.1);
                 }
             `}</style>
@@ -379,28 +379,28 @@ export default function InstructorAssignments() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="btn-standard" style={{ padding: '0.85rem 1.5rem', background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', fontWeight: 800, color: '#475569' }}>
+                <button className="btn-standard" style={{ padding: '0.85rem 1.5rem', background: 'var(--index-card-bg)', border: '1px solid var(--index-border-color)', borderRadius: '14px', fontWeight: 800, color: 'var(--index-text-secondary)' }}>
                     <Filter size={18} /> Filters
                 </button>
             </div>
 
             {loading ? (
                 <div style={{ padding: '10rem 0', textAlign: 'center' }}>
-                    <Loader2 className="animate-spin" size={48} color="#1a4d3e" style={{ margin: '0 auto' }} />
-                    <p style={{ marginTop: '2rem', fontWeight: 800, color: '#64748b', fontSize: '1.1rem' }}>Sychronizing assignment data...</p>
+                    <Loader2 className="animate-spin" size={48} color="var(--index-primary-color)" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '2rem', fontWeight: 800, color: 'var(--index-text-secondary)', fontSize: '1.1rem' }}>Sychronizing assignment data...</p>
                 </div>
             ) : error ? (
-                <div style={{ padding: '4rem', background: '#fff1f2', borderRadius: '32px', textAlign: 'center', border: '1px solid #ffe4e6' }}>
-                    <AlertCircle size={48} color="#e11d48" style={{ margin: '0 auto 1.5rem' }} />
-                    <h3 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.5rem' }}>Connection Interrupted</h3>
-                    <p style={{ color: '#64748b', fontWeight: 600, margin: '1rem 0 2.5rem' }}>{error}</p>
+                <div style={{ padding: '4rem', background: 'var(--index-danger-bg-soft)', borderRadius: '32px', textAlign: 'center', border: '1px solid var(--index-danger-bg-soft)' }}>
+                    <AlertCircle size={48} color="var(--lgl-error)" style={{ margin: '0 auto 1.5rem' }} />
+                    <h3 style={{ margin: 0, fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.5rem' }}>Connection Interrupted</h3>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, margin: '1rem 0 2.5rem' }}>{error}</p>
                     <button onClick={fetchAssignments} className="btn-create" style={{ margin: '0 auto' }}>Retry Sync</button>
                 </div>
             ) : filteredAssignments.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '8rem 2rem', background: 'white', border: '2px dashed #e2e8f0', borderRadius: '40px' }}>
-                    <ClipboardList size={80} color="#cbd5e1" style={{ marginBottom: '2rem' }} />
-                    <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', margin: '0 0 1rem 0' }}>No assignments yet</h2>
-                    <p style={{ color: '#64748b', fontWeight: 600, marginBottom: '3rem', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 3rem auto' }}>
+                <div style={{ textAlign: 'center', padding: '8rem 2rem', background: 'var(--index-card-bg)', border: '2px dashed var(--index-border-color)', borderRadius: '40px' }}>
+                    <ClipboardList size={80} color="var(--index-text-faint)" style={{ marginBottom: '2rem' }} />
+                    <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--index-text-heading)', margin: '0 0 1rem 0' }}>No assignments yet</h2>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, marginBottom: '3rem', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 3rem auto' }}>
                         Start creating your first assignment to share resources and track student progress.
                     </p>
                     <Link to="/instructor/assignments/create" className="btn-create" style={{ display: 'inline-flex', margin: '0 auto' }}>
@@ -421,16 +421,16 @@ export default function InstructorAssignments() {
 
                             <div className="assignment-meta">
                                 <div className="meta-row">
-                                    <Calendar size={18} color="#1a4d3e" />
+                                    <Calendar size={18} color="var(--index-primary-color)" />
                                     <span>Due: {new Date(assignment.due_date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                 </div>
                                 <div className="meta-row">
-                                    <Clock size={18} color="#64748b" />
+                                    <Clock size={18} color="var(--index-text-secondary)" />
                                     <span>Time: {new Date(assignment.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                             </div>
 
-                            <p style={{ color: '#64748b', fontSize: '0.95rem', fontWeight: 600, margin: '0 0 2rem 0', lineBreak: 'anywhere', height: '3.6rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                            <p style={{ color: 'var(--index-text-secondary)', fontSize: '0.95rem', fontWeight: 600, margin: '0 0 2rem 0', lineBreak: 'anywhere', height: '3.6rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                                 {assignment.description}
                             </p>
 

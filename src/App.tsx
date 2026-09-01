@@ -2,10 +2,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import StudentLogin from './pages/auth/StudentLogin';
 import InstructorLogin from './pages/auth/InstructorLogin';
-// import AdminLogin from './pages/auth/AdminLogin';
-import StudentRegister from './pages/auth/StudentRegister';
+import AdminLogin from './pages/auth/AdminLogin';
+// import StudentRegister from './pages/auth/StudentRegister';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import StudentDashboard from './pages/student/Dashboard';
+import StudentCertificates from './pages/student/Certificates';
 import InstructorDashboard from './pages/instructor/InstructorDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Courses from './pages/student/courses/Courses';
@@ -34,6 +35,10 @@ import AssignmentSubmissions from './pages/instructor/assignments/AssignmentSubm
 import EditAssignment from "./pages/instructor/assignments/EditAssignment.tsx";
 import StudentAssignments from './pages/student/assignments/Assignments.tsx';
 import SubmitAssignment from './pages/student/assignments/SubmitAssignment.tsx';
+import StudentExams from './pages/student/exam/Exams.tsx';
+import TakeExam from './pages/student/exam/TakeExam.tsx';
+import QuizCategories from './pages/student/quiz/QuizCategories.tsx';
+import TakeQuiz from './pages/student/quiz/TakeQuiz.tsx';
 import NotFound from './pages/NotFound';
 import CheckoutSuccess from './pages/CheckoutSuccess';
 import AdminLayout from './components/layouts/AdminLayout';
@@ -49,10 +54,14 @@ import CreateInterview from './pages/instructor/interviews/CreateInterview';
 import EditInterview from './pages/instructor/interviews/EditInterview';
 import StudentInterviews from './pages/student/interviews/Interviews';
 import CertificateTemplateManager from './pages/instructor/CertificateTemplateManager';
+import DesignTemplatePicker from './pages/instructor/certificates/DesignTemplatePicker';
+import AssignCertificate from './pages/instructor/certificates/AssignCertificate';
 import ActivityLogsDetailed from './pages/instructor/ActivityLogsDetailed';
 import CertificateVerification from './pages/CertificateVerification';
 import InstructorReviews from './pages/instructor/Reviews';
 import InstructorAnnouncements from './pages/instructor/Announcements';
+import ManageInstructors from './pages/admin/ManageInstructors';
+import ManageUsers from './pages/admin/ManageUsers';
 import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 
@@ -76,9 +85,9 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<StudentLogin />} />
-            <Route path="/register" element={<StudentRegister />} />
+            {/* <Route path="/register" element={<StudentRegister />} /> */}
             <Route path="/instructor-login" element={<InstructorLogin />} />
-            {/* <Route path="/admin-login" element={<AdminLogin />} /> */}
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/verify/:uuid" element={<CertificateVerification />} />
             <Route path="/checkout-success" element={<CheckoutSuccess />} />
@@ -90,6 +99,7 @@ function App() {
             <Route element={<ProtectedRoute allowedRoles={['student']} />}>
               <Route element={<StudentLayout />}>
                 <Route path="/student/dashboard" element={<StudentDashboard />} />
+                <Route path="/student/certificates" element={<StudentCertificates />} />
                 <Route path="/student/courses" element={<Courses />} />
                 <Route path="/student/courses/:courseId" element={<CourseDetails />} />
                 <Route path="/student/courses/:courseId/lesson/:lessonId" element={<LessonView />} />
@@ -99,13 +109,17 @@ function App() {
                 <Route path="/student/courses/:courseId/channel" element={<StudentChannelPage />} />
                 <Route path="/student/assignments" element={<StudentAssignments />} />
                 <Route path="/student/assignments/:id/submit" element={<SubmitAssignment />} />
+                <Route path="/student/exam" element={<StudentExams />} />
+                <Route path="/student/exam/:cohortId" element={<TakeExam />} />
+                <Route path="/student/quiz" element={<QuizCategories />} />
+                <Route path="/student/quiz/:categoryId" element={<TakeQuiz />} />
                 <Route path="/student/interview" element={<StudentInterviews />} />
                 {/* Redirect legacy dashboard route if needed, or just keep /student/dashboard as main */}
                 <Route path="/student-dashboard" element={<Navigate to="/student/dashboard" replace />} />
               </Route>
             </Route>
 
-            <Route element={<ProtectedRoute allowedRoles={['instructor']} />}>
+            <Route element={<ProtectedRoute allowedRoles={['instructor', 'admin']} />}>
               <Route element={<InstructorLayout />}>
                 <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
                 <Route path="/instructor/cohorts" element={<MyCohorts />} />
@@ -139,7 +153,9 @@ function App() {
                 <Route path="/instructor/reviews" element={<InstructorReviews />} />
                 <Route path="/instructor/announcements" element={<InstructorAnnouncements />} />
                 <Route path="/instructor/activity-logs" element={<ActivityLogsDetailed />} />
-                <Route path="/instructor/courses/:courseId/certificate-design" element={<CertificateTemplateManager />} />
+                <Route path="/instructor/cohorts/:cohortId/certificate-design" element={<CertificateTemplateManager />} />
+                <Route path="/instructor/certificates/design" element={<DesignTemplatePicker />} />
+                <Route path="/instructor/certificates/assign" element={<AssignCertificate />} />
               </Route>
             </Route>
 
@@ -147,6 +163,8 @@ function App() {
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
               <Route element={<AdminLayout />}>
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/instructors" element={<ManageInstructors />} />
+                <Route path="/admin/users" element={<ManageUsers />} />
               </Route>
             </Route>
 

@@ -7,7 +7,13 @@ import {
     ShieldCheck,
     CheckCircle,
     Info,
-    AlertCircle
+    AlertCircle,
+    Phone,
+    GraduationCap,
+    BookOpen,
+    CreditCard,
+    DollarSign,
+    Clock
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -19,7 +25,12 @@ export default function AddStudent() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        phone: '',
         password: '',
+        course_name: 'Foundation Academy',
+        education_level: "Bachelor's Degree",
+        payment_plan: 'full', // 'full' (100%) or 'installment' (50%)
+        payment_method: 'manual',
         cohorts: cohortIdFromUrl ? [cohortIdFromUrl] : [] as string[],
         sendWelcomeEmail: true
     });
@@ -43,6 +54,12 @@ export default function AddStudent() {
             const data = await response.json();
             if (response.ok) {
                 setCohorts(data);
+                if (cohortIdFromUrl && data.length > 0) {
+                    const matched = data.find((c: any) => String(c.id) === String(cohortIdFromUrl));
+                    if (matched && matched.course?.title) {
+                        setFormData(prev => ({ ...prev, course_name: matched.course.title }));
+                    }
+                }
             }
         } catch (err) {
             console.error('Failed to load academic sessions.');
@@ -55,10 +72,21 @@ export default function AddStudent() {
 
     const toggleCohort = (id: string) => {
         setFormData(prev => {
-            const selected = prev.cohorts.includes(id)
+            const isSelected = prev.cohorts.includes(id);
+            const selected = isSelected
                 ? prev.cohorts.filter(c => c !== id)
                 : [...prev.cohorts, id];
-            return { ...prev, cohorts: selected };
+
+            // If selecting a cohort and course_name matches default or is empty, adopt the cohort course
+            let nextCourseName = prev.course_name;
+            if (!isSelected) {
+                const found = cohorts.find(c => String(c.id) === String(id));
+                if (found && found.course?.title) {
+                    nextCourseName = found.course.title;
+                }
+            }
+
+            return { ...prev, cohorts: selected, course_name: nextCourseName };
         });
     };
 
@@ -68,6 +96,8 @@ export default function AddStudent() {
         setError(null);
 
         try {
+            const isInstallment = formData.payment_plan === 'installment';
+
             const response = await fetch(`${API_URL}/students`, {
                 method: 'POST',
                 headers: {
@@ -78,8 +108,16 @@ export default function AddStudent() {
                 body: JSON.stringify({
                     name: formData.name,
                     email: formData.email,
+                    phone: formData.phone || null,
+                    course_name: formData.course_name,
+                    education_level: formData.education_level,
+                    payment_plan: formData.payment_plan,
+                    payment_method: formData.payment_method,
+                    payment_status: 'approved',
+                    payment_tracking_enabled: isInstallment,
                     cohorts: formData.cohorts,
-                    password: formData.password || undefined // Use default if empty
+                    password: formData.password || undefined,
+                    send_welcome_email: formData.sendWelcomeEmail
                 })
             });
 
@@ -89,7 +127,7 @@ export default function AddStudent() {
                 setIsSuccess(true);
                 setTimeout(() => {
                     navigate('/instructor/students');
-                }, 2000);
+                }, 1800);
             } else {
                 throw new Error(data.message || 'Enrollment rejected by central registry.');
             }
@@ -103,11 +141,11 @@ export default function AddStudent() {
         return (
             <div className="add-student-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
                 <div style={{ textAlign: 'center', animation: 'scaleIn 0.5s ease-out' }}>
-                    <div style={{ width: '100px', height: '100px', background: '#f0fdf4', borderRadius: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem', color: '#1a4d3e' }}>
+                    <div style={{ width: '100px', height: '100px', background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)', borderRadius: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2.5rem', color: 'var(--index-primary-color)' }}>
                         <CheckCircle size={50} />
                     </div>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', margin: '0 0 1rem 0' }}>Student Enrolled</h2>
-                    <p style={{ color: '#64748b', fontSize: '1.2rem', fontWeight: 600 }}>The registration process is complete. Assigning student to the selected cohorts...</p>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 950, color: 'var(--index-text-heading)', margin: '0 0 1rem 0' }}>Student Enrolled</h2>
+                    <p style={{ color: 'var(--index-text-secondary)', fontSize: '1.2rem', fontWeight: 600 }}>The student profile has been created and verified successfully. Redirecting...</p>
                 </div>
             </div>
         );
@@ -117,7 +155,7 @@ export default function AddStudent() {
         <div className="add-student-container">
             <style>{`
                 .staff-scope .add-student-container {
-                    max-width: 1000px;
+                    max-width: 1050px;
                     margin: 0 auto;
                     font-family: 'Inter', system-ui, -apple-system, sans-serif;
                 }
@@ -126,7 +164,7 @@ export default function AddStudent() {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     text-decoration: none;
                     font-weight: 800;
                     font-size: 0.9rem;
@@ -135,20 +173,20 @@ export default function AddStudent() {
                 }
 
                 .staff-scope .back-link:hover {
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope .registration-layout {
                     display: grid;
-                    grid-template-columns: 1.2fr 0.8fr;
-                    gap: 3rem;
+                    grid-template-columns: 1.25fr 0.75fr;
+                    gap: 2.5rem;
                 }
 
                 .staff-scope .form-card-premium {
                     background: white;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 32px;
-                    padding: 3rem;
+                    padding: 2.75rem;
                     box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02);
                 }
 
@@ -156,27 +194,30 @@ export default function AddStudent() {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    margin-bottom: 2.5rem;
+                    margin-bottom: 1.75rem;
                 }
 
                 .staff-scope .icon-box {
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     padding: 10px;
                     border-radius: 12px;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
 
-               .staff-scope  .section-title h2 {
+                .staff-scope .section-title h2 {
                     margin: 0;
-                    font-size: 1.5rem;
+                    font-size: 1.35rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope .form-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    gap: 1.5rem;
+                    gap: 1.25rem;
                     margin-bottom: 2rem;
                 }
 
@@ -186,14 +227,14 @@ export default function AddStudent() {
                     gap: 8px;
                 }
 
-               .staff-scope  .form-group.full-width {
+                .staff-scope .form-group.full-width {
                     grid-column: 1 / -1;
                 }
 
-               .staff-scope  .form-group label {
+                .staff-scope .form-group label {
                     font-weight: 850;
-                    color: #0f172a;
-                    font-size: 0.9rem;
+                    color: var(--index-text-heading);
+                    font-size: 0.88rem;
                     letter-spacing: -0.01em;
                 }
 
@@ -206,27 +247,77 @@ export default function AddStudent() {
                     left: 16px;
                     top: 50%;
                     transform: translateY(-50%);
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                 }
 
-                .staff-scope .premium-input {
+                .staff-scope .premium-input,
+                .staff-scope .premium-select {
                     width: 100%;
                     padding: 0.85rem 1.25rem 0.85rem 3rem;
-                    background: #fcfdfe;
-                    border: 1.5px solid #f1f5f9;
+                    background: var(--index-card-bg);
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 16px;
                     font-family: inherit;
-                    font-size: 0.95rem;
+                    font-size: 0.92rem;
                     font-weight: 600;
                     transition: all 0.3s;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
-                .staff-scope .premium-input:focus {
+                .staff-scope .premium-input:focus,
+                .staff-scope .premium-select:focus {
                     outline: none;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     background: white;
-                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                    box-shadow: 0 0 0 4px color-mix(in srgb, var(--index-primary-color) calc(0.05 * 100%), transparent);
+                }
+
+                .staff-scope .plan-cards-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .staff-scope .plan-card {
+                    padding: 1.25rem;
+                    border-radius: 18px;
+                    border: 2px solid var(--index-hover-bg);
+                    background: var(--index-card-bg);
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .staff-scope .plan-card:hover {
+                    border-color: color-mix(in srgb, var(--index-primary-color) 40%, transparent);
+                    background: var(--index-hover-bg);
+                }
+
+                .staff-scope .plan-card.selected {
+                    border-color: var(--index-primary-color);
+                    background: color-mix(in srgb, var(--index-primary-color) 8%, transparent);
+                }
+
+                .staff-scope .plan-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+
+                .staff-scope .plan-title {
+                    font-weight: 900;
+                    font-size: 0.95rem;
+                    color: var(--index-text-heading);
+                }
+
+                .staff-scope .plan-desc {
+                    font-size: 0.78rem;
+                    color: var(--index-text-secondary);
+                    font-weight: 600;
+                    line-height: 1.4;
                 }
 
                 .staff-scope .cohort-grid {
@@ -240,27 +331,27 @@ export default function AddStudent() {
                     align-items: center;
                     gap: 12px;
                     padding: 1rem;
-                    background: #fcfdfe;
-                    border: 1.5px solid #f1f5f9;
+                    background: var(--index-card-bg);
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 16px;
                     cursor: pointer;
                     transition: all 0.2s;
                 }
 
                 .staff-scope .cohort-item:hover {
-                    border-color: #1a4d3e;
-                    background: #f8fafc;
+                    border-color: var(--index-primary-color);
+                    background: var(--index-hover-bg);
                 }
 
                 .staff-scope .cohort-item.selected {
-                    background: #f0fdf4;
-                    border-color: #1a4d3e;
+                    background: color-mix(in srgb, var(--lgl-success) 12%, transparent);
+                    border-color: var(--index-primary-color);
                 }
 
                 .staff-scope .cohort-checkbox {
                     width: 20px;
                     height: 20px;
-                    accent-color: #1a4d3e;
+                    accent-color: var(--index-primary-color);
                 }
 
                 .staff-scope .cohort-info {
@@ -270,13 +361,13 @@ export default function AddStudent() {
 
                 .staff-scope .cohort-name {
                     font-weight: 850;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     font-size: 0.9rem;
                 }
 
                 .staff-scope .cohort-course {
                     font-size: 0.75rem;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-weight: 600;
                 }
 
@@ -287,17 +378,17 @@ export default function AddStudent() {
                 }
 
                 .staff-scope .info-card {
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     border-radius: 24px;
                     padding: 1.75rem;
-                    border: 1px solid #f1f5f9;
+                    border: 1px solid var(--index-hover-bg);
                 }
 
                 .info-card h4 {
                     margin: 0 0 1rem 0;
                     font-size: 1rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     display: flex;
                     align-items: center;
                     gap: 8px;
@@ -311,13 +402,13 @@ export default function AddStudent() {
 
                 .staff-scope .info-item-text {
                     font-size: 0.85rem;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-weight: 600;
                     line-height: 1.5;
                 }
 
                 .staff-scope .btn-submit {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     border: none;
                     padding: 1rem 2rem;
@@ -336,13 +427,25 @@ export default function AddStudent() {
 
                 .staff-scope .btn-submit:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 10px 20px -5px rgba(26, 77, 62, 0.3);
+                    box-shadow: 0 10px 20px -5px color-mix(in srgb, var(--index-primary-color) calc(0.3 * 100%), transparent);
                 }
 
                 .staff-scope .btn-submit:disabled {
                     opacity: 0.7;
                     cursor: not-allowed;
                     transform: none;
+                }
+
+                @media (max-width: 850px) {
+                    .staff-scope .registration-layout {
+                        grid-template-columns: 1fr;
+                    }
+                    .staff-scope .form-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .staff-scope .plan-cards-grid {
+                        grid-template-columns: 1fr;
+                    }
                 }
 
                 @keyframes scaleIn {
@@ -356,7 +459,7 @@ export default function AddStudent() {
             </button>
 
             {error && (
-                <div style={{ padding: '1.25rem', background: '#fff1f2', border: '1.5px solid #ffe4e6', borderRadius: '18px', color: '#e11d48', fontWeight: 700, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ padding: '1.25rem', background: 'var(--index-danger-bg-soft)', border: '1.5px solid var(--index-danger-bg-soft)', borderRadius: '18px', color: 'var(--lgl-error)', fontWeight: 700, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <AlertCircle size={20} />
                     {error}
                 </div>
@@ -365,20 +468,21 @@ export default function AddStudent() {
             <div className="registration-layout">
                 <div className="form-card-premium shadow-premium">
                     <form onSubmit={handleSubmit}>
+                        {/* Section 1: Basic Information */}
                         <div className="section-title">
-                            <div className="icon-box"><UserPlus size={22} /></div>
+                            <div className="icon-box"><UserPlus size={20} /></div>
                             <h2>Student Information</h2>
                         </div>
 
                         <div className="form-grid">
                             <div className="form-group full-width">
-                                <label>Full Name</label>
+                                <label>Full Name *</label>
                                 <div className="input-wrapper">
                                     <UserPlus className="input-icon" size={18} />
                                     <input
                                         type="text"
                                         className="premium-input"
-                                        placeholder="e.g. John Doe"
+                                        placeholder="e.g. Jane Doe"
                                         required
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -387,7 +491,7 @@ export default function AddStudent() {
                             </div>
 
                             <div className="form-group">
-                                <label>Email Address</label>
+                                <label>Email Address *</label>
                                 <div className="input-wrapper">
                                     <Mail className="input-icon" size={18} />
                                     <input
@@ -402,13 +506,27 @@ export default function AddStudent() {
                             </div>
 
                             <div className="form-group">
-                                <label>Password (Optional)</label>
+                                <label>Phone Number</label>
+                                <div className="input-wrapper">
+                                    <Phone className="input-icon" size={18} />
+                                    <input
+                                        type="tel"
+                                        className="premium-input"
+                                        placeholder="+1 (555) 000-0000"
+                                        value={formData.phone}
+                                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group full-width">
+                                <label>Temporary Password (Optional)</label>
                                 <div className="input-wrapper">
                                     <ShieldCheck className="input-icon" size={18} />
                                     <input
-                                        type="password"
+                                        type="text"
                                         className="premium-input"
-                                        placeholder="Auto-generated if empty"
+                                        placeholder="Defaults to 'password123' if left blank"
                                         value={formData.password}
                                         onChange={e => setFormData({ ...formData, password: e.target.value })}
                                     />
@@ -416,9 +534,114 @@ export default function AddStudent() {
                             </div>
                         </div>
 
-                        <div className="section-title" style={{ marginTop: '1rem' }}>
-                            <div className="icon-box"><Layers size={22} /></div>
-                            <h2>Assign Cohorts</h2>
+                        {/* Section 2: Course Track & Academic Background */}
+                        <div className="section-title" style={{ marginTop: '1.5rem' }}>
+                            <div className="icon-box"><BookOpen size={20} /></div>
+                            <h2>Academic Track & Education</h2>
+                        </div>
+
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label>Course / Program Track *</label>
+                                <div className="input-wrapper">
+                                    <BookOpen className="input-icon" size={18} />
+                                    <select
+                                        className="premium-select"
+                                        value={formData.course_name}
+                                        onChange={e => setFormData({ ...formData, course_name: e.target.value })}
+                                    >
+                                        <option value="Foundation Academy">Foundation Academy</option>
+                                        <option value="Professional Masterclass">Professional Masterclass</option>
+                                        <option value="All-in-One Dual Bundle">All-in-One Dual Bundle</option>
+                                        <option value="Cybersecurity Analyst Track">Cybersecurity Analyst Track</option>
+                                        <option value="Cloud Engineering Track">Cloud Engineering Track</option>
+                                        <option value="Custom Program">Custom Program</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Education Level</label>
+                                <div className="input-wrapper">
+                                    <GraduationCap className="input-icon" size={18} />
+                                    <select
+                                        className="premium-select"
+                                        value={formData.education_level}
+                                        onChange={e => setFormData({ ...formData, education_level: e.target.value })}
+                                    >
+                                        <option value="High School Diploma">High School Diploma / GED</option>
+                                        <option value="Associate Degree">Associate Degree</option>
+                                        <option value="Bachelor's Degree">Bachelor's Degree</option>
+                                        <option value="Master's Degree">Master's Degree</option>
+                                        <option value="Doctorate">Doctorate / PhD</option>
+                                        <option value="Professional Certification">Professional Certification</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Section 3: Payment Plan & Reminder Configuration */}
+                        <div className="section-title" style={{ marginTop: '1.5rem' }}>
+                            <div className="icon-box"><DollarSign size={20} /></div>
+                            <h2>Payment Plan & Tuition Tracking</h2>
+                        </div>
+
+                        <div className="plan-cards-grid">
+                            <div
+                                className={`plan-card ${formData.payment_plan === 'full' ? 'selected' : ''}`}
+                                onClick={() => setFormData({ ...formData, payment_plan: 'full' })}
+                            >
+                                <div className="plan-header">
+                                    <span className="plan-title">100% Full Payment</span>
+                                    <CreditCard size={18} color={formData.payment_plan === 'full' ? 'var(--index-primary-color)' : 'var(--index-text-faint)'} />
+                                </div>
+                                <p className="plan-desc">
+                                    Fully paid upfront. No remaining tuition reminder countdown or access locks will be applied.
+                                </p>
+                            </div>
+
+                            <div
+                                className={`plan-card ${formData.payment_plan === 'installment' ? 'selected' : ''}`}
+                                onClick={() => setFormData({ ...formData, payment_plan: 'installment' })}
+                            >
+                                <div className="plan-header">
+                                    <span className="plan-title" style={{ color: formData.payment_plan === 'installment' ? 'var(--lgl-warning)' : 'inherit' }}>
+                                        50% Installment Payment
+                                    </span>
+                                    <Clock size={18} color={formData.payment_plan === 'installment' ? 'var(--lgl-warning)' : 'var(--index-text-faint)'} />
+                                </div>
+                                <p className="plan-desc">
+                                    Part payment (50% down). <strong>Activates tuition deadline countdown reminder</strong> on student dashboard.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="form-grid">
+                            <div className="form-group full-width">
+                                <label>Payment Method</label>
+                                <div className="input-wrapper">
+                                    <CreditCard className="input-icon" size={18} />
+                                    <select
+                                        className="premium-select"
+                                        value={formData.payment_method}
+                                        onChange={e => setFormData({ ...formData, payment_method: e.target.value })}
+                                    >
+                                        <option value="manual">Manual / Instructor Verified (Direct Deposit / Offline)</option>
+                                        <option value="zelle">Zelle</option>
+                                        <option value="square">Square</option>
+                                        <option value="stripe">Stripe</option>
+                                        <option value="bank_transfer">Bank Wire / Transfer</option>
+                                        <option value="cash">Cash</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Section 4: Cohort Assignment */}
+                        <div className="section-title" style={{ marginTop: '1.5rem' }}>
+                            <div className="icon-box"><Layers size={20} /></div>
+                            <h2>Assign Cohort(s)</h2>
                         </div>
 
                         <div className="cohort-grid" style={{ marginBottom: '2rem' }}>
@@ -442,48 +665,58 @@ export default function AddStudent() {
                                     </div>
                                 ))
                             ) : (
-                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>No cohorts available.</p>
+                                <p style={{ color: 'var(--index-text-secondary)', fontSize: '0.9rem' }}>No cohorts available.</p>
                             )}
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', padding: '1.25rem', borderRadius: '18px', marginBottom: '2.5rem' }}>
+                        {/* Section 5: Email Notification */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--index-hover-bg)', padding: '1.25rem', borderRadius: '18px', marginBottom: '2.5rem' }}>
                             <input
                                 type="checkbox"
                                 id="welcomeEmail"
                                 checked={formData.sendWelcomeEmail}
                                 onChange={e => setFormData({ ...formData, sendWelcomeEmail: e.target.checked })}
-                                style={{ width: '20px', height: '20px', accentColor: '#1a4d3e' }}
+                                style={{ width: '20px', height: '20px', accentColor: 'var(--index-primary-color)' }}
                             />
-                            <label htmlFor="welcomeEmail" style={{ fontSize: '0.9rem', color: '#475569', fontWeight: 700, cursor: 'pointer' }}>
-                                Send welcome email with login credentials.
+                            <label htmlFor="welcomeEmail" style={{ fontSize: '0.9rem', color: 'var(--index-text-heading)', fontWeight: 750, cursor: 'pointer' }}>
+                                Send welcome email with login credentials and access details.
                             </label>
                         </div>
 
                         <button type="submit" className="btn-submit" disabled={isSubmitting}>
-                            {isSubmitting ? 'Adding Student...' : 'Create Student Profile'}
+                            {isSubmitting ? 'Enrolling Student...' : 'Create & Verify Student Profile'}
                         </button>
                     </form>
                 </div>
 
                 <div className="sidebar-info">
                     <div className="info-card shadow-premium">
-                        <h4><ShieldCheck size={18} color="#1a4d3e" /> Privacy & Security</h4>
+                        <h4><ShieldCheck size={18} color="var(--index-primary-color)" /> Instant Verification</h4>
                         <div className="info-item">
                             <div className="info-item-text">
-                                Student data is handled securely. Access to course materials is granted immediately upon successful enrollment.
+                                When added manually by an instructor, the student's status is automatically set to <strong>Approved</strong>. No pending manual review is required.
                             </div>
                         </div>
                     </div>
 
                     <div className="info-card shadow-premium">
-                        <h4><Info size={18} color="#0f172a" /> Enrollment Info</h4>
+                        <h4><Clock size={18} color="var(--lgl-warning)" /> 50% Reminder Automation</h4>
                         <div className="info-item">
-                            <CheckCircle size={16} color="#1a4d3e" style={{ flexShrink: 0, marginTop: '2px' }} />
-                            <div className="info-item-text">Students can start learning as soon as they receive their credentials.</div>
+                            <div className="info-item-text">
+                                Selecting <strong>50% Installment</strong> flags the student's account with tuition tracking. The student dashboard will automatically show the remaining balance countdown and payment link.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="info-card shadow-premium">
+                        <h4><Info size={18} color="var(--index-text-heading)" /> Credentials & Access</h4>
+                        <div className="info-item">
+                            <CheckCircle size={16} color="var(--index-primary-color)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                            <div className="info-item-text">The student can log in right away and access their assigned cohorts.</div>
                         </div>
                         <div className="info-item" style={{ marginBottom: 0 }}>
-                            <CheckCircle size={16} color="#1a4d3e" style={{ flexShrink: 0, marginTop: '2px' }} />
-                            <div className="info-item-text">A unique Student ID will be assigned to their profile.</div>
+                            <CheckCircle size={16} color="var(--index-primary-color)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                            <div className="info-item-text">You can resend login credentials at any time from their profile.</div>
                         </div>
                     </div>
                 </div>
@@ -491,3 +724,4 @@ export default function AddStudent() {
         </div>
     );
 }
+

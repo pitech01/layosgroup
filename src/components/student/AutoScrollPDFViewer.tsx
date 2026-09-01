@@ -87,7 +87,7 @@ const AutoScrollPDFViewer: React.FC<AutoScrollPDFViewerProps> = ({ url, currentP
             width: '100%', 
             height: '100%', 
             overflow: 'auto', 
-            background: '#020617', 
+            background: 'var(--lgl-charcoal)', 
             display: 'flex', 
             justifyContent: 'center', 
             padding: '3rem',
@@ -95,8 +95,8 @@ const AutoScrollPDFViewer: React.FC<AutoScrollPDFViewerProps> = ({ url, currentP
         }}>
             {!pdf && (
                 <div style={{ position: 'absolute', top: '40%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                    <Loader2 className="animate-spin" color="#49BABA" size={48} />
-                    <span style={{ color: '#94a3b8', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.1em' }}>INITIALIZING NATIVE GRAPHICS ENGINE...</span>
+                    <Loader2 className="animate-spin" color="var(--lgl-cyan)" size={48} />
+                    <span style={{ color: 'var(--color-lgl-gray-mid)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.1em' }}>INITIALIZING NATIVE GRAPHICS ENGINE...</span>
                 </div>
             )}
             

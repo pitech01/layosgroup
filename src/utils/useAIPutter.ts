@@ -1,8 +1,47 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { loadPdf, extractPdfPageText } from './pdfTextExtractor';
 
-const SERVERLESS_FUNCTION_ENDPOINT = "/api/chat";
-const MODEL_NAME = "gpt-4o-mini";
+// Calls Google Gemini directly from the client — same key/model/pattern used
+// by the mobile app (layos-mobile/src/services/ai-tutor.ts, app/(student)/ai-search.tsx).
+// No backend proxy, no credit/usage tracking. Replaces the old `/api/chat`
+// endpoint this hook used to call, which was never actually implemented server-side.
+const GEMINI_MODEL = "gemini-3.5-flash";
+
+const callGemini = async (systemInstruction: string, userText: string) => {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+        throw new Error('Missing Gemini API key in environment variables.');
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            contents: [{ role: 'user', parts: [{ text: userText }] }],
+            generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 4096,
+                thinkingConfig: { thinkingBudget: 0 },
+            },
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`AI Tutor busy (${response.status}): ${errorData.error?.message || 'Check connection'}`);
+    }
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+        console.error('Gemini API error details:', data);
+        throw new Error('The AI tutor could not generate a response.');
+    }
+    return text as string;
+};
 
 export type AIState = 'idle' | 'extracting' | 'summarizing' | 'ready' | 'speaking' | 'paused' | 'error';
 
@@ -161,35 +200,20 @@ export const useAIPutter = () => {
                 const chunkText = pagesContent.join('');
                 accumulatedFullText += chunkText;
 
-                const prompt = `CRITICAL GOAL: You are a Virtual Tutor creating detailed lesson sections for pages ${startPage} to ${endPage} of a ${totalPages}-page document.
-                
+                const systemInstruction = "You are a Virtual Tutor creating detailed, educational lesson sections from document pages. Maintain high factual accuracy.";
+                const prompt = `CRITICAL GOAL: Create detailed lesson sections for pages ${startPage} to ${endPage} of a ${totalPages}-page document.
+
                 Instructional Guidelines:
                 1. DETAIL: Provide a rich, educational summary for EACH page in this chunk.
                 2. FORMAT: Every page MUST use this EXACT format: SECTION TITLE: [Topic] | PAGE: [Int] | CONTENT: [Detailed Explanation]
                 3. FIDELITY: Maintain high factual accuracy.
-                
+
                 Document Content (Pages ${startPage}-${endPage}):
                 ${chunkText}`;
 
-
-                const response = await fetch(SERVERLESS_FUNCTION_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: MODEL_NAME,
-                        messages: [{ role: 'user', content: prompt }],
-                        temperature: 0.1,
-                        max_tokens: 4096
-                    })
-                });
+                const rawResponse = await callGemini(systemInstruction, prompt);
 
                 if (runId !== currentRunIdRef.current) return;
-
-
-                const data = await response.json();
-                const rawResponse = data.choices[0].message.content;
 
                 const sections = rawResponse.split(/SECTION TITLE:/i).filter((s: string) => s.trim().length > 0);
                 const chunkExplanations: AIExplanation[] = sections.map((s: string) => {
@@ -237,31 +261,13 @@ export const useAIPutter = () => {
 
     const askQuestion = async (question: string) => {
         try {
-
-
-            const response = await fetch(SERVERLESS_FUNCTION_ENDPOINT, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    model: MODEL_NAME,
-                    messages: [
-                        { role: 'system', content: "You are the Layos Virtual Tutor. Answer clearly based on document context." },
-                        { role: 'user', content: `Context: ${fullText.substring(0, 5000)}\n\nQuestion: ${question}` }
-                    ]
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`AI Tutor busy (${response.status}): ${errorData.error?.message || 'Check connection'}`);
-            }
-            const data = await response.json();
-            const answer = data.choices[0].message.content;
+            const answer = await callGemini(
+                "You are the Layos Virtual Tutor. Answer clearly based on document context.",
+                `Context: ${fullText.substring(0, 5000)}\n\nQuestion: ${question}`
+            );
             speakChatAnswer(answer);
             return answer;
-        } catch (err) {
+        } catch {
             return "I apologize, I'm having trouble thinking right now.";
         }
     };

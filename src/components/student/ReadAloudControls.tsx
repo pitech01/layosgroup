@@ -49,7 +49,7 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
           overflow: hidden;
         }
         .teaching-badge {
-          background: linear-gradient(135deg, #8b5cf6, #d946ef);
+          background: linear-gradient(135deg, var(--lgl-cyan), var(--lgl-cyan-dark));
           color: white;
           font-size: 0.55rem;
           font-weight: 800;
@@ -69,7 +69,7 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2.5px', background: 'rgba(255,255,255,0.05)' }}>
           <div style={{ 
             height: '100%', 
-            background: tts.isTeachingMode ? 'linear-gradient(90deg, #8b5cf6, #d946ef)' : 'linear-gradient(90deg, #10b981, #3b82f6)', 
+            background: tts.isTeachingMode ? 'linear-gradient(90deg, var(--lgl-cyan), var(--lgl-cyan-dark))' : 'linear-gradient(90deg, var(--lgl-cyan), var(--lgl-cyan-dark))', 
             width: `${tts.progressPct}%`, 
             transition: 'width 0.4s ease' 
           }} />
@@ -88,7 +88,7 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
             
             <button 
               className="tts-control-btn" 
-              style={{ background: 'white', color: '#0f172a', width: '36px', height: '36px' }}
+              style={{ background: 'white', color: 'var(--lgl-charcoal)', width: '36px', height: '36px' }}
               onClick={tts.ttsState === 'playing' ? tts.pause : tts.play}
             >
               {tts.ttsState === 'playing' ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: '1.5px' }} />}
@@ -99,18 +99,18 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
           <div style={{ flex: 1, minWidth: 0 }}>
             {tts.ttsState === 'extracting' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div className="animate-spin" style={{ width: 12, height: 12, border: '2px solid #10b981', borderTopColor: 'transparent', borderRadius: '50%' }} />
-                <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 700 }}>{tts.indexingProgress}%</span>
+                <div className="animate-spin" style={{ width: 12, height: 12, border: '2px solid var(--lgl-cyan)', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                <span style={{ color: 'var(--lgl-cyan)', fontSize: '0.75rem', fontWeight: 700 }}>{tts.indexingProgress}%</span>
               </div>
             ) : tts.ttsState === 'processing' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div className="animate-pulse" style={{ color: '#d946ef' }}>
+                <div className="animate-pulse" style={{ color: 'var(--lgl-cyan-dark)' }}>
                    <Brain size={14} />
                 </div>
-                <span style={{ color: '#d946ef', fontSize: '0.75rem', fontWeight: 700 }}>Loading...</span>
+                <span style={{ color: 'var(--lgl-cyan-dark)', fontSize: '0.75rem', fontWeight: 700 }}>Loading...</span>
               </div>
             ) : tts.ttsState === 'error' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--lgl-error)' }}>
                 <AlertCircle size={12} />
                 <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Error</span>
               </div>
@@ -121,7 +121,7 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
                     <Sparkles size={8} /> AI Mode
                   </div>
                 )}
-                <span style={{ color: '#94a3b8', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1 }}>
+                <span style={{ color: 'var(--lgl-gray-mid)', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1 }}>
                   {tts.engine === 'ai' ? `MMS (${tts.language.toUpperCase()})` : 'Native'} • {tts.currentChunk}/{tts.totalChunks}
                 </span>
                 <span style={{ 
@@ -149,7 +149,7 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
               onClick={() => tts.setIsTeachingMode(!tts.isTeachingMode)}
               style={{ 
                 background: tts.isTeachingMode ? 'rgba(217, 70, 239, 0.15)' : 'transparent',
-                color: tts.isTeachingMode ? '#d946ef' : 'white',
+                color: tts.isTeachingMode ? 'var(--lgl-cyan-dark)' : 'white',
               }}
               title={tts.isTeachingMode ? 'Disable AI Assistant' : 'Enable AI Assistant'}
             >
@@ -186,7 +186,7 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
               <div style={{ flex: 1 }}>
                 {tts.engine === 'native' ? (
                   <>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#94a3b8', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--lgl-gray-mid)', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.3rem' }}>
                       Voice
                     </label>
                     <select 
@@ -195,7 +195,7 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
                         const v = tts.availableVoices.find(v => v.name === e.target.value);
                         if (v) tts.setVoice(v);
                       }}
-                      style={{ width: '100%', background: '#1e293b', color: 'white', border: '1px solid #334155', borderRadius: '6px', padding: '0.3rem', fontSize: '0.75rem', outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--lgl-charcoal)', color: 'white', border: '1px solid var(--lgl-gray-dark)', borderRadius: '6px', padding: '0.3rem', fontSize: '0.75rem', outline: 'none' }}
                     >
                       {tts.availableVoices.map(v => (
                         <option key={v.name} value={v.name}>{cleanVoiceName(v.name)}</option>
@@ -204,13 +204,13 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
                   </>
                 ) : (
                   <>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#94a3b8', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--lgl-gray-mid)', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.3rem' }}>
                       Region Tones
                     </label>
                     <select 
                       value={tts.language} 
                       onChange={(e) => tts.setLanguage(e.target.value)}
-                      style={{ width: '100%', background: '#1e293b', color: 'white', border: '1px solid #334155', borderRadius: '6px', padding: '0.3rem', fontSize: '0.75rem', outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--lgl-charcoal)', color: 'white', border: '1px solid var(--lgl-gray-dark)', borderRadius: '6px', padding: '0.3rem', fontSize: '0.75rem', outline: 'none' }}
                     >
                       <option value="eng">English</option>
                       <option value="yor">Yoruba</option>
@@ -223,12 +223,12 @@ const ReadAloudControls: React.FC<ReadAloudControlsProps> = ({ tts, onClose }) =
 
               <div style={{ width: '100px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <div>
-                  <label style={{ color: '#94a3b8', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', display: 'block' }}>Rate {tts.rate}x</label>
+                  <label style={{ color: 'var(--lgl-gray-mid)', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', display: 'block' }}>Rate {tts.rate}x</label>
                   <input 
                     type="range" min="0.5" max="1.5" step="0.05" 
                     value={tts.rate} 
                     onChange={(e) => tts.setRate(parseFloat(e.target.value))}
-                    style={{ width: '100%', accentColor: '#10b981', height: '14px' }}
+                    style={{ width: '100%', accentColor: 'var(--lgl-cyan)', height: '14px' }}
                   />
                 </div>
               </div>

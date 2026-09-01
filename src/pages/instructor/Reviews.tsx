@@ -182,7 +182,7 @@ const Reviews = () => {
                 .reviews-header-block h1 {
                     font-size: 2.25rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0;
                     letter-spacing: -0.03em;
                     display: flex;
@@ -192,7 +192,7 @@ const Reviews = () => {
 
                 .staff-scope .reviews-dashboard-card {
                     background: white;
-                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border: 1px solid color-mix(in srgb, var(--index-border-color) 80%, transparent);
                     border-radius: 32px;
                     overflow: hidden;
                     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.01);
@@ -208,7 +208,7 @@ const Reviews = () => {
                     flex-wrap: wrap;
                     gap: 1.5rem;
                     margin-bottom: 2rem;
-                    border-bottom: 1px solid #f1f5f9;
+                    border-bottom: 1px solid var(--index-hover-bg);
                     padding-bottom: 1.5rem;
                 }
 
@@ -221,19 +221,19 @@ const Reviews = () => {
                 .staff-scope .select-premium-dropdown {
                     height: 44px;
                     padding: 0 1.25rem;
-                    background: #f8fafc;
-                    border: 1.5px solid #e2e8f0;
+                    background: var(--index-hover-bg);
+                    border: 1.5px solid var(--index-border-color);
                     border-radius: 12px;
                     font-size: 0.9rem;
                     font-weight: 700;
-                    color: #475569;
+                    color: var(--index-text-secondary);
                     outline: none;
                     cursor: pointer;
                     transition: all 0.2s;
                 }
 
                 .select-premium-dropdown:focus {
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     background: white;
                 }
 
@@ -252,8 +252,8 @@ const Reviews = () => {
 
                 /* Premium Card styling */
                 .staff-scope .review-premium-card {
-                    background: #ffffff;
-                    border: 1px solid #e2e8f0;
+                    background: var(--index-card-bg);
+                    border: 1px solid var(--index-border-color);
                     border-radius: 24px;
                     padding: 1.75rem;
                     display: flex;
@@ -267,7 +267,7 @@ const Reviews = () => {
                 .review-premium-card:hover {
                     transform: translateY(-4px);
                     box-shadow: 0 12px 20px -5px rgba(0,0,0,0.05);
-                    border-color: #cbd5e1;
+                    border-color: var(--index-text-faint);
                 }
 
                 .staff-scope .review-card-header {
@@ -287,8 +287,8 @@ const Reviews = () => {
                     width: 46px;
                     height: 46px;
                     border-radius: 12px;
-                    background: #ecfdf5;
-                    color: #047857;
+                    background: color-mix(in srgb, var(--lgl-success) 12%, transparent);
+                    color: var(--lgl-success);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -302,14 +302,14 @@ const Reviews = () => {
                 .staff-scope .reviewer-meta-text h3 {
                     font-size: 1rem;
                     font-weight: 800;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0;
                     letter-spacing: -0.01em;
                 }
 
                 .staff-scope .reviewer-meta-text p {
                     font-size: 0.8rem;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     margin: 0.15rem 0 0 0;
                     font-weight: 600;
                 }
@@ -325,15 +325,15 @@ const Reviews = () => {
                     flex-shrink: 0;
                 }
 
-                .badge-courses { background: #e0f2fe; color: #0369a1; }
-                .badge-placement { background: #ecfdf5; color: #047857; }
-                .badge-coaching { background: #f3e8ff; color: #6b21a8; }
-                .badge-general { background: #f1f5f9; color: #475569; }
+                .badge-courses { background: var(--index-accent-soft-bg); color: var(--lgl-cyan-dark); }
+                .badge-placement { background: color-mix(in srgb, var(--lgl-success) 12%, transparent); color: var(--lgl-success); }
+                .badge-coaching { background: var(--index-accent-soft-bg); color: var(--lgl-cyan-dark); }
+                .badge-general { background: var(--index-hover-bg); color: var(--index-text-secondary); }
 
                 .staff-scope .review-card-text {
                     font-size: 0.95rem;
                     line-height: 1.6;
-                    color: #334155;
+                    color: var(--index-text-secondary);
                     font-weight: 500;
                     margin: 0;
                     flex-grow: 1;
@@ -351,8 +351,8 @@ const Reviews = () => {
 
                 /* Screenshot Area */
                 .staff-scope .screenshot-upload-area {
-                    background: #f8fafc;
-                    border: 2px dashed #cbd5e1;
+                    background: var(--index-hover-bg);
+                    border: 2px dashed var(--index-text-faint);
                     border-radius: 16px;
                     padding: 1rem;
                     display: flex;
@@ -372,12 +372,12 @@ const Reviews = () => {
                     height: 50px;
                     border-radius: 8px;
                     object-fit: cover;
-                    background: #e2e8f0;
-                    border: 1px solid #cbd5e1;
+                    background: var(--index-border-color);
+                    border: 1px solid var(--index-text-faint);
                 }
 
                 .staff-scope .btn-upload-screenshot {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     border: none;
                     border-radius: 10px;
@@ -400,14 +400,14 @@ const Reviews = () => {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    border-top: 1px solid #f1f5f9;
+                    border-top: 1px solid var(--index-hover-bg);
                     padding-top: 1.25rem;
                     margin-top: 0.5rem;
                 }
 
                 .staff-scope .review-date-text {
                     font-size: 0.8rem;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     display: flex;
                     align-items: center;
                     gap: 4px;
@@ -432,21 +432,21 @@ const Reviews = () => {
                     transition: all 0.2s;
                 }
 
-                .action-mini-trigger.delete { background: #fef2f2; color: #ef4444; }
-                .action-mini-trigger.delete:hover { background: #ef4444; color: white; }
+                .action-mini-trigger.delete { background: var(--index-danger-bg-soft); color: var(--lgl-error); }
+                .action-mini-trigger.delete:hover { background: var(--lgl-error); color: white; }
 
                 .action-mini-trigger:disabled {
                     opacity: 0.5;
                     cursor: not-allowed;
-                    background: #f1f5f9 !important;
-                    color: #94a3b8 !important;
+                    background: var(--index-hover-bg) !important;
+                    color: var(--index-text-faint) !important;
                 }
 
                 /* Premium Lightbox Overlay */
                 .staff-scope .lightbox-overlay-premium {
                     position: fixed;
                     inset: 0;
-                    background: rgba(2, 6, 23, 0.95);
+                    background: color-mix(in srgb, var(--lgl-charcoal) 95%, transparent);
                     backdrop-filter: blur(12px);
                     z-index: 999999;
                     display: flex;
@@ -485,18 +485,18 @@ const Reviews = () => {
 
             <header className="reviews-header-block">
                 <div>
-                    <h1><Star size={30} fill="#1a4d3e" color="#1a4d3e" /> Alumni Reviews</h1>
-                    <p style={{ color: '#64748b', fontWeight: 600, marginTop: '0.5rem' }}>View submitted feedback and upload WhatsApp/conversation screenshots to showcase on the main landing page.</p>
+                    <h1><Star size={30} fill="var(--index-primary-color)" color="var(--index-primary-color)" /> Alumni Reviews</h1>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, marginTop: '0.5rem' }}>View submitted feedback and upload WhatsApp/conversation screenshots to showcase on the main landing page.</p>
                 </div>
             </header>
 
             <div className="reviews-dashboard-card">
                 <div className="reviews-toolbar">
-                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#0f172a' }}>All Feedback Submissions</h3>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: 'var(--index-text-heading)' }}>All Feedback Submissions</h3>
 
                     {/* Category Filter */}
                     <div className="filter-select-wrap">
-                        <Filter size={18} color="#64748b" />
+                        <Filter size={18} color="var(--index-text-secondary)" />
                         <select
                             className="select-premium-dropdown"
                             value={categoryFilter}
@@ -513,14 +513,14 @@ const Reviews = () => {
 
                 {loading ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 0', gap: '1rem' }}>
-                        <Loader2 size={42} className="animate-spin" color="#1a4d3e" />
-                        <p style={{ color: '#64748b', fontWeight: 700 }}>Fetching reviewed logs...</p>
+                        <Loader2 size={42} className="animate-spin" color="var(--index-primary-color)" />
+                        <p style={{ color: 'var(--index-text-secondary)', fontWeight: 700 }}>Fetching reviewed logs...</p>
                     </div>
                 ) : filteredReviews.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '5rem 2rem', border: '2px dashed #e2e8f0', borderRadius: '24px', background: '#f8fafc' }}>
-                        <MessageSquare size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#475569', margin: 0 }}>No Reviews Found</h3>
-                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '0.4rem', fontWeight: 600 }}>There are no reviews matching your currently active filter layout.</p>
+                    <div style={{ textAlign: 'center', padding: '5rem 2rem', border: '2px dashed var(--index-border-color)', borderRadius: '24px', background: 'var(--index-hover-bg)' }}>
+                        <MessageSquare size={48} color="var(--index-text-faint)" style={{ margin: '0 auto 1rem' }} />
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--index-text-secondary)', margin: 0 }}>No Reviews Found</h3>
+                        <p style={{ color: 'var(--index-text-faint)', fontSize: '0.9rem', marginTop: '0.4rem', fontWeight: 600 }}>There are no reviews matching your currently active filter layout.</p>
                     </div>
                 ) : (
                     <div className="reviews-grid-deck animate-fade-in-up">
@@ -555,9 +555,9 @@ const Reviews = () => {
                                                     className="screenshot-thumb" 
                                                 />
                                                 <div>
-                                                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#16a34a', display: 'block' }}>Screenshot Active</span>
+                                                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--lgl-success)', display: 'block' }}>Screenshot Active</span>
                                                     <button 
-                                                        style={{ background: 'none', border: 'none', color: '#1a4d3e', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px', cursor: 'pointer', padding: 0, marginTop: '2px' }}
+                                                        style={{ background: 'none', border: 'none', color: 'var(--index-primary-color)', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px', cursor: 'pointer', padding: 0, marginTop: '2px' }}
                                                         onClick={() => setPreviewImage(review.image)}
                                                     >
                                                         <Eye size={12} /> View Image
@@ -566,12 +566,12 @@ const Reviews = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <div style={{ width: '50px', height: '50px', borderRadius: '8px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #cbd5e1', color: '#94a3b8' }}>
+                                                <div style={{ width: '50px', height: '50px', borderRadius: '8px', background: 'var(--index-hover-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--index-border-color)', color: 'var(--index-text-faint)' }}>
                                                     <Image size={24} style={{ margin: 'auto' }} />
                                                 </div>
                                                 <div>
-                                                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#64748b', display: 'block' }}>No Screenshot Uploaded</span>
-                                                    <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginTop: '2px' }}>Not active on landing page</span>
+                                                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--index-text-secondary)', display: 'block' }}>No Screenshot Uploaded</span>
+                                                    <span style={{ fontSize: '0.72rem', color: 'var(--index-text-faint)', display: 'block', marginTop: '2px' }}>Not active on landing page</span>
                                                 </div>
                                             </>
                                         )}

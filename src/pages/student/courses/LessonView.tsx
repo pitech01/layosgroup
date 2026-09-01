@@ -68,7 +68,7 @@ const VideoAudioVisualizer = ({ video }: { video: HTMLVideoElement | null }) => 
             animationRef.current = requestAnimationFrame(draw);
             analyser.getByteFrequencyData(dataArray);
 
-            ctx.fillStyle = '#111827'; 
+            ctx.fillStyle = '#1E1F2B'; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const barWidth = (canvas.width / bufferLength) * 2.0;
@@ -207,7 +207,7 @@ const LessonView = () => {
         if (quizResult?.passed && !isCompleted && !autoCompletedRef.current) {
             autoCompletedRef.current = true;
             toast.success('Congratulations,assessment passed! You have successfully completed this lesson.', {
-                style: { background: '#10B981', color: '#fff', fontWeight: 'bold' },
+                style: { background: 'var(--lgl-success)', color: '#fff', fontWeight: 'bold' },
                 duration: 4000
             });
             handleCompleteLesson({ score: quizResult.score, answers: selectedAnswers, forceComplete: true });
@@ -267,7 +267,7 @@ const LessonView = () => {
         if (!hasQuiz) {
             autoCompletedRef.current = true;
             toast.success("Great job! Lesson automatically marked as complete.", {
-                style: { background: '#10B981', color: '#fff', fontWeight: 'bold' }
+                style: { background: 'var(--lgl-success)', color: '#fff', fontWeight: 'bold' }
             });
             handleCompleteLesson();
         }
@@ -289,7 +289,7 @@ const LessonView = () => {
             autoCompletedRef.current = true;
             toast.success("Great job! Lesson automatically marked as complete.", {
                 icon: '🎉',
-                style: { background: '#10B981', color: '#fff', fontWeight: 'bold' }
+                style: { background: 'var(--lgl-success)', color: '#fff', fontWeight: 'bold' }
             });
             handleCompleteLesson();
         }
@@ -678,7 +678,7 @@ const LessonView = () => {
                                                             <span className="text-[10px] font-black text-brand-emerald uppercase tracking-[0.2em]">Diagnostic In Progress</span>
                                                             <div className="flex gap-2">
                                                                 {lesson.quiz_data.questions.map((_: any, i: number) => (
-                                                                    <div key={i} className={`w-3 h-1.5 rounded-full transition-all duration-500 ${i <= currentQuestionIndex ? 'bg-brand-emerald shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-white/10'}`} />
+                                                                    <div key={i} className={`w-3 h-1.5 rounded-full transition-all duration-500 ${i <= currentQuestionIndex ? 'bg-brand-emerald shadow-[0_0_10px_color-mix(in srgb, var(--lgl-success) 50%, transparent)]' : 'bg-white/10'}`} />
                                                                 ))}
                                                             </div>
                                                         </div>
@@ -930,15 +930,16 @@ const LessonView = () => {
                             <div className="pt-10 border-t border-brand-border">
                                 <button
                                     onClick={() => {
+                                        if (isCompleted) return;
                                         const quizData = typeof lesson.quiz_data === 'string' ? JSON.parse(lesson.quiz_data) : lesson.quiz_data;
-                                        if (quizData && quizData.questions && quizData.questions.length > 0 && !isCompleted) {
+                                        if (quizData && quizData.questions && quizData.questions.length > 0) {
                                             setQuizStarted(true);
                                             window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
                                         } else {
-                                            handleCompleteLesson();
+                                            handleCompleteLesson({ forceComplete: true });
                                         }
                                     }}
-                                    disabled={isCompleting}
+                                    disabled={isCompleting || isCompleted}
                                     className={`
                                         w-full sm:w-auto h-16 px-12 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 border-none cursor-pointer active:scale-95
                                         ${isCompleted
@@ -1013,7 +1014,7 @@ const LessonView = () => {
             <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-brand-border/40 sm:border-t-0 pt-3 sm:pt-0">
                 <button
                     onClick={() => setShowAiInteraction(true)}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 rounded-full border border-indigo-500 text-indigo-500 font-black text-[10px] uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all active:scale-95 cursor-pointer bg-transparent flex-1 sm:flex-none"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 md:py-2 rounded-full border border-brand-emerald text-brand-emerald font-black text-[10px] uppercase tracking-widest hover:bg-brand-emerald hover:text-white transition-all active:scale-95 cursor-pointer bg-transparent flex-1 sm:flex-none"
                 >
                     <Sparkles size={14} /> <span>Virtual Tutor</span>
                 </button>

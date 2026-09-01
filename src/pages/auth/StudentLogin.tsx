@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, AlertCircle, X, Star, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, X, Star, Loader2, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { TwoFactorChallengeModal } from '../../components/auth/TwoFactorChallengeModal';
 import loginHero from '../../assets/login-hero.jpeg';
@@ -88,43 +88,97 @@ export default function StudentLogin() {
     };
 
     return (
-        <div className="flex min-h-screen bg-brand-beige overflow-hidden">
-            {/* Left Panel - Login Form */}
-            <div className="flex-1 flex flex-col p-8 md:p-16 bg-white dark:bg-brand-charcoal relative overflow-hidden items-center justify-center">
-                {/* Decorative background element */}
-                <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-brand-emerald/5 rounded-full pointer-events-none" />
+        <div className="flex min-h-screen bg-white dark:bg-charcoal-900 overflow-hidden relative">
+            {/* Left Panel - Hero Visual */}
+            <div
+                className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-16 text-white overflow-hidden bg-cover bg-center"
+                style={{
+                    backgroundImage: `url(${loginHero})`,
+                }}
+            >
+                {/* Cyberpunk dark cyan grid overlay */}
+                <div className="absolute inset-0 bg-charcoal-950/75 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/50 pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(0,217,233,0.2),transparent_75%)] pointer-events-none" />
 
-                <div className="w-full max-w-[400px] animate-fade-in-up">
-                    <div className="flex justify-center mb-10">
+                {/* Top Content: White Logo Container */}
+                <div className="relative z-10">
+                    <div className="inline-flex items-center h-20 px-7 rounded-2xl bg-white shadow-lg shadow-black/20">
                         <img
                             src="/logo-v2.png"
                             alt="Layos Group LLC"
-                            className="h-12 w-auto"
+                            className="h-11 w-auto object-contain"
                         />
                     </div>
+                </div>
 
-                    <div className="text-center mb-10">
-                        <h1 className="text-3xl font-black text-brand-charcoal dark:text-white mb-2">Welcome Back</h1>
-                        <p className="text-brand-muted font-medium">Enter your credentials to access your learning portal.</p>
+                {/* Center/Bottom Content */}
+                <div className="relative z-10 mt-auto space-y-8">
+                    {/* Decorative Concept Bullet */}
+                    <div className="w-6 h-6 rounded-full bg-white/90 shadow-md"></div>
+
+                    <div className="space-y-4">
+                        <h2 className="text-4xl font-extrabold tracking-tight leading-tight max-w-md">
+                            Transform Learning <br/>Into Marketable Skills
+                        </h2>
+                        <p className="text-white/75 text-sm font-medium leading-relaxed max-w-sm">
+                            Harness the power of data-driven analytics and expert-led curriculum to accelerate your professional journey.
+                        </p>
                     </div>
 
+                    {/* Floating Premium Badge */}
+                    <div className="bg-white/10 backdrop-blur-xl p-4.5 rounded-2xl border border-white/20 shadow-xl inline-block max-w-[280px] mt-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-brand-emerald/20 rounded-full flex items-center justify-center text-xl shadow-inner">
+                                <Star className="text-brand-emerald fill-brand-emerald" size={18} />
+                            </div>
+                            <div className="pr-2">
+                                <div className="font-extrabold text-[11px] uppercase tracking-wider text-white">Elite Platform</div>
+                                <div className="text-[9px] font-bold text-white/60 uppercase tracking-widest mt-0.5">Join 5,000+ Students</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Panel - Login Form */}
+            <div className="flex-1 flex flex-col justify-between p-8 md:p-16 bg-white dark:bg-charcoal-900 relative min-h-screen overflow-y-auto">
+                {/* Top Right Signup option */}
+                {/* <div className="hidden sm:block absolute top-8 right-8 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Don't have an account? <Link to="/register" className="text-slate-900 dark:text-white font-bold underline underline-offset-4 hover:text-brand-emerald transition-colors">Sign up</Link>
+                </div> */}
+
+                <div className="w-full max-w-[420px] mx-auto my-auto py-12 animate-fade-in-up">
+                    {/* Logo shown only on mobile */}
+                    <div className="flex justify-center mb-8 lg:hidden">
+                        <div className="bg-white p-3 rounded-2xl shadow-md border border-slate-100 dark:border-white/5">
+                            <img
+                                src="/logo-v2.png"
+                                alt="Layos Group LLC"
+                                className="h-10 w-auto"
+                            />
+                        </div>
+                    </div>
+
+                    <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-8 tracking-tight">Sign in</h1>
+
                     {error && (
-                        <div className="p-5 bg-red-50 border border-red-100 text-red-600 rounded-[20px] mb-6 text-sm font-bold shadow-sm animate-in slide-in-from-top-2">
+                        <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 rounded-2xl mb-6 text-sm font-bold shadow-sm animate-in slide-in-from-top-2">
                             <div className="flex items-center gap-3">
-                                <AlertCircle size={20} />
+                                <AlertCircle size={18} />
                                 <span className="flex-1">{error}</span>
                                 <button
                                     onClick={() => { setError(null); setShowForceOption(false); }}
-                                    className="bg-transparent border-none text-red-400 hover:text-red-600 cursor-pointer p-1 transition-colors"
+                                    className="bg-transparent border-none text-red-400 hover:text-red-600 dark:hover:text-red-300 cursor-pointer p-1 transition-colors"
                                 >
-                                    <X size={16} />
+                                    <X size={14} />
                                 </button>
                             </div>
 
                             {showForceOption && (
                                 <button
                                     onClick={() => handleLogin(null as any, true)}
-                                    className="w-full mt-4 py-3 bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-widest border-none cursor-pointer hover:bg-red-700 transition-colors"
+                                    className="w-full mt-4 py-3 bg-red-600 text-white rounded-full font-black text-xs uppercase tracking-widest border-none cursor-pointer hover:bg-red-700 transition-colors"
                                 >
                                     Sign out other devices & Enter
                                 </button>
@@ -132,106 +186,87 @@ export default function StudentLogin() {
                         </div>
                     )}
 
-                    <form onSubmit={handleLogin} className="space-y-5">
+                    <form onSubmit={handleLogin} className="space-y-6">
                         <div className="space-y-2">
-                            <label className="block text-xs font-black text-brand-charcoal dark:text-white uppercase tracking-widest ml-1">Email Address</label>
-                            <input
-                                type="email"
-                                className="w-full px-5 py-3.5 bg-brand-beige/50 dark:bg-white/5 border border-brand-border rounded-2xl text-brand-charcoal dark:text-white outline-none text-sm font-bold focus:border-brand-emerald focus:ring-4 focus:ring-brand-emerald/10 transition-all"
-                                placeholder="name@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
+                            <label className="block text-xs font-extrabold text-slate-500 dark:text-slate-400 ml-1">Email Address</label>
+                            <div className="relative">
+                                <Mail size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                <input
+                                    type="email"
+                                    className="w-full pl-12 pr-6 py-3.5 bg-white dark:bg-charcoal-800 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white outline-none text-sm font-bold focus:border-brand-emerald focus:ring-4 focus:ring-brand-emerald/10 transition-all"
+                                    placeholder="name@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="block text-xs font-black text-brand-charcoal dark:text-white uppercase tracking-widest ml-1">Password</label>
+                            <div className="flex justify-between items-center px-1">
+                                <label className="block text-xs font-extrabold text-slate-500 dark:text-slate-400">Password</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-1 bg-transparent border-none cursor-pointer transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                                    {showPassword ? 'Hide' : 'Show'}
+                                </button>
+                            </div>
                             <div className="relative">
+                                <Lock size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                 <input
                                     type={showPassword ? "text" : "password"}
-                                    className="w-full px-5 py-3.5 bg-brand-beige/50 dark:bg-white/5 border border-brand-border rounded-2xl text-brand-charcoal dark:text-white outline-none text-sm font-bold focus:border-brand-emerald focus:ring-4 focus:ring-brand-emerald/10 transition-all pr-14"
+                                    className="w-full pl-12 pr-6 py-3.5 bg-white dark:bg-charcoal-800 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white outline-none text-sm font-bold focus:border-brand-emerald focus:ring-4 focus:ring-brand-emerald/10 transition-all"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-brand-muted hover:text-brand-emerald bg-transparent border-none cursor-pointer transition-colors"
-                                >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
                             </div>
                         </div>
 
-                        <div className="flex justify-end">
-                            <Link to="/forgot-password" title="Forgot password" className="text-xs font-black text-brand-charcoal dark:text-white hover:text-brand-emerald transition-colors uppercase tracking-widest">Forgot password?</Link>
+                        <div className="flex justify-end px-1">
+                            <Link to="/forgot-password" title="Forgot password" className="text-xs font-bold text-slate-500 hover:text-brand-emerald transition-colors underline underline-offset-4">Forget your password?</Link>
                         </div>
 
-                        <button 
-                            type="submit" 
-                            className="w-full py-4 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-brand-charcoal/20 dark:shadow-brand-emerald/20 hover:-translate-y-1 active:scale-[0.98] transition-all disabled:opacity-70 disabled:pointer-events-none border-none cursor-pointer"
+                        <button
+                            type="submit"
+                            className="group w-full py-4 bg-brand-charcoal hover:bg-black dark:bg-lgl-cyan dark:text-brand-charcoal dark:hover:bg-cyan-400 text-white rounded-xl font-bold text-sm tracking-widest uppercase active:scale-[0.98] hover:scale-[1.01] transition-all disabled:opacity-70 disabled:pointer-events-none border-none cursor-pointer flex items-center justify-center gap-2"
                             disabled={loading}
                         >
                             {loading ? (
                                 <div className="flex items-center gap-3 justify-center">
-                                    <Loader2 className="animate-spin" size={20} />
+                                    <Loader2 className="animate-spin" size={18} />
                                     <span>Authenticating...</span>
                                 </div>
                             ) : (
-                                'Sign In'
+                                <>
+                                    <span>Sign In</span>
+                                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                </>
                             )}
                         </button>
                     </form>
 
                     <div className="mt-8 text-center">
-                        <Link to="/instructor-login" className="text-xs font-black text-brand-muted hover:text-brand-emerald transition-colors uppercase tracking-[0.15em] flex items-center justify-center gap-2">
-                            Are you an instructor? <span className="text-brand-emerald underline underline-offset-4">Continue here</span>
+                        <Link to="/instructor-login" className="text-xs font-bold text-slate-400 hover:text-brand-emerald transition-colors uppercase tracking-[0.1em] flex items-center justify-center gap-2">
+                            Are you an instructor? <span className="text-brand-emerald underline underline-offset-4 font-bold">Continue here</span>
                         </Link>
                     </div>
+
+                    {/* Mobile-only Signup option */}
+                    {/* <div className="sm:hidden mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                        Don't have an account? <Link to="/register" className="text-brand-charcoal dark:text-white font-bold underline underline-offset-4 hover:text-brand-emerald transition-colors">Sign up</Link>
+                    </div> */}
                 </div>
 
-                <div className="mt-auto w-full flex flex-col md:flex-row justify-between pt-8 text-[10px] font-black uppercase tracking-widest text-brand-muted gap-4">
-                    <div>© 2026 Layos Group LLC. All rights reserved.</div>
+                <div className="w-full flex flex-col sm:flex-row justify-between pt-8 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 gap-4 mt-auto border-t border-slate-100 dark:border-white/5">
+                    <div>© 2026 LGL Consulting. All rights reserved.</div>
                     <div className="flex gap-6">
-                        <a href="#" className="hover:text-brand-charcoal transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-brand-charcoal transition-colors">Terms of Service</a>
-                    </div>
-                </div>
-            </div>
-
-            {/* Right Panel - Hero Content */}
-            <div className="hidden lg:flex flex-1 bg-brand-charcoal relative flex-col p-16 text-white overflow-hidden justify-center items-center">
-                {/* Decorative radial gradient */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(5,150,105,0.15),transparent_70%)] pointer-events-none" />
-                
-                <div className="relative z-10 w-full flex flex-col items-center">
-                    <div className="relative w-full max-w-[500px] perspective-1000">
-                        <img
-                            src={loginHero}
-                            alt="Dashboard Preview"
-                            className="w-full h-auto rounded-[32px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border border-white/10 transform -rotate-y-12 rotate-x-6 translate-z-10 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-1000 ease-out"
-                        />
-
-                        {/* Floating Premium Badge */}
-                        <div className="absolute bottom-[10%] -right-10 bg-white/10 backdrop-blur-xl p-5 rounded-[24px] border border-white/20 shadow-2xl animate-fade-in-up delay-300">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-brand-emerald/20 rounded-full flex items-center justify-center text-2xl shadow-inner">
-                                    <Star className="text-brand-emerald fill-brand-emerald" size={24} />
-                                </div>
-                                <div className="pr-4">
-                                    <div className="font-black text-sm uppercase tracking-widest">Elite Platform</div>
-                                    <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-0.5">Join 5,000+ Students</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-20 text-center max-w-lg animate-fade-in-up delay-500">
-                        <h2 className="text-4xl font-black mb-6 leading-tight">Transform Learning <br/>Into Marketable Skills</h2>
-                        <p className="text-lg text-white/70 font-medium leading-relaxed">Harness the power of data-driven analytics and expert-led curriculum to accelerate your professional journey.</p>
+                        <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">Terms of Service</a>
                     </div>
                 </div>
             </div>

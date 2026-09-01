@@ -107,7 +107,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
     };
 
     const insertMention = (name: string) => {
-        const mentionHTML = `<strong style="color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 4px; user-select: none;">@${name}</strong>&nbsp;`;
+        const mentionHTML = `<strong style="color: var(--index-primary-color); background: var(--index-accent-soft-bg); padding: 2px 6px; border-radius: 4px; user-select: none;">@${name}</strong>&nbsp;`;
         executeCommand('insertHTML', mentionHTML);
         setShowMentionMenu(false);
         setMentionQuery('');
@@ -126,7 +126,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
 
     const ICON_SIZE = 24;
 
-    const blackIconStyle = { color: '#000000', visibility: 'visible' as const, fill: 'currentColor', display: 'inline-block', position: 'relative' as const, zIndex: 100 };
+    const blackIconStyle = { color: 'var(--index-text-heading)', visibility: 'visible' as const, fill: 'currentColor', display: 'inline-block', position: 'relative' as const, zIndex: 100 };
     const whiteIconStyle = { color: '#ffffff', visibility: 'visible' as const, fill: 'currentColor', display: 'inline-block', position: 'relative' as const, zIndex: 100 };
 
     return (
@@ -136,7 +136,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                     transition: all 0.2s;
                 }
                 .mention-item-menu:hover {
-                    background: #eff6ff;
+                    background: var(--index-accent-soft-bg);
                 }
             `}</style>
             
@@ -176,10 +176,10 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
             {/* File Review Chip */}
             {file && (
                 <div className="mp-file-chip">
-                    <div><MdOutlineAttachFile size={20} style={{ color: '#000000', visibility: 'visible', display: 'inline-block', position: 'relative', zIndex: 100 }} /></div>
+                    <div><MdOutlineAttachFile size={20} style={{ color: 'var(--index-text-heading)', visibility: 'visible', display: 'inline-block', position: 'relative', zIndex: 100 }} /></div>
                     <span style={{ fontWeight: 600 }}>{file.name}</span>
                     <div style={{ cursor: 'pointer', display: 'flex' }} onClick={() => setFile(null)}>
-                        <MdClose size={20} style={{ color: '#ef4444', visibility: 'visible', display: 'inline-block', position: 'relative', zIndex: 100 }} />
+                        <MdClose size={20} style={{ color: 'var(--lgl-error)', visibility: 'visible', display: 'inline-block', position: 'relative', zIndex: 100 }} />
                     </div>
                 </div>
             )}
@@ -202,34 +202,34 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                 
                 {/* Mention Dropdown Popover */}
                 {showMentionMenu && (
-                    <div style={{ position: 'absolute', bottom: '100%', left: '100px', marginBottom: '8px', zIndex: 9999, background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', width: '280px', overflow: 'hidden' }}>
-                        <div 
-                            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 }} 
-                            onClick={(_) => { setShowMentionMenu(false); editorRef.current?.focus(); }} 
+                    <div style={{ position: 'absolute', bottom: '100%', left: '100px', marginBottom: '8px', zIndex: 9999, background: 'var(--index-card-bg)', border: '1px solid var(--index-border-color)', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', width: '280px', overflow: 'hidden' }}>
+                        <div
+                            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 }}
+                            onClick={(_) => { setShowMentionMenu(false); editorRef.current?.focus(); }}
                         />
-                        <div style={{ padding: '12px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 800, color: '#64748b', marginBottom: '8px' }}>Tag a User</div>
-                            <input 
+                        <div style={{ padding: '12px', background: 'var(--index-hover-bg)', borderBottom: '1px solid var(--index-border-color)' }}>
+                            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 800, color: 'var(--index-text-secondary)', marginBottom: '8px' }}>Tag a User</div>
+                            <input
                                 autoFocus
                                 type="text"
                                 value={mentionQuery}
                                 onChange={(e) => setMentionQuery(e.target.value)}
                                 placeholder="Search by name..."
-                                style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '0.9rem', color: '#0f172a', fontWeight: 500 }}
+                                style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--index-border-color)', outline: 'none', fontSize: '0.9rem', color: 'var(--index-text-heading)', fontWeight: 500 }}
                             />
                         </div>
                         <div style={{ maxHeight: '200px', overflowY: 'auto', padding: '8px' }}>
                             {mentionQuery.length < 2 ? (
-                                <div style={{ padding: '12px', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>Type at least 2 characters to search...</div>
+                                <div style={{ padding: '12px', textAlign: 'center', color: 'var(--index-text-faint)', fontSize: '0.85rem', fontWeight: 600 }}>Type at least 2 characters to search...</div>
                             ) : isSearchingMentions ? (
-                                <div style={{ padding: '12px', textAlign: 'center', color: '#2563eb', fontSize: '0.85rem', fontWeight: 700 }}>Searching platform...</div>
+                                <div style={{ padding: '12px', textAlign: 'center', color: 'var(--index-primary-color)', fontSize: '0.85rem', fontWeight: 700 }}>Searching platform...</div>
                             ) : mentionResults.length === 0 ? (
-                                <div style={{ padding: '12px', textAlign: 'center', color: '#dc2626', fontSize: '0.85rem', fontWeight: 700 }}>No users found for "{mentionQuery}"</div>
+                                <div style={{ padding: '12px', textAlign: 'center', color: 'var(--lgl-error)', fontSize: '0.85rem', fontWeight: 700 }}>No users found for "{mentionQuery}"</div>
                             ) : (
                                 mentionResults.map(user => (
                                     <div key={user.id} className="mention-item-menu" onMouseDown={(e) => { e.preventDefault(); insertMention(user.name); }} style={{ display: 'flex', flexDirection: 'column', gap: '2px', padding: '8px 12px', cursor: 'pointer', borderRadius: '6px' }}>
-                                        <span style={{ fontWeight: 800, color: '#0f172a' }}>@{user.name}</span>
-                                        <span style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>{user.role}</span>
+                                        <span style={{ fontWeight: 800, color: 'var(--index-text-heading)' }}>@{user.name}</span>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--index-text-secondary)', textTransform: 'uppercase', fontWeight: 700 }}>{user.role}</span>
                                     </div>
                                 ))
                             )}

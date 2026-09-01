@@ -205,7 +205,7 @@ export default function CreateLiveSession() {
                     background: white;
                     border-radius: 24px;
                     padding: 3rem;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
                 }
 
@@ -230,7 +230,7 @@ export default function CreateLiveSession() {
                     display: block;
                     font-size: 0.9rem;
                     font-weight: 700;
-                    color: #1e293b;
+                    color: var(--index-text-heading);
                     margin-bottom: 0.75rem;
                     display: flex;
                     align-items: center;
@@ -240,9 +240,9 @@ export default function CreateLiveSession() {
                 .staff-scope .form-input-modern {
                     width: 100%;
                     padding: 0.85rem 1.15rem;
-                    border: 2px solid #f1f5f9;
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 14px;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     outline: none;
                     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                     font-size: 0.95rem;
@@ -250,17 +250,17 @@ export default function CreateLiveSession() {
 
                 .form-input-modern:focus {
                     background: white;
-                    border-color: #3b82f6;
-                    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+                    border-color: var(--index-primary-color);
+                    box-shadow: 0 0 0 4px color-mix(in srgb, var(--index-primary-color) 10%, transparent);
                 }
 
                 .form-input-modern.error {
-                    border-color: #ef4444;
-                    background: #fffafa;
+                    border-color: var(--lgl-error);
+                    background: var(--index-hover-bg);
                 }
 
                 .staff-scope .error-text {
-                    color: #ef4444;
+                    color: var(--lgl-error);
                     font-size: 0.8rem;
                     font-weight: 600;
                     margin-top: 0.5rem;
@@ -270,7 +270,7 @@ export default function CreateLiveSession() {
                 }
 
                 .staff-scope .btn-submit-live {
-                    background: #020617;
+                    background: var(--lgl-charcoal);
                     color: white;
                     width: 100%;
                     padding: 1.15rem;
@@ -285,13 +285,13 @@ export default function CreateLiveSession() {
                     gap: 0.75rem;
                     transition: all 0.3s;
                     margin-top: 1rem;
-                    box-shadow: 0 10px 20px rgba(2, 6, 23, 0.2);
+                    box-shadow: 0 10px 20px color-mix(in srgb, var(--lgl-charcoal) 20%, transparent);
                 }
 
                 .btn-submit-live:hover:not(:disabled) {
-                    background: #0f172a;
+                    background: var(--index-text-heading);
                     transform: translateY(-2px);
-                    box-shadow: 0 15px 30px rgba(2, 6, 23, 0.3);
+                    box-shadow: 0 15px 30px color-mix(in srgb, var(--lgl-charcoal) 30%, transparent);
                 }
 
                 .staff-scope .btn-submit-live:disabled {
@@ -300,12 +300,12 @@ export default function CreateLiveSession() {
                 }
 
                 .staff-scope .back-btn {
-                    background: #f1f5f9;
+                    background: var(--index-hover-bg);
                     border: none;
                     padding: 0.75rem;
                     border-radius: 14px;
                     cursor: pointer;
-                    color: #020617;
+                    color: var(--lgl-charcoal);
                     transition: all 0.2s;
                     display: flex;
                     align-items: center;
@@ -313,8 +313,8 @@ export default function CreateLiveSession() {
                 }
 
                 .staff-scope .back-btn:hover {
-                    background: #e2e8f0;
-                    color: #0f172a;
+                    background: var(--index-border-color);
+                    color: var(--index-text-heading);
                 }
 
                 @media (max-width: 640px) {
@@ -336,7 +336,7 @@ export default function CreateLiveSession() {
                 </button>
                 <div>
                     <h1 className="dashboard-header-title" style={{ margin: 0, fontSize: '1.75rem' }}>Schedule Live Session</h1>
-                    <p style={{ color: '#64748b', marginTop: '0.25rem' }}>Create a new interactive session for your students.</p>
+                    <p style={{ color: 'var(--index-text-secondary)', marginTop: '0.25rem' }}>Create a new interactive session for your students.</p>
                 </div>
 
                 <style>{`
@@ -439,7 +439,7 @@ export default function CreateLiveSession() {
                             onChange={e => setFormData({ ...formData, meetingLink: e.target.value })}
                         />
                         {formErrors.meetingLink && <p className="error-text"><AlertCircle size={14} /> {formErrors.meetingLink}</p>}
-                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Optional. Visible to students when the session is live.</p>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--index-text-faint)', marginTop: '0.75rem' }}>Optional. Visible to students when the session is live.</p>
                     </div>
 
                     <div className="form-group-modern">
@@ -447,17 +447,17 @@ export default function CreateLiveSession() {
                             <FileVideo size={16} /> Pre-recorded Session (Optional)
                         </label>
                         {uploading ? (
-                            <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '14px', textAlign: 'center' }}>
+                            <div style={{ padding: '2rem', background: 'var(--index-hover-bg)', borderRadius: '14px', textAlign: 'center' }}>
                                 <div style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Uploading... {uploadProgress}%</div>
-                                <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                                    <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                                <div style={{ width: '100%', height: '8px', background: 'var(--index-border-color)', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--index-primary-color)', transition: 'width 0.3s' }}></div>
                                 </div>
                             </div>
                         ) : recordingUrl ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#f0fdf4', padding: '1rem', borderRadius: '14px', border: '1px solid #bcf0da' }}>
-                                <FileVideo size={20} color="#10b981" />
-                                <div style={{ flex: 1, fontSize: '0.85rem', fontWeight: 600, color: '#1a4d3e', wordBreak: 'break-all' }}>{recordingUrl}</div>
-                                <button type="button" onClick={handleDeleteVideo} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>Remove</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--index-accent-soft-bg)', padding: '1rem', borderRadius: '14px', border: '1px solid color-mix(in srgb, var(--lgl-cyan) 30%, transparent)' }}>
+                                <FileVideo size={20} color="var(--lgl-success)" />
+                                <div style={{ flex: 1, fontSize: '0.85rem', fontWeight: 600, color: 'var(--index-primary-color)', wordBreak: 'break-all' }}>{recordingUrl}</div>
+                                <button type="button" onClick={handleDeleteVideo} style={{ color: 'var(--lgl-error)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>Remove</button>
                             </div>
                         ) : (
                             <>
@@ -471,7 +471,7 @@ export default function CreateLiveSession() {
                                     }}
                                     style={{ padding: '0.6rem' }}
                                 />
-                                <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.75rem' }}>Upload a video file for students to watch later.</p>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--index-text-faint)', marginTop: '0.75rem' }}>Upload a video file for students to watch later.</p>
                             </>
                         )}
                     </div>

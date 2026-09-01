@@ -111,20 +111,20 @@ export default function StudentAssignments() {
     );
 
     return (
-        <div className="space-y-6 md:space-y-8 pb-12 max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 text-[#2D312E]">
+        <div className="space-y-6 md:space-y-8 pb-12 max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 text-[var(--index-text-heading)]">
             {/* Top Header Section */}
-            <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[#E6DFD5] pb-6 md:pb-8">
+            <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[var(--index-border-color)] pb-6 md:pb-8">
                 <div className="max-w-2xl">
                     <div className="flex items-center gap-2 mb-2.5">
-                        <div className="p-1.5 bg-[#1A4D3E]/10 rounded-md">
-                            <Sparkles className="text-[#1A4D3E]" size={14} />
+                        <div className="p-1.5 bg-[var(--index-primary-color)]/10 rounded-md">
+                            <Sparkles className="text-[var(--index-primary-color)]" size={14} />
                         </div>
-                        <span className="text-[#1A4D3E] font-bold text-[10px] md:text-xs uppercase tracking-wider">Academic Portal</span>
+                        <span className="text-[var(--index-primary-color)] font-bold text-[10px] md:text-xs uppercase tracking-wider">Academic Portal</span>
                     </div>
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-[#1A4D3E] mb-2">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-[var(--index-primary-color)] mb-2">
                         Assignments & Deliverables
                     </h1>
-                    <p className="text-[#7A827E] text-xs sm:text-sm md:text-base font-medium leading-relaxed">
+                    <p className="text-[var(--index-text-secondary)] text-xs sm:text-sm md:text-base font-medium leading-relaxed">
                         Manage your academic tasks, download specifications, and track evaluation progress.
                     </p>
                 </div>
@@ -132,16 +132,16 @@ export default function StudentAssignments() {
                 {/* Search and Filter Row */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
                     <div className="relative flex-1 sm:w-72 md:w-80">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7A827E]" size={16} />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--index-text-secondary)]" size={16} />
                         <input 
                             type="text" 
                             placeholder="Search tasks..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-[#FBF9F6] border border-[#E6DFD5] rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[#1A4D3E] transition-colors font-medium placeholder-[#A5ADA9]"
+                            className="w-full bg-[var(--index-bg-color)] border border-[var(--index-border-color)] rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[var(--index-primary-color)] transition-colors font-medium placeholder-[var(--index-text-faint)]"
                         />
                     </div>
-                    {/* <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FBF9F6] border border-[#E6DFD5] rounded-xl text-sm font-semibold text-[#2D312E] hover:bg-[#F4EFEA] transition-colors whitespace-nowrap">
+                    {/* <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--index-bg-color)] border border-[var(--index-border-color)] rounded-xl text-sm font-semibold text-[var(--index-text-heading)] hover:bg-[var(--index-card-bg)] transition-colors whitespace-nowrap">
                         <SlidersHorizontal size={15} />
                         <span>Filters</span>
                     </button> */}
@@ -152,28 +152,28 @@ export default function StudentAssignments() {
             {loading ? (
                 <SkeletonAssignmentList />
             ) : error ? (
-                <div className="bg-white p-6 sm:p-10 rounded-[24px] border border-red-100 text-center max-w-xl mx-auto space-y-4 shadow-sm">
-                    <div className="w-12 h-12 sm:w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto text-red-500">
+                <div className="bg-[var(--index-card-bg)] p-6 sm:p-10 rounded-[24px] border border-[var(--index-border-color)] text-center max-w-xl mx-auto space-y-4 shadow-sm">
+                    <div className="w-12 h-12 sm:w-14 h-14 bg-red-50 dark:bg-red-950/20 rounded-full flex items-center justify-center mx-auto text-red-500">
                         <AlertCircle size={26} />
                     </div>
                     <div>
-                        <h2 className="text-lg sm:text-xl font-semibold text-[#2D312E]">Sync Error</h2>
-                        <p className="text-[#7A827E] text-xs sm:text-sm mt-1">{error}</p>
+                        <h2 className="text-lg sm:text-xl font-semibold text-[var(--index-text-heading)]">Sync Error</h2>
+                        <p className="text-[var(--index-text-secondary)] text-xs sm:text-sm mt-1">{error}</p>
                     </div>
                     <button 
                         onClick={fetchAssignments} 
-                        className="w-full sm:w-auto bg-[#1A4D3E] text-white px-6 py-2.5 rounded-xl font-semibold text-xs uppercase tracking-wider hover:bg-[#12362C] transition-all"
+                        className="w-full sm:w-auto bg-[var(--index-primary-color)] text-white px-6 py-2.5 rounded-xl font-semibold text-xs uppercase tracking-wider hover:bg-[var(--index-primary-hover)] transition-all"
                     >
                         Retry Connection
                     </button>
                 </div>
             ) : filteredAssignments.length === 0 ? (
-                <div className="bg-[#FBF9F6] py-16 md:py-20 px-4 text-center rounded-[32px] border border-dashed border-[#E6DFD5] max-w-2xl mx-auto">
-                    <div className="w-14 h-14 sm:w-16 h-16 bg-[#F4EFEA] rounded-full flex items-center justify-center mx-auto mb-4 text-[#A5ADA9]">
+                <div className="bg-[var(--index-bg-color)] py-16 md:py-20 px-4 text-center rounded-[32px] border border-dashed border-[var(--index-border-color)] max-w-2xl mx-auto">
+                    <div className="w-14 h-14 sm:w-16 h-16 bg-[var(--index-card-bg)] rounded-full flex items-center justify-center mx-auto mb-4 text-[var(--index-text-faint)]">
                         <LayoutGrid size={26} />
                     </div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-[#2D312E] mb-1">No Assignments Found</h2>
-                    <p className="text-[#7A827E] text-xs sm:text-sm max-w-xs mx-auto font-medium">Your schedule is currently clear. Active deliverables will appear here.</p>
+                    <h2 className="text-lg sm:text-xl font-semibold text-[var(--index-text-heading)] mb-1">No Assignments Found</h2>
+                    <p className="text-[var(--index-text-secondary)] text-xs sm:text-sm max-w-xs mx-auto font-medium">Your schedule is currently clear. Active deliverables will appear here.</p>
                 </div>
             ) : (
                 /* Fully fluid layout system responsive across all devices */
@@ -185,32 +185,32 @@ export default function StudentAssignments() {
                         return (
                             <div 
                                 key={a.id} 
-                                className="bg-white border border-[#E6DFD5] rounded-[24px] p-5 md:p-6 flex flex-col justify-between hover:shadow-md transition-all duration-300 relative group overflow-hidden"
+                                className="bg-[var(--index-card-bg)] border border-[var(--index-border-color)] rounded-[24px] p-5 md:p-6 flex flex-col justify-between hover:shadow-md transition-all duration-300 relative group overflow-hidden"
                             >
                                 <div>
                                     {/* Top Row: Context Tag & Options Icon */}
                                     <div className="flex items-center justify-between mb-3.5">
-                                        <span className="text-[10px] md:text-[11px] font-semibold text-[#7A827E] uppercase tracking-wider block max-w-[85%] truncate">
+                                        <span className="text-[10px] md:text-[11px] font-semibold text-[var(--index-text-secondary)] uppercase tracking-wider block max-w-[85%] truncate">
                                             {a.cohort?.name || "General Module"}
                                         </span>
-                                        <button className="text-[#A5ADA9] hover:text-[#2D312E] transition-colors p-1 -mr-1">
+                                        <button className="text-[var(--index-text-faint)] hover:text-[var(--index-text-heading)] transition-colors p-1 -mr-1">
                                             <MoreVertical size={16} />
                                         </button>
                                     </div>
 
                                     {/* Title */}
-                                    <h3 className="text-base md:text-lg font-semibold text-[#2D312E] tracking-tight leading-snug group-hover:text-[#1A4D3E] transition-colors mb-4 line-clamp-2 sm:min-h-[3rem] md:min-h-[3.5rem]">
+                                    <h3 className="text-base md:text-lg font-semibold text-[var(--index-text-heading)] tracking-tight leading-snug group-hover:text-[var(--index-primary-color)] transition-colors mb-4 line-clamp-2 sm:min-h-[3rem] md:min-h-[3.5rem]">
                                         {a.title}
                                     </h3>
 
                                     {/* Metadata Row: Calendar and Time */}
-                                    <div className="space-y-2 border-b border-[#F4EFEA] pb-4 mb-4">
-                                        <div className="flex items-center gap-2 text-xs font-medium text-[#7A827E]">
-                                            <Calendar size={14} className="text-[#1A4D3E] flex-shrink-0" />
+                                    <div className="space-y-2 border-b border-[var(--index-card-bg)] pb-4 mb-4">
+                                        <div className="flex items-center gap-2 text-xs font-medium text-[var(--index-text-secondary)]">
+                                            <Calendar size={14} className="text-[var(--index-primary-color)] flex-shrink-0" />
                                             <span className="truncate">Due: {new Date(a.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-xs font-medium text-[#7A827E]">
-                                            <Clock size={14} className="text-[#1A4D3E] flex-shrink-0" />
+                                        <div className="flex items-center gap-2 text-xs font-medium text-[var(--index-text-secondary)]">
+                                            <Clock size={14} className="text-[var(--index-primary-color)] flex-shrink-0" />
                                             <span className="truncate">Time: {new Date(a.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                     </div>
@@ -220,7 +220,7 @@ export default function StudentAssignments() {
                                 <div className="space-y-3.5">
                                     <div className="flex items-center justify-between gap-2">
                                         {hasSubmitted ? (
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider bg-[#E8F2EE] text-[#1A4D3E] rounded-md whitespace-nowrap">
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 md:py-1 text-[10px] md:text-[11px] font-semibold uppercase tracking-wider bg-[var(--index-accent-soft-bg)] text-[var(--index-primary-color)] rounded-md whitespace-nowrap">
                                                 <CheckCircle size={12} /> Completed
                                             </span>
                                         ) : overdue ? (
@@ -238,7 +238,7 @@ export default function StudentAssignments() {
                                             <button
                                                 type="button"
                                                 onClick={(e) => handleViewResource(e, a.title, a.assignment_file_url, a.assignment_file)}
-                                                className="inline-flex items-center gap-1 text-[10px] md:text-[11px] font-bold uppercase text-[#7A827E] hover:text-[#1A4D3E] transition-colors border-none bg-transparent cursor-pointer whitespace-nowrap p-1"
+                                                className="inline-flex items-center gap-1 text-[10px] md:text-[11px] font-bold uppercase text-[var(--index-text-secondary)] hover:text-[var(--index-primary-color)] transition-colors border-none bg-transparent cursor-pointer whitespace-nowrap p-1"
                                             >
                                                 <Eye size={13} /> View Guidelines
                                             </button>
@@ -247,7 +247,7 @@ export default function StudentAssignments() {
 
                                     {/* Action Launch Button Block */}
                                     {hasSubmitted ? (
-                                        <div className="w-full bg-[#F4EFEA] text-[#1A4D3E] text-center py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+                                        <div className="w-full bg-[var(--index-card-bg)] text-[var(--index-primary-color)] text-center py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2">
                                             <Trophy size={14} className="flex-shrink-0" /> Submission Received
                                         </div>
                                     ) : (
@@ -256,7 +256,7 @@ export default function StudentAssignments() {
                                             className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all no-underline text-center border ${
                                                 overdue 
                                                     ? 'bg-red-600 border-red-600 text-white hover:bg-red-700' 
-                                                    : 'bg-[#1A4D3E] border-[#1A4D3E] text-white hover:bg-[#12362C]'
+                                                    : 'bg-[var(--index-primary-color)] border-[var(--index-primary-color)] text-white hover:bg-[var(--index-primary-hover)]'
                                             }`}
                                         >
                                             <span>{overdue ? 'Submit Late' : 'Open Assignment'}</span>
@@ -272,18 +272,18 @@ export default function StudentAssignments() {
 
             {/* Responsive Full-screen Document Viewer Modal */}
             {viewingPdf && (
-                <div className="fixed inset-0 z-[2000] bg-[#FBF9F6] flex flex-col animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-[2000] bg-[var(--index-bg-color)] flex flex-col animate-in fade-in duration-200">
                     {/* Header: Made highly responsive to preserve layout structural integrity on small phones */}
-                    <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-[#E6DFD5] flex justify-between items-center bg-white gap-3">
+                    <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--index-border-color)] flex justify-between items-center bg-[var(--index-card-bg)] gap-3">
                         <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1A4D3E]/10 flex items-center justify-center text-[#1A4D3E] flex-shrink-0 hidden xs:flex">
+                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--index-primary-color)]/10 flex items-center justify-center text-[var(--index-primary-color)] flex-shrink-0 hidden xs:flex">
                                 <FileText size={18} />
                             </div>
                             <div className="min-w-0">
-                                <h3 className="text-xs sm:text-sm font-semibold text-[#2D312E] truncate max-w-[140px] xs:max-w-[200px] sm:max-w-md md:max-w-xl">
+                                <h3 className="text-xs sm:text-sm font-semibold text-[var(--index-text-heading)] truncate max-w-[140px] xs:max-w-[200px] sm:max-w-md md:max-w-xl">
                                     {viewingPdf.title}
                                 </h3>
-                                <p className="text-[9px] sm:text-[10px] font-bold text-[#7A827E] uppercase tracking-wider mt-0.5 truncate">
+                                <p className="text-[9px] sm:text-[10px] font-bold text-[var(--index-text-secondary)] uppercase tracking-wider mt-0.5 truncate">
                                     {viewingPdf.type === 'office' ? 'Secure Office Viewer' : 'Secure Encrypted PDF Viewer'}
                                 </p>
                             </div>
@@ -292,7 +292,7 @@ export default function StudentAssignments() {
                             {viewingPdf.type === 'pdf' && (
                                 <button 
                                     onClick={() => setShowAiInteraction(true)}
-                                    className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-bold text-[9px] sm:text-[11px] uppercase tracking-wider hover:bg-indigo-100 transition-colors"
+                                    className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 text-brand-emerald font-bold text-[9px] sm:text-[11px] uppercase tracking-wider hover:bg-brand-emerald/20 transition-colors"
                                 >
                                     <Sparkles size={12} className="sm:size-[13px]" /> 
                                     <span>Virtual Tutor</span>
@@ -303,7 +303,7 @@ export default function StudentAssignments() {
                                     setViewingPdf(null);
                                     setIframeLoading(true);
                                 }}
-                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#F4EFEA] text-[#7A827E] flex items-center justify-center hover:text-red-500 hover:bg-red-50 transition-colors"
+                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[var(--index-card-bg)] text-[var(--index-text-secondary)] flex items-center justify-center hover:text-red-500 hover:bg-red-50 transition-colors"
                             >
                                 <X size={18} />
                             </button>
@@ -312,14 +312,14 @@ export default function StudentAssignments() {
 
                     {/* Viewer Sandbox Canvas */}
                     <div 
-                        className="flex-1 relative bg-[#F4EFEA] overflow-hidden flex items-center justify-center"
+                        className="flex-1 relative bg-[var(--index-card-bg)] overflow-hidden flex items-center justify-center"
                         onContextMenu={(e) => e.preventDefault()}
                     >
                         {iframeLoading && (
-                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#F4EFEA] p-4 text-center">
-                                <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 text-[#1A4D3E] animate-spin mb-3" />
-                                <h4 className="font-semibold text-xs sm:text-sm text-[#2D312E]">Loading Document Environment...</h4>
-                                <p className="text-[#7A827E] text-[11px] sm:text-xs mt-1">Establishing high-fidelity verification bridge</p>
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--index-card-bg)] p-4 text-center">
+                                <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 text-[var(--index-primary-color)] animate-spin mb-3" />
+                                <h4 className="font-semibold text-xs sm:text-sm text-[var(--index-text-heading)]">Loading Document Environment...</h4>
+                                <p className="text-[var(--index-text-secondary)] text-[11px] sm:text-xs mt-1">Establishing high-fidelity verification bridge</p>
                             </div>
                         )}
                         {viewingPdf.url && (
@@ -344,8 +344,8 @@ export default function StudentAssignments() {
                     </div>
 
                     {/* Modal Footer Section */}
-                    <div className="px-4 py-2.5 sm:py-3 bg-white border-t border-[#E6DFD5] text-center">
-                        <p className="text-[9px] sm:text-[10px] font-bold text-[#A5ADA9] uppercase tracking-widest">End-to-End Encryption Protocol Active</p>
+                    <div className="px-4 py-2.5 sm:py-3 bg-[var(--index-card-bg)] border-t border-[var(--index-border-color)] text-center">
+                        <p className="text-[9px] sm:text-[10px] font-bold text-[var(--index-text-faint)] uppercase tracking-widest">End-to-End Encryption Protocol Active</p>
                     </div>
                 </div>
             )}

@@ -151,7 +151,7 @@ const Live = () => {
             {/* Upcoming Sessions Section */}
             <section className="space-y-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                 <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.5)]" />
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_12px_color-mix(in srgb, var(--lgl-error) 50%, transparent)]" />
                     <h2 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Active & Upcoming</h2>
                 </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from '../../../components/student_layout/Topbar';
+import AIAssistantFAB from '../../../components/student/AIAssistantFAB';
 import '../../../student.css';
 
 
@@ -17,14 +18,14 @@ const StudentLayout = () => {
 
     return (
         <div className="flex min-h-screen bg-brand-beige dark:bg-brand-charcoal overflow-hidden">
-            <Sidebar collapsed={collapsed} mobileOpen={mobileOpen} />
+            <Sidebar collapsed={collapsed} mobileOpen={mobileOpen} onToggle={() => setCollapsed(!collapsed)} />
 
             <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
                 <Topbar
                     role="student"
-                    collapsed={window.innerWidth <= 1024 ? !mobileOpen : collapsed}
+                    collapsed={window.innerWidth < 1024 ? !mobileOpen : collapsed}
                     onToggle={() => {
-                        if (window.innerWidth <= 1024) {
+                        if (window.innerWidth < 1024) {
                             setMobileOpen(!mobileOpen);
                         } else {
                             setCollapsed(!collapsed);
@@ -48,6 +49,8 @@ const StudentLayout = () => {
                     onClick={() => setMobileOpen(false)}
                 />
             )}
+
+            <AIAssistantFAB />
         </div>
     );
 };

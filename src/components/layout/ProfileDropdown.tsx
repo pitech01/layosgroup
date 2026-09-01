@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 interface ProfileDropdownProps {
-    role: 'instructor' | 'student';
+    role: 'instructor' | 'student' | 'admin';
 }
 
 const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
@@ -16,8 +16,8 @@ const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
 
     // Dynamic user data
     const userData = {
-        name: user?.name || (role === 'instructor' ? 'Instructor' : 'Student'),
-        email: user?.email || (role === 'instructor' ? 'instructor@layos.edu' : 'student@layos.edu'),
+        name: user?.name || (role === 'admin' ? 'Administrator' : role === 'instructor' ? 'Instructor' : 'Student'),
+        email: user?.email || (role === 'admin' ? 'admin@layos.edu' : role === 'instructor' ? 'instructor@layos.edu' : 'student@layos.edu'),
         tier: user?.role === 'instructor' ? 'Instructor' : (user?.role === 'admin' ? 'Administrator' : '')
     };
 
@@ -25,7 +25,7 @@ const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
 
     const handleLogout = () => {
         logout();
-        navigate(role === 'instructor' ? '/instructor-login' : '/login');
+        navigate(role === 'admin' ? '/admin-login' : role === 'instructor' ? '/instructor-login' : '/login');
     };
 
     useEffect(() => {
@@ -48,7 +48,10 @@ const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
                 className={`user-profile-pill ${isOpen ? 'is-active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <div className={`user-avatar-small ${role === 'instructor' ? 'role-instructor' : 'role-student'}`}>
+                <div
+                    className={`user-avatar-small ${role === 'instructor' ? 'role-instructor' : 'role-student'}`}
+                    style={role === 'admin' ? { background: 'var(--lgl-error)' } : undefined}
+                >
                     {userInitial}
                 </div>
                 <div className="user-info-text">
@@ -72,7 +75,7 @@ const ProfileDropdown = ({ role }: ProfileDropdownProps) => {
                     <div className="profile-dropdown-actions">
                         <button
                             className="profile-dropdown-btn"
-                            onClick={() => { setIsOpen(false); navigate(role === 'instructor' ? '/instructor/settings' : '/student/account'); }}
+                            onClick={() => { setIsOpen(false); navigate(role === 'student' ? '/student/account' : '/instructor/settings'); }}
                         >
                             <User size={18} />
                             <span>My Profile</span>

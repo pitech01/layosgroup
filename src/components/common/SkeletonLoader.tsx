@@ -5,7 +5,7 @@ interface SkeletonProps {
 }
 
 const SkeletonPulse = ({ className = '' }: SkeletonProps) => (
-    <div className={`animate-pulse bg-beige-200 dark:bg-charcoal-800 rounded-lg ${className}`} />
+    <div className={`animate-pulse bg-beige-200 dark:bg-charcoal-700 rounded-lg ${className}`} />
 );
 
 export const SkeletonText = ({ width = 'w-full', className = '' }: { width?: string; className?: string }) => (
@@ -121,7 +121,7 @@ export const SkeletonLessonView = () => {
         <div className="space-y-8 p-4 lg:p-8 max-w-7xl mx-auto animate-pulse">
             
             {/* 1. Header & Breadcrumb Sync Bar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-beige-200 dark:border-charcoal-800 pb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-beige-200 dark:border-charcoal-700 pb-6">
                 <div className="space-y-3 flex-1">
                     {/* Simulated Module Label (e.g., "Module 3: Lesson Title") */}
                     <div className="flex items-center gap-2">
@@ -143,12 +143,12 @@ export const SkeletonLessonView = () => {
                 <div className="lg:col-span-2 space-y-6">
                     
                     {/* Main Frame Viewport (Mimicking standard 16:9 Premium Video or PDF Canvas footprint) */}
-                    <div className="w-full aspect-[16/9] bg-beige-100 dark:bg-charcoal-900 rounded-2xl border border-beige-200 dark:border-charcoal-800 p-6 flex flex-col justify-between relative overflow-hidden">
+                    <div className="w-full aspect-[16/9] bg-beige-100 dark:bg-charcoal-900 rounded-2xl border border-beige-200 dark:border-charcoal-700 p-6 flex flex-col justify-between relative overflow-hidden">
                         
                         {/* Top Control Overlay Wireframe (Simulated Maximize/Minimize & Status Badges) */}
                         <div className="flex justify-between items-center w-full">
-                            <SkeletonPulse className="w-28 h-6 rounded-lg bg-beige-200 dark:bg-charcoal-800" />
-                            <SkeletonPulse className="w-8 h-8 rounded-lg bg-beige-200 dark:bg-charcoal-800" />
+                            <SkeletonPulse className="w-28 h-6 rounded-lg bg-beige-200 dark:bg-charcoal-700" />
+                            <SkeletonPulse className="w-8 h-8 rounded-lg bg-beige-200 dark:bg-charcoal-700" />
                         </div>
 
                         {/* Central Play/Load Icon Blueprint */}
@@ -158,10 +158,10 @@ export const SkeletonLessonView = () => {
 
                         {/* Bottom Controller Bar Blueprint */}
                         <div className="flex justify-between items-center w-full">
-                            <SkeletonPulse className="w-1/3 h-3 rounded bg-beige-200 dark:bg-charcoal-800" />
+                            <SkeletonPulse className="w-1/3 h-3 rounded bg-beige-200 dark:bg-charcoal-700" />
                             <div className="flex gap-2">
-                                <SkeletonPulse className="w-6 h-6 rounded bg-beige-200 dark:bg-charcoal-800" />
-                                <SkeletonPulse className="w-6 h-6 rounded bg-beige-200 dark:bg-charcoal-800" />
+                                <SkeletonPulse className="w-6 h-6 rounded bg-beige-200 dark:bg-charcoal-700" />
+                                <SkeletonPulse className="w-6 h-6 rounded bg-beige-200 dark:bg-charcoal-700" />
                             </div>
                         </div>
                     </div>
@@ -204,7 +204,7 @@ export const SkeletonLessonView = () => {
 
                     {/* Syllabus Context Component: Simulating current module sequence list */}
                     <div className="premium-card p-5 space-y-4 border border-beige-100 dark:border-charcoal-900">
-                        <div className="flex items-center justify-between border-b border-beige-100 dark:border-charcoal-800 pb-3">
+                        <div className="flex items-center justify-between border-b border-beige-100 dark:border-charcoal-700 pb-3">
                             <SkeletonText width="w-32" className="h-4" />
                             <SkeletonPulse className="w-10 h-5 rounded-full" />
                         </div>
@@ -261,13 +261,13 @@ export const SkeletonCourseDetails = () => {
 
                     {/* Master Instructor Credentials Profile Wrapper */}
                     <div className="flex items-center gap-3 pt-2">
-                        <SkeletonPulse className="w-8 h-8 rounded-full bg-beige-200 dark:bg-charcoal-800" />
+                        <SkeletonPulse className="w-8 h-8 rounded-full bg-beige-200 dark:bg-charcoal-700" />
                         <SkeletonText width="w-48" className="h-4" />
                     </div>
                 </div>
 
                 {/* Right Side: Global Mastery Status Sidebar Card (Certificates / Claims Tracking) */}
-                <div className="premium-card p-8 border border-beige-200 dark:border-charcoal-800 min-w-full lg:min-w-[340px] space-y-6">
+                <div className="premium-card p-8 border border-beige-200 dark:border-charcoal-700 min-w-full lg:min-w-[340px] space-y-6">
                     <div>
                         <SkeletonText width="w-36" className="h-3 opacity-50 mb-4" />
                         {/* Progress Metric Ring/Percent representation */}
@@ -286,7 +286,7 @@ export const SkeletonCourseDetails = () => {
             </div>
 
             {/* 3. Deep Course Curriculum Details Grid Section (Module Accordion List) */}
-            <div className="space-y-6 pt-6 border-t border-beige-200 dark:border-charcoal-800">
+            <div className="space-y-6 pt-6 border-t border-beige-200 dark:border-charcoal-700">
                 {/* Curriculum Panel Head Label */}
                 <div className="space-y-2">
                     <SkeletonText width="w-48" className="h-6" />
@@ -302,17 +302,17 @@ export const SkeletonCourseDetails = () => {
                             <div className="flex justify-between items-center">
                                 <div className="space-y-2 flex-1">
                                     <SkeletonText width="w-1/4" className="h-3 opacity-60" />
-                                    <SkeletonText width="w-2/5" className="h-5 bg-beige-200 dark:bg-charcoal-800" />
+                                    <SkeletonText width="w-2/5" className="h-5 bg-beige-200 dark:bg-charcoal-700" />
                                 </div>
                                 <SkeletonPulse className="w-6 h-6 rounded-md" />
                             </div>
 
                             {/* Nested Lessons Items Footprint (Inside target module block container) */}
-                            <div className="pt-2 space-y-3 pl-4 border-l-2 border-beige-200 dark:border-charcoal-800">
+                            <div className="pt-2 space-y-3 pl-4 border-l-2 border-beige-200 dark:border-charcoal-700">
                                 {Array.from({ length: 2 }).map((_, j) => (
                                     <div key={j} className="flex items-center justify-between py-2">
                                         <div className="flex items-center gap-3 flex-1">
-                                            <SkeletonPulse className="w-5 h-5 rounded-md bg-beige-200 dark:bg-charcoal-800" />
+                                            <SkeletonPulse className="w-5 h-5 rounded-md bg-beige-200 dark:bg-charcoal-700" />
                                             <SkeletonText width={j === 0 ? "w-1/3" : "w-1/2"} className="h-4" />
                                         </div>
                                         <div className="flex items-center gap-4">

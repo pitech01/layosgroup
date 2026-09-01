@@ -75,7 +75,7 @@ export default function AssignmentSubmissions() {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     text-decoration: none;
                     font-weight: 800;
                     font-size: 0.95rem;
@@ -88,13 +88,13 @@ export default function AssignmentSubmissions() {
                 }
 
                 .staff-scope .back-link:hover {
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     transform: translateX(-4px);
                 }
 
                 .staff-scope .assignment-header-premium {
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 32px;
                     padding: 3rem;
                     margin-bottom: 3rem;
@@ -111,7 +111,7 @@ export default function AssignmentSubmissions() {
                 .staff-scope .header-main-info h1 {
                     font-size: 2.5rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0 0 1rem 0;
                     letter-spacing: -0.04em;
                 }
@@ -119,8 +119,8 @@ export default function AssignmentSubmissions() {
                 .staff-scope .cohort-label {
                     display: inline-flex;
                     padding: 6px 14px;
-                    background: #f1f5f9;
-                    color: #475569;
+                    background: var(--index-hover-bg);
+                    color: var(--index-text-secondary);
                     border-radius: 10px;
                     font-size: 0.8rem;
                     font-weight: 800;
@@ -131,7 +131,7 @@ export default function AssignmentSubmissions() {
                 .staff-scope .header-meta-group {
                     display: flex;
                     gap: 2rem;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-size: 1rem;
                     font-weight: 600;
                 }
@@ -144,23 +144,23 @@ export default function AssignmentSubmissions() {
 
                 .staff-scope .stats-box-premium {
                     padding: 1.5rem 2.5rem;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     border-radius: 24px;
                     text-align: center;
-                    border: 1px solid #f1f5f9;
+                    border: 1px solid var(--index-hover-bg);
                     min-width: 180px;
                 }
 
                 .stats-box-premium .value {
                     font-size: 2rem;
                     font-weight: 950;
-                    color: #1a4d3e;
+                    color: var(--index-primary-color);
                     line-height: 1.2;
                 }
 
                 .stats-box-premium .label {
                     font-size: 0.75rem;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     font-weight: 900;
                     text-transform: uppercase;
                     letter-spacing: 0.1em;
@@ -169,7 +169,7 @@ export default function AssignmentSubmissions() {
 
                 .staff-scope .submissions-card {
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 32px;
                     padding: 3rem;
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
@@ -185,38 +185,38 @@ export default function AssignmentSubmissions() {
                     left: 1.25rem;
                     top: 50%;
                     transform: translateY(-50%);
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                 }
 
                 .staff-scope .premium-search-input {
                     width: 100%;
                     padding: 1rem 1.25rem 1rem 3.5rem;
-                    background: #f8fafc;
-                    border: 2px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 18px;
                     font-weight: 600;
                     font-size: 1rem;
                     transition: all 0.3s;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope .premium-search-input:focus {
                     outline: none;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     background: white;
-                    box-shadow: 0 0 0 5px rgba(26, 77, 62, 0.05);
+                    box-shadow: 0 0 0 5px color-mix(in srgb, var(--index-primary-color) 5%, transparent);
                 }
 
                 .staff-scope .submissions-table-header {
                     display: grid;
                     grid-template-columns: 1.5fr 1fr 1.5fr 120px;
                     padding: 1rem 1.5rem;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     border-radius: 14px;
                     margin-bottom: 1rem;
                     font-weight: 900;
                     font-size: 0.75rem;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                 }
@@ -227,7 +227,7 @@ export default function AssignmentSubmissions() {
                     align-items: center;
                     padding: 1.5rem;
                     background: white;
-                    border: 1px solid #f1f5f9;
+                    border: 1px solid var(--index-hover-bg);
                     border-radius: 20px;
                     margin-bottom: 1rem;
                     gap: 1.5rem;
@@ -235,8 +235,8 @@ export default function AssignmentSubmissions() {
                 }
 
                 .staff-scope .submission-item-row:hover {
-                    border-color: #1a4d3e;
-                    background: #fcfdfe;
+                    border-color: var(--index-primary-color);
+                    background: var(--index-card-bg);
                     transform: scale(1.01);
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
                 }
@@ -251,8 +251,8 @@ export default function AssignmentSubmissions() {
                     width: 48px;
                     height: 48px;
                     border-radius: 16px;
-                    background: #f1f5f9;
-                    color: #1a4d3e;
+                    background: var(--index-hover-bg);
+                    color: var(--index-primary-color);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -265,13 +265,13 @@ export default function AssignmentSubmissions() {
                     margin: 0;
                     font-size: 1rem;
                     font-weight: 800;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
 
                 .staff-scope .student-text p {
                     margin: 0;
                     font-size: 0.8rem;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     font-weight: 600;
                 }
 
@@ -279,13 +279,13 @@ export default function AssignmentSubmissions() {
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    color: #475569;
+                    color: var(--index-text-secondary);
                     font-size: 0.9rem;
                     font-weight: 700;
                 }
 
                 .staff-scope .answer-cell {
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-size: 0.85rem;
                     font-weight: 600;
                     line-height: 1.5;
@@ -305,8 +305,8 @@ export default function AssignmentSubmissions() {
                     align-items: center;
                     justify-content: center;
                     gap: 8px;
-                    background: #f0fdf4;
-                    color: #1a4d3e;
+                    background: color-mix(in srgb, var(--lgl-success) 15%, transparent);
+                    color: var(--index-primary-color);
                     padding: 10px 18px;
                     border-radius: 12px;
                     text-decoration: none;
@@ -317,9 +317,9 @@ export default function AssignmentSubmissions() {
                 }
 
                 .staff-scope .download-btn-premium:hover {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                 }
             `}</style>
 
@@ -329,14 +329,14 @@ export default function AssignmentSubmissions() {
 
             {loading ? (
                 <div style={{ padding: '10rem 0', textAlign: 'center' }}>
-                    <Loader2 className="animate-spin" size={60} color="#1a4d3e" style={{ margin: '0 auto' }} />
-                    <p style={{ marginTop: '2rem', fontWeight: 800, color: '#64748b', fontSize: '1.2rem' }}>Processing submission records...</p>
+                    <Loader2 className="animate-spin" size={60} color="var(--index-primary-color)" style={{ margin: '0 auto' }} />
+                    <p style={{ marginTop: '2rem', fontWeight: 800, color: 'var(--index-text-secondary)', fontSize: '1.2rem' }}>Processing submission records...</p>
                 </div>
             ) : error ? (
-                <div style={{ padding: '4rem', background: '#fff1f2', borderRadius: '40px', textAlign: 'center', border: '1px solid #ffe4e6' }}>
-                    <AlertCircle size={56} color="#e11d48" style={{ margin: '0 auto 1.5rem' }} />
-                    <h2 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.8rem' }}>Operation Aborted</h2>
-                    <p style={{ color: '#64748b', fontWeight: 600, margin: '1rem 0 2.5rem' }}>{error}</p>
+                <div style={{ padding: '4rem', background: 'var(--index-danger-bg-soft)', borderRadius: '40px', textAlign: 'center', border: '1px solid var(--index-danger-bg-soft)' }}>
+                    <AlertCircle size={56} color="var(--lgl-error)" style={{ margin: '0 auto 1.5rem' }} />
+                    <h2 style={{ margin: 0, fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.8rem' }}>Operation Aborted</h2>
+                    <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, margin: '1rem 0 2.5rem' }}>{error}</p>
                     <button onClick={fetchSubmissions} className="btn-create" style={{ margin: '0 auto', width: 'auto', padding: '1rem 2rem' }}>Retry Sync</button>
                 </div>
             ) : (
@@ -347,11 +347,11 @@ export default function AssignmentSubmissions() {
                             <h1>{data.assignment?.title}</h1>
                             <div className="header-meta-group">
                                 <div className="meta-badge">
-                                    <Calendar size={20} color="#1a4d3e" />
+                                    <Calendar size={20} color="var(--index-primary-color)" />
                                     <span>Due {new Date(data.assignment?.due_date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
                                 </div>
                                 <div className="meta-badge">
-                                    <CheckCircle2 size={20} color="#1a4d3e" />
+                                    <CheckCircle2 size={20} color="var(--index-primary-color)" />
                                     <span>{data.submissions?.length || 0} Responses received</span>
                                 </div>
                                 {data.assignment?.assignment_file && (
@@ -360,7 +360,7 @@ export default function AssignmentSubmissions() {
                                         target="_blank"
                                         rel="noreferrer"
                                         className="meta-badge"
-                                        style={{ color: '#1a4d3e', textDecoration: 'underline' }}
+                                        style={{ color: 'var(--index-primary-color)', textDecoration: 'underline' }}
                                     >
                                         <FileText size={20} />
                                         <span>Instructions File</span>
@@ -397,9 +397,9 @@ export default function AssignmentSubmissions() {
 
                         {filteredSubmissions.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '6rem 0' }}>
-                                <User size={64} color="#cbd5e1" style={{ marginBottom: '1.5rem' }} />
-                                <h3 style={{ margin: 0, fontWeight: 900, color: '#0f172a', fontSize: '1.4rem' }}>No student records matched</h3>
-                                <p style={{ color: '#64748b', fontWeight: 600 }}>Try adjusting your search query for "{searchTerm}"</p>
+                                <User size={64} color="var(--index-text-faint)" style={{ marginBottom: '1.5rem' }} />
+                                <h3 style={{ margin: 0, fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1.4rem' }}>No student records matched</h3>
+                                <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600 }}>Try adjusting your search query for "{searchTerm}"</p>
                             </div>
                         ) : (
                             <div className="submissions-list">
@@ -438,7 +438,7 @@ export default function AssignmentSubmissions() {
                                                     <span>REVIEW</span>
                                                 </a>
                                             ) : (
-                                                <span style={{ fontSize: '0.7rem', fontWeight: 950, color: '#94a3b8' }}>N/A</span>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 950, color: 'var(--index-text-faint)' }}>N/A</span>
                                             )}
                                         </div>
                                     </div>

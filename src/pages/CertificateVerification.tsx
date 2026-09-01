@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-    ShieldCheck, Download, 
-    Loader2, 
+import {
+    ShieldCheck, Download,
+    Loader2,
     Lock, Award, Printer, CheckCircle,
-    ArrowRight, X, Maximize2, ShieldAlert, Cpu
+    ArrowRight, X, Maximize2, ShieldAlert, Cpu, SearchCheck, RefreshCw, WifiOff
 } from 'lucide-react';
 
 interface Certificate {
@@ -14,32 +14,46 @@ interface Certificate {
     issued_at: string;
     certificate_uuid: string;
     issued_by: string;
-    certificate_url?: string;
-    qr_url?: string;
+    certificate_path?: string;
+    qr_code_path?: string;
 }
+
+type VerifyErrorType = 'not_found' | 'network' | null;
 
 const CertificateVerification = () => {
     const { uuid } = useParams();
+    const navigate = useNavigate();
     const [certificate, setCertificate] = useState<Certificate | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
+    const [errorType, setErrorType] = useState<VerifyErrorType>(null);
     const [previewOpen, setPreviewOpen] = useState(false);
+    const [lookupCode, setLookupCode] = useState('');
 
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
+    const verify = useCallback(async () => {
+        setLoading(true);
+        setErrorType(null);
+        try {
+            const res = await axios.get(`${API_URL}/certificates/verify/${uuid}`);
+            setCertificate(res.data);
+        } catch (err) {
+            const isNotFound = axios.isAxiosError(err) && err.response?.status === 404;
+            setErrorType(isNotFound ? 'not_found' : 'network');
+        } finally {
+            setLoading(false);
+        }
+    }, [API_URL, uuid]);
+
     useEffect(() => {
-        const verify = async () => {
-            try {
-                const res = await axios.get(`${API_URL}/certificates/verify/${uuid}`);
-                setCertificate(res.data);
-            } catch (err) {
-                setError(true);
-            } finally {
-                setLoading(false);
-            }
-        };
         verify();
-    }, [uuid]);
+    }, [verify]);
+
+    const handleLookupSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const code = lookupCode.trim();
+        if (code) navigate(`/verify/${code.toUpperCase()}`);
+    };
 
     const handleDownload = async () => {
         try {
@@ -55,172 +69,234 @@ const CertificateVerification = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
-        } catch (err) {
+        } catch {
             alert('Security signature mismatch or network timeout. Please try again.');
         }
     };
 
-    if (loading) return (
-        <div className="verify-loader-screen">
-            <div className="verify-loader-content">
-                <Loader2 className="verify-spinner" size={64} />
-                <h2 className="verify-loader-text">AUTHENTICATING...</h2>
-                <p className="verify-loader-sub">SECURE REGISTRY ACCESS</p>
-            </div>
-        </div>
-    );
+    let body;
 
-    if (error) return (
-        <div className="verify-container">
-            <div className="verify-card error-card">
-                <div className="verify-icon-wrapper error">
-                    <ShieldAlert size={40} />
+    if (loading) {
+        body = (
+            <div className="verify-loader-screen">
+                <div className="verify-loader-content">
+                    <Loader2 className="verify-spinner" size={64} />
+                    <h2 className="verify-loader-text">AUTHENTICATING...</h2>
+                    <p className="verify-loader-sub">SECURE REGISTRY ACCESS</p>
                 </div>
-                <h1 className="verify-title">Unverified Record</h1>
-                <p className="verify-description">
-                    The security key <span className="highlight">{uuid}</span> could not be authenticated against our global ledger.
-                </p>
-                
-                <div className="verify-diagnostics">
-                    <span className="diag-label">NETWORK DIAGNOSTICS</span>
-                    <code>Endpoint: {API_URL}/certificates/verify/{uuid}</code>
-                    <p className="diag-tip">Check connection or ensure code is correct.</p>
+            </div>
+        );
+    } else if (errorType) {
+        body = (
+            <div className="verify-page">
+                <div className="verify-header">
+                    <div className="verify-logo-section">
+                        <div className="verify-logo-box">
+                            <Lock size={24} />
+                        </div>
+                        <div className="verify-brand">
+                            <h3>LGL CONSULTING</h3>
+                            <p>OFFICIAL VERIFICATION PORTAL</p>
+                        </div>
+                    </div>
                 </div>
 
-                <Link to="/" className="verify-button">
-                    BACK TO PLATFORM <ArrowRight size={14} />
-                </Link>
+                <main className="error-state-main">
+                    <div className="error-state-card">
+                        <div className={`error-state-icon-wrap ${errorType === 'network' ? 'network' : ''}`}>
+                            {errorType === 'network' ? <WifiOff size={36} /> : <ShieldAlert size={36} />}
+                        </div>
+
+                        {errorType === 'network' ? (
+                            <>
+                                <h1 className="error-state-title">Connection Problem</h1>
+                                <p className="error-state-desc">
+                                    We couldn't reach the verification registry just now. This is usually a temporary
+                                    network issue rather than a problem with the certificate itself.
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <h1 className="error-state-title">Certificate Not Found</h1>
+                                <p className="error-state-desc">
+                                    We couldn't find a certificate matching this code. It may have been typed
+                                    incorrectly, or the record may not exist in our registry.
+                                </p>
+                            </>
+                        )}
+
+                        <div className="error-state-code-pill">
+                            <code>{uuid}</code>
+                        </div>
+
+                        <div className="error-state-actions">
+                            {errorType === 'network' && (
+                                <button type="button" className="error-btn-primary" onClick={verify}>
+                                    <RefreshCw size={16} /> Try Again
+                                </button>
+                            )}
+                            <Link to="/" className="error-btn-secondary">
+                                <ArrowRight size={16} /> Back to Platform
+                            </Link>
+                        </div>
+
+                        <form className="lookup-form" onSubmit={handleLookupSubmit}>
+                            <label htmlFor="lookup-code">Have a different certificate code?</label>
+                            <div className="lookup-form-row">
+                                <SearchCheck size={16} className="lookup-form-icon" />
+                                <input
+                                    id="lookup-code"
+                                    type="text"
+                                    placeholder="Enter certificate code"
+                                    value={lookupCode}
+                                    onChange={(e) => setLookupCode(e.target.value)}
+                                    autoCapitalize="characters"
+                                />
+                                <button type="submit" disabled={!lookupCode.trim()}>Verify</button>
+                            </div>
+                        </form>
+                    </div>
+                </main>
+
+                <footer className="verify-footer">
+                    <p>© 2026 LGL Consulting Secure Registry Authority</p>
+                </footer>
             </div>
-        </div>
-    );
+        );
+    } else {
+        body = (
+            <div className="verify-page">
+                <div className="verify-header">
+                    <div className="verify-logo-section">
+                        <div className="verify-logo-box">
+                            <Lock size={24} />
+                        </div>
+                        <div className="verify-brand">
+                            <h3>LGL CONSULTING</h3>
+                            <p>OFFICIAL VERIFICATION PORTAL</p>
+                        </div>
+                    </div>
+                    <div className="verify-status-badge">
+                        <div className="pulse-dot"></div>
+                        REAL-TIME LEDGER STATUS: ACTIVE
+                    </div>
+                </div>
+
+                <main className="verify-main">
+                    <div className="verify-grid">
+                        {/* Left: Certificate Preview */}
+                        <div className="verify-preview-section">
+                            <div className="certificate-frame">
+                                <div className="certificate-inner">
+                                    {certificate?.certificate_path ? (
+                                        <img
+                                            src={certificate.certificate_path}
+                                            alt="Official Certificate"
+                                            onClick={() => setPreviewOpen(true)}
+                                        />
+                                    ) : (
+                                        <div className="certificate-placeholder">
+                                            <Cpu size={48} />
+                                            <p>Secure Image Loading...</p>
+                                        </div>
+                                    )}
+                                    <div className="certificate-overlay" onClick={() => setPreviewOpen(true)}>
+                                        <Maximize2 size={24} />
+                                        <span>ZOOM PREVIEW</span>
+                                    </div>
+                                </div>
+                                <div className="seal-badge">
+                                    <Award size={40} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right: metadata */}
+                        <div className="verify-data-section">
+                            <div className="info-card">
+                                <div className="verified-chip">
+                                    <CheckCircle size={14} />
+                                    RECORD AUTHENTICATED
+                                </div>
+
+                                <h1 className="credential-title">
+                                    CREDENTIAL<br />
+                                    <span className="gold">VALIDATED</span>
+                                </h1>
+
+                                <div className="serial-number">
+                                    <Lock size={12} /> REGISTER ID: {uuid}
+                                </div>
+
+                                <div className="info-fields">
+                                    <div className="info-field">
+                                        <label>HOLDER NAME</label>
+                                        <p className="name-val">{certificate?.full_name}</p>
+                                    </div>
+                                    <div className="divider"></div>
+                                    <div className="info-field">
+                                        <label>ACCREDITATION</label>
+                                        <p className="course-val">{certificate?.course_title}</p>
+                                    </div>
+                                </div>
+
+                                <div className="info-metrics">
+                                    <div className="metric">
+                                        <label>DATE ISSUED</label>
+                                        <span>{new Date(certificate?.issued_at || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                    </div>
+                                    <div className="metric">
+                                        <label>AUTHORITY</label>
+                                        <span>{certificate?.issued_by || 'LGL CONSULTING'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="action-card">
+                                <div className="action-buttons">
+                                    <button onClick={handleDownload} className="btn-primary">
+                                        <Download size={20} /> OFFICIAL DOWNLOAD
+                                    </button>
+                                    <button onClick={() => window.print()} className="btn-secondary">
+                                        <Printer size={20} />
+                                    </button>
+                                </div>
+                                <p className="trust-note">
+                                    <ShieldCheck size={14} /> Cryptographic signature verified
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+
+                <footer className="verify-footer">
+                    <p>© 2026 LGL Consulting Secure Registry Authority</p>
+                </footer>
+
+                {/* Modal */}
+                {previewOpen && (
+                    <div className="preview-modal" onClick={() => setPreviewOpen(false)}>
+                        <div className="modal-content" onClick={e => e.stopPropagation()}>
+                            <button className="close-modal" onClick={() => setPreviewOpen(false)}><X size={32} /></button>
+                            <img src={certificate?.certificate_path} alt="HD Preview" />
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
 
     return (
-        <div className="verify-page">
-            <div className="verify-header">
-                <div className="verify-logo-section">
-                    <div className="verify-logo-box">
-                        <Lock size={24} />
-                    </div>
-                    <div className="verify-brand">
-                        <h3>LAYOS GROUP</h3>
-                        <p>OFFICIAL VERIFICATION PORTAL</p>
-                    </div>
-                </div>
-                <div className="verify-status-badge">
-                    <div className="pulse-dot"></div>
-                    REAL-TIME LEDGER STATUS: ACTIVE
-                </div>
-            </div>
-
-            <main className="verify-main">
-                <div className="verify-grid">
-                    {/* Left: Certificate Preview */}
-                    <div className="verify-preview-section">
-                        <div className="certificate-frame">
-                            <div className="certificate-inner">
-                                {certificate?.certificate_url ? (
-                                    <img 
-                                        src={certificate.certificate_url} 
-                                        alt="Official Certificate" 
-                                        onClick={() => setPreviewOpen(true)}
-                                    />
-                                ) : (
-                                    <div className="certificate-placeholder">
-                                        <Cpu size={48} />
-                                        <p>Secure Image Loading...</p>
-                                    </div>
-                                )}
-                                <div className="certificate-overlay" onClick={() => setPreviewOpen(true)}>
-                                    <Maximize2 size={24} />
-                                    <span>ZOOM PREVIEW</span>
-                                </div>
-                            </div>
-                            <div className="seal-badge">
-                                <Award size={40} />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right: metadata */}
-                    <div className="verify-data-section">
-                        <div className="info-card">
-                            <div className="verified-chip">
-                                <CheckCircle size={14} />
-                                RECORD AUTHENTICATED
-                            </div>
-                            
-                            <h1 className="credential-title">
-                                CREDENTIAL<br/>
-                                <span className="gold">VALIDATED</span>
-                            </h1>
-                            
-                            <div className="serial-number">
-                                <Lock size={12} /> REGISTER ID: {uuid}
-                            </div>
-
-                            <div className="info-fields">
-                                <div className="info-field">
-                                    <label>HOLDER NAME</label>
-                                    <p className="name-val">{certificate?.full_name}</p>
-                                </div>
-                                <div className="divider"></div>
-                                <div className="info-field">
-                                    <label>ACCREDITATION</label>
-                                    <p className="course-val">{certificate?.course_title}</p>
-                                </div>
-                            </div>
-
-                            <div className="info-metrics">
-                                <div className="metric">
-                                    <label>DATE ISSUED</label>
-                                    <span>{new Date(certificate?.issued_at || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                </div>
-                                <div className="metric">
-                                    <label>AUTHORITY</label>
-                                    <span>{certificate?.issued_by || 'LAYOS GROUP'}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="action-card">
-                            <div className="action-buttons">
-                                <button onClick={handleDownload} className="btn-primary">
-                                    <Download size={20} /> OFFICIAL DOWNLOAD
-                                </button>
-                                <button onClick={() => window.print()} className="btn-secondary">
-                                    <Printer size={20} />
-                                </button>
-                            </div>
-                            <p className="trust-note">
-                                <ShieldCheck size={14} /> Cryptographic signature verified
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <footer className="verify-footer">
-                <p>© 2026 Layos Group Secure Registry Authority</p>
-            </footer>
-
-            {/* Modal */}
-            {previewOpen && (
-                <div className="preview-modal" onClick={() => setPreviewOpen(false)}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <button className="close-modal" onClick={() => setPreviewOpen(false)}><X size={32}/></button>
-                        <img src={certificate?.certificate_url} alt="HD Preview" />
-                    </div>
-                </div>
-            )}
-
+        <>
+            {body}
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;900&family=Space+Grotesk:wght@300;700&display=swap');
 
                 .verify-page {
                     min-height: 100vh;
-                    background: #f0f2f5;
+                    background: var(--index-bg-color);
                     font-family: 'Outfit', sans-serif;
-                    color: #1a1a1a;
+                    color: var(--index-text-heading);
                     padding: 40px 20px;
                 }
 
@@ -268,8 +344,7 @@ const CertificateVerification = () => {
                     flex-wrap: wrap;
                     gap: 20px;
                 }
-                
-                /* [Rest of the existing styles remained same, only added @media print above] */
+
                 .verify-logo-section {
                     display: flex;
                     align-items: center;
@@ -277,7 +352,7 @@ const CertificateVerification = () => {
                 }
 
                 .verify-logo-box {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     width: 50px;
                     height: 50px;
@@ -285,7 +360,7 @@ const CertificateVerification = () => {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    box-shadow: 0 10px 20px rgba(26,77,62,0.15);
+                    box-shadow: 0 10px 20px color-mix(in srgb, var(--index-primary-color) 15%, transparent);
                 }
 
                 .verify-brand h3 {
@@ -293,7 +368,7 @@ const CertificateVerification = () => {
                     font-size: 1.25rem;
                     font-weight: 900;
                     letter-spacing: -1px;
-                    color: #1a4d3e;
+                    color: var(--index-primary-color);
                 }
 
                 .verify-brand p {
@@ -301,12 +376,13 @@ const CertificateVerification = () => {
                     font-size: 0.65rem;
                     font-weight: 700;
                     letter-spacing: 2px;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     text-transform: uppercase;
                 }
 
                 .verify-status-badge {
-                    background: rgba(255,255,255,0.8);
+                    background: var(--index-card-bg);
+                    color: var(--index-text-heading);
                     backdrop-filter: blur(10px);
                     padding: 8px 20px;
                     border-radius: 50px;
@@ -315,14 +391,14 @@ const CertificateVerification = () => {
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    border: 1px solid white;
+                    border: 1px solid var(--index-border-color);
                     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
                 }
 
                 .pulse-dot {
                     width: 8px;
                     height: 8px;
-                    background: #10b981;
+                    background: var(--lgl-success);
                     border-radius: 50%;
                     animation: pulse 2s infinite;
                 }
@@ -352,21 +428,21 @@ const CertificateVerification = () => {
                 }
 
                 .certificate-frame {
-                    background: white;
+                    background: var(--index-card-bg);
                     padding: 15px;
                     border-radius: 50px;
-                    box-shadow: 0 40px 80px -20px rgba(26,77,62,0.15);
+                    box-shadow: 0 40px 80px -20px color-mix(in srgb, var(--index-primary-color) 15%, transparent);
                     position: relative;
                     border: 1px solid rgba(255,255,255,0.5);
                 }
 
                 .certificate-inner {
                     aspect-ratio: 1.414/1;
-                    background: #f8fafc;
+                    background: var(--index-hover-bg);
                     border-radius: 35px;
                     overflow: hidden;
                     position: relative;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                 }
 
                 .certificate-inner img {
@@ -402,23 +478,23 @@ const CertificateVerification = () => {
                     left: -20px;
                     width: 100px;
                     height: 100px;
-                    background: #fbbf24;
+                    background: var(--lgl-warning);
                     color: white;
                     border-radius: 35px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    box-shadow: 0 15px 30px rgba(251,191,36,0.3);
+                    box-shadow: 0 15px 30px color-mix(in srgb, var(--lgl-warning) 30%, transparent);
                     border: 6px solid white;
                     transform: rotate(-10deg);
                 }
 
                 .info-card {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     padding: 50px;
                     border-radius: 60px;
-                    box-shadow: 0 30px 60px rgba(26,77,62,0.2);
+                    box-shadow: 0 30px 60px color-mix(in srgb, var(--index-primary-color) 20%, transparent);
                     margin-bottom: 30px;
                     position: relative;
                     overflow: hidden;
@@ -447,7 +523,7 @@ const CertificateVerification = () => {
                     text-transform: uppercase;
                 }
 
-                .gold { color: #fbbf24; }
+                .gold { color: var(--lgl-warning); }
 
                 .serial-number {
                     font-size: 0.65rem;
@@ -465,7 +541,7 @@ const CertificateVerification = () => {
                     display: block;
                     font-size: 0.6rem;
                     font-weight: 900;
-                    color: #fbbf24;
+                    color: var(--lgl-warning);
                     letter-spacing: 3px;
                     margin-bottom: 10px;
                 }
@@ -493,10 +569,10 @@ const CertificateVerification = () => {
                 .metric span { font-weight: 900; font-size: 0.9rem; }
 
                 .action-card {
-                    background: white;
+                    background: var(--index-card-bg);
                     padding: 30px;
                     border-radius: 40px;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                 }
 
                 .action-buttons {
@@ -507,7 +583,7 @@ const CertificateVerification = () => {
 
                 .btn-primary {
                     flex: 1;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     text-decoration: none;
                     display: flex;
@@ -521,18 +597,18 @@ const CertificateVerification = () => {
                     transition: 0.3s;
                 }
 
-                .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(26,77,62,0.2); }
+                .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 20px color-mix(in srgb, var(--index-primary-color) 20%, transparent); }
 
                 .btn-secondary {
                     width: 65px;
-                    background: #f8fafc;
-                    border: 1px solid #e2e8f0;
+                    background: var(--index-hover-bg);
+                    border: 1px solid var(--index-border-color);
                     border-radius: 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                 }
 
                 .trust-note {
@@ -540,7 +616,7 @@ const CertificateVerification = () => {
                     text-align: center;
                     font-size: 0.65rem;
                     font-weight: 700;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -552,7 +628,7 @@ const CertificateVerification = () => {
                     padding: 60px 0;
                     font-size: 0.7rem;
                     font-weight: 700;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                 }
 
                 .preview-modal {
@@ -592,7 +668,7 @@ const CertificateVerification = () => {
                 /* Loader Styles */
                 .verify-loader-screen {
                     min-height: 100vh;
-                    background: #0d0f14;
+                    background: var(--lgl-charcoal);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -601,21 +677,193 @@ const CertificateVerification = () => {
                 }
 
                 .verify-spinner {
-                    color: #fbbf24;
+                    color: var(--lgl-warning);
                     animation: spin 1s linear infinite;
                     margin-bottom: 20px;
                 }
 
                 .verify-loader-text { font-weight: 700; font-size: 1.5rem; letter-spacing: 5px; margin: 0; }
-                .verify-loader-sub { font-size: 0.7rem; color: #475569; letter-spacing: 3px; font-weight: 700; }
+                .verify-loader-sub { font-size: 0.7rem; color: var(--lgl-gray-mid); letter-spacing: 3px; font-weight: 700; }
 
-                /* Error Card */
-                .error-card { text-align: center; padding: 60px !important; border-top: 10px solid #ef4444 !important; }
-                .verify-icon-wrapper.error { color: #ef4444; margin-bottom: 30px; }
-                .verify-diagnostics { padding: 20px; background: #f8fafc; border-radius: 20px; text-align: left; margin: 30px 0; border: 1px solid #e2e8f0; }
-                .diag-label { font-size: 0.6rem; font-weight: 900; color: #94a3b8; display: block; margin-bottom: 10px; }
-                .verify-diagnostics code { font-size: 0.6rem; color: #ef4444; word-break: break-all; }
-                .diag-tip { font-size: 0.6rem; color: #64748b; margin: 10px 0 0; }
+                /* Error / Not-Found State */
+                .error-state-main {
+                    max-width: 560px;
+                    margin: 0 auto;
+                }
+
+                .error-state-card {
+                    background: var(--index-card-bg);
+                    border-radius: 40px;
+                    padding: 56px 40px;
+                    text-align: center;
+                    border-top: 6px solid var(--lgl-error);
+                    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.08);
+                }
+
+                .error-state-icon-wrap {
+                    width: 84px;
+                    height: 84px;
+                    border-radius: 28px;
+                    background: color-mix(in srgb, var(--lgl-error) 10%, transparent);
+                    color: var(--lgl-error);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 28px;
+                }
+
+                .error-state-icon-wrap.network {
+                    background: color-mix(in srgb, var(--lgl-warning) 12%, transparent);
+                    color: var(--lgl-warning);
+                }
+
+                .error-state-title {
+                    font-size: 1.75rem;
+                    font-weight: 900;
+                    letter-spacing: -1px;
+                    margin: 0 0 14px;
+                    color: var(--index-text-heading);
+                }
+
+                .error-state-desc {
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                    line-height: 1.6;
+                    color: var(--index-text-secondary);
+                    margin: 0 0 24px;
+                }
+
+                .error-state-code-pill {
+                    display: inline-block;
+                    background: var(--index-hover-bg);
+                    border: 1px solid var(--index-border-color);
+                    border-radius: 100px;
+                    padding: 10px 24px;
+                    margin-bottom: 32px;
+                }
+
+                .error-state-code-pill code {
+                    font-size: 0.85rem;
+                    font-weight: 800;
+                    letter-spacing: 2px;
+                    color: var(--index-text-heading);
+                }
+
+                .error-state-actions {
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                    gap: 12px;
+                    margin-bottom: 36px;
+                }
+
+                .error-btn-primary,
+                .error-btn-secondary {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 0.8rem;
+                    font-weight: 800;
+                    letter-spacing: 0.5px;
+                    padding: 14px 26px;
+                    border-radius: 16px;
+                    text-decoration: none;
+                    cursor: pointer;
+                    border: none;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                }
+
+                .error-btn-primary {
+                    background: var(--index-primary-color);
+                    color: white;
+                    box-shadow: 0 10px 20px color-mix(in srgb, var(--index-primary-color) 25%, transparent);
+                }
+
+                .error-btn-secondary {
+                    background: var(--index-hover-bg);
+                    color: var(--index-text-heading);
+                    border: 1px solid var(--index-border-color);
+                }
+
+                .error-btn-primary:hover,
+                .error-btn-secondary:hover {
+                    transform: translateY(-2px);
+                }
+
+                .lookup-form {
+                    border-top: 1px solid var(--index-border-color);
+                    padding-top: 28px;
+                    text-align: left;
+                }
+
+                .lookup-form label {
+                    display: block;
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    color: var(--index-text-faint);
+                    margin-bottom: 12px;
+                }
+
+                .lookup-form-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    background: var(--index-hover-bg);
+                    border: 1.5px solid var(--index-border-color);
+                    border-radius: 16px;
+                    padding: 6px 6px 6px 16px;
+                }
+
+                .lookup-form-row:focus-within {
+                    border-color: var(--index-primary-color);
+                }
+
+                .lookup-form-icon {
+                    color: var(--index-text-faint);
+                    flex-shrink: 0;
+                }
+
+                .lookup-form-row input {
+                    flex: 1;
+                    min-width: 0;
+                    border: none;
+                    background: transparent;
+                    outline: none;
+                    font-size: 0.9rem;
+                    font-weight: 700;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    color: var(--index-text-heading);
+                    padding: 10px 0;
+                }
+
+                .lookup-form-row input::placeholder {
+                    text-transform: none;
+                    letter-spacing: normal;
+                    font-weight: 500;
+                    color: var(--index-text-faint);
+                }
+
+                .lookup-form-row button {
+                    flex-shrink: 0;
+                    background: var(--index-primary-color);
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    padding: 10px 20px;
+                    font-size: 0.75rem;
+                    font-weight: 800;
+                    letter-spacing: 0.5px;
+                    cursor: pointer;
+                    transition: opacity 0.2s;
+                }
+
+                .lookup-form-row button:disabled {
+                    opacity: 0.4;
+                    cursor: not-allowed;
+                }
 
                 @media (max-width: 768px) {
                     .verify-page {
@@ -660,8 +908,17 @@ const CertificateVerification = () => {
                     .course-val {
                         font-size: 1.1rem;
                     }
-                    .error-card {
-                        padding: 30px 20px !important;
+                    .error-state-card {
+                        padding: 40px 24px;
+                        border-radius: 28px;
+                    }
+                    .error-state-actions {
+                        flex-direction: column;
+                    }
+                    .error-btn-primary,
+                    .error-btn-secondary {
+                        width: 100%;
+                        justify-content: center;
                     }
                     .close-modal {
                         top: 15px;
@@ -697,12 +954,8 @@ const CertificateVerification = () => {
                     }
                 }
             `}</style>
-        </div>
+        </>
     );
 };
 
 export default CertificateVerification;
-
-
-
-

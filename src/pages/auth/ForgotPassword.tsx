@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, ArrowLeft, Star, Lock } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft, ArrowRight, Mail, Lock } from 'lucide-react';
 import loginHero from '../../assets/login-hero.jpeg';
 import toast from 'react-hot-toast';
 
@@ -109,40 +109,101 @@ export default function ForgotPassword() {
     };
 
     return (
-        <div className="flex min-h-screen bg-brand-beige overflow-hidden">
-            {/* Left Panel - Recover Flow */}
-            <div className="flex-1 flex flex-col p-8 md:p-16 bg-white dark:bg-brand-charcoal relative overflow-hidden items-center justify-center">
-                <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-brand-emerald/5 rounded-full pointer-events-none" />
+        <div className="flex min-h-screen bg-white dark:bg-charcoal-900 overflow-hidden relative">
+            {/* Left Panel - Hero Visual */}
+            <div
+                className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-16 text-white overflow-hidden bg-cover bg-center"
+                style={{
+                    backgroundImage: `url(${loginHero})`,
+                }}
+            >
+                {/* Cyberpunk dark cyan grid overlay */}
+                <div className="absolute inset-0 bg-charcoal-950/75 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/50 pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(0,217,233,0.2),transparent_75%)] pointer-events-none" />
 
-                <div className="w-full max-w-[400px] animate-fade-in-up">
-                    <div className="flex justify-center mb-10">
+                {/* Top Content: White Logo Container */}
+                <div className="relative z-10">
+                    <div className="inline-flex items-center h-20 px-7 rounded-2xl bg-white shadow-lg shadow-black/20">
                         <img
                             src="/logo-v2.png"
                             alt="Layos Group LLC"
-                            className="h-12 w-auto"
+                            className="h-11 w-auto object-contain"
                         />
+                    </div>
+                </div>
+
+                {/* Center/Bottom Content */}
+                <div className="relative z-10 mt-auto space-y-8">
+                    {/* Decorative Concept Bullet */}
+                    <div className="w-6 h-6 rounded-full bg-white/90 shadow-md"></div>
+
+                    <div className="space-y-4">
+                        <h2 className="text-4xl font-extrabold tracking-tight leading-tight max-w-md">
+                            Secure Your <br />Learning Journey
+                        </h2>
+                        <p className="text-white/75 text-sm font-medium leading-relaxed max-w-sm">
+                            Safety first. Reset your password in a few quick steps to keep your progress and personal data protected.
+                        </p>
+                    </div>
+
+                    {/* Floating Premium Badge */}
+                    <div className="bg-white/10 backdrop-blur-xl p-4.5 rounded-2xl border border-white/20 shadow-xl inline-block max-w-[280px] mt-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-brand-emerald/20 rounded-full flex items-center justify-center text-xl shadow-inner">
+                                <Lock className="text-brand-emerald" size={18} />
+                            </div>
+                            <div className="pr-2">
+                                <div className="font-extrabold text-[11px] uppercase tracking-wider text-white">Enhanced Security</div>
+                                <div className="text-[9px] font-bold text-white/60 uppercase tracking-widest mt-0.5">256-bit Encryption</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Panel - Recovery Form */}
+            <div className="flex-1 flex flex-col justify-between p-8 md:p-16 bg-white dark:bg-charcoal-900 relative min-h-screen overflow-y-auto">
+                <div className="w-full max-w-[420px] mx-auto my-auto py-12 animate-fade-in-up">
+                    {/* Logo shown only on mobile */}
+                    <div className="flex justify-center mb-8 lg:hidden">
+                        <div className="bg-white p-3 rounded-2xl shadow-md border border-slate-100 dark:border-white/5">
+                            <img
+                                src="/logo-v2.png"
+                                alt="Layos Group LLC"
+                                className="h-10 w-auto"
+                            />
+                        </div>
                     </div>
 
                     {step === 1 && (
                         <div className="animate-in fade-in slide-in-from-right-4">
-                            <div className="text-center mb-10">
-                                <h1 className="text-3xl font-black text-brand-charcoal dark:text-white mb-2">Forgot Password?</h1>
-                                <p className="text-brand-muted font-medium">No worries, we'll send you reset instructions.</p>
-                            </div>
+                            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">Forgot Password?</h1>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">No worries, we'll send you reset instructions.</p>
                             <form onSubmit={handleSendCode} className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-black text-brand-charcoal dark:text-white uppercase tracking-widest ml-1">Email Address</label>
-                                    <input
-                                        type="email"
-                                        className="w-full px-5 py-3.5 bg-brand-beige/50 dark:bg-white/5 border border-brand-border rounded-2xl text-brand-charcoal dark:text-white outline-none text-sm font-bold focus:border-brand-emerald transition-all"
-                                        placeholder="name@example.com"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                    />
+                                    <label className="block text-xs font-extrabold text-slate-500 dark:text-slate-400 ml-1">Email Address</label>
+                                    <div className="relative">
+                                        <Mail size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                        <input
+                                            type="email"
+                                            className="w-full pl-12 pr-6 py-3.5 bg-white dark:bg-charcoal-800 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white outline-none text-sm font-bold focus:border-brand-emerald focus:ring-4 focus:ring-brand-emerald/10 transition-all"
+                                            placeholder="name@example.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                                <button type="submit" className="w-full py-4 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-brand-charcoal/20 hover:-translate-y-1 transition-all disabled:opacity-70 border-none cursor-pointer" disabled={loading}>
-                                    {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'Send Reset Code'}
+                                <button type="submit" className="group w-full py-4 bg-brand-charcoal hover:bg-black dark:bg-brand-emerald dark:hover:bg-cyan-400 text-white rounded-xl font-bold text-sm tracking-widest uppercase active:scale-[0.98] hover:scale-[1.01] transition-all disabled:opacity-70 disabled:pointer-events-none border-none cursor-pointer flex items-center justify-center gap-2" disabled={loading}>
+                                    {loading ? (
+                                        <Loader2 size={20} className="animate-spin" />
+                                    ) : (
+                                        <>
+                                            <span>Send Reset Code</span>
+                                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                        </>
+                                    )}
                                 </button>
                             </form>
                         </div>
@@ -150,10 +211,8 @@ export default function ForgotPassword() {
 
                     {step === 2 && (
                         <div className="animate-in fade-in slide-in-from-right-4">
-                            <div className="text-center mb-10">
-                                <h1 className="text-3xl font-black text-brand-charcoal dark:text-white mb-2">Verify Code</h1>
-                                <p className="text-brand-muted font-medium">We've sent a 6-digit code to <strong className="text-brand-charcoal dark:text-white">{email}</strong>.</p>
-                            </div>
+                            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">Verify Code</h1>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">We've sent a 6-digit code to <strong className="text-slate-900 dark:text-white">{email}</strong>.</p>
                             <form onSubmit={handleVerifyCode} className="space-y-8">
                                 <div className="flex gap-2 justify-center">
                                     {code.map((digit, idx) => (
@@ -163,22 +222,29 @@ export default function ForgotPassword() {
                                             type="text"
                                             value={digit}
                                             onChange={(e) => handleCodeChange(idx, e.target.value)}
-                                            className="w-12 h-14 md:w-14 md:h-16 text-center text-xl font-black bg-brand-beige/50 dark:bg-white/5 border border-brand-border rounded-xl text-brand-charcoal dark:text-white outline-none focus:border-brand-emerald focus:ring-4 focus:ring-brand-emerald/10 transition-all"
+                                            className="w-12 h-14 md:w-14 md:h-16 text-center text-xl font-black bg-white dark:bg-charcoal-800 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white outline-none focus:border-brand-emerald focus:ring-4 focus:ring-brand-emerald/10 transition-all"
                                             maxLength={1}
                                             required
                                         />
                                     ))}
                                 </div>
-                                <button type="submit" className="w-full py-4 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-brand-charcoal/20 hover:-translate-y-1 transition-all disabled:opacity-70 border-none cursor-pointer" disabled={loading}>
-                                    {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'Verify Code'}
+                                <button type="submit" className="group w-full py-4 bg-brand-charcoal hover:bg-black dark:bg-brand-emerald dark:hover:bg-cyan-400 text-white rounded-xl font-bold text-sm tracking-widest uppercase active:scale-[0.98] hover:scale-[1.01] transition-all disabled:opacity-70 disabled:pointer-events-none border-none cursor-pointer flex items-center justify-center gap-2" disabled={loading}>
+                                    {loading ? (
+                                        <Loader2 size={20} className="animate-spin" />
+                                    ) : (
+                                        <>
+                                            <span>Verify Code</span>
+                                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                        </>
+                                    )}
                                 </button>
-                                
+
                                 <div className="text-center">
-                                    <p className="text-xs font-bold text-brand-muted uppercase tracking-widest">
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                                         Didn't receive the code?{' '}
-                                        <button 
-                                            type="button" 
-                                            onClick={handleSendCode} 
+                                        <button
+                                            type="button"
+                                            onClick={handleSendCode}
                                             disabled={loading}
                                             className="bg-transparent border-none text-brand-emerald font-black cursor-pointer hover:underline underline-offset-4 uppercase ml-1"
                                         >
@@ -192,17 +258,16 @@ export default function ForgotPassword() {
 
                     {step === 3 && (
                         <div className="animate-in fade-in slide-in-from-right-4">
-                            <div className="text-center mb-10">
-                                <h1 className="text-3xl font-black text-brand-charcoal dark:text-white mb-2">Set New Password</h1>
-                                <p className="text-brand-muted font-medium">Create a strong password to secure your account.</p>
-                            </div>
+                            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">Set New Password</h1>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Create a strong password to secure your account.</p>
                             <form onSubmit={handleResetPassword} className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-black text-brand-charcoal dark:text-white uppercase tracking-widest ml-1">New Password</label>
+                                    <label className="block text-xs font-extrabold text-slate-500 dark:text-slate-400 ml-1">New Password</label>
                                     <div className="relative">
+                                        <Lock size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                         <input
                                             type={showPassword ? "text" : "password"}
-                                            className="w-full px-5 py-3.5 bg-brand-beige/50 dark:bg-white/5 border border-brand-border rounded-2xl text-brand-charcoal dark:text-white outline-none text-sm font-bold focus:border-brand-emerald transition-all pr-14"
+                                            className="w-full pl-12 pr-14 py-3.5 bg-white dark:bg-charcoal-800 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white outline-none text-sm font-bold focus:border-brand-emerald focus:ring-4 focus:ring-brand-emerald/10 transition-all"
                                             placeholder="••••••••"
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
@@ -211,76 +276,53 @@ export default function ForgotPassword() {
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-brand-muted hover:text-brand-emerald bg-transparent border-none cursor-pointer transition-colors"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-brand-emerald bg-transparent border-none cursor-pointer transition-colors"
                                         >
                                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-black text-brand-charcoal dark:text-white uppercase tracking-widest ml-1">Confirm New Password</label>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        className="w-full px-5 py-3.5 bg-brand-beige/50 dark:bg-white/5 border border-brand-border rounded-2xl text-brand-charcoal dark:text-white outline-none text-sm font-bold focus:border-brand-emerald transition-all"
-                                        placeholder="••••••••"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required
-                                    />
+                                    <label className="block text-xs font-extrabold text-slate-500 dark:text-slate-400 ml-1">Confirm New Password</label>
+                                    <div className="relative">
+                                        <Lock size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            className="w-full pl-12 pr-6 py-3.5 bg-white dark:bg-charcoal-800 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white outline-none text-sm font-bold focus:border-brand-emerald focus:ring-4 focus:ring-brand-emerald/10 transition-all"
+                                            placeholder="••••••••"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                                <button type="submit" className="w-full py-4 bg-brand-charcoal dark:bg-brand-emerald text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-brand-charcoal/20 hover:-translate-y-1 transition-all disabled:opacity-70 border-none cursor-pointer" disabled={loading}>
-                                    {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'Reset Password'}
+                                <button type="submit" className="group w-full py-4 bg-brand-charcoal hover:bg-black dark:bg-brand-emerald dark:hover:bg-cyan-400 text-white rounded-xl font-bold text-sm tracking-widest uppercase active:scale-[0.98] hover:scale-[1.01] transition-all disabled:opacity-70 disabled:pointer-events-none border-none cursor-pointer flex items-center justify-center gap-2" disabled={loading}>
+                                    {loading ? (
+                                        <Loader2 size={20} className="animate-spin" />
+                                    ) : (
+                                        <>
+                                            <span>Reset Password</span>
+                                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                        </>
+                                    )}
                                 </button>
                             </form>
                         </div>
                     )}
 
-                    <div className="mt-12 text-center">
-                        <Link to="/login" className="flex items-center justify-center gap-2 text-xs font-black text-brand-muted hover:text-brand-charcoal transition-colors uppercase tracking-widest group">
+                    <div className="mt-8 text-center">
+                        <Link to="/login" className="flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-brand-emerald transition-colors uppercase tracking-widest group">
                             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                             Back to Login
                         </Link>
                     </div>
                 </div>
 
-                <div className="mt-auto w-full flex flex-col md:flex-row justify-between pt-8 text-[10px] font-black uppercase tracking-widest text-brand-muted gap-4">
-                    <div>© 2026 Layos Group LLC. All rights reserved.</div>
+                <div className="w-full flex flex-col sm:flex-row justify-between pt-8 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 gap-4 mt-auto border-t border-slate-100 dark:border-white/5">
+                    <div>© 2026 LGL Consulting. All rights reserved.</div>
                     <div className="flex gap-6">
-                        <a href="#" className="hover:text-brand-charcoal transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-brand-charcoal transition-colors">Terms of Service</a>
-                    </div>
-                </div>
-            </div>
-
-            {/* Right Panel - Hero Content */}
-            <div className="hidden lg:flex flex-1 bg-brand-charcoal relative flex-col p-16 text-white overflow-hidden justify-center items-center">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(5,150,105,0.15),transparent_70%)] pointer-events-none" />
-                
-                <div className="relative z-10 w-full flex flex-col items-center">
-                    <div className="relative w-full max-w-[500px] perspective-1000">
-                        <img
-                            src={loginHero}
-                            alt="Security Hero"
-                            className="w-full h-auto rounded-[32px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border border-white/10 transform rotate-y-12 rotate-x-6 translate-z-10 hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-1000 ease-out"
-                        />
-
-                        {/* Floating Security Badge */}
-                        <div className="absolute top-[20%] -right-10 bg-white/10 backdrop-blur-xl p-5 rounded-[24px] border border-white/20 shadow-2xl animate-fade-in-up">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-brand-emerald/20 rounded-full flex items-center justify-center text-2xl shadow-inner">
-                                    <Lock className="text-brand-emerald" size={24} />
-                                </div>
-                                <div className="pr-4">
-                                    <div className="font-black text-sm uppercase tracking-widest">Enhanced Security</div>
-                                    <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-0.5">256-bit Encryption</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-20 text-center max-w-lg animate-fade-in-up delay-500">
-                        <h2 className="text-4xl font-black mb-6 leading-tight">Secure Your Journey</h2>
-                        <p className="text-lg text-white/70 font-medium leading-relaxed">Safety first. Reset your password to keep your learning progress and personal data protected.</p>
+                        <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">Terms of Service</a>
                     </div>
                 </div>
             </div>

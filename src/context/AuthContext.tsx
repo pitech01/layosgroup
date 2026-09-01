@@ -10,6 +10,7 @@ interface User {
     role: string;
     bio?: string;
     two_factor_enabled?: boolean;
+    disabled_pages?: string[];
 }
 
 interface AuthContextType {
@@ -20,6 +21,7 @@ interface AuthContextType {
     logout: () => void;
     updateUserInfo: (user: User) => void;
     toggleTwoFactor: (enabled: boolean) => void;
+    hasPageAccess: (pageKey: string | null) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -69,8 +71,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const hasPageAccess = (pageKey: string | null) => {
+        if (!pageKey) return true;
+        return !(user?.disabled_pages || []).includes(pageKey);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, userRole, isAuthenticated, login, logout, updateUserInfo, toggleTwoFactor }}>
+        <AuthContext.Provider value={{ user, userRole, isAuthenticated, login, logout, updateUserInfo, toggleTwoFactor, hasPageAccess }}>
             {children}
         </AuthContext.Provider>
     );

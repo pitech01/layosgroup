@@ -42,7 +42,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div className="form-group-modern">
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1e293b' }}>Post Type</label>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--index-text-heading)' }}>Post Type</label>
                         <select
                             value={type}
                             onChange={(e: any) => setType(e.target.value)}
@@ -50,10 +50,10 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
                                 width: '100%',
                                 padding: '0.875rem',
                                 borderRadius: '12px',
-                                border: '1px solid #e2e8f0',
-                                background: '#f8fafc',
+                                border: '1px solid var(--index-border-color)',
+                                background: 'var(--index-hover-bg)',
                                 fontSize: '0.95rem',
-                                color: '#1e293b'
+                                color: 'var(--index-text-heading)'
                             }}
                         >
                             <option value="message">Standard Message</option>
@@ -63,7 +63,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
                     </div>
 
                     <div className="form-group-modern">
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1e293b' }}>Content</label>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--index-text-heading)' }}>Content</label>
                         <textarea
                             rows={4}
                             required
@@ -74,9 +74,9 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
                                 width: '100%',
                                 padding: '1rem',
                                 borderRadius: '12px',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid var(--index-border-color)',
                                 fontSize: '0.95rem',
-                                color: '#334155',
+                                color: 'var(--index-text-heading)',
                                 resize: 'none',
                                 fontFamily: 'inherit'
                             }}
@@ -85,7 +85,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
 
                     {type === 'assignment' && (
                         <div className="form-group-modern">
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1e293b' }}>Due Date</label>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--index-text-heading)' }}>Due Date</label>
                             <input
                                 type="date"
                                 value={dueDate}
@@ -94,7 +94,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
                                     width: '100%',
                                     padding: '0.875rem',
                                     borderRadius: '12px',
-                                    border: '1px solid #e2e8f0',
+                                    border: '1px solid var(--index-border-color)',
                                     fontSize: '0.95rem'
                                 }}
                             />
@@ -106,14 +106,14 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
                             type="button"
                             onClick={() => document.getElementById('modal-file-attachment')?.click()}
                             style={{
-                                background: attachment ? '#f0fdf4' : '#f1f5f9',
+                                background: attachment ? 'var(--index-accent-soft-bg)' : 'var(--index-hover-bg)',
                                 border: 'none',
                                 padding: '0.875rem 1.25rem',
                                 borderRadius: '12px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
-                                color: attachment ? '#16a34a' : '#64748b',
+                                color: attachment ? 'var(--index-primary-color)' : 'var(--index-text-secondary)',
                                 fontWeight: 700,
                                 fontSize: '0.85rem'
                             }}
@@ -137,8 +137,8 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit }: CreatePostModalProps) =>
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 gap: '0.5rem',
-                                boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.25)',
-                                background: '#3b82f6'
+                                boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 25%, transparent)',
+                                background: 'var(--index-primary-color)'
                             }}
                         >
                             <Send size={18} />

@@ -105,8 +105,8 @@ const MessageCard = ({
                     ${isMine 
                         ? 'bg-brand-emerald text-white rounded-tr-none' 
                         : isInstructor 
-                            ? 'bg-brand-charcoal text-white rounded-tl-none' 
-                            : 'bg-white text-brand-charcoal border border-brand-border rounded-tl-none'}
+                            ? 'bg-brand-charcoal dark:bg-charcoal-700 text-white rounded-tl-none' 
+                            : 'bg-white text-brand-charcoal border border-brand-border dark:bg-brand-charcoal dark:text-white dark:border-white/10 rounded-tl-none'}
                     ${message.isDeleted ? 'opacity-60 italic' : ''}
                     ${message.type === 'announcement' ? 'border-2 border-red-500/30' : ''}
                 `}>
@@ -156,7 +156,7 @@ const MessageCard = ({
                             </div>
                         </div>
                     ) : (
-                        <div className="prose prose-sm prose-invert max-w-none break-words overflow-hidden">
+                        <div className={`prose prose-sm max-w-none break-words overflow-hidden ${(!isMine && !isInstructor) ? 'text-brand-charcoal dark:text-white dark:prose-invert' : 'text-white prose-invert'}`}>
                             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                                 {message.content}
                             </ReactMarkdown>
@@ -184,7 +184,7 @@ const MessageCard = ({
                                 </a>
                             </div>
                         ) : /\.(mp3|wav|ogg|webm|m4a)(\?.*)?$/i.test(message.attachmentUrl.split('?')[0]) ? (
-                            <div className="bg-white border border-brand-border p-2 rounded-xl flex items-center gap-2 shadow-sm">
+                            <div className="bg-white dark:bg-white/10 border border-brand-border p-2 rounded-xl flex items-center gap-2 shadow-sm">
                                 <FileAudio size={18} className="text-brand-emerald" />
                                 <audio controls src={message.attachmentUrl} className="h-8 flex-1" />
                             </div>
@@ -193,14 +193,14 @@ const MessageCard = ({
                                 href={message.attachmentUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex items-center gap-3 p-3 bg-white border border-brand-border rounded-xl hover:bg-brand-beige transition-all shadow-sm no-underline group/file"
+                                className="flex items-center gap-3 p-3 bg-white dark:bg-white/10 border border-brand-border rounded-xl hover:bg-brand-beige dark:hover:bg-white/20 transition-all shadow-sm no-underline group/file"
                                 onClick={(e) => handleViewPdf(e, message.attachmentUrl!, 'Attachment')}
                             >
-                                <div className="bg-brand-beige p-2 rounded-lg text-brand-emerald group-hover/file:bg-brand-emerald group-hover/file:text-white transition-colors">
+                                <div className="bg-brand-beige dark:bg-white/10 p-2 rounded-lg text-brand-emerald group-hover/file:bg-brand-emerald group-hover/file:text-white transition-colors">
                                     <Download size={18} />
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <span className="text-xs font-bold text-brand-charcoal truncate max-w-[180px]">
+                                    <span className="text-xs font-bold text-brand-charcoal dark:text-white truncate max-w-[180px]">
                                         {message.attachmentUrl.split('/').pop()?.split('?')[0] || 'Attachment'}
                                     </span>
                                     <span className="text-[10px] text-brand-muted font-medium">
@@ -219,7 +219,7 @@ const MessageCard = ({
                             value={replyContent}
                             onChange={(e) => setReplyContent(e.target.value)}
                             placeholder="Reply to this message..."
-                            className="flex-1 px-3 py-1.5 rounded-xl border border-brand-border text-sm outline-none focus:border-brand-emerald text-brand-charcoal bg-white"
+                            className="flex-1 px-3 py-1.5 rounded-xl border border-brand-border text-sm outline-none focus:border-brand-emerald text-brand-charcoal dark:text-white bg-white dark:bg-white/10"
                             onKeyDown={async (e) => {
                                 if (e.key === 'Enter' && replyContent.trim()) {
                                     e.preventDefault();
@@ -260,7 +260,7 @@ const MessageCard = ({
                 {message.replies && message.replies.length > 0 && !message.parentId && (
                     <button 
                         onClick={() => setShowReplies(!showReplies)}
-                        className="flex items-center gap-1.5 mt-2 bg-brand-beige text-brand-charcoal hover:bg-brand-border/40 px-3 py-1 rounded-full text-xs font-bold transition-colors shadow-sm"
+                        className="flex items-center gap-1.5 mt-2 bg-brand-beige dark:bg-white/10 text-brand-charcoal dark:text-white hover:bg-brand-border/40 px-3 py-1 rounded-full text-xs font-bold transition-colors shadow-sm"
                     >
                         <MessageSquare size={12} className="text-brand-muted" />
                         {message.replies.length} {message.replies.length === 1 ? 'reply' : 'replies'}
@@ -293,12 +293,12 @@ const MessageCard = ({
                 {/* Actions (Hover) */}
                 {!message.isDeleted && !isEditing && (
                     <div className={`
-                        absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 bg-white border border-brand-border rounded-lg shadow-md p-1 z-10
+                        absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1 bg-white dark:bg-charcoal-700 border border-brand-border dark:border-white/10 rounded-lg shadow-md p-1 z-10
                         ${isMine ? 'right-full mr-2' : 'left-full ml-2'}
                     `}>
                         {onSendReply && !message.parentId && (
                             <button 
-                                className="p-1.5 hover:bg-brand-beige text-brand-muted hover:text-brand-charcoal rounded transition-colors"
+                                className="p-1.5 hover:bg-brand-beige dark:hover:bg-white/10 text-brand-muted hover:text-brand-charcoal dark:hover:text-white rounded transition-colors"
                                 onClick={() => setIsReplying(!isReplying)}
                                 title="Reply"
                             >
@@ -307,7 +307,7 @@ const MessageCard = ({
                         )}
                         {onEdit && (
                             <button 
-                                className="p-1.5 hover:bg-brand-beige text-brand-muted hover:text-brand-charcoal rounded transition-colors"
+                                className="p-1.5 hover:bg-brand-beige dark:hover:bg-white/10 text-brand-muted hover:text-brand-charcoal dark:hover:text-white rounded transition-colors"
                                 onClick={() => setIsEditing(true)}
                                 title="Edit"
                             >
@@ -316,7 +316,7 @@ const MessageCard = ({
                         )}
                         {onDelete && (
                             <button 
-                                className="p-1.5 hover:bg-red-50 text-brand-muted hover:text-red-500 rounded transition-colors"
+                                className="p-1.5 hover:bg-red-50 dark:hover:bg-red-500/30 text-brand-muted hover:text-red-500 rounded transition-colors"
                                 onClick={() => onDelete()}
                                 title="Delete"
                             >
@@ -330,26 +330,26 @@ const MessageCard = ({
             {/* Secure PDF Viewer Modal */}
             {viewingPdf && (
                 <div className="fixed inset-0 z-[5000] flex items-center justify-center p-4 md:p-8 bg-black/80 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white w-full max-w-5xl h-[90vh] rounded-[2rem] overflow-hidden flex flex-col shadow-2xl relative">
-                        <div className="flex items-center justify-between p-4 md:p-6 border-b border-brand-border bg-white">
+                    <div className="bg-white dark:bg-brand-charcoal w-full max-w-5xl h-[90vh] rounded-[2rem] overflow-hidden flex flex-col shadow-2xl relative">
+                        <div className="flex items-center justify-between p-4 md:p-6 border-b border-brand-border bg-white dark:bg-brand-charcoal">
                             <div className="flex items-center gap-4">
-                                <div className="p-2.5 bg-emerald-50 rounded-xl text-emerald-600">
+                                <div className="p-2.5 bg-emerald-50 dark:bg-white/5 rounded-xl text-emerald-600 dark:text-emerald-400">
                                     <FileText size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm md:text-base font-black text-brand-charcoal truncate max-w-[200px] md:max-w-md">{viewingPdf?.title}</h3>
+                                    <h3 className="text-sm md:text-base font-black text-brand-charcoal dark:text-white truncate max-w-[200px] md:max-w-md">{viewingPdf?.title}</h3>
                                     <p className="text-[10px] text-brand-muted font-bold uppercase tracking-wider">Secure Viewer • Read Only</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setViewingPdf(null)}
-                                className="p-2 hover:bg-brand-beige text-brand-muted hover:text-brand-charcoal rounded-xl transition-colors"
+                                className="p-2 hover:bg-brand-beige dark:hover:bg-white/10 text-brand-muted hover:text-brand-charcoal dark:hover:text-white rounded-xl transition-colors"
                             >
                                 <X size={24} />
                             </button>
                         </div>
 
-                        <div className="flex-1 bg-brand-beige relative overflow-hidden" onContextMenu={(e) => e.preventDefault()}>
+                        <div className="flex-1 bg-brand-beige dark:bg-white/5 relative overflow-hidden" onContextMenu={(e) => e.preventDefault()}>
                             <iframe
                                 src={`${viewingPdf.url}#toolbar=0&navpanes=0`}
                                 className="w-full h-full border-none"
@@ -359,7 +359,7 @@ const MessageCard = ({
                             <div className="absolute inset-0 bg-transparent pointer-events-none" />
                         </div>
 
-                        <div className="p-3 text-center border-t border-brand-border bg-white">
+                        <div className="p-3 text-center border-t border-brand-border bg-white dark:bg-brand-charcoal">
                             <p className="text-[10px] text-brand-muted font-bold tracking-widest uppercase italic">Protected by Layos Security Protocol</p>
                         </div>
                     </div>

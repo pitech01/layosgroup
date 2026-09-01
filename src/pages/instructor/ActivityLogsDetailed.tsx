@@ -49,8 +49,8 @@ export default function ActivityLogsDetailed() {
     if (loading) {
         return (
             <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
-                <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
-                <p style={{ fontWeight: 800, color: '#64748b' }}>Loading Activity Logs...</p>
+                <Loader2 className="animate-spin" size={40} color="var(--index-primary-color)" />
+                <p style={{ fontWeight: 800, color: 'var(--index-text-secondary)' }}>Loading Activity Logs...</p>
             </div>
         );
     }
@@ -59,30 +59,30 @@ export default function ActivityLogsDetailed() {
         <div className="animate-fade-in-up" style={{ padding: '0 1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
-                    <h2 style={{ fontSize: '1.75rem', fontWeight: 950, color: '#0f172a', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <Activity size={28} color="#1a4d3e" /> Thorough Activity Logs
+                    <h2 style={{ fontSize: '1.75rem', fontWeight: 950, color: 'var(--index-text-heading)', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Activity size={28} color="var(--index-primary-color)" /> Thorough Activity Logs
                     </h2>
-                    <p style={{ color: '#64748b', margin: 0, fontWeight: 600, fontSize: '1.05rem' }}>
+                    <p style={{ color: 'var(--index-text-secondary)', margin: 0, fontWeight: 600, fontSize: '1.05rem' }}>
                         Detailed historical tracking of all student engagement and system events.
                     </p>
                 </div>
             </div>
 
-            <div style={{ background: 'white', borderRadius: '24px', border: '1px solid rgba(226, 232, 240, 0.8)', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.02)', overflow: 'hidden' }}>
-                <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+            <div style={{ background: 'var(--index-card-bg)', borderRadius: '24px', border: '1px solid color-mix(in srgb, var(--index-border-color) 80%, transparent)', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.02)', overflow: 'hidden' }}>
+                <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--index-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--index-hover-bg)' }}>
                     <div style={{ position: 'relative', width: '300px' }}>
-                        <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+                        <Search size={18} color="var(--index-text-faint)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
                         <input
                             type="text"
                             placeholder="Search logs..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '0.95rem', fontWeight: 600, color: '#0f172a', outline: 'none', transition: 'border-color 0.2s', background: 'white' }}
-                            onFocus={(e) => e.target.style.borderColor = '#1a4d3e'}
-                            onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                            style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: '12px', border: '1.5px solid var(--index-border-color)', fontSize: '0.95rem', fontWeight: 600, color: 'var(--index-text-heading)', outline: 'none', transition: 'border-color 0.2s', background: 'var(--index-card-bg)' }}
+                            onFocus={(e) => e.target.style.borderColor = 'var(--index-primary-color)'}
+                            onBlur={(e) => e.target.style.borderColor = 'var(--index-border-color)'}
                         />
                     </div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#64748b', background: '#e2e8f0', padding: '6px 14px', borderRadius: '100px' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--index-text-secondary)', background: 'var(--index-border-color)', padding: '6px 14px', borderRadius: '100px' }}>
                         {filteredActivities.length} Records
                     </div>
                 </div>
@@ -90,33 +90,33 @@ export default function ActivityLogsDetailed() {
                 <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
-                            <tr style={{ background: 'white', borderBottom: '2px solid #f1f5f9' }}>
-                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</th>
-                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Action Type</th>
-                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</th>
-                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Timestamp</th>
+                            <tr style={{ background: 'var(--index-card-bg)', borderBottom: '2px solid var(--index-border-subtle)' }}>
+                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</th>
+                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Action Type</th>
+                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</th>
+                                <th style={{ padding: '1.25rem 2rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--index-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Timestamp</th>
                             </tr>
                         </thead>
                         <tbody>
                             {paginatedActivities.length > 0 ? paginatedActivities.map((activity, idx) => (
-                                <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s', background: idx % 2 === 0 ? 'white' : '#fcfdfe' }} onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'} onMouseOut={(e) => e.currentTarget.style.background = idx % 2 === 0 ? 'white' : '#fcfdfe'}>
+                                <tr key={idx} style={{ borderBottom: '1px solid var(--index-border-subtle)', transition: 'background 0.2s', background: idx % 2 === 0 ? 'var(--index-card-bg)' : 'var(--index-hover-bg)' }} onMouseOver={(e) => e.currentTarget.style.background = 'var(--index-hover-bg)'} onMouseOut={(e) => e.currentTarget.style.background = idx % 2 === 0 ? 'var(--index-card-bg)' : 'var(--index-hover-bg)'}>
                                     <td style={{ padding: '1.25rem 2rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f0fdf4', color: '#1a4d3e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem' }}>
+                                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)', color: 'var(--index-primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem' }}>
                                                 {activity.user?.name ? activity.user.name.charAt(0) : '-'}
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.95rem' }}>{activity.user?.name || 'System / Unassigned'}</div>
+                                                <div style={{ fontWeight: 800, color: 'var(--index-text-heading)', fontSize: '0.95rem' }}>{activity.user?.name || 'System / Unassigned'}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td style={{ padding: '1.25rem 2rem' }}>
-                                        <span style={{ padding: '6px 12px', background: '#f1f5f9', color: '#475569', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'capitalize' }}>
+                                        <span style={{ padding: '6px 12px', background: 'var(--index-hover-bg)', color: 'var(--index-text-secondary)', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'capitalize' }}>
                                             {activity.action.replace('_', ' ')}
                                         </span>
                                     </td>
                                     <td style={{ padding: '1.25rem 2rem' }}>
-                                        <div style={{ fontWeight: 600, color: '#334155', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                        <div style={{ fontWeight: 600, color: 'var(--index-text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
                                             {activity.description}
                                         </div>
                                         {(() => {
@@ -129,11 +129,11 @@ export default function ActivityLogsDetailed() {
                                             }
                                             if (Object.keys(parsed).length === 0) return null;
                                             return (
-                                                <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'var(--index-hover-bg)', borderRadius: '8px', border: '1px solid var(--index-border-color)', fontSize: '0.8rem', color: 'var(--index-text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                     {Object.entries(parsed).map(([key, value]) => (
                                                         <div key={key} style={{ display: 'flex' }}>
                                                             <span style={{ fontWeight: 800, minWidth: '80px', textTransform: 'capitalize' }}>{key.replace('_', ' ')}:</span>
-                                                            <span style={{ fontFamily: 'monospace', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#0f172a' }}>{String(value)}</span>
+                                                            <span style={{ fontFamily: 'monospace', background: 'var(--index-border-color)', padding: '2px 6px', borderRadius: '4px', color: 'var(--index-text-heading)' }}>{String(value)}</span>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -141,7 +141,7 @@ export default function ActivityLogsDetailed() {
                                         })()}
                                     </td>
                                     <td style={{ padding: '1.25rem 2rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--index-text-secondary)', fontSize: '0.9rem', fontWeight: 600 }}>
                                             <Clock size={14} /> 
                                             {new Date(activity.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                                         </div>
@@ -149,7 +149,7 @@ export default function ActivityLogsDetailed() {
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan={4} style={{ padding: '4rem 2rem', textAlign: 'center', color: '#94a3b8', fontWeight: 600 }}>
+                                    <td colSpan={4} style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--index-text-faint)', fontWeight: 600 }}>
                                         No matching activity logs found.
                                     </td>
                                 </tr>
@@ -164,13 +164,13 @@ export default function ActivityLogsDetailed() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     padding: '1.5rem 2rem',
-                    borderTop: '1px solid #f1f5f9',
+                    borderTop: '1px solid var(--index-border-subtle)',
                     flexWrap: 'wrap',
                     gap: '1rem',
-                    background: '#f8fafc'
+                    background: 'var(--index-hover-bg)'
                 }}>
-                    <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>
-                        Showing <span style={{ fontWeight: 800, color: '#0f172a' }}>{filteredActivities.length > 0 ? startIndex + 1 : 0}</span> to <span style={{ fontWeight: 800, color: '#0f172a' }}>{Math.min(startIndex + itemsPerPage, filteredActivities.length)}</span> of <span style={{ fontWeight: 800, color: '#0f172a' }}>{filteredActivities.length}</span> records
+                    <div style={{ fontSize: '0.9rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>
+                        Showing <span style={{ fontWeight: 800, color: 'var(--index-text-heading)' }}>{filteredActivities.length > 0 ? startIndex + 1 : 0}</span> to <span style={{ fontWeight: 800, color: 'var(--index-text-heading)' }}>{Math.min(startIndex + itemsPerPage, filteredActivities.length)}</span> of <span style={{ fontWeight: 800, color: 'var(--index-text-heading)' }}>{filteredActivities.length}</span> records
                     </div>
                     <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
                         <button
@@ -179,9 +179,9 @@ export default function ActivityLogsDetailed() {
                             style={{
                                 padding: '0.5rem 0.85rem',
                                 borderRadius: '8px',
-                                border: '1.5px solid #e2e8f0',
-                                background: 'white',
-                                color: currentPage === 1 ? '#cbd5e1' : '#475569',
+                                border: '1.5px solid var(--index-border-color)',
+                                background: 'var(--index-card-bg)',
+                                color: currentPage === 1 ? 'var(--index-text-faint)' : 'var(--index-text-secondary)',
                                 fontWeight: 700,
                                 fontSize: '0.85rem',
                                 cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
@@ -196,7 +196,7 @@ export default function ActivityLogsDetailed() {
                             const isEnd = pageNum === 1 || pageNum === totalPages;
                             if (!isClose && !isEnd) {
                                 if (pageNum === 2 || pageNum === totalPages - 1) {
-                                    return <span key={pageNum} style={{ padding: '0 0.5rem', color: '#94a3b8' }}>...</span>;
+                                    return <span key={pageNum} style={{ padding: '0 0.5rem', color: 'var(--index-text-faint)' }}>...</span>;
                                 }
                                 return null;
                             }
@@ -208,9 +208,9 @@ export default function ActivityLogsDetailed() {
                                         padding: '0.5rem 0.85rem',
                                         borderRadius: '8px',
                                         border: '1.5px solid',
-                                        borderColor: currentPage === pageNum ? '#1a4d3e' : '#e2e8f0',
-                                        background: currentPage === pageNum ? '#1a4d3e' : 'white',
-                                        color: currentPage === pageNum ? 'white' : '#475569',
+                                        borderColor: currentPage === pageNum ? 'var(--index-primary-color)' : 'var(--index-border-color)',
+                                        background: currentPage === pageNum ? 'var(--index-primary-color)' : 'var(--index-card-bg)',
+                                        color: currentPage === pageNum ? 'white' : 'var(--index-text-secondary)',
                                         fontWeight: 800,
                                         fontSize: '0.85rem',
                                         cursor: 'pointer',
@@ -228,9 +228,9 @@ export default function ActivityLogsDetailed() {
                             style={{
                                 padding: '0.5rem 0.85rem',
                                 borderRadius: '8px',
-                                border: '1.5px solid #e2e8f0',
-                                background: 'white',
-                                color: (currentPage === totalPages || totalPages === 0) ? '#cbd5e1' : '#475569',
+                                border: '1.5px solid var(--index-border-color)',
+                                background: 'var(--index-card-bg)',
+                                color: (currentPage === totalPages || totalPages === 0) ? 'var(--index-text-faint)' : 'var(--index-text-secondary)',
                                 fontWeight: 700,
                                 fontSize: '0.85rem',
                                 cursor: (currentPage === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer',

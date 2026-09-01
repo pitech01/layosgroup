@@ -1,7 +1,7 @@
 import ProfileDropdown from './ProfileDropdown';
 
 interface TopbarRightProps {
-    role: 'instructor' | 'student';
+    role: 'instructor' | 'student' | 'admin';
 }
 
 const TopbarRight = ({ role }: TopbarRightProps) => {

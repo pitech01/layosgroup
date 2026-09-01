@@ -203,13 +203,13 @@ export default function LiveClass() {
     const getStatusStyles = (status: string) => {
         switch (status) {
             case 'live':
-                return { bg: '#ecfdf5', color: '#10b981', label: 'LIVE NOW' };
+                return { bg: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)', color: 'var(--lgl-success)', label: 'LIVE NOW' };
             case 'upcoming':
-                return { bg: '#eff6ff', color: '#3b82f6', label: 'UPCOMING' };
+                return { bg: 'var(--index-accent-soft-bg)', color: 'var(--index-primary-color)', label: 'UPCOMING' };
             case 'ended':
-                return { bg: '#f1f5f9', color: '#64748b', label: 'ENDED' };
+                return { bg: 'var(--index-hover-bg)', color: 'var(--index-text-secondary)', label: 'ENDED' };
             default:
-                return { bg: '#f1f5f9', color: '#64748b', label: status.toUpperCase() };
+                return { bg: 'var(--index-hover-bg)', color: 'var(--index-text-secondary)', label: status.toUpperCase() };
         }
     };
 
@@ -352,7 +352,7 @@ export default function LiveClass() {
                 .staff-scope .filter-tabs {
                     display: flex;
                     gap: 0.5rem;
-                    background: #f1f5f9;
+                    background: var(--index-hover-bg);
                     padding: 0.4rem;
                     border-radius: 14px;
                     width: fit-content;
@@ -368,7 +368,7 @@ export default function LiveClass() {
                     padding: 0.6rem 1.25rem;
                     border: none;
                     background: transparent;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-weight: 700;
                     font-size: 0.85rem;
                     border-radius: 10px;
@@ -378,7 +378,7 @@ export default function LiveClass() {
 
                 .staff-scope .filter-btn.active {
                     background: white;
-                    color: #020617;
+                    color: var(--index-text-heading);
                     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
                 }
 
@@ -390,7 +390,7 @@ export default function LiveClass() {
 
                 .staff-scope .live-session-card {
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 20px;
                     padding: 1.75rem;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -402,7 +402,7 @@ export default function LiveClass() {
 
                 .staff-scope .live-session-card:hover {
                     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
-                    border-color: #cbd5e1;
+                    border-color: var(--index-text-faint);
                     transform: translateY(-4px);
                 }
 
@@ -420,7 +420,7 @@ export default function LiveClass() {
                     position: fixed;
                     bottom: 2rem;
                     right: 2rem;
-                    background: #10b981;
+                    background: var(--lgl-success);
                     color: white;
                     padding: 1rem 1.5rem;
                     border-radius: 12px;
@@ -444,7 +444,7 @@ export default function LiveClass() {
                     align-items: center;
                     justify-content: center;
                     gap: 0.75rem;
-                    background: #020617;
+                    background: var(--lgl-charcoal);
                     color: white;
                     border: none;
                     border-radius: 12px;
@@ -454,33 +454,33 @@ export default function LiveClass() {
                 }
 
                 .btn-go-live:hover:not(:disabled) {
-                    background: #0f172a;
-                    box-shadow: 0 10px 15px -3px rgba(2, 6, 23, 0.2);
+                    background: var(--index-text-heading);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--lgl-charcoal) 20%, transparent);
                 }
 
                 .btn-go-live:disabled {
-                    background: #f1f5f9;
-                    color: #94a3b8;
+                    background: var(--index-hover-bg);
+                    color: var(--index-text-faint);
                     cursor: not-allowed;
                 }
 
                 .staff-scope .warning-badge {
-                    background: #fff7ed;
-                    color: #c2410c;
+                    background: color-mix(in srgb, var(--lgl-warning) 12%, transparent);
+                    color: var(--lgl-warning);
                     padding: 0.75rem;
                     border-radius: 10px;
                     font-size: 0.8rem;
                     display: flex;
                     align-items: center;
                     gap: 0.5rem;
-                    border: 1px solid #ffedd5;
+                    border: 1px solid color-mix(in srgb, var(--lgl-warning) 30%, transparent);
                 }
 
                 .staff-scope .empty-state-container {
                     padding: 8rem 2rem;
                     text-align: center;
                     background: white;
-                    border: 2px dashed #e2e8f0;
+                    border: 2px dashed var(--index-border-color);
                     border-radius: 32px;
                     display: flex;
                     flex-direction: column;
@@ -490,7 +490,7 @@ export default function LiveClass() {
                 .staff-scope .modal-overlay {
                     position: fixed;
                     inset: 0;
-                    background: rgba(15, 23, 42, 0.4);
+                    background: color-mix(in srgb, var(--lgl-charcoal) 40%, transparent);
                     backdrop-filter: blur(8px);
                     display: flex;
                     align-items: center;
@@ -557,12 +557,12 @@ export default function LiveClass() {
             <div className="live-header-section">
                 <div>
                     <h1 className="dashboard-header-title" style={{ marginBottom: '0.5rem' }}>Live Sessions</h1>
-                    <p style={{ color: '#64748b', fontSize: '1rem' }}>Manage and host your upcoming live classes.</p>
+                    <p style={{ color: 'var(--index-text-secondary)', fontSize: '1rem' }}>Manage and host your upcoming live classes.</p>
                 </div>
 
                 <button
                     className="btn-standard"
-                    style={{ background: '#020617', padding: '0.85rem 1.75rem', borderRadius: '12px' }}
+                    style={{ background: 'var(--lgl-charcoal)', padding: '0.85rem 1.75rem', borderRadius: '12px' }}
                     onClick={() => navigate('/instructor/live/create')}
                 >
                     <Plus size={20} /> Schedule Session
@@ -604,37 +604,37 @@ export default function LiveClass() {
                                     <div style={{ display: 'flex', gap: '8px' }}>
                                         <button 
                                             onClick={() => handleEdit(session)}
-                                            style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer' }}
+                                            style={{ background: 'var(--index-hover-bg)', border: '1px solid var(--index-border-color)', color: 'var(--index-text-secondary)', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer' }}
                                         >
                                             <Edit size={16} />
                                         </button>
                                         <button 
                                             onClick={() => handleDeleteSession(session.id)}
-                                            style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer' }}
+                                            style={{ background: 'var(--index-danger-bg-soft)', border: '1px solid var(--index-danger-bg-soft)', color: 'var(--lgl-error)', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer' }}
                                         >
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </div>
 
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>{session.title}</h3>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--index-text-heading)', marginBottom: '0.5rem' }}>{session.title}</h3>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--index-text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                                     <Video size={16} />
                                     <span>{session.course?.title}</span>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--index-text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                                     <Calendar size={16} />
                                     <span>{new Date(session.scheduled_date).toLocaleDateString()}</span>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--index-text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                                     <Clock size={16} />
                                     <span>{session.start_time.substring(0, 5)} - {session.end_time.substring(0, 5)}</span>
                                 </div>
 
-                                <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
+                                <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--index-border-subtle)' }}>
                                     {!hasLink && !isEnded && (
                                         <div className="warning-badge" style={{ marginBottom: '1rem' }}>
                                             <AlertCircle size={16} /> No meeting link added
@@ -643,10 +643,10 @@ export default function LiveClass() {
 
                                     {isEnded ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                            <button className="btn-go-live" disabled style={{ background: '#f8fafc', color: '#94a3b8' }}>Session Ended</button>
+                                            <button className="btn-go-live" disabled style={{ background: 'var(--index-hover-bg)', color: 'var(--index-text-faint)' }}>Session Ended</button>
                                             <button
                                                 className="btn-standard"
-                                                style={{ width: '100%', justifyContent: 'center', background: session.recording_link ? '#020617' : '#3b82f6' }}
+                                                style={{ width: '100%', justifyContent: 'center', background: session.recording_link ? 'var(--lgl-charcoal)' : 'var(--index-primary-color)' }}
                                                 onClick={() => handleOpenRecordingModal(session)}
                                             >
                                                 {session.recording_link ? 'Update Recording Link' : 'Add Recording Link'}
@@ -668,14 +668,14 @@ export default function LiveClass() {
                 </div>
             ) : (
                 <div className="empty-state-container">
-                    <div style={{ padding: '2.5rem', background: '#f8fafc', borderRadius: '40px', marginBottom: '2rem' }}>
-                        <Inbox size={64} color="#cbd5e1" strokeWidth={1.5} />
+                    <div style={{ padding: '2.5rem', background: 'var(--index-hover-bg)', borderRadius: '40px', marginBottom: '2rem' }}>
+                        <Inbox size={64} color="var(--index-text-faint)" strokeWidth={1.5} />
                     </div>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1e293b', marginBottom: '1rem' }}>
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--index-text-heading)', marginBottom: '1rem' }}>
                         No live sessions scheduled
                     </h2>
-                    <p style={{ color: '#64748b', maxWidth: '300px', margin: '0 0 2rem 0' }}>When you schedule sessions, they will appear here for management.</p>
-                    <button className="btn-standard" style={{ background: '#020617' }} onClick={() => navigate('/instructor/live/create')}>Schedule Your First Live Session</button>
+                    <p style={{ color: 'var(--index-text-secondary)', maxWidth: '300px', margin: '0 0 2rem 0' }}>When you schedule sessions, they will appear here for management.</p>
+                    <button className="btn-standard" style={{ background: 'var(--lgl-charcoal)' }} onClick={() => navigate('/instructor/live/create')}>Schedule Your First Live Session</button>
                 </div>
             )}
 
@@ -693,12 +693,12 @@ export default function LiveClass() {
                             Add Session Recording
                             <button
                                 onClick={() => setRecordingModal({ ...recordingModal, show: false })}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--index-text-secondary)' }}
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                        <p style={{ color: 'var(--index-text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
                             Upload the video file for this session. Recommended formats: MP4, WebM.
                         </p>
                         <div style={{ marginBottom: '1.5rem' }}>
@@ -707,17 +707,17 @@ export default function LiveClass() {
                             </label>
                             
                             {uploading ? (
-                                <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '14px', textAlign: 'center' }}>
+                                <div style={{ padding: '1.5rem', background: 'var(--index-hover-bg)', borderRadius: '14px', textAlign: 'center' }}>
                                     <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '0.85rem' }}>Uploading... {uploadProgress}%</div>
-                                    <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
-                                        <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                                    <div style={{ width: '100%', height: '6px', background: 'var(--index-border-color)', borderRadius: '3px', overflow: 'hidden' }}>
+                                        <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--index-primary-color)', transition: 'width 0.3s' }}></div>
                                     </div>
                                 </div>
                             ) : uploadedUrl ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f0fdf4', padding: '0.85rem', borderRadius: '12px', border: '1px solid #bcf0da' }}>
-                                    <CheckCircle2 size={16} color="#10b981" />
-                                    <div style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#1a4d3e', wordBreak: 'break-all' }}>Recording Uploaded</div>
-                                    <button type="button" onClick={handleDeleteVideo} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800 }}>Delete</button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)', padding: '0.85rem', borderRadius: '12px', border: '1px solid color-mix(in srgb, var(--lgl-success) 35%, transparent)' }}>
+                                    <CheckCircle2 size={16} color="var(--lgl-success)" />
+                                    <div style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: 'var(--index-primary-color)', wordBreak: 'break-all' }}>Recording Uploaded</div>
+                                    <button type="button" onClick={handleDeleteVideo} style={{ color: 'var(--lgl-error)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800 }}>Delete</button>
                                 </div>
                             ) : (
                                 <input
@@ -750,7 +750,7 @@ export default function LiveClass() {
                             Edit Live Session
                             <button
                                 onClick={() => setEditModal({ show: false, session: null })}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--index-text-secondary)' }}
                             >
                                 <X size={24} />
                             </button>
@@ -764,7 +764,7 @@ export default function LiveClass() {
                                     type="text"
                                     value={editForm.title}
                                     onChange={(e) => setEditForm({...editForm, title: e.target.value})}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--index-border-color)' }}
                                 />
                             </div>
 
@@ -774,7 +774,7 @@ export default function LiveClass() {
                                     className="form-input"
                                     value={editForm.course_id}
                                     onChange={(e) => setEditForm({...editForm, course_id: e.target.value})}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--index-border-color)' }}
                                 >
                                     {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                                 </select>
@@ -787,7 +787,7 @@ export default function LiveClass() {
                                     type="date"
                                     value={editForm.scheduled_date}
                                     onChange={(e) => setEditForm({...editForm, scheduled_date: e.target.value})}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--index-border-color)' }}
                                 />
                             </div>
 
@@ -798,7 +798,7 @@ export default function LiveClass() {
                                     type="url"
                                     value={editForm.meeting_link}
                                     onChange={(e) => setEditForm({...editForm, meeting_link: e.target.value})}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--index-border-color)' }}
                                 />
                             </div>
 
@@ -809,7 +809,7 @@ export default function LiveClass() {
                                     type="time"
                                     value={editForm.start_time}
                                     onChange={(e) => setEditForm({...editForm, start_time: e.target.value})}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--index-border-color)' }}
                                 />
                             </div>
 
@@ -820,7 +820,7 @@ export default function LiveClass() {
                                     type="time"
                                     value={editForm.end_time}
                                     onChange={(e) => setEditForm({...editForm, end_time: e.target.value})}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid var(--index-border-color)' }}
                                 />
                             </div>
 
@@ -830,17 +830,17 @@ export default function LiveClass() {
                                 </label>
                                 
                                 {uploading ? (
-                                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '14px', textAlign: 'center' }}>
+                                    <div style={{ padding: '1.5rem', background: 'var(--index-hover-bg)', borderRadius: '14px', textAlign: 'center' }}>
                                         <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '0.85rem' }}>Uploading... {uploadProgress}%</div>
-                                        <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
-                                            <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                                        <div style={{ width: '100%', height: '6px', background: 'var(--index-border-color)', borderRadius: '3px', overflow: 'hidden' }}>
+                                            <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--index-primary-color)', transition: 'width 0.3s' }}></div>
                                         </div>
                                     </div>
                                 ) : editForm.recording_link ? (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f0fdf4', padding: '0.85rem', borderRadius: '12px', border: '1px solid #bcf0da' }}>
-                                        <CheckCircle2 size={16} color="#10b981" />
-                                        <div style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: '#1a4d3e', wordBreak: 'break-all' }}>Video Ready</div>
-                                        <button type="button" onClick={handleDeleteVideo} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800 }}>Remove</button>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)', padding: '0.85rem', borderRadius: '12px', border: '1px solid color-mix(in srgb, var(--lgl-success) 35%, transparent)' }}>
+                                        <CheckCircle2 size={16} color="var(--lgl-success)" />
+                                        <div style={{ flex: 1, fontSize: '0.75rem', fontWeight: 600, color: 'var(--index-primary-color)', wordBreak: 'break-all' }}>Video Ready</div>
+                                        <button type="button" onClick={handleDeleteVideo} style={{ color: 'var(--lgl-error)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800 }}>Remove</button>
                                     </div>
                                 ) : (
                                     <input
@@ -850,7 +850,7 @@ export default function LiveClass() {
                                             if (e.target.files?.[0]) handleFileUpload(e.target.files[0]);
                                             e.target.value = '';
                                         }}
-                                        style={{ width: '100%', padding: '0.6rem', border: '1px solid #e2e8f0', borderRadius: '10px' }}
+                                        style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--index-border-color)', borderRadius: '10px' }}
                                     />
                                 )}
                             </div>
@@ -859,14 +859,14 @@ export default function LiveClass() {
                         <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
                             <button 
                                 className="btn-standard" 
-                                style={{ flex: 1, background: '#f1f5f9', color: '#64748b' }}
+                                style={{ flex: 1, background: 'var(--index-hover-bg)', color: 'var(--index-text-secondary)' }}
                                 onClick={() => setEditModal({ show: false, session: null })}
                             >
                                 Cancel
                             </button>
                             <button 
                                 className="btn-standard" 
-                                style={{ flex: 2, background: '#020617' }}
+                                style={{ flex: 2, background: 'var(--lgl-charcoal)' }}
                                 onClick={handleUpdateSession}
                                 disabled={updating}
                             >

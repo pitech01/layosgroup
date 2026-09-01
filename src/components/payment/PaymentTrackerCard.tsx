@@ -81,19 +81,20 @@ export const PaymentTrackerCard: React.FC<PaymentTrackerCardProps> = ({ user, co
         return (
             <div className="bg-white dark:bg-brand-charcoal rounded-3xl p-6 sm:p-8 border-2 border-brand-border shadow-sm space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border/60 pb-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-500/10 text-indigo-500 rounded-2xl flex items-center justify-center shrink-0 border border-indigo-500/20">
+                    <div className="flex items-center gap-4 min-w-0">
+                        <div className="w-12 h-12 bg-brand-emerald/10 text-brand-emerald rounded-2xl flex items-center justify-center shrink-0 border border-brand-emerald/20">
                             <Calendar size={24} />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                                 <h3 className="text-lg font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Tuition Balance Tracker</h3>
                                 <span className="px-3 py-0.5 bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 rounded-full text-[10px] font-black uppercase tracking-widest">
                                     50% Paid ($500 Remaining)
                                 </span>
                             </div>
-                            <p className="text-xs text-brand-muted font-medium mt-0.5">
-                                Cohort: <span className="font-bold text-brand-charcoal dark:text-white">{info.cohortName}</span> ({info.courseType === 'foundation' ? 'Foundation - 7 Day Term' : 'Professional - 14 Day Term'})
+                            <p className="text-xs text-brand-muted font-medium mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                <span>Cohort: <span className="font-bold text-brand-charcoal dark:text-white">{info.cohortName}</span></span>
+                                <span>({info.courseType === 'foundation' ? 'Foundation - 7 Day Term' : 'Professional - 14 Day Term'})</span>
                             </p>
                         </div>
                     </div>
@@ -102,14 +103,14 @@ export const PaymentTrackerCard: React.FC<PaymentTrackerCardProps> = ({ user, co
                         type="button"
                         onClick={handlePayBalance}
                         disabled={isProcessing}
-                        className="px-6 h-12 bg-brand-emerald text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand-emerald/20 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full sm:w-auto px-6 h-12 bg-brand-emerald text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand-emerald/20 hover:scale-105 active:scale-95 transition-all border-none cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                         {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <><CreditCard size={16} /> Complete Payment (${info.remainingBalance})</>}
                     </button>
                 </div>
 
                 <div className="p-5 bg-brand-beige/40 dark:bg-white/5 border border-brand-border rounded-2xl flex items-center gap-4">
-                    <Clock size={24} className="text-indigo-500 shrink-0" />
+                    <Clock size={24} className="text-brand-emerald shrink-0" />
                     <p className="text-xs font-bold text-brand-charcoal dark:text-white leading-relaxed">
                         Your 50% tuition payment countdown will begin once your cohort starts on{' '}
                         <span className="text-brand-emerald font-black underline">{info.startDate?.toLocaleDateString()}</span>.
@@ -163,19 +164,21 @@ export const PaymentTrackerCard: React.FC<PaymentTrackerCardProps> = ({ user, co
         <div className="bg-white dark:bg-brand-charcoal rounded-3xl p-6 sm:p-8 border-2 border-brand-border shadow-sm space-y-6">
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border/60 pb-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 min-w-0">
                     <div className="w-12 h-12 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center shrink-0 border border-amber-500/20">
                         <Clock size={24} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-xl font-black text-brand-charcoal dark:text-white uppercase tracking-tight">Tuition Balance Countdown</h3>
                             <span className="px-3 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-full text-[10px] font-black uppercase tracking-widest">
                                 50% Paid (${info.remainingBalance} Due)
                             </span>
                         </div>
-                        <p className="text-xs text-brand-muted font-medium mt-0.5">
-                            Cohort: <span className="font-bold text-brand-charcoal dark:text-white">{info.cohortName}</span> • Course: <span className="font-bold text-brand-emerald">{info.courseTitle}</span>
+                        <p className="text-xs text-brand-muted font-medium mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span>Cohort: <span className="font-bold text-brand-charcoal dark:text-white">{info.cohortName}</span></span>
+                            <span className="hidden sm:inline text-brand-border">•</span>
+                            <span>Course: <span className="font-bold text-brand-emerald">{info.courseTitle}</span></span>
                         </p>
                     </div>
                 </div>

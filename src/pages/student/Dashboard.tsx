@@ -166,9 +166,9 @@ export default function StudentDashboard() {
 
     const stats = [
         { label: 'Enrolled Courses', value: enrollments.length.toString(), icon: BookOpen, color: 'text-brand-emerald', bg: 'bg-brand-emerald/10' },
-        { label: 'Live Sessions', value: liveSessions.length.toString(), icon: Video, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+        { label: 'Live Sessions', value: liveSessions.length.toString(), icon: Video, color: 'text-brand-emerald', bg: 'bg-brand-emerald/10' },
         { label: 'Completed', value: enrollments.filter(e => e.pivot?.progress === 100).length.toString(), icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-        { label: 'Certificates', value: certificates.length.toString(), icon: Trophy, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+        { label: 'Certificates', value: certificates.length.toString(), icon: Trophy, color: 'text-amber-500', bg: 'bg-amber-500/10', path: '/student/certificates' },
     ];
 
     if (loading) {
@@ -183,7 +183,7 @@ export default function StudentDashboard() {
             <PaymentWarningBanner paymentInfo={paymentInfo} />
 
             {/* Hero Section */}
-            <section className="relative h-full sm:h-full md:h-80 rounded-xl overflow-hidden group shadow-2xl p-2">
+            <section className="relative h-auto min-h-[18rem] md:h-80 rounded-xl overflow-hidden group shadow-2xl p-2 py-6 md:py-10 flex flex-col justify-center">
                 <img
                     src="/learning_journey_hero.png"
                     alt="Hero"
@@ -191,12 +191,12 @@ export default function StudentDashboard() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-brand-charcoal via-brand-charcoal/60 to-transparent" />
                 
-                <div className="relative z-10 h-full flex flex-col justify-center px-8 md:px-16 max-w-2xl">
+                <div className="relative z-10 w-full flex flex-col justify-center px-8 md:px-16 pt-8 pb-6 md:pt-0 md:pb-0 max-w-2xl">
                     <div className="flex items-center gap-3 mb-4 animate-fade-in-up">
-                        <div className="p-2 bg-brand-emerald/20 backdrop-blur-md rounded-lg border border-brand-emerald/30">
-                            <Sparkles className="text-brand-emerald" size={18} />
+                        <div className="p-2 bg-brand-emerald/20 backdrop-blur-md rounded-lg border border-brand-emerald/30 md:hidden flex items-center justify-center">
+                            <img src="/logo-cap.png" alt="LGL Logo" className="h-7 w-7 object-contain" />
                         </div>
-                        <span className="text-brand-emerald font-black text-xs uppercase tracking-[0.2em]">Learning Portal</span>
+                        <span className="text-brand-emerald font-black text-xs uppercase tracking-[0.2em]">LGL Learning Portal</span>
                     </div>
                     <h1 className="text-3xl md:text-5xl font-black text-white mb-4 animate-fade-in-up delay-100">
                         Welcome back, <span className="text-brand-emerald">{firstName}</span>
@@ -224,8 +224,9 @@ export default function StudentDashboard() {
 
             {/* Stats Grid */}
             <div className="grid md:grid-cols-2 grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
-                {stats.map(({ label, value, icon: Icon, color, bg }, idx) => (
-                    <div key={idx} className="bg-white dark:bg-brand-charcoal p-6 rounded-2xl border border-brand-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group ">
+                {stats.map(({ label, value, icon: Icon, color, bg, path }, idx) => {
+                    const cardClassName = "bg-white dark:bg-brand-charcoal p-6 rounded-2xl border border-brand-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group block no-underline text-inherit";
+                    const cardContent = (
                         <div className="flex items-center gap-4">
                             <div className={`p-4 rounded-2xl ${bg} ${color} transition-transform group-hover:scale-110`}>
                                 <Icon size={24} />
@@ -235,8 +236,17 @@ export default function StudentDashboard() {
                                 <div className="text-[0.6em] font-black text-brand-muted uppercase tracking-widest text-wrap">{label}</div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                    return path ? (
+                        <Link key={idx} to={path} className={`${cardClassName} cursor-pointer`}>
+                            {cardContent}
+                        </Link>
+                    ) : (
+                        <div key={idx} className={cardClassName}>
+                            {cardContent}
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Dedicated Payment Status & Live Countdown Card */}
@@ -257,7 +267,7 @@ export default function StudentDashboard() {
                             {enrollments.length > 0 ? (
   <div className="grid gap-6">
     {enrollments.map((cohort: any) => {
-      const progress = cohort.pivot?.progress || 0;
+      const progress = Math.round(Number(cohort.pivot?.progress) || 0);
       const isCompleted = progress >= 100;
       const cert = certificates.find((c) => Number(c.course_id) === Number(cohort.course?.id));
       const lessons = cohort.course?.modules?.reduce(
@@ -284,22 +294,29 @@ export default function StudentDashboard() {
             </div>
 
             {/* Content Section */}
-            <div className="flex-1 min-w-0 space-y-3">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-emerald opacity-80">
-                  {isCompleted ? 'Course Completed' : 'In Progress'}
-                </span>
-                <h4 className="text-xl font-bold text-brand-charcoal dark:text-white truncate tracking-tight">
+            <div className="w-full md:flex-1 min-w-0 space-y-3">
+              <div className="flex flex-col gap-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-brand-emerald opacity-80">
+                    {isCompleted ? 'Course Completed' : 'In Progress'}
+                  </span>
+                  {cohort.course?.title && cohort.name && (
+                    <span className="px-2 py-0.5 bg-brand-beige dark:bg-white/10 text-brand-charcoal dark:text-white border border-brand-border rounded-md text-[9px] font-bold uppercase tracking-wider">
+                      {cohort.name}
+                    </span>
+                  )}
+                </div>
+                <h4 className="text-lg md:text-xl font-bold text-brand-charcoal dark:text-white line-clamp-2 tracking-tight">
                   {cohort.course?.title || cohort.name}
                 </h4>
               </div>
 
-              <div className="flex items-center gap-4 text-xs font-medium text-brand-muted dark:text-white/60">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs font-medium text-brand-muted dark:text-white/60">
                 <div className="flex items-center gap-1.5">
                   <BookOpen size={14} />
                   {lessons} {lessons === 1 ? 'Lesson' : 'Lessons'}
                 </div>
-                <div className="w-1 h-1 rounded-full bg-brand-border" />
+                <div className="w-1 h-1 rounded-full bg-brand-border hidden sm:block" />
                 <div>{progress}% Completed</div>
               </div>
 
@@ -313,32 +330,33 @@ export default function StudentDashboard() {
             </div>
 
             {/* Action Section */}
-            <div className="shrink-0 w-full md:w-auto">
+            <div className="shrink-0 w-full md:w-auto flex justify-start md:justify-end">
               {isCompleted ? (
                 cert ? (
                   <button
                     onClick={() => downloadCertificate(cert.certificate_uuid)}
-                    className="w-full md:w-auto px-6 py-3 bg-brand-charcoal text-white dark:bg-white dark:text-brand-charcoal rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2"
+                    className="px-4 py-2 md:px-6 md:py-3 bg-brand-charcoal text-white dark:bg-white dark:text-brand-charcoal rounded-xl font-bold text-[11px] md:text-xs uppercase tracking-wide md:tracking-wider hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2"
                   >
-                    <Download size={16} />
+                    <Download size={14} />
                     Certificate
                   </button>
                 ) : (
                   <button
                     onClick={() => handleClaimCertificate(cohort.course?.id)}
                     disabled={claiming === cohort.course?.id}
-                    className="w-full md:w-auto px-6 py-3 bg-brand-emerald text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="px-4 py-2 md:px-6 md:py-3 bg-brand-emerald text-white rounded-xl font-bold text-[11px] md:text-xs uppercase tracking-wide md:tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    {claiming === cohort.course?.id ? <Loader2 size={16} className="animate-spin" /> : 'Claim Reward'}
+                    {claiming === cohort.course?.id ? <Loader2 size={14} className="animate-spin" /> : 'Claim Reward'}
                   </button>
                 )
               ) : (
                 <Link
                   to={`/student/courses/${cohort.course?.id}?cohortId=${cohort.id}`}
-                  className="w-full md:w-auto flex items-center justify-center gap-3 px-6 py-3 bg-brand-emerald text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:shadow-lg hover:shadow-brand-emerald/30 transition-all active:scale-95"
+                  className="flex items-center justify-center gap-2 px-4 py-2 md:px-6 md:py-3 bg-brand-emerald text-white rounded-xl font-bold text-[11px] md:text-xs uppercase tracking-wide md:tracking-wider hover:shadow-lg hover:shadow-brand-emerald/30 transition-all active:scale-95"
                 >
-                  Resume Progress
-                  <Play size={14} fill="currentColor" />
+                  <span className="xl:hidden">Resume</span>
+                  <span className="hidden xl:inline">Resume Progress</span>
+                  <Play size={13} fill="currentColor" />
                 </Link>
               )}
             </div>

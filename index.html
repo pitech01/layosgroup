@@ -3,13 +3,29 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var shouldBeDark = saved ? saved === 'dark' : prefersDark;
+        if (shouldBeDark) document.documentElement.classList.add('dark');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" type="image/png" href="/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <title>Layos Group | LMS</title>
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <title>LGL Consulting | LMS</title>
+  <meta name="description" content="Access the LGL Consulting Learning Management System (LMS). Track your course progress, submit assignments, view resources, and collaborate with expert instructors." />
+  <meta name="author" content="LGL Consulting" />
+  <meta property="og:title" content="LGL Consulting | LMS" />
+  <meta property="og:description" content="Access the LGL Consulting Learning Management System (LMS). Track your course progress, submit assignments, view resources, and collaborate with expert instructors." />
+  <meta property="og:type" content="website" />
 </head>
 
 <body>

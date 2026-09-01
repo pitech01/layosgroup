@@ -10,7 +10,7 @@ const NotFound = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: '#f8fafc',
+            background: 'var(--index-bg-color)',
             fontFamily: "'Inter', sans-serif",
             padding: '2rem',
             overflow: 'hidden',
@@ -39,7 +39,7 @@ const NotFound = () => {
                     font-size: clamp(8rem, 20vw, 12rem);
                     font-weight: 900;
                     line-height: 1;
-                    background: linear-gradient(135deg, #1a4d3e, #2d7a63);
+                    background: linear-gradient(135deg, var(--index-primary-color), var(--index-primary-hover));
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     margin-bottom: 0;
@@ -50,7 +50,7 @@ const NotFound = () => {
                 .decoration-circle {
                     position: absolute;
                     border-radius: 50%;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     filter: blur(80px);
                     z-index: -1;
                     animation: pulse-slow 8s infinite ease-in-out;
@@ -70,26 +70,26 @@ const NotFound = () => {
                 }
 
                 .btn-primary-nf {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
-                    box-shadow: 0 10px 20px rgba(26, 77, 62, 0.2);
+                    box-shadow: 0 10px 20px color-mix(in srgb, var(--index-primary-color) 20%, transparent);
                 }
 
                 .btn-primary-nf:hover {
                     transform: translateY(-3px);
-                    box-shadow: 0 15px 30px rgba(26, 77, 62, 0.3);
-                    background: #153a2f;
+                    box-shadow: 0 15px 30px color-mix(in srgb, var(--index-primary-color) 30%, transparent);
+                    background: var(--index-primary-hover);
                 }
 
                 .btn-secondary-nf {
-                    background: white;
-                    color: #1a4d3e;
-                    border: 2px solid #e2e8f0;
+                    background: var(--index-card-bg);
+                    color: var(--index-primary-color);
+                    border: 2px solid var(--index-border-color);
                 }
 
                 .btn-secondary-nf:hover {
-                    background: #f8fafc;
-                    border-color: #cbd5e1;
+                    background: var(--index-hover-bg);
+                    border-color: var(--index-border-color);
                     transform: translateY(-3px);
                 }
 
@@ -97,14 +97,14 @@ const NotFound = () => {
                     margin-bottom: -2rem;
                     animation: float 6s infinite ease-in-out;
                     display: inline-block;
-                    color: #1a4d3e;
+                    color: var(--index-primary-color);
                     opacity: 0.8;
                 }
             `}</style>
 
             {/* Decorative Background Elements */}
             <div className="decoration-circle" style={{ width: '400px', height: '400px', top: '-100px', right: '-100px' }}></div>
-            <div className="decoration-circle" style={{ width: '300px', height: '300px', bottom: '-50px', left: '-50px', background: '#2d7a63' }}></div>
+            <div className="decoration-circle" style={{ width: '300px', height: '300px', bottom: '-50px', left: '-50px', background: 'var(--index-primary-hover)' }}></div>
 
             <div className="not-found-container animate-fade-in-up">
                 <div className="icon-container">
@@ -120,7 +120,7 @@ const NotFound = () => {
                 <h2 style={{
                     fontSize: '2rem',
                     fontWeight: 800,
-                    color: '#0f172a',
+                    color: 'var(--index-text-heading)',
                     marginBottom: '1rem',
                     letterSpacing: '-0.02em'
                 }}>
@@ -129,7 +129,7 @@ const NotFound = () => {
 
                 <p style={{
                     fontSize: '1.1rem',
-                    color: '#64748b',
+                    color: 'var(--index-text-secondary)',
                     marginBottom: '3rem',
                     lineHeight: 1.6
                 }}>

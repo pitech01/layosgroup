@@ -109,15 +109,15 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
     };
 
     return (
-        <div className="flex flex-col mx-2 md:mx-4 mb-4 bg-white border border-brand-border rounded-[24px] shadow-lg transition-all duration-300 focus-within:shadow-xl focus-within:border-brand-emerald/30  relative">
+        <div className="flex flex-col mx-2 md:mx-4 mb-4 bg-white dark:bg-brand-charcoal border border-brand-border dark:border-white/10 rounded-[24px] shadow-lg transition-all duration-300 focus-within:shadow-xl focus-within:border-brand-emerald/30  relative">
             
             {/* Mention Menu */}
             {showMentionMenu && (
-                <div className="absolute bottom-full left-4 mb-2 w-72 bg-white border border-brand-border rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in slide-in-from-bottom-2">
-                    <div className="p-3 bg-brand-beige/50 border-b border-brand-border">
+                <div className="absolute bottom-full left-4 mb-2 w-72 bg-white dark:bg-charcoal-700 border border-brand-border dark:border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in slide-in-from-bottom-2">
+                    <div className="p-3 bg-brand-beige/50 dark:bg-white/5 border-b border-brand-border dark:border-white/10">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-[10px] font-black uppercase tracking-widest text-brand-muted">Mention User</span>
-                            <button onClick={() => setShowMentionMenu(false)} className="text-brand-muted hover:text-brand-charcoal">
+                            <button onClick={() => setShowMentionMenu(false)} className="text-brand-muted hover:text-brand-charcoal dark:hover:text-white">
                                 <X size={14} />
                             </button>
                         </div>
@@ -127,7 +127,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                             value={mentionQuery}
                             onChange={(e) => setMentionQuery(e.target.value)}
                             placeholder="Search by name..."
-                            className="w-full px-3 py-2 text-xs bg-white border border-brand-border rounded-lg outline-none focus:border-brand-emerald"
+                            className="w-full px-3 py-2 text-xs bg-white dark:bg-brand-charcoal border border-brand-border dark:border-white/10 text-brand-charcoal dark:text-white rounded-lg outline-none focus:border-brand-emerald"
                         />
                     </div>
                     <div className="max-h-48 overflow-y-auto p-1">
@@ -142,9 +142,9 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                                 <button 
                                     key={user.id} 
                                     onMouseDown={(e) => { e.preventDefault(); insertMention(user.name); }}
-                                    className="w-full flex flex-col items-start gap-0.5 px-3 py-2 hover:bg-brand-beige rounded-xl transition-colors text-left"
+                                    className="w-full flex flex-col items-start gap-0.5 px-3 py-2 hover:bg-brand-beige dark:hover:bg-white/10 rounded-xl transition-colors text-left"
                                 >
-                                    <span className="text-sm font-bold text-brand-charcoal">@{user.name}</span>
+                                    <span className="text-sm font-bold text-brand-charcoal dark:text-white">@{user.name}</span>
                                     <span className="text-[10px] font-black uppercase text-brand-muted">{user.role}</span>
                                 </button>
                             ))
@@ -155,7 +155,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
 
             {/* Formatting Toolbar (Collapsible on Mobile) */}
             {(showToolbar || (typeof window !== 'undefined' && window.innerWidth > 768)) && (
-                <div className="flex items-center gap-1 p-2 bg-brand-beige/30 border-b border-brand-border overflow-x-auto no-scrollbar">
+                <div className="flex items-center gap-1 p-2 bg-brand-beige/30 dark:bg-white/5 border-b border-brand-border dark:border-white/10 overflow-x-auto no-scrollbar">
                     {[
                         { icon: Bold, cmd: 'bold', label: 'Bold' },
                         { icon: Italic, cmd: 'italic', label: 'Italic' },
@@ -170,7 +170,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                             key={i}
                             type="button"
                             onClick={() => btn.click ? btn.click() : executeCommand(btn.cmd!, btn.arg)}
-                            className="p-2 hover:bg-white rounded-lg text-brand-muted hover:text-brand-emerald transition-colors shrink-0"
+                            className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg text-brand-muted hover:text-brand-emerald transition-colors shrink-0"
                             title={btn.label}
                         >
                             <btn.icon size={16} />
@@ -181,11 +181,11 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
 
             {/* File Chip */}
             {file && (
-                <div className="flex items-center gap-2 m-3 p-2 pr-3 bg-brand-beige rounded-xl border border-brand-border w-fit animate-in slide-in-from-left-2">
-                    <div className="bg-white p-1.5 rounded-lg text-brand-emerald shadow-sm">
+                <div className="flex items-center gap-2 m-3 p-2 pr-3 bg-brand-beige dark:bg-white/10 rounded-xl border border-brand-border dark:border-white/10 w-fit animate-in slide-in-from-left-2">
+                    <div className="bg-white dark:bg-brand-charcoal p-1.5 rounded-lg text-brand-emerald shadow-sm">
                         <Paperclip size={14} />
                     </div>
-                    <span className="text-xs font-bold text-brand-charcoal max-w-[200px] truncate">{file.name}</span>
+                    <span className="text-xs font-bold text-brand-charcoal dark:text-white max-w-[200px] truncate">{file.name}</span>
                     <button onClick={() => setFile(null)} className="ml-1 text-red-500 hover:text-red-600 transition-colors">
                         <X size={14} />
                     </button>
@@ -197,7 +197,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                 <button 
                     type="button"
                     onClick={() => document.getElementById('chat-file-input')?.click()}
-                    className="p-2.5 bg-brand-beige hover:bg-brand-border text-brand-muted hover:text-brand-charcoal rounded-full transition-all duration-200 shrink-0"
+                    className="p-2.5 bg-brand-beige dark:bg-white/10 hover:bg-brand-border dark:hover:bg-white/20 text-brand-muted hover:text-brand-charcoal dark:hover:text-white rounded-full transition-all duration-200 shrink-0"
                 >
                     <Plus size={20} />
                     <input type="file" id="chat-file-input" className="hidden" onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
@@ -210,7 +210,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                         onInput={handleInput}
                         onKeyDown={handleKeyDown}
                         data-placeholder={placeholder}
-                        className="w-full max-h-48 overflow-y-auto outline-none text-sm text-brand-charcoal font-medium leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-brand-muted/60 empty:before:pointer-events-none"
+                        className="w-full max-h-48 overflow-y-auto outline-none text-sm text-brand-charcoal dark:text-white font-medium leading-relaxed empty:before:content-[attr(data-placeholder)] empty:before:text-brand-muted/60 dark:empty:before:text-white/40 empty:before:pointer-events-none"
                     />
                 </div>
 
@@ -218,7 +218,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                     <button 
                         type="button"
                         onClick={() => setShowToolbar(!showToolbar)}
-                        className={`md:hidden p-2.5 rounded-full transition-colors ${showToolbar ? 'text-brand-emerald bg-brand-emerald/10' : 'text-brand-muted hover:bg-brand-beige'}`}
+                        className={`md:hidden p-2.5 rounded-full transition-colors ${showToolbar ? 'text-brand-emerald bg-brand-emerald/10' : 'text-brand-muted hover:bg-brand-beige dark:hover:bg-white/10'}`}
                     >
                         <Hash size={20} />
                     </button>
@@ -226,7 +226,7 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                     <button 
                         type="button"
                         onClick={() => setShowMentionMenu(!showMentionMenu)}
-                        className="p-2.5 text-brand-muted hover:bg-brand-beige rounded-full transition-colors"
+                        className="p-2.5 text-brand-muted dark:text-white/60 hover:bg-brand-beige dark:hover:bg-white/10 rounded-full transition-colors"
                     >
                         <AtSign size={20} />
                     </button>
@@ -238,8 +238,8 @@ const ChatInput = ({ onSendMessage, placeholder = "Type a message...", isSending
                         className={`
                             p-2.5 rounded-full transition-all duration-300 shadow-md
                             ${(!message.trim() && !file) || isSending 
-                                ? 'bg-brand-beige text-brand-muted shadow-none cursor-not-allowed' 
-                                : 'bg-brand-emerald text-white hover:scale-105 active:scale-95 shadow-[0_4px_12px_rgba(5,150,105,0.3)]'}
+                                ? 'bg-brand-beige dark:bg-white/10 text-brand-muted dark:text-white/40 shadow-none cursor-not-allowed' 
+                                : 'bg-brand-emerald text-white hover:scale-105 active:scale-95 shadow-[0_4px_12px_color-mix(in srgb, var(--index-primary-color) 30%, transparent)]'}
                         `}
                     >
                         {isSending ? <RefreshCw size={20} className="animate-spin" /> : <Send size={20} />}

@@ -113,7 +113,7 @@ export default function CreateInterview() {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     text-decoration: none;
                     font-weight: 800;
                     font-size: 0.9rem;
@@ -125,7 +125,7 @@ export default function CreateInterview() {
                 }
                 .staff-scope .form-card {
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 32px;
                     padding: 3rem;
                     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -136,27 +136,27 @@ export default function CreateInterview() {
                     gap: 12px;
                     margin-bottom: 2.5rem;
                 }
-                .staff-scope .icon-box { background: #f1f5f9; padding: 12px; border-radius: 12px; color: #1a4d3e; }
+                .staff-scope .icon-box { background: var(--index-hover-bg); padding: 12px; border-radius: 12px; color: var(--index-primary-color); }
                 .staff-scope .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 2rem; }
-                .form-group label { font-weight: 800; color: #334155; font-size: 0.95rem; }
+                .form-group label { font-weight: 800; color: var(--index-text-secondary); font-size: 0.95rem; }
                 .staff-scope .premium-input {
-                    width: 100%; padding: 1rem 1.25rem; background: #f8fafc;
-                    border: 2px solid #f1f5f9; border-radius: 16px; font-weight: 600;
+                    width: 100%; padding: 1rem 1.25rem; background: var(--index-hover-bg);
+                    border: 2px solid var(--index-hover-bg); border-radius: 16px; font-weight: 600;
                     transition: all 0.2s;
                 }
-                .premium-input:focus { outline: none; border-color: #1a4d3e; background: white; }
+                .premium-input:focus { outline: none; border-color: var(--index-primary-color); background: white; }
                 .staff-scope .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
                 .staff-scope .upload-box {
-                    border: 2px dashed #e2e8f0; border-radius: 20px; padding: 2rem;
-                    text-align: center; background: #f8fafc; cursor: pointer; transition: all 0.2s;
+                    border: 2px dashed var(--index-border-color); border-radius: 20px; padding: 2rem;
+                    text-align: center; background: var(--index-hover-bg); cursor: pointer; transition: all 0.2s;
                 }
-                .upload-box:hover { border-color: #1a4d3e; background: #f0f7f4; }
+                .upload-box:hover { border-color: var(--index-primary-color); background: var(--index-accent-soft-bg); }
                 .staff-scope .selected-file {
                     display: flex; align-items: center; gap: 10px; background: white;
-                    padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 1rem;
+                    padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid var(--index-border-color); margin-top: 1rem;
                 }
                 .staff-scope .btn-submit {
-                    background: #1a4d3e; color: white; border: none; padding: 1.25rem;
+                    background: var(--index-primary-color); color: white; border: none; padding: 1.25rem;
                     border-radius: 20px; font-weight: 900; font-size: 1.1rem; cursor: pointer;
                     display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; transition: all 0.3s;
                 }
@@ -214,14 +214,14 @@ export default function CreateInterview() {
                             {!docFile ? (
                                 <div className="upload-box" onClick={() => document.getElementById('doc-input')?.click()}>
                                     <input type="file" id="doc-input" hidden accept=".pdf,.doc,.docx" onChange={e => handleFileChange(e, 'doc')} />
-                                    <FileText size={24} color="#1a4d3e" style={{ marginBottom: '10px' }} />
+                                    <FileText size={24} color="var(--index-primary-color)" style={{ marginBottom: '10px' }} />
                                     <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>Click to upload doc</div>
                                 </div>
                             ) : (
                                 <div className="selected-file">
-                                    <FileText size={18} color="#1a4d3e" />
+                                    <FileText size={18} color="var(--index-primary-color)" />
                                     <span style={{ fontSize: '0.8rem', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{docFile.name}</span>
-                                    <X size={16} color="#ef4444" style={{ cursor: 'pointer' }} onClick={() => setDocFile(null)} />
+                                    <X size={16} color="var(--lgl-error)" style={{ cursor: 'pointer' }} onClick={() => setDocFile(null)} />
                                 </div>
                             )}
                         </div>
@@ -231,22 +231,22 @@ export default function CreateInterview() {
                             {!videoFile ? (
                                 <div className="upload-box" onClick={() => document.getElementById('video-input')?.click()}>
                                     <input type="file" id="video-input" hidden accept="video/*" onChange={e => handleFileChange(e, 'video')} />
-                                    <Video size={24} color="#1a4d3e" style={{ marginBottom: '10px' }} />
+                                    <Video size={24} color="var(--index-primary-color)" style={{ marginBottom: '10px' }} />
                                     <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>Click to upload video</div>
                                 </div>
                             ) : (
                                 <div className="selected-file">
-                                    <Video size={18} color="#1a4d3e" />
+                                    <Video size={18} color="var(--index-primary-color)" />
                                     <span style={{ fontSize: '0.8rem', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{videoFile.name}</span>
-                                    <X size={16} color="#ef4444" style={{ cursor: 'pointer' }} onClick={() => setVideoFile(null)} />
+                                    <X size={16} color="var(--lgl-error)" style={{ cursor: 'pointer' }} onClick={() => setVideoFile(null)} />
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f8fafc', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid #e2e8f0' }}>
-                        <Info size={18} color="#64748b" />
-                        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Files will be securely stored on Bunny.net. Max limits: 50MB for docs, 500MB for videos.</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--index-hover-bg)', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid var(--index-border-color)' }}>
+                        <Info size={18} color="var(--index-text-secondary)" />
+                        <span style={{ fontSize: '0.8rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>Files will be securely stored on Bunny.net. Max limits: 50MB for docs, 500MB for videos.</span>
                     </div>
 
                     <button className="btn-submit" disabled={isSubmitting}>

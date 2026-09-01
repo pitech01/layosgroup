@@ -216,14 +216,14 @@ const Settings = () => {
                 .settings-header h1 {
                     font-size: 2.25rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0;
                     letter-spacing: -0.03em;
                 }
 
                 .staff-scope .settings-card {
                     background: white;
-                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border: 1px solid color-mix(in srgb, var(--index-border-color) 80%, transparent);
                     border-radius: 32px;
                     overflow: hidden;
                     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02);
@@ -232,8 +232,8 @@ const Settings = () => {
                 .staff-scope .settings-tabs-nav {
                     display: flex;
                     padding: 1.5rem 2rem;
-                    background: #f8fafc;
-                    border-bottom: 1px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border-bottom: 1px solid var(--index-hover-bg);
                     gap: 1rem;
                     overflow-x: auto;
                 }
@@ -246,7 +246,7 @@ const Settings = () => {
                     border-radius: 14px;
                     border: none;
                     background: transparent;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-weight: 700;
                     font-size: 0.95rem;
                     cursor: pointer;
@@ -255,13 +255,13 @@ const Settings = () => {
                 }
 
                 .settings-tab-btn:hover {
-                    background: #f1f5f9;
-                    color: #0f172a;
+                    background: var(--index-hover-bg);
+                    color: var(--index-text-heading);
                 }
 
                 .settings-tab-btn.active {
                     background: white;
-                    color: #1a4d3e;
+                    color: var(--index-primary-color);
                     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
                 }
 
@@ -320,13 +320,13 @@ const Settings = () => {
                     width: 160px;
                     height: 160px;
                     border-radius: 40px;
-                    background: #f1f5f9;
+                    background: var(--index-hover-bg);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 3rem;
                     font-weight: 950;
-                    color: #1a4d3e;
+                    color: var(--index-primary-color);
                     position: relative;
                     border: 4px solid white;
                     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
@@ -339,7 +339,7 @@ const Settings = () => {
                     width: 44px;
                     height: 44px;
                     border-radius: 14px;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     display: flex;
                     align-items: center;
@@ -365,7 +365,7 @@ const Settings = () => {
                     display: block;
                     font-size: 0.85rem;
                     font-weight: 800;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                     margin-bottom: 0.75rem;
@@ -380,38 +380,38 @@ const Settings = () => {
                     left: 1.25rem;
                     top: 50%;
                     transform: translateY(-50%);
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                 }
 
                 .staff-scope .premium-text-input {
                     width: 100%;
                     height: 56px;
                     padding: 0 1.25rem 0 3.5rem;
-                    background: #f8fafc;
-                    border: 1.5px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 16px;
                     font-size: 1rem;
                     font-weight: 600;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     transition: all 0.2s;
                 }
 
                 .premium-text-input:focus {
                     background: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     outline: none;
-                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                    box-shadow: 0 0 0 4px color-mix(in srgb, var(--index-primary-color) calc(0.05 * 100%), transparent);
                 }
 
                 .staff-scope .premium-textarea {
                     width: 100%;
                     padding: 1.25rem;
-                    background: #f8fafc;
-                    border: 1.5px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 16px;
                     font-size: 1rem;
                     font-weight: 600;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     min-height: 120px;
                     resize: vertical;
                     transition: all 0.2s;
@@ -419,9 +419,9 @@ const Settings = () => {
 
                 .premium-textarea:focus {
                     background: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     outline: none;
-                    box-shadow: 0 0 0 4px rgba(26, 77, 62, 0.05);
+                    box-shadow: 0 0 0 4px color-mix(in srgb, var(--index-primary-color) calc(0.05 * 100%), transparent);
                 }
 
                 .staff-scope .settings-action-row {
@@ -430,13 +430,13 @@ const Settings = () => {
                     gap: 1rem;
                     margin-top: 3rem;
                     padding-top: 2rem;
-                    border-top: 1px solid #f1f5f9;
+                    border-top: 1px solid var(--index-hover-bg);
                 }
 
                 .staff-scope .btn-premium-save {
                     height: 52px;
                     padding: 0 2.5rem;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     border: none;
                     border-radius: 16px;
@@ -444,18 +444,18 @@ const Settings = () => {
                     font-weight: 800;
                     cursor: pointer;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) calc(0.2 * 100%), transparent);
                 }
 
                 .btn-premium-save:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 15px 20px -5px rgba(26, 77, 62, 0.3);
+                    box-shadow: 0 15px 20px -5px color-mix(in srgb, var(--index-primary-color) calc(0.3 * 100%), transparent);
                     filter: brightness(1.1);
                 }
 
                 .staff-scope .security-status-box {
-                    background: #f0fdf4;
-                    border: 1.5px solid #dcfce7;
+                    background: color-mix(in srgb, var(--lgl-success) 12%, transparent);
+                    border: 1.5px solid color-mix(in srgb, var(--lgl-success) 15%, transparent);
                     border-radius: 20px;
                     padding: 1.5rem;
                     display: flex;
@@ -467,13 +467,13 @@ const Settings = () => {
                 .staff-scope .status-icon-glow {
                     width: 52px;
                     height: 52px;
-                    background: #16a34a;
+                    background: var(--lgl-success);
                     color: white;
                     border-radius: 14px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    box-shadow: 0 8px 15px rgba(22, 163, 74, 0.2);
+                    box-shadow: 0 8px 15px color-mix(in srgb, var(--lgl-success) 20%, transparent);
                 }
 
                 .staff-scope .session-management-section {
@@ -481,8 +481,8 @@ const Settings = () => {
                 }
 
                 .staff-scope .session-card-premium {
-                    background: #f8fafc;
-                    border: 1px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border: 1px solid var(--index-hover-bg);
                     border-radius: 20px;
                     padding: 1.25rem 2rem;
                     display: flex;
@@ -492,8 +492,8 @@ const Settings = () => {
 
                 .staff-scope .btn-outline-danger-premium {
                     background: transparent;
-                    border: 2px solid #fee2e2;
-                    color: #ef4444;
+                    border: 2px solid var(--index-danger-bg-soft);
+                    color: var(--lgl-error);
                     padding: 0.6rem 1.25rem;
                     border-radius: 12px;
                     font-weight: 800;
@@ -506,11 +506,26 @@ const Settings = () => {
                 }
 
                 .btn-outline-danger-premium:hover {
-                    background: #fef2f2;
-                    border-color: #fecaca;
+                    background: var(--index-danger-bg-soft);
+                    border-color: color-mix(in srgb, var(--lgl-error) 35%, transparent);
                 }
 
                 @media (max-width: 640px) {
+                    .staff-scope .instructor-avatar-large {
+                        width: 120px;
+                        height: 120px;
+                        border-radius: 28px;
+                        font-size: 2.25rem;
+                    }
+                    .staff-scope .settings-content-body {
+                        padding: 1.25rem 1rem !important;
+                    }
+                    .settings-header {
+                        margin-bottom: 1.5rem;
+                    }
+                    .settings-header h1 {
+                        font-size: 1.75rem;
+                    }
                     .staff-scope .security-status-box {
                         flex-direction: column;
                         text-align: center;
@@ -519,16 +534,13 @@ const Settings = () => {
                     }
                     .staff-scope .password-grid-premium {
                         grid-template-columns: 1fr !important;
-                        gap: 1rem !important;
+                        gap: 1.25rem !important;
                     }
                     .staff-scope .session-card-premium {
                         flex-direction: column;
-                        gap: 1.5rem;
-                        text-align: center;
-                        padding: 1.5rem;
-                    }
-                    .session-card-premium div {
-                        flex-direction: column;
+                        gap: 1.25rem;
+                        text-align: left;
+                        padding: 1.25rem;
                     }
                     .staff-scope .btn-outline-danger-premium {
                         width: 100%;
@@ -538,8 +550,8 @@ const Settings = () => {
             `}</style>
 
             <header className="settings-header">
-                <h1>Setting</h1>
-                <p style={{ color: '#64748b', fontWeight: 600, marginTop: '0.5rem' }}>Manage your profile and security settings.</p>
+                <h1>Settings</h1>
+                <p style={{ color: 'var(--index-text-secondary)', fontWeight: 600, marginTop: '0.5rem' }}>Manage your personal profile and account security.</p>
             </header>
 
             <div className="settings-card">
@@ -548,13 +560,13 @@ const Settings = () => {
                         onClick={() => setActiveTab('profile')}
                         className={`settings-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
                     >
-                        <User size={20} /> Profile
+                        <User size={20} /> Personal Profile
                     </button>
                     <button
                         onClick={() => setActiveTab('security')}
                         className={`settings-tab-btn ${activeTab === 'security' ? 'active' : ''}`}
                     >
-                        <Shield size={20} /> Security
+                        <Shield size={20} /> Password &amp; Security
                     </button>
                 </nav>
 
@@ -571,18 +583,18 @@ const Settings = () => {
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>{user?.name}</h4>
-                                        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>ID: INS-{user?.id.toString().padStart(4, '0')}</p>
+                                        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>ID: INS-{user?.id.toString().padStart(4, '0')}</p>
                                     </div>
                                 </div>
 
                                 <div className="settings-form-col">
                                     {error && (
-                                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '1rem', borderRadius: '16px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                        <div style={{ background: 'var(--index-danger-bg-soft)', border: '1px solid color-mix(in srgb, var(--lgl-error) 35%, transparent)', padding: '1rem', borderRadius: '16px', color: 'var(--lgl-error)', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
                                             <AlertCircle size={18} /> {error}
                                         </div>
                                     )}
                                     {success && (
-                                        <div style={{ background: '#f0fdf4', border: '1px solid #dcfce7', padding: '1rem', borderRadius: '16px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                        <div style={{ background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--lgl-success) 15%, transparent)', padding: '1rem', borderRadius: '16px', color: 'var(--lgl-success)', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
                                             <CheckCircle size={18} /> {success}
                                         </div>
                                     )}
@@ -616,11 +628,11 @@ const Settings = () => {
                                     </div>
 
                                     <div className="input-field-group">
-                                        <label>Professional Biography</label>
+                                        <label>Professional Bio</label>
                                         <textarea
                                             name="bio"
                                             className="premium-textarea"
-                                            placeholder="Outline your professional background and teaching philosophy..."
+                                            placeholder="Write a brief introduction about your background and experience..."
                                             value={formData.bio}
                                             onChange={handleInputChange}
                                         ></textarea>
@@ -649,35 +661,35 @@ const Settings = () => {
                                     <Shield size={24} />
                                 </div>
                                 <div>
-                                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#065f46' }}>Security Status: {user?.two_factor_enabled ? 'Maximum Protection (2FA Active)' : 'Standard Security'}</h4>
-                                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#047857', fontWeight: 600 }}>Your account cryptographic keys and authentication settings.</p>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: 'var(--lgl-success)' }}>Account Protection: {user?.two_factor_enabled ? 'Two-Step Verification Active' : 'Standard Protection'}</h4>
+                                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: 'var(--lgl-success)', fontWeight: 600 }}>Manage your password, login safety, and connected devices.</p>
                                 </div>
                             </div>
 
                             {/* 2FA Card */}
-                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '24px', padding: '1.5rem 2rem', marginBottom: '2.5rem' }}>
+                            <div style={{ background: 'var(--index-hover-bg)', border: '1px solid var(--index-border-color)', borderRadius: '24px', padding: '1.5rem 2rem', marginBottom: '2.5rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                                        <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: user?.two_factor_enabled ? '#ecfdf5' : '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: user?.two_factor_enabled ? '#10b981' : '#f59e0b', shrink: 0 }}>
+                                        <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: user?.two_factor_enabled ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: user?.two_factor_enabled ? 'var(--lgl-success)' : 'var(--lgl-warning)', shrink: 0 }}>
                                             <Mail size={22} />
                                         </div>
                                         <div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                                                <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#0f172a' }}>Email Two-Factor Authentication (2FA)</h4>
+                                                <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: 'var(--index-text-heading)' }}>Email Two-Step Verification (2FA)</h4>
                                                 {user?.two_factor_enabled ? (
-                                                    <span style={{ padding: '0.2rem 0.6rem', background: '#d1fae5', color: '#065f46', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                    <span style={{ padding: '0.2rem 0.6rem', background: 'color-mix(in srgb, var(--lgl-success) 15%, transparent)', color: 'var(--lgl-success)', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                                         <CheckCircle size={10} /> Active
                                                     </span>
                                                 ) : (
-                                                    <span style={{ padding: '0.2rem 0.6rem', background: '#fef3c7', color: '#92400e', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                    <span style={{ padding: '0.2rem 0.6rem', background: 'color-mix(in srgb, var(--lgl-warning) 15%, transparent)', color: 'var(--lgl-warning)', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                                         <AlertCircle size={10} /> Disabled
                                                     </span>
                                                 )}
                                             </div>
-                                            <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+                                            <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.85rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>
                                                 {user?.two_factor_enabled
-                                                    ? `Email verification code will be dispatched to ${user.email} on each sign in.`
-                                                    : 'Add security verification layer. Requires a 6-digit email OTP code when logging in.'}
+                                                    ? `We will send a 6-digit code to ${user.email} every time you sign in.`
+                                                    : 'Adds an extra layer of safety. We will send a 6-digit code to your email when you log in.'}
                                             </p>
                                         </div>
                                     </div>
@@ -688,17 +700,17 @@ const Settings = () => {
                                                 type="button"
                                                 onClick={handleDisableTwoFactor}
                                                 disabled={isDisabling2FA}
-                                                style={{ padding: '0.75rem 1.25rem', background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '14px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                                                style={{ padding: '0.75rem 1.25rem', background: 'var(--index-danger-bg-soft)', color: 'var(--lgl-error)', border: '1px solid color-mix(in srgb, var(--lgl-error) 35%, transparent)', borderRadius: '14px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em' }}
                                             >
-                                                {isDisabling2FA ? <Loader2 size={16} className="animate-spin" /> : 'Disable 2FA'}
+                                                {isDisabling2FA ? <Loader2 size={16} className="animate-spin" /> : 'Turn Off 2FA'}
                                             </button>
                                         ) : (
                                             <button
                                                 type="button"
                                                 onClick={() => setIsTwoFactorModalOpen(true)}
-                                                style={{ padding: '0.75rem 1.5rem', background: '#1a4d3e', color: 'white', border: 'none', borderRadius: '14px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 4px 12px rgba(26, 77, 62, 0.2)' }}
+                                                style={{ padding: '0.75rem 1.5rem', background: 'var(--index-primary-color)', color: 'white', border: 'none', borderRadius: '14px', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 4px 12px color-mix(in srgb, var(--index-primary-color) calc(0.2 * 100%), transparent)' }}
                                             >
-                                                Enable 2FA
+                                                Turn On 2FA
                                             </button>
                                         )}
                                     </div>
@@ -707,12 +719,12 @@ const Settings = () => {
 
                             <div className="settings-form-col" style={{ maxWidth: '600px' }}>
                                 {error && (
-                                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '1rem', borderRadius: '16px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                    <div style={{ background: 'var(--index-danger-bg-soft)', border: '1px solid color-mix(in srgb, var(--lgl-error) 35%, transparent)', padding: '1rem', borderRadius: '16px', color: 'var(--lgl-error)', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
                                         <AlertCircle size={18} /> {error}
                                     </div>
                                 )}
                                 {success && (
-                                    <div style={{ background: '#f0fdf4', border: '1px solid #dcfce7', padding: '1rem', borderRadius: '16px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                                    <div style={{ background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--lgl-success) 15%, transparent)', padding: '1rem', borderRadius: '16px', color: 'var(--lgl-success)', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
                                         <CheckCircle size={18} /> {success}
                                     </div>
                                 )}
@@ -725,14 +737,14 @@ const Settings = () => {
                                             type="password"
                                             name="currentPassword"
                                             className="premium-text-input"
-                                            placeholder="••••••••••••"
+                                            placeholder="Enter your current password"
                                             value={formData.currentPassword}
                                             onChange={handleInputChange}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="password-grid-premium" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '2.5rem' }}>
+                                <div className="password-grid-premium" style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
                                     <div className="input-field-group">
                                         <label>New Password</label>
                                         <div className="premium-input-wrapper">
@@ -741,21 +753,21 @@ const Settings = () => {
                                                 type="password"
                                                 name="newPassword"
                                                 className="premium-text-input"
-                                                placeholder="Enter"
+                                                placeholder="At least 8 characters"
                                                 value={formData.newPassword}
                                                 onChange={handleInputChange}
                                             />
                                         </div>
                                     </div>
                                     <div className="input-field-group">
-                                        <label>Confirm Password</label>
+                                        <label>Confirm New Password</label>
                                         <div className="premium-input-wrapper">
                                             <Lock size={20} className="premium-input-icon" />
                                             <input
                                                 type="password"
                                                 name="confirmPassword"
                                                 className="premium-text-input"
-                                                placeholder="Confirm"
+                                                placeholder="Re-enter new password"
                                                 value={formData.confirmPassword}
                                                 onChange={handleInputChange}
                                             />
@@ -766,7 +778,7 @@ const Settings = () => {
                                 <div className="settings-action-row">
                                     <button
                                         className="btn-premium-save"
-                                        style={{ background: '#3b82f6', boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.2)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                        style={{ background: 'var(--index-primary-color)', boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 20%, transparent)', display: 'flex', alignItems: 'center', gap: '8px' }}
                                         onClick={handleUpdatePassword}
                                         disabled={isSaving}
                                     >
@@ -776,11 +788,11 @@ const Settings = () => {
                                 </div>
 
                                 <div className="session-management-section">
-                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1.5rem' }}>Active Sessions</h3>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1.5rem' }}>Where You're Logged In</h3>
                                     
                                     {isLoadingSessions ? (
                                         <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                                            <Loader2 size={24} className="animate-spin" color="#1a4d3e" />
+                                            <Loader2 size={24} className="animate-spin" color="var(--index-primary-color)" />
                                         </div>
                                     ) : (
                                         <div style={{ display: 'grid', gap: '1rem' }}>
@@ -791,33 +803,33 @@ const Settings = () => {
                                                             width: '44px', 
                                                             height: '44px', 
                                                             borderRadius: '14px', 
-                                                            background: session.is_current ? '#ecfdf5' : '#f1f5f9', 
+                                                            background: session.is_current ? 'color-mix(in srgb, var(--lgl-success) 12%, transparent)' : 'var(--index-hover-bg)', 
                                                             display: 'flex', 
                                                             alignItems: 'center', 
                                                             justifyContent: 'center', 
-                                                            color: session.is_current ? '#16a34a' : '#64748b' 
+                                                            color: session.is_current ? 'var(--lgl-success)' : 'var(--index-text-secondary)' 
                                                         }}>
                                                             <Monitor size={22} />
                                                         </div>
                                                         <div>
-                                                            <h5 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>{session.name}</h5>
-                                                            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                <Globe size={12} /> {session.is_current ? 'Current Device • Active Now' : `Last active ${session.last_used_at}`} 
+                                                            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--index-text-heading)' }}>
+                                                                {session.name} {session.is_current && <span style={{ fontSize: '0.7rem', background: 'var(--lgl-success)', color: 'white', padding: '2px 8px', borderRadius: '99px', marginLeft: '6px', fontWeight: 900 }}>This Device</span>}
+                                                            </h4>
+                                                            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>
+                                                                {session.is_current ? 'Currently active now' : `Last active: ${session.last_used_at || 'Recently'}`}
                                                             </p>
                                                         </div>
                                                     </div>
+                                                    
                                                     {!session.is_current ? (
-                                                        <button 
-                                                            className="btn-outline-danger-premium" 
+                                                        <button
+                                                            className="btn-outline-danger-premium"
                                                             onClick={() => handleTerminateSession(session.id)}
-                                                            style={{ padding: '0.5rem 1rem' }}
                                                         >
-                                                            Terminate
+                                                            Log Out Device
                                                         </button>
                                                     ) : (
-                                                        <button className="btn-outline-danger-premium" onClick={handleLogout} style={{ border: 'none', background: '#fef2f2' }}>
-                                                            <LogOut size={16} /> Sign Out
-                                                        </button>
+                                                        <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--lgl-success)' }}>Active Session</span>
                                                     )}
                                                 </div>
                                             ))}

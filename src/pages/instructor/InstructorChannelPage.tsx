@@ -116,7 +116,7 @@ const InstructorChannelPage = () => {
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-                <Loader2 size={40} className="animate-spin text-blue-500" />
+                <Loader2 size={40} className="animate-spin text-brand-emerald" />
             </div>
         );
     }
@@ -130,7 +130,7 @@ const InstructorChannelPage = () => {
                     height: calc(100vh - 120px);
                     background: white;
                     border-radius: 24px;
-                    border: 1.5px solid #e2e8f0;
+                    border: 1.5px solid var(--index-border-color);
                     overflow: hidden;
                     box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
                     padding: 2rem;
@@ -153,7 +153,7 @@ const InstructorChannelPage = () => {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                color: '#64748b',
+                color: 'var(--index-text-secondary)',
                 textDecoration: 'none',
                 fontSize: '0.9rem',
                 fontWeight: 600,

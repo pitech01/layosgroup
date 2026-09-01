@@ -136,9 +136,9 @@ export default function SubmitAssignment() {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-[70vh] gap-4 bg-[#f4ebe1]">
-                <Loader2 className="animate-spin text-[#113f31]" size={44} />
-                <p className="font-bold text-xs text-[#113f31]/60 uppercase tracking-[0.25em] animate-pulse">Initializing Interface...</p>
+            <div className="flex flex-col items-center justify-center h-[70vh] gap-4 bg-[var(--index-card-bg)]">
+                <Loader2 className="animate-spin text-[var(--index-primary-color)]" size={44} />
+                <p className="font-bold text-xs text-[var(--index-primary-color)]/60 uppercase tracking-[0.25em] animate-pulse">Initializing Interface...</p>
             </div>
         );
     }
@@ -146,34 +146,34 @@ export default function SubmitAssignment() {
     if (!assignment) return null;
 
     return (
-        <div className="min-h-screen bg-[#f4ebe1] px-4 md:px-8 py-8 selection:bg-[#113f31]/10">
+        <div className="min-h-screen bg-[var(--index-card-bg)] px-4 md:px-8 py-8 selection:bg-[var(--index-primary-color)]/10">
             <div className="max-w-5xl mx-auto space-y-8 pb-16">
                 
                 {/* Back Nav Button */}
                 <button 
                     onClick={() => navigate(-1)} 
-                    className="group flex items-center gap-2.5 text-[#113f31]/70 hover:text-[#113f31] font-bold text-xs uppercase tracking-widest transition-all bg-transparent border-none cursor-pointer p-0"
+                    className="group flex items-center gap-2.5 text-[var(--index-primary-color)]/70 hover:text-[var(--index-primary-color)] font-bold text-xs uppercase tracking-widest transition-all bg-transparent border-none cursor-pointer p-0"
                 >
                     <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" /> 
                     Back to Assignments
                 </button>
 
                 {/* Premium Header Card Block */}
-                <div className="relative bg-[#113f31] rounded-[32px] p-8 md:p-12 text-white overflow-hidden shadow-xl shadow-[#113f31]/10">
+                <div className="relative bg-[var(--index-primary-color)] rounded-[32px] p-8 md:p-12 text-white overflow-hidden shadow-xl shadow-[var(--index-primary-color)]/10">
                     <div className="absolute top-0 right-0 w-80 h-80 bg-white/[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                     
                     <div className="relative z-10 space-y-6">
                         <div className="flex flex-wrap gap-2.5">
-                            <span className="px-3.5 py-1.5 bg-white/10 backdrop-blur-md rounded-full text-[11px] font-bold uppercase tracking-wider text-[#d1e7dd]">
+                            <span className="px-3.5 py-1.5 bg-white/10 backdrop-blur-md rounded-full text-[11px] font-bold uppercase tracking-wider text-[var(--lgl-success)]">
                                 {assignment.cohort?.name || "March Cohort"}
                             </span>
-                            <span className="px-3.5 py-1.5 bg-[#fbdca7] text-[#744210] rounded-full text-[11px] font-bold uppercase tracking-wider">
+                            <span className="px-3.5 py-1.5 bg-lgl-warning/20 text-lgl-warning rounded-full text-[11px] font-bold uppercase tracking-wider">
                                 Due: {new Date(assignment.due_date).toLocaleDateString()}
                             </span>
                         </div>
 
-                        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#fdfbf7]">{assignment.title}</h1>
-                        <p className="text-base text-[#fdfbf7]/80 max-w-3xl leading-relaxed font-normal">
+                        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[var(--index-bg-color)]">{assignment.title}</h1>
+                        <p className="text-base text-[var(--index-bg-color)]/80 max-w-3xl leading-relaxed font-normal">
                             {assignment.description}
                         </p>
 
@@ -181,7 +181,7 @@ export default function SubmitAssignment() {
                             <button
                                 type="button"
                                 onClick={handleViewResource}
-                                className="inline-flex items-center gap-2.5 bg-[#fdfbf7] text-[#113f31] hover:bg-[#fdfbf7]/90 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-[0.98] cursor-pointer"
+                                className="inline-flex items-center gap-2.5 bg-[var(--index-bg-color)] text-[var(--index-primary-color)] hover:bg-[var(--index-bg-color)]/90 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-[0.98] cursor-pointer"
                             >
                                 <Eye size={16} /> View Assignment Instructions
                             </button>
@@ -190,20 +190,20 @@ export default function SubmitAssignment() {
                 </div>
 
                 {/* Workspace Matrix Dashboard */}
-                <div className="bg-[#fdfbf7] rounded-[32px] border border-[#eadace] p-6 md:p-10 shadow-sm space-y-10">
+                <div className="bg-[var(--index-bg-color)] rounded-[32px] border border-[var(--index-border-color)] p-6 md:p-10 shadow-sm space-y-10">
                     <form onSubmit={handleSubmit} className="space-y-10">
                         
                         {/* Interactive Rich Notes Field */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-[#113f31]/5 rounded-xl">
-                                    <FileText size={20} className="text-[#113f31]" />
+                                <div className="p-2 bg-[var(--index-primary-color)]/5 rounded-xl">
+                                    <FileText size={20} className="text-[var(--index-primary-color)]" />
                                 </div>
-                                <h2 className="text-sm font-bold text-[#113f31] uppercase tracking-wider">Written Deliverable Summary</h2>
+                                <h2 className="text-sm font-bold text-[var(--index-primary-color)] uppercase tracking-wider">Written Deliverable Summary</h2>
                             </div>
 
                             <textarea
-                                className="w-full min-h-[180px] p-5 bg-[#f4ebe1]/30 border-2 border-[#eadace] rounded-2xl focus:outline-none focus:border-[#113f31] focus:bg-white transition-all text-[#113f31] font-medium text-base placeholder-[#113f31]/40 leading-relaxed resize-none shadow-inner"
+                                className="w-full min-h-[180px] p-5 bg-[var(--index-card-bg)]/30 border-2 border-[var(--index-border-color)] rounded-2xl focus:outline-none focus:border-[var(--index-primary-color)] focus:bg-white dark:focus:bg-[var(--index-card-bg)] transition-all text-[var(--index-primary-color)] font-medium text-base placeholder-[var(--index-primary-color)]/40 leading-relaxed resize-none shadow-inner"
                                 placeholder="Write any accompanying notes or direct textual submission here for your evaluator..."
                                 value={answerText}
                                 onChange={(e) => setAnswerText(e.target.value)}
@@ -213,14 +213,14 @@ export default function SubmitAssignment() {
                         {/* File Dropzone Component Block */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-[#113f31]/5 rounded-xl">
-                                    <CloudUpload size={20} className="text-[#113f31]" />
+                                <div className="p-2 bg-[var(--index-primary-color)]/5 rounded-xl">
+                                    <CloudUpload size={20} className="text-[var(--index-primary-color)]" />
                                 </div>
-                                <h2 className="text-sm font-bold text-[#113f31] uppercase tracking-wider">File Submission Protocol</h2>
+                                <h2 className="text-sm font-bold text-[var(--index-primary-color)] uppercase tracking-wider">File Submission Protocol</h2>
                             </div>
 
                             {!selectedFile ? (
-                                <label className="group relative block bg-[#f4ebe1]/20 border-2 border-dashed border-[#eadace] hover:border-[#113f31] rounded-2xl p-10 text-center cursor-pointer hover:bg-[#113f31]/5 transition-all duration-300">
+                                <label className="group relative block bg-[var(--index-card-bg)]/20 border-2 border-dashed border-[var(--index-border-color)] hover:border-[var(--index-primary-color)] rounded-2xl p-10 text-center cursor-pointer hover:bg-[var(--index-primary-color)]/5 transition-all duration-300">
                                     <input
                                         type="file"
                                         className="hidden"
@@ -228,25 +228,25 @@ export default function SubmitAssignment() {
                                         accept=".pdf,.doc,.docx,.zip,.png,.jpg,.jpeg"
                                     />
                                     <div className="space-y-3">
-                                        <div className="w-14 h-14 bg-[#f4ebe1] rounded-2xl flex items-center justify-center mx-auto text-[#113f31]/60 group-hover:scale-105 transition-transform duration-300">
+                                        <div className="w-14 h-14 bg-[var(--index-card-bg)] rounded-2xl flex items-center justify-center mx-auto text-[var(--index-primary-color)]/60 group-hover:scale-105 transition-transform duration-300">
                                             <FolderSync size={26} />
                                         </div>
                                         <div>
-                                            <div className="text-sm font-bold text-[#113f31]">Upload Deliverable File</div>
-                                            <p className="text-[#113f31]/50 font-semibold text-[11px] uppercase tracking-wider mt-1.5">
+                                            <div className="text-sm font-bold text-[var(--index-primary-color)]">Upload Deliverable File</div>
+                                            <p className="text-[var(--index-primary-color)]/50 font-semibold text-[11px] uppercase tracking-wider mt-1.5">
                                                 PDF, DOCX, ZIP, or Images &bull; Up to 50MB
                                             </p>
                                         </div>
                                     </div>
                                 </label>
                             ) : (
-                                <div className="bg-[#f4ebe1]/30 border border-[#eadace] rounded-2xl p-5 flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-[#113f31] text-white rounded-xl flex items-center justify-center shadow-md">
+                                <div className="bg-[var(--index-card-bg)]/30 border border-[var(--index-border-color)] rounded-2xl p-5 flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-[var(--index-primary-color)] text-white rounded-xl flex items-center justify-center shadow-md">
                                         <FileText size={22} />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-bold text-[#113f31] truncate">{selectedFile.name}</div>
-                                        <div className="text-[11px] font-bold text-[#113f31]/50 uppercase tracking-wider mt-0.5">
+                                        <div className="text-sm font-bold text-[var(--index-primary-color)] truncate">{selectedFile.name}</div>
+                                        <div className="text-[11px] font-bold text-[var(--index-primary-color)]/50 uppercase tracking-wider mt-0.5">
                                             {(selectedFile.size / 1024 / 1024).toFixed(2)} MB &bull; Asset Ready
                                         </div>
                                     </div>
@@ -263,9 +263,9 @@ export default function SubmitAssignment() {
 
                         {/* Audit Tracking Alert Flag */}
                         {assignment.my_submission && !selectedFile && (
-                            <div className="bg-[#d1e7dd]/60 border border-[#b1d4c4] p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
-                                <div className="flex items-center gap-3.5 text-[#0f5132]">
-                                    <div className="w-10 h-10 bg-[#113f31] text-white rounded-xl flex items-center justify-center shrink-0">
+                            <div className="bg-[var(--lgl-success)]/60 border border-[var(--lgl-success)] p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+                                <div className="flex items-center gap-3.5 text-[var(--index-primary-hover)]">
+                                    <div className="w-10 h-10 bg-[var(--index-primary-color)] text-white rounded-xl flex items-center justify-center shrink-0">
                                         <CheckCircle size={20} />
                                     </div>
                                     <div className="text-sm">
@@ -274,7 +274,7 @@ export default function SubmitAssignment() {
                                         ) : (
                                             <p className="font-medium">Text submission content recorded.</p>
                                         )}
-                                        <span className="text-[#0f5132]/70 text-xs font-semibold block mt-0.5">New saves automatically overwrite previous submissions.</span>
+                                        <span className="text-[var(--index-primary-hover)]/70 text-xs font-semibold block mt-0.5">New saves automatically overwrite previous submissions.</span>
                                     </div>
                                 </div>
                                 {assignment.my_submission.submission_file_url && (
@@ -282,7 +282,7 @@ export default function SubmitAssignment() {
                                         href={assignment.my_submission.submission_file_url} 
                                         target="_blank" 
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1.5 bg-[#113f31] text-white hover:bg-[#113f31]/90 px-4 py-2 rounded-xl font-bold text-[11px] uppercase tracking-wider no-underline shadow-sm transition-all"
+                                        className="inline-flex items-center gap-1.5 bg-[var(--index-primary-color)] text-white hover:bg-[var(--index-primary-color)]/90 px-4 py-2 rounded-xl font-bold text-[11px] uppercase tracking-wider no-underline shadow-sm transition-all"
                                     >
                                         <Eye size={14} /> Audit Current Upload
                                     </a>
@@ -291,9 +291,9 @@ export default function SubmitAssignment() {
                         )}
 
                         {/* Informational Guideline Badge */}
-                        <div className="flex gap-3 p-5 bg-[#f4ebe1]/40 border border-[#eadace] rounded-2xl">
-                            <Info size={18} className="text-[#113f31]/60 shrink-0 mt-0.5" />
-                            <p className="text-[#113f31]/70 text-xs font-medium leading-relaxed">
+                        <div className="flex gap-3 p-5 bg-[var(--index-card-bg)]/40 border border-[var(--index-border-color)] rounded-2xl">
+                            <Info size={18} className="text-[var(--index-primary-color)]/60 shrink-0 mt-0.5" />
+                            <p className="text-[var(--index-primary-color)]/70 text-xs font-medium leading-relaxed">
                                 Ensure your workspace components match the architectural outline specified. For compound files or modular projects, package into a standard .ZIP package archive.
                             </p>
                         </div>
@@ -302,7 +302,7 @@ export default function SubmitAssignment() {
                         <button 
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full h-14 bg-[#113f31] hover:bg-[#113f31]/95 text-white rounded-xl font-bold text-sm uppercase tracking-[0.15em] shadow-lg shadow-[#113f31]/10 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 border-none cursor-pointer flex items-center justify-center gap-2"
+                            className="w-full h-14 bg-[var(--index-primary-color)] hover:bg-[var(--index-primary-color)]/95 text-white rounded-xl font-bold text-sm uppercase tracking-[0.15em] shadow-lg shadow-[var(--index-primary-color)]/10 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 border-none cursor-pointer flex items-center justify-center gap-2"
                         >
                             {isSubmitting ? (
                                 <><Loader2 className="animate-spin" size={18} /> Transmitting Data...</>
@@ -315,17 +315,17 @@ export default function SubmitAssignment() {
 
                 {/* Secure Overlay Frame System Container */}
                 {viewingPdf && (
-                    <div className="fixed inset-0 z-[2000] bg-[#f4ebe1] flex flex-col animate-in fade-in duration-200">
-                        <div className="px-6 py-4 border-b border-[#eadace] flex justify-between items-center bg-[#fdfbf7]">
+                    <div className="fixed inset-0 z-[2000] bg-[var(--index-card-bg)] flex flex-col animate-in fade-in duration-200">
+                        <div className="px-6 py-4 border-b border-[var(--index-border-color)] flex justify-between items-center bg-[var(--index-bg-color)]">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-[#113f31]/5 flex items-center justify-center text-[#113f31]">
+                                <div className="w-10 h-10 rounded-xl bg-[var(--index-primary-color)]/5 flex items-center justify-center text-[var(--index-primary-color)]">
                                     <FileText size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-bold text-[#113f31] uppercase tracking-wide leading-none">
+                                    <h3 className="text-sm font-bold text-[var(--index-primary-color)] uppercase tracking-wide leading-none">
                                         {viewingPdf.title}
                                     </h3>
-                                    <p className="text-[10px] font-bold text-[#113f31]/50 uppercase tracking-widest mt-1">
+                                    <p className="text-[10px] font-bold text-[var(--index-primary-color)]/50 uppercase tracking-widest mt-1">
                                         Instructional Material View
                                     </p>
                                 </div>
@@ -334,7 +334,7 @@ export default function SubmitAssignment() {
                                 {viewingPdf.type === 'pdf' && (
                                     <button 
                                         onClick={() => setShowAiInteraction(true)}
-                                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-indigo-600 text-indigo-600 font-bold text-[11px] uppercase tracking-wider hover:bg-indigo-600 hover:text-white transition-all bg-transparent cursor-pointer"
+                                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-brand-emerald text-brand-emerald font-bold text-[11px] uppercase tracking-wider hover:bg-brand-emerald hover:text-white transition-all bg-transparent cursor-pointer"
                                     >
                                         <Sparkles size={13} /> Layos Virtual Tutor
                                     </button>
@@ -344,7 +344,7 @@ export default function SubmitAssignment() {
                                         setViewingPdf(null);
                                         setIframeLoading(true);
                                     }}
-                                    className="w-10 h-10 rounded-xl bg-[#f4ebe1] text-[#113f31]/60 hover:text-red-600 flex items-center justify-center transition-all border-none cursor-pointer"
+                                    className="w-10 h-10 rounded-xl bg-[var(--index-card-bg)] text-[var(--index-primary-color)]/60 hover:text-red-600 flex items-center justify-center transition-all border-none cursor-pointer"
                                 >
                                     <X size={20} />
                                 </button>
@@ -352,13 +352,13 @@ export default function SubmitAssignment() {
                         </div>
 
                         <div 
-                            className="flex-1 relative bg-[#ebdcd0] overflow-hidden flex items-center justify-center"
+                            className="flex-1 relative bg-[var(--index-border-color)] overflow-hidden flex items-center justify-center"
                             onContextMenu={(e) => e.preventDefault()}
                         >
                             {iframeLoading && (
-                                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#ebdcd0]">
-                                    <div className="w-12 h-12 border-4 border-[#eadace] border-t-[#113f31] rounded-full animate-spin mb-4" />
-                                    <h4 className="text-xs font-bold text-[#113f31] uppercase tracking-widest">Building Document Space...</h4>
+                                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--index-border-color)]">
+                                    <div className="w-12 h-12 border-4 border-[var(--index-border-color)] border-t-[var(--index-primary-color)] rounded-full animate-spin mb-4" />
+                                    <h4 className="text-xs font-bold text-[var(--index-primary-color)] uppercase tracking-widest">Building Document Space...</h4>
                                 </div>
                             )}
                             {viewingPdf.url && (
@@ -380,8 +380,8 @@ export default function SubmitAssignment() {
                             )}
                         </div>
 
-                        <div className="px-6 py-3 bg-[#fdfbf7] border-t border-[#eadace] text-center">
-                            <p className="text-[10px] font-bold text-[#113f31]/40 uppercase tracking-widest">Layos Learning Architecture Environment</p>
+                        <div className="px-6 py-3 bg-[var(--index-bg-color)] border-t border-[var(--index-border-color)] text-center">
+                            <p className="text-[10px] font-bold text-[var(--index-primary-color)]/40 uppercase tracking-widest">Layos Learning Architecture Environment</p>
                         </div>
                     </div>
                 )}

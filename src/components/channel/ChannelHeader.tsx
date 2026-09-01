@@ -14,7 +14,7 @@ const ChannelHeader = ({ courseTitle, onNewPost, showPostButton = false }: Chann
             alignItems: 'center',
             marginBottom: '2rem',
             paddingBottom: '1.5rem',
-            borderBottom: '1px solid #f1f5f9'
+            borderBottom: '1px solid var(--index-border-subtle)'
         }}>
             <style>{`
                 @media (max-width: 640px) {
@@ -44,7 +44,7 @@ const ChannelHeader = ({ courseTitle, onNewPost, showPostButton = false }: Chann
                     width: '44px',
                     height: '44px',
                     borderRadius: '12px',
-                    background: '#0f172a',
+                    background: 'var(--lgl-charcoal)',
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center',
@@ -53,8 +53,8 @@ const ChannelHeader = ({ courseTitle, onNewPost, showPostButton = false }: Chann
                     <Hash size={24} />
                 </div>
                 <div>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>{courseTitle}</h1>
-                    <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>Course Channel</span>
+                    <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, color: 'var(--index-text-heading)' }}>{courseTitle}</h1>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>Course Channel</span>
                 </div>
             </div>
 

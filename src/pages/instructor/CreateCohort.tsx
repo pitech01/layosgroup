@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import {
@@ -11,9 +11,15 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
+interface InstructorOption {
+    id: number;
+    name: string;
+    email: string;
+}
+
 export default function CreateCohort() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, userRole } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -24,9 +30,38 @@ export default function CreateCohort() {
         timezone: 'UTC+1 (WAT)',
         visibility: 'public'
     });
+    const [instructors, setInstructors] = useState<InstructorOption[]>([]);
+    const [selectedInstructorId, setSelectedInstructorId] = useState<string>('');
+
+    useEffect(() => {
+        if (userRole !== 'admin') return;
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+        fetch(`${API_URL}/admin/instructors`, {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setInstructors(data);
+                    if (data.length > 0) setSelectedInstructorId(String(data[0].id));
+                }
+            })
+            .catch(() => setInstructors([]));
+    }, [userRole]);
+
+    const basePath = '/instructor/cohorts';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (userRole === 'admin' && !selectedInstructorId) {
+            setError('Please select an instructor to assign this cohort to.');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -52,7 +87,7 @@ export default function CreateCohort() {
                     enrollment_deadline: formData.enrollmentDeadline,
                     timezone: formData.timezone,
                     visibility: formData.visibility,
-                    instructor_id: user?.id
+                    instructor_id: userRole === 'admin' ? Number(selectedInstructorId) : user?.id
                 })
             });
 
@@ -69,7 +104,7 @@ export default function CreateCohort() {
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                navigate(`/instructor/cohorts/${data.id}`);
+                navigate(`${basePath}/${data.id}`);
             });
         } catch (err: any) {
             console.error('Cohort Creation Error:', err);
@@ -79,7 +114,7 @@ export default function CreateCohort() {
                 icon: 'error',
                 title: 'Oops...',
                 text: errorMsg,
-                confirmButtonColor: '#1a4d3e'
+                confirmButtonColor: 'var(--index-primary-color)'
             });
         } finally {
             setLoading(false);
@@ -105,7 +140,7 @@ export default function CreateCohort() {
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     text-decoration: none;
                     font-weight: 700;
                     font-size: 0.9rem;
@@ -113,7 +148,7 @@ export default function CreateCohort() {
                     transition: color 0.2s;
                 }
 
-                .breadcrumb-back:hover { color: #1a4d3e; }
+                .breadcrumb-back:hover { color: var(--index-primary-color); }
 
                 .staff-scope .form-header-premium {
                     margin-bottom: 3rem;
@@ -122,7 +157,7 @@ export default function CreateCohort() {
                 .form-header-premium h1 {
                     font-size: 2.5rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     letter-spacing: -0.04em;
                     margin: 0 0 0.5rem 0;
                 }
@@ -138,7 +173,7 @@ export default function CreateCohort() {
 
                 .staff-scope .cohort-form-card {
                     background: white;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 32px;
                     padding: 3rem;
                     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
@@ -159,7 +194,7 @@ export default function CreateCohort() {
                     display: block;
                     font-size: 0.85rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                     margin-bottom: 12px;
@@ -168,22 +203,22 @@ export default function CreateCohort() {
                 .staff-scope .input-premium {
                     width: 100%;
                     height: 56px;
-                    background: #f8fafc;
-                    border: 2px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 16px;
                     padding: 0 1.25rem;
                     font-size: 1rem;
                     font-weight: 600;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     transition: all 0.3s;
                     box-sizing: border-box;
                 }
 
                 .input-premium:focus {
                     background: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     outline: none;
-                    box-shadow: 0 0 0 5px rgba(26, 77, 62, 0.05);
+                    box-shadow: 0 0 0 5px color-mix(in srgb, var(--index-primary-color) 5%, transparent);
                 }
 
                 .staff-scope .form-grid-2 {
@@ -210,7 +245,7 @@ export default function CreateCohort() {
                 .staff-scope .submit-btn-premium {
                     width: 100%;
                     height: 64px;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     border: none;
                     border-radius: 20px;
@@ -222,13 +257,13 @@ export default function CreateCohort() {
                     justify-content: center;
                     gap: 12px;
                     margin-top: 1rem;
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 20%, transparent);
                     transition: all 0.3s;
                 }
 
                .staff-scope  .submit-btn-premium:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 20px 25px -5px rgba(26, 77, 62, 0.25);
+                    box-shadow: 0 20px 25px -5px color-mix(in srgb, var(--index-primary-color) 25%, transparent);
                 }
 
                 .staff-scope .section-tile {
@@ -238,23 +273,23 @@ export default function CreateCohort() {
                     margin-bottom: 2rem;
                     margin-top: 1rem;
                     padding-bottom: 1rem;
-                    border-bottom: 1px solid #f1f5f9;
+                    border-bottom: 1px solid var(--index-hover-bg);
                 }
 
                 .staff-scope .section-tile span {
                     font-size: 1.1rem;
                     font-weight: 900;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                 }
             `}</style>
 
-            <Link to="/instructor/cohorts" className="breadcrumb-back">
+            <Link to={basePath} className="breadcrumb-back">
                 <ArrowLeft size={18} /> Back to Cohorts
             </Link>
 
             <div className="form-header-premium" style={{ marginBottom: '2.5rem' }}>
                 <h1>Create Cohort</h1>
-                <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem' }}>
+                <p style={{ color: 'var(--index-text-secondary)', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.5rem' }}>
                     Configure a new session for student enrollment.
                 </p>
             </div>
@@ -268,22 +303,22 @@ export default function CreateCohort() {
                     width: 'calc(100% - 4rem)',
                     zIndex: 9999,
                     padding: '1rem 1.25rem',
-                    background: '#fff1f2',
-                    border: '1px solid #ffe4e6',
-                    color: '#e11d48',
+                    background: 'var(--index-danger-bg-soft)',
+                    border: '1px solid var(--index-danger-bg-soft)',
+                    color: 'var(--lgl-error)',
                     borderRadius: '16px',
                     fontSize: '0.95rem',
                     fontWeight: 500,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.75rem',
-                    boxShadow: '0 10px 25px rgba(225, 29, 72, 0.15)'
+                    boxShadow: '0 10px 25px color-mix(in srgb, var(--lgl-error) 15%, transparent)'
                 }}>
                     <AlertCircle size={20} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                     <span style={{ flex: 1 }}>{error}</span>
                     <button
                         onClick={() => setError(null)}
-                        style={{ background: 'none', border: 'none', color: '#fb7185', cursor: 'pointer', display: 'flex', padding: '4px', flexShrink: 0 }}
+                        style={{ background: 'none', border: 'none', color: 'var(--lgl-error)', cursor: 'pointer', display: 'flex', padding: '4px', flexShrink: 0 }}
                     >
                         <X size={16} />
                     </button>
@@ -292,7 +327,7 @@ export default function CreateCohort() {
 
             <form className="cohort-form-card shadow-premium" onSubmit={handleSubmit}>
                 <div className="section-tile">
-                    <Shield size={20} color="#1a4d3e" />
+                    <Shield size={20} color="var(--index-primary-color)" />
                     <span>Basic Configuration</span>
                 </div>
 
@@ -342,7 +377,22 @@ export default function CreateCohort() {
                     />
                 </div>
 
-
+                {userRole === 'admin' && (
+                    <div className="input-group-premium">
+                        <label>Assign Instructor</label>
+                        <select
+                            className="input-premium select-premium"
+                            required
+                            value={selectedInstructorId}
+                            onChange={(e) => setSelectedInstructorId(e.target.value)}
+                        >
+                            {instructors.length === 0 && <option value="">No instructors available</option>}
+                            {instructors.map((inst) => (
+                                <option key={inst.id} value={inst.id}>{inst.name} &mdash; {inst.email}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 <button type="submit" className="submit-btn-premium" disabled={loading}>
                     {loading ? (

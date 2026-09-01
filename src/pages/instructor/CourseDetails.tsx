@@ -118,7 +118,7 @@ export default function CohortDetails() {
             <style>{`
                 .staff-scope .cohort-header-premium {
                     background: white;
-                    border: 1.5px solid rgba(226, 232, 240, 0.8);
+                    border: 1.5px solid color-mix(in srgb, var(--index-border-color) 80%, transparent);
                     border-radius: 32px;
                     padding: 2.5rem;
                     margin-bottom: 2.5rem;
@@ -133,20 +133,20 @@ export default function CohortDetails() {
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                 }
-                .staff-scope .badge-active { background: #f0fdf4; color: #1a4d3e; border: 1px solid #1a4d3e20; }
-                .staff-scope .badge-completed { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+                .staff-scope .badge-active { background: var(--index-accent-soft-bg); color: var(--index-primary-color); border: 1px solid var(--index-primary-color)20; }
+                .staff-scope .badge-completed { background: var(--index-hover-bg); color: var(--index-text-secondary); border: 1px solid var(--index-border-color); }
 
                 .staff-scope .management-tabs-premium {
                     display: flex;
                     gap: 3rem;
-                    border-bottom: 2px solid #f1f5f9;
+                    border-bottom: 2px solid var(--index-hover-bg);
                     margin-bottom: 3rem;
                 }
 
                 .staff-scope .tab-premium {
                     padding: 1.25rem 0;
                     font-weight: 850;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     cursor: pointer;
                     position: relative;
                     transition: all 0.3s;
@@ -155,7 +155,7 @@ export default function CohortDetails() {
                     gap: 10px;
                 }
 
-                .tab-premium.active { color: #1a4d3e; }
+                .tab-premium.active { color: var(--index-primary-color); }
                 .tab-premium.active::after {
                     content: '';
                     position: absolute;
@@ -163,13 +163,13 @@ export default function CohortDetails() {
                     left: 0;
                     width: 100%;
                     height: 3.5px;
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     border-radius: 4px;
                 }
 
                 .staff-scope .course-blueprint-card {
                     background: white;
-                    border: 1.5px solid #f1f5f9;
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 28px;
                     margin-bottom: 2.5rem;
                     overflow: hidden;
@@ -182,35 +182,35 @@ export default function CohortDetails() {
                     justify-content: space-between;
                     align-items: center;
                     cursor: pointer;
-                    background: #fcfdfe;
+                    background: var(--index-card-bg);
                     transition: background 0.2s;
                 }
 
-                .blueprint-header:hover { background: #f8fafc; }
+                .blueprint-header:hover { background: var(--index-hover-bg); }
 
                 .blueprint-title-zone h3 {
                     margin: 0;
                     font-size: 1.4rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     letter-spacing: -0.02em;
                 }
 
                 .blueprint-title-zone p {
                     margin: 6px 0 0 0;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-weight: 600;
                     font-size: 0.95rem;
                 }
 
                 .staff-scope .blueprint-content {
                     padding: 0 2.5rem 2.5rem 2.5rem;
-                    border-top: 1.5px solid #f8fafc;
+                    border-top: 1.5px solid var(--index-hover-bg);
                 }
 
                 .staff-scope .module-card-premium {
-                    background: #fcfdfe;
-                    border: 1.5px solid #f1f5f9;
+                    background: var(--index-card-bg);
+                    border: 1.5px solid var(--index-hover-bg);
                     border-radius: 24px;
                     margin-top: 1.5rem;
                     overflow: hidden;
@@ -219,7 +219,7 @@ export default function CohortDetails() {
                 .staff-scope .module-header-premium {
                     padding: 1.25rem 2rem;
                     background: white;
-                    border-bottom: 1.5px solid rgba(241, 245, 249, 0.6);
+                    border-bottom: 1.5px solid color-mix(in srgb, var(--index-hover-bg) 60%, transparent);
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -230,7 +230,7 @@ export default function CohortDetails() {
                     display: flex;
                     align-items: center;
                     gap: 1.5rem;
-                    border-bottom: 1.25px solid rgba(241, 245, 249, 0.4);
+                    border-bottom: 1.25px solid color-mix(in srgb, var(--index-hover-bg) 40%, transparent);
                 }
 
                 .staff-scope .icon-box-premium {
@@ -242,12 +242,12 @@ export default function CohortDetails() {
                     justify-content: center;
                 }
 
-                .staff-scope .tp-video { background: #eff6ff; color: #2563eb; }
-                .staff-scope .tp-live { background: #fef2f2; color: #dc2626; }
-                .staff-scope .tp-material { background: #f0fdf4; color: #10b981; }
+                .staff-scope .tp-video { background: var(--index-accent-soft-bg); color: var(--index-primary-color); }
+                .staff-scope .tp-live { background: var(--index-danger-bg-soft); color: var(--lgl-error); }
+                .staff-scope .tp-material { background: var(--index-accent-soft-bg); color: var(--lgl-success); }
 
                 .staff-scope .btn-primary-forest {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
                     border: none;
                     padding: 0.85rem 2.25rem;
@@ -257,13 +257,13 @@ export default function CohortDetails() {
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    box-shadow: 0 10px 15px -3px rgba(26, 77, 62, 0.2);
+                    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--index-primary-color) 20%, transparent);
                     transition: all 0.3s;
                 }
 
                 .staff-scope .action-pill {
                     padding: 0.6rem 1.25rem;
-                    border: 2px solid #f1f5f9;
+                    border: 2px solid var(--index-hover-bg);
                     background: white;
                     border-radius: 12px;
                     font-size: 0.85rem;
@@ -272,12 +272,12 @@ export default function CohortDetails() {
                     align-items: center;
                     gap: 8px;
                     cursor: pointer;
-                    color: #475569;
+                    color: var(--index-text-secondary);
                 }
 
                 .staff-scope .search-bar-premium {
                     background: white;
-                    border: 2px solid #f1f5f9;
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 18px;
                     padding: 0 1.5rem;
                     height: 56px;
@@ -293,7 +293,7 @@ export default function CohortDetails() {
                     background: transparent;
                     outline: none;
                     font-weight: 600;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     width: 100%;
                 }
             `}</style>
@@ -303,11 +303,11 @@ export default function CohortDetails() {
                     <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '1.25rem' }}>
                             <span className={`badge-premium ${cohort.status === 'Active' ? 'badge-active' : 'badge-completed'}`}>{cohort.status}</span>
-                            <span style={{ fontSize: '0.9rem', color: '#1a4d3e', fontWeight: 900, background: '#f0fdf4', padding: '4px 12px', borderRadius: '8px' }}>{cohort.code}</span>
-                            <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Operational Cycle: {cohort.launchDate} — {cohort.endDate}</span>
+                            <span style={{ fontSize: '0.9rem', color: 'var(--index-primary-color)', fontWeight: 900, background: 'var(--index-accent-soft-bg)', padding: '4px 12px', borderRadius: '8px' }}>{cohort.code}</span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>Operational Cycle: {cohort.launchDate} — {cohort.endDate}</span>
                         </div>
-                        <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '2.5rem', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.04em' }}>Cohort Management</h1>
-                        <p style={{ margin: 0, color: '#64748b', fontSize: '1.15rem', fontWeight: 600 }}>Managing {assignedCourses.length} Assigned Courses</p>
+                        <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '2.5rem', fontWeight: 950, color: 'var(--index-text-heading)', letterSpacing: '-0.04em' }}>Cohort Management</h1>
+                        <p style={{ margin: 0, color: 'var(--index-text-secondary)', fontSize: '1.15rem', fontWeight: 600 }}>Managing {assignedCourses.length} Assigned Courses</p>
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
@@ -327,7 +327,7 @@ export default function CohortDetails() {
                 <div style={{ animation: 'fadeInUp 0.6s ease-out' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                         <div className="search-bar-premium">
-                            <Search size={20} color="#94a3b8" />
+                            <Search size={20} color="var(--index-text-faint)" />
                             <input
                                 placeholder="Search courses in this cohort..."
                                 value={searchQuery}
@@ -344,7 +344,7 @@ export default function CohortDetails() {
                         <div key={course.id} className="course-blueprint-card">
                             <div className="blueprint-header" onClick={() => toggleCourseExpansion(course.id)}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                                    <div style={{ padding: '12px', background: '#f0fdf4', borderRadius: '14px', color: '#1a4d3e' }}>
+                                    <div style={{ padding: '12px', background: 'var(--index-accent-soft-bg)', borderRadius: '14px', color: 'var(--index-primary-color)' }}>
                                         <BookOpen size={24} />
                                     </div>
                                     <div className="blueprint-title-zone">
@@ -354,10 +354,10 @@ export default function CohortDetails() {
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>Completion</div>
-                                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0f172a' }}>68% Avg.</div>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--index-text-faint)', textTransform: 'uppercase' }}>Completion</div>
+                                        <div style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--index-text-heading)' }}>68% Avg.</div>
                                     </div>
-                                    <div style={{ color: '#cbd5e1' }}>
+                                    <div style={{ color: 'var(--index-text-faint)' }}>
                                         {course.isExpanded ? <ChevronDown size={28} /> : <ChevronRight size={28} />}
                                     </div>
                                 </div>
@@ -366,8 +366,8 @@ export default function CohortDetails() {
                             {course.isExpanded && (
                                 <div className="blueprint-content">
                                     {course.modules.length === 0 && (
-                                        <div style={{ padding: '3rem', textAlign: 'center', border: '2px dashed #f1f5f9', borderRadius: '24px', margin: '1.5rem 0' }}>
-                                            <p style={{ color: '#94a3b8', fontWeight: 600 }}>No curriculum structure defined for this course yet.</p>
+                                        <div style={{ padding: '3rem', textAlign: 'center', border: '2px dashed var(--index-border-subtle)', borderRadius: '24px', margin: '1.5rem 0' }}>
+                                            <p style={{ color: 'var(--index-text-faint)', fontWeight: 600 }}>No curriculum structure defined for this course yet.</p>
                                             <Link to={`/instructor/curriculum/${course.id}`} className="btn-primary-forest" style={{ display: 'inline-flex', marginTop: '1rem' }}>Open Curriculum Builder</Link>
                                         </div>
                                     )}
@@ -375,8 +375,8 @@ export default function CohortDetails() {
                                         <div key={mod.id} className="module-card-premium">
                                             <div className="module-header-premium">
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                    <GripVertical size={20} color="#cbd5e1" />
-                                                    <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#0f172a' }}>{mod.title}</h4>
+                                                    <GripVertical size={20} color="var(--index-border-subtle)" />
+                                                    <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: 'var(--index-text-heading)' }}>{mod.title}</h4>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '8px' }}>
                                                     <button className="action-pill" style={{ padding: '6px 10px' }}><Edit3 size={14} /></button>
@@ -391,8 +391,8 @@ export default function CohortDetails() {
                                                             {sess.type === 'material' && <FileText size={18} />}
                                                         </div>
                                                         <div style={{ flex: 1 }}>
-                                                            <div style={{ fontWeight: 850, fontSize: '0.95rem', color: '#0f172a' }}>{sess.title}</div>
-                                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px', fontWeight: 700, textTransform: 'uppercase' }}>
+                                                            <div style={{ fontWeight: 850, fontSize: '0.95rem', color: 'var(--index-text-heading)' }}>{sess.title}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--index-text-faint)', marginTop: '4px', fontWeight: 700, textTransform: 'uppercase' }}>
                                                                 {sess.type} • {sess.duration || sess.format || sess.time}
                                                             </div>
                                                         </div>
@@ -402,8 +402,8 @@ export default function CohortDetails() {
                                                         </div>
                                                     </div>
                                                 ))}
-                                                <div style={{ padding: '1rem 2rem', background: '#fcfdfe', display: 'flex', gap: '1rem' }}>
-                                                    <button style={{ border: 'none', background: 'transparent', color: '#1a4d3e', fontWeight: 900, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Lesson</button>
+                                                <div style={{ padding: '1rem 2rem', background: 'var(--index-hover-bg)', display: 'flex', gap: '1rem' }}>
+                                                    <button style={{ border: 'none', background: 'transparent', color: 'var(--index-primary-color)', fontWeight: 900, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Plus size={16} /> Add Lesson</button>
                                                 </div>
                                             </div>
                                         </div>

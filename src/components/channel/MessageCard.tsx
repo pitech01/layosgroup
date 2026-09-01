@@ -98,7 +98,7 @@ const MessageCard = ({
                     background: transparent;
                 }
                 .slack-message-row:hover {
-                    background-color: #f8fafc;
+                    background-color: var(--index-hover-bg);
                 }
                 
                 .message-avatar-sidebar {
@@ -132,13 +132,13 @@ const MessageCard = ({
                     font-weight: 800;
                     color: white;
                     font-size: 1rem;
-                    background: ${isInstructor ? '#1e1b4b' : '#334155'};
+                    background: ${isInstructor ? 'var(--index-primary-color)' : 'var(--lgl-charcoal)'};
                 }
 
                 .avatar-timestamp-on-hover {
                     position: absolute;
                     font-size: 0.65rem;
-                    color: #94a3b8;
+                    color: var(--index-text-faint);
                     opacity: 0;
                     width: 100%;
                     text-align: right;
@@ -168,12 +168,12 @@ const MessageCard = ({
 
                 .sender-displayName {
                     font-weight: 900;
-                    color: #1e293b;
+                    color: var(--index-text-heading);
                     font-size: 0.95rem;
                 }
                 .instructor-badge-premium {
-                    background: #eff6ff;
-                    color: #2563eb;
+                    background: var(--index-accent-soft-bg);
+                    color: var(--index-primary-color);
                     font-size: 0.65rem;
                     padding: 2px 6px;
                     border-radius: 4px;
@@ -184,13 +184,13 @@ const MessageCard = ({
 
                 .timestamp-minimal {
                     font-size: 0.75rem;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     font-weight: 500;
                 }
 
                 .message-body-text {
                     font-size: 0.95rem;
-                    color: #334155;
+                    color: var(--index-text-heading);
                     line-height: 1.5;
                     word-wrap: break-word;
                     width: 100%;
@@ -204,7 +204,7 @@ const MessageCard = ({
                     margin-bottom: 0;
                 }
                 .message-body-text a {
-                    color: #2563eb;
+                    color: var(--index-primary-color);
                     text-decoration: none;
                 }
                 .message-body-text a:hover {
@@ -216,22 +216,22 @@ const MessageCard = ({
                     padding-left: 20px;
                 }
                 .message-body-text blockquote {
-                    border-left: 3px solid #cbd5e1;
+                    border-left: 3px solid var(--index-border-color);
                     margin: 4px 0 8px 0;
                     padding-left: 12px;
-                    color: #475569;
+                    color: var(--index-text-secondary);
                     font-style: italic;
                 }
                 .message-body-text code {
-                    background: #f1f5f9;
+                    background: var(--index-hover-bg);
                     padding: 2px 4px;
                     border-radius: 4px;
                     font-size: 0.85em;
                     font-family: monospace;
-                    color: #ef4444;
+                    color: var(--lgl-error);
                 }
                 .message-body-text pre {
-                    background: #0f172a;
+                    background: var(--lgl-charcoal);
                     padding: 12px;
                     border-radius: 6px;
                     overflow-x: auto;
@@ -239,16 +239,16 @@ const MessageCard = ({
                 }
                 .message-body-text pre code {
                     background: transparent;
-                    color: #f8fafc;
+                    color: var(--lgl-gray-light);
                     padding: 0;
                 }
                 
                 .is-announcement .message-body-text {
                     padding: 8px 12px;
-                    background: #fffafa;
-                    border-left: 4px solid #ef4444;
+                    background: var(--index-danger-bg-soft);
+                    border-left: 4px solid var(--lgl-error);
                     border-radius: 4px;
-                    color: #7f1d1d;
+                    color: var(--lgl-error);
                 }
 
                 .message-attachment-container {
@@ -260,15 +260,15 @@ const MessageCard = ({
                     max-height: 240px;
                     border-radius: 8px;
                     object-fit: cover;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                 }
 
                 .audio-attachment-pill {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    background: #f8fafc;
-                    border: 1px solid #e2e8f0;
+                    background: var(--index-hover-bg);
+                    border: 1px solid var(--index-border-color);
                     padding: 8px 16px;
                     border-radius: 30px;
                     max-width: fit-content;
@@ -279,11 +279,11 @@ const MessageCard = ({
                     align-items: center;
                     gap: 12px;
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     padding: 12px;
                     border-radius: 8px;
                     text-decoration: none;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     max-width: 100%;
                     width: 100%;
                     transition: all 0.2s;
@@ -292,8 +292,8 @@ const MessageCard = ({
                 }
 
                 .generic-file-attachment:hover {
-                    background: #f1f5f9;
-                    border-color: #cbd5e1;
+                    background: var(--index-hover-bg);
+                    border-color: var(--index-border-color);
                 }
 
                 .message-actions-hover {
@@ -302,7 +302,7 @@ const MessageCard = ({
                     top: -12px;
                     opacity: 0;
                     background: white;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid var(--index-border-color);
                     border-radius: 6px;
                     display: flex;
                     align-items: center;
@@ -317,19 +317,19 @@ const MessageCard = ({
                     padding: 6px 8px;
                     background: transparent;
                     border: none;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                 }
                 .action-btn:hover {
-                    background: #f1f5f9;
-                    color: #0f172a;
+                    background: var(--index-hover-bg);
+                    color: var(--index-text-heading);
                 }
                 .action-btn.delete:hover {
-                    color: #ef4444;
-                    background: #fef2f2;
+                    color: var(--lgl-error);
+                    background: var(--index-danger-bg-soft);
                 }
                 
                 .format-tool-btn {
@@ -338,15 +338,15 @@ const MessageCard = ({
                     border: none;
                     cursor: pointer;
                     border-radius: 4px;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     transition: all 0.2s;
                 }
                 .format-tool-btn:hover {
-                    background: #f1f5f9;
-                    color: #0f172a;
+                    background: var(--index-hover-bg);
+                    color: var(--index-text-heading);
                 }
             `}</style>
             
@@ -367,18 +367,18 @@ const MessageCard = ({
                     <div className="message-upper-meta">
                         <span className="sender-displayName">{message.senderName}</span>
                         {isInstructor && <span className="instructor-badge-premium">Instructor</span>}
-                        {message.type === 'announcement' && <span className="instructor-badge-premium" style={{background:'#fee2e2', color:'#b91c1c'}}>Announcement</span>}
+                        {message.type === 'announcement' && <span className="instructor-badge-premium" style={{background:'var(--index-danger-bg-soft)', color:'var(--lgl-error)'}}>Announcement</span>}
                         <span className="timestamp-minimal">{message.createdAt}</span>
                     </div>
                 )}
 
                 {message.isDeleted ? (
-                    <div className="message-body-text deleted" style={{ fontStyle: 'italic', color: '#94a3b8' }}>
+                    <div className="message-body-text deleted" style={{ fontStyle: 'italic', color: 'var(--index-text-faint)' }}>
                         This message has been deleted.
                     </div>
                 ) : isEditing ? (
                     <div style={{ width: '100%', marginTop: '4px' }}>
-                        <div style={{ display: 'flex', gap: '2px', marginBottom: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
+                        <div style={{ display: 'flex', gap: '2px', marginBottom: '8px', borderBottom: '1px solid var(--index-hover-bg)', paddingBottom: '4px' }}>
                             <button onMouseDown={(e) => { e.preventDefault(); handleFormat('bold'); }} className="format-tool-btn" title="Bold">
                                 <Bold size={18} />
                             </button>
@@ -398,9 +398,9 @@ const MessageCard = ({
                                 minHeight: '60px',
                                 padding: '8px 12px',
                                 borderRadius: '6px',
-                                border: '1px solid #cbd5e1',
+                                border: '1px solid var(--index-border-color)',
                                 fontSize: '0.95rem',
-                                color: '#1e293b',
+                                color: 'var(--index-text-heading)',
                                 outline: 'none',
                                 overflowY: 'auto',
                                 background: 'white'
@@ -409,7 +409,7 @@ const MessageCard = ({
                         <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                             <button 
                                 onClick={() => { setIsEditing(false); setEditContent(message.content); }}
-                                style={{ padding: '4px 12px', borderRadius: '4px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                                style={{ padding: '4px 12px', borderRadius: '4px', border: '1px solid var(--index-border-color)', background: 'white', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
                                 disabled={isSaving}
                             >
                                 Cancel
@@ -423,7 +423,7 @@ const MessageCard = ({
                                         setIsEditing(false);
                                     }
                                 }}
-                                style={{ padding: '4px 12px', borderRadius: '4px', border: 'none', background: '#2563eb', color: 'white', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                                style={{ padding: '4px 12px', borderRadius: '4px', border: 'none', background: 'var(--index-primary-color)', color: 'white', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
                                 disabled={isSaving || (editContent === message.content)}
                             >
                                 {isSaving ? 'Saving...' : 'Save Changes'}
@@ -449,7 +449,7 @@ const MessageCard = ({
                             </div>
                         ) : /\.(mp3|wav|ogg|webm|m4a)(\?.*)?$/i.test(message.attachmentUrl.split('?')[0]) ? (
                             <div className="audio-attachment-pill">
-                                <FileAudio size={20} color="#64748b" />
+                                <FileAudio size={20} color="var(--index-text-secondary)" />
                                 <audio controls src={message.attachmentUrl} style={{ height: '32px' }} />
                             </div>
                         ) : (
@@ -460,14 +460,14 @@ const MessageCard = ({
                                 className="generic-file-attachment"
                                 onClick={(e) => handleViewPdf(e, message.attachmentUrl!, 'Attachment')}
                             >
-                                <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Download size={20} color="#3b82f6" />
+                                <div style={{ background: 'var(--index-hover-bg)', padding: '10px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Download size={20} color="var(--index-primary-color)" />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <span style={{ fontSize: '0.9rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '220px' }}>
                                         {message.attachmentUrl.split('/').pop()?.split('?')[0] || 'Attachment'}
                                     </span>
-                                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--index-text-secondary)', fontWeight: 500 }}>
                                         {viewerRole === 'student' && isPdf(message.attachmentUrl) ? 'Secure PDF Document' : 'Click to download'}
                                     </span>
                                 </div>
@@ -487,11 +487,11 @@ const MessageCard = ({
                                 flex: 1,
                                 padding: '6px 12px',
                                 borderRadius: '8px',
-                                border: '1px solid #cbd5e1',
+                                border: '1px solid var(--index-border-color)',
                                 fontSize: '0.9rem',
                                 outline: 'none',
                                 background: 'white',
-                                color: '#1e293b'
+                                color: 'var(--index-text-heading)'
                             }}
                             onKeyDown={async (e) => {
                                 if (e.key === 'Enter' && replyContent.trim()) {
@@ -516,7 +516,7 @@ const MessageCard = ({
                             }}
                             style={{
                                 padding: '6px 12px',
-                                background: '#2563eb',
+                                background: 'var(--index-primary-color)',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '8px',
@@ -534,8 +534,8 @@ const MessageCard = ({
                             }}
                             style={{
                                 padding: '6px 12px',
-                                background: '#f1f5f9',
-                                color: '#64748b',
+                                background: 'var(--index-hover-bg)',
+                                color: 'var(--index-text-secondary)',
                                 border: 'none',
                                 borderRadius: '8px',
                                 fontSize: '0.85rem',
@@ -556,26 +556,26 @@ const MessageCard = ({
                             alignItems: 'center',
                             gap: '6px',
                             marginTop: '8px',
-                            background: '#eff6ff',
+                            background: 'var(--index-accent-soft-bg)',
                             border: 'none',
                             borderRadius: '20px',
                             padding: '4px 12px',
                             fontSize: '0.8rem',
                             fontWeight: 700,
-                            color: '#2563eb',
+                            color: 'var(--index-primary-color)',
                             cursor: 'pointer'
                         }}
                     >
                         <MessageSquare size={14} />
                         {message.replies.length} {message.replies.length === 1 ? 'reply' : 'replies'}
-                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#64748b', marginLeft: '4px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--index-text-secondary)', marginLeft: '4px' }}>
                             {showReplies ? '(hide)' : '(view)'}
                         </span>
                     </button>
                 )}
 
                 {showReplies && message.replies && message.replies.length > 0 && !message.parentId && (
-                    <div className="replies-list" style={{ width: '100%', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px', borderLeft: '2px solid #e2e8f0', paddingLeft: '12px' }}>
+                    <div className="replies-list" style={{ width: '100%', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px', borderLeft: '2px solid var(--index-border-color)', paddingLeft: '12px' }}>
                         {message.replies.map((reply) => {
                             const isReplyMine = !!(currentUserId && String(reply.senderId) === String(currentUserId));
                             return (
@@ -636,7 +636,7 @@ const MessageCard = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     padding: '2rem',
-                    background: 'rgba(2, 6, 23, 0.9)',
+                    background: 'color-mix(in srgb, var(--lgl-charcoal) 90%, transparent)',
                     backdropFilter: 'blur(10px)'
                 }}>
                     <div style={{
@@ -653,31 +653,31 @@ const MessageCard = ({
                     }}>
                         <div style={{
                             padding: '1.5rem 2.5rem',
-                            borderBottom: '1.5px solid #f1f5f9',
+                            borderBottom: '1.5px solid var(--index-border-subtle)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            background: '#fcfdfe'
+                            background: 'var(--index-hover-bg)'
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                <div style={{ padding: '10px', borderRadius: '14px', background: '#f0fdf4' }}>
-                                    <FileText size={22} color="#1a4d3e" />
+                                <div style={{ padding: '10px', borderRadius: '14px', background: 'var(--index-accent-soft-bg)' }}>
+                                    <FileText size={22} color="var(--index-primary-color)" />
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0, fontWeight: 950, color: '#0f172a', letterSpacing: '-0.02em' }}>{viewingPdf?.title}</h3>
-                                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Secure PDF Viewer • Download Disabled</p>
+                                    <h3 style={{ margin: 0, fontWeight: 950, color: 'var(--index-text-heading)', letterSpacing: '-0.02em' }}>{viewingPdf?.title}</h3>
+                                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>Secure PDF Viewer • Download Disabled</p>
                                 </div>
                             </div>
                             <button
                                 onClick={(e) => { e.stopPropagation(); setViewingPdf(null); }}
-                                style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: '#f1f5f9', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                                style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', background: 'var(--index-hover-bg)', border: 'none', color: 'var(--index-text-secondary)', cursor: 'pointer' }}
                             >
                                 <X size={22} />
                             </button>
                         </div>
 
                         <div
-                            style={{ flex: 1, background: '#f8fafc', overflow: 'hidden', position: 'relative' }}
+                            style={{ flex: 1, background: 'var(--index-hover-bg)', overflow: 'hidden', position: 'relative' }}
                             onContextMenu={(e) => e.preventDefault()}
                         >
                             <iframe
@@ -688,8 +688,8 @@ const MessageCard = ({
                             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'transparent' }}></div>
                         </div>
 
-                        <div style={{ padding: '1rem 2.5rem', background: '#fcfdfe', borderTop: '1.5px solid #f1f5f9', textAlign: 'center' }}>
-                            <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Protected by Layos Group Security Protocol</p>
+                        <div style={{ padding: '1rem 2.5rem', background: 'var(--index-hover-bg)', borderTop: '1.5px solid var(--index-border-subtle)', textAlign: 'center' }}>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--index-text-faint)', fontWeight: 600 }}>Protected by Layos Group Security Protocol</p>
                         </div>
                     </div>
                 </div>

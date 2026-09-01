@@ -79,15 +79,15 @@ export default function MyCourses() {
     );
 
     const stats = [
-        { label: 'Active Cohorts', count: cohortsList.length, trend: 'Managed', color: '#1a4d3e', icon: CheckCircle2 },
-        { label: 'Student Body', count: cohortsList.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Enrolled', color: '#64748b', icon: Users },
+        { label: 'Active Cohorts', count: cohortsList.length, trend: 'Managed', color: 'var(--index-primary-color)', icon: CheckCircle2 },
+        { label: 'Student Body', count: cohortsList.reduce((acc, c) => acc + (c.students?.length || 0), 0), trend: 'Enrolled', color: 'var(--index-text-secondary)', icon: Users },
     ];
 
     if (loading) {
         return (
             <div style={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
-                <Loader2 className="animate-spin" size={40} color="#1a4d3e" />
-                <p style={{ fontWeight: 800, color: '#64748b' }}>Loading Records...</p>
+                <Loader2 className="animate-spin" size={40} color="var(--index-primary-color)" />
+                <p style={{ fontWeight: 800, color: 'var(--index-text-secondary)' }}>Loading Records...</p>
             </div>
         );
     }
@@ -105,7 +105,7 @@ export default function MyCourses() {
                 .courses-header h2 {
                     font-size: 1.75rem;
                     font-weight: 950;
-                    color: #0f172a;
+                    color: var(--index-text-heading);
                     margin: 0;
                     letter-spacing: -0.02em;
                 }
@@ -119,7 +119,7 @@ export default function MyCourses() {
 
                 .staff-scope .stat-card-premium {
                     background: white;
-                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border: 1px solid color-mix(in srgb, var(--index-border-color) 80%, transparent);
                     border-radius: 24px;
                     padding: 2rem;
                     display: flex;
@@ -143,10 +143,10 @@ export default function MyCourses() {
 
                 .staff-scope .search-pill-input {
                     height: 56px;
-                    border: 2px solid #f1f5f9;
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 18px;
                     background: white;
-                    color: #1e293b;
+                    color: var(--index-text-heading);
                     font-size: 1rem;
                     font-weight: 600;
                     padding: 0 1.5rem 0 3.5rem;
@@ -156,16 +156,16 @@ export default function MyCourses() {
                 }
 
                 .search-pill-input:focus {
-                    border-color: #1a4d3e;
-                    box-shadow: 0 0 0 5px rgba(26, 77, 62, 0.05);
+                    border-color: var(--index-primary-color);
+                    box-shadow: 0 0 0 5px color-mix(in srgb, var(--index-primary-color) calc(0.05 * 100%), transparent);
                 }
 
                 .staff-scope .filter-pill-premium {
                     height: 56px;
-                    border: 2px solid #f1f5f9;
+                    border: 2px solid var(--index-hover-bg);
                     border-radius: 18px;
                     background: white;
-                    color: #475569;
+                    color: var(--index-text-secondary);
                     font-size: 0.95rem;
                     font-weight: 700;
                     padding: 0 1.5rem;
@@ -179,7 +179,7 @@ export default function MyCourses() {
 
                 .staff-scope .course-table-card-premium {
                     background: white;
-                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border: 1px solid color-mix(in srgb, var(--index-border-color) 80%, transparent);
                     border-radius: 32px;
                     overflow: hidden;
                     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02);
@@ -193,18 +193,18 @@ export default function MyCourses() {
                 .course-table th {
                     text-align: left;
                     padding: 1.5rem 2rem;
-                    background: #f8fafc;
-                    color: #64748b;
+                    background: var(--index-hover-bg);
+                    color: var(--index-text-secondary);
                     font-size: 0.85rem;
                     font-weight: 800;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
-                    border-bottom: 1px solid #f1f5f9;
+                    border-bottom: 1px solid var(--index-hover-bg);
                 }
 
                 .course-table td {
                     padding: 1.75rem 2rem;
-                    border-bottom: 1px solid #f8fafc;
+                    border-bottom: 1px solid var(--index-hover-bg);
                     vertical-align: middle;
                 }
 
@@ -212,21 +212,21 @@ export default function MyCourses() {
                     width: 44px;
                     height: 44px;
                     border-radius: 14px;
-                    background: #f8fafc;
-                    border: 1.5px solid #f1f5f9;
+                    background: var(--index-hover-bg);
+                    border: 1.5px solid var(--index-hover-bg);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #64748b;
+                    color: var(--index-text-secondary);
                     cursor: pointer;
                     transition: all 0.2s;
                     text-decoration: none;
                 }
 
                 .action-btn-circle:hover {
-                    background: #1a4d3e;
+                    background: var(--index-primary-color);
                     color: white;
-                    border-color: #1a4d3e;
+                    border-color: var(--index-primary-color);
                     transform: translateY(-2px);
                 }
 
@@ -251,12 +251,12 @@ export default function MyCourses() {
             <div className="courses-header">
                 <div>
                     <h2>Cohort Roster</h2>
-                    <p style={{ color: '#64748b', margin: '0.5rem 0 0 0', fontWeight: 600 }}>Overview of active learning sessions and cohort registrations.</p>
+                    <p style={{ color: 'var(--index-text-secondary)', margin: '0.5rem 0 0 0', fontWeight: 600 }}>Overview of active learning sessions and cohort registrations.</p>
                 </div>
                 <Link
                     to="/instructor/cohorts/create"
                     className="btn-standard"
-                    style={{ background: '#1a4d3e', boxShadow: '0 10px 15px rgba(26, 77, 62, 0.15)' }}
+                    style={{ background: 'var(--index-primary-color)', boxShadow: '0 10px 15px color-mix(in srgb, var(--index-primary-color) calc(0.15 * 100%), transparent)' }}
                 >
                     <Plus size={20} /> New Cohort
                 </Link>
@@ -279,8 +279,8 @@ export default function MyCourses() {
                             <stat.icon size={32} />
                         </div>
                         <div>
-                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</p>
-                            <h3 style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: 950, color: '#0f172a' }}>{stat.count}</h3>
+                            <p style={{ margin: 0, color: 'var(--index-text-secondary)', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</p>
+                            <h3 style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: 950, color: 'var(--index-text-heading)' }}>{stat.count}</h3>
                         </div>
                     </div>
                 ))}
@@ -288,7 +288,7 @@ export default function MyCourses() {
 
             <div className="filter-section" style={{ marginBottom: '2rem' }}>
                 <div className="search-pill-container" style={{ flex: 1 }}>
-                    <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--index-text-faint)' }} />
                     <input
                         type="text"
                         placeholder="Search sessions..."
@@ -315,28 +315,28 @@ export default function MyCourses() {
                                 <tr key={cohort.id}>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                                            <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a4d3e', fontWeight: 950 }}>
+                                            <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--index-hover-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--index-primary-color)', fontWeight: 950 }}>
                                                 {cohort.name.charAt(0)}
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#1a4d3e', background: '#f0fdf4', padding: '2px 8px', borderRadius: '6px', width: 'fit-content' }}>{cohort.id}</span>
-                                                <span style={{ fontWeight: 900, color: '#0f172a', fontSize: '1rem' }}>{cohort.name}</span>
-                                                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>{cohort.course?.title || 'No Curriculum Linked'}</span>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--index-primary-color)', background: 'color-mix(in srgb, var(--lgl-success) 12%, transparent)', padding: '2px 8px', borderRadius: '6px', width: 'fit-content' }}>{cohort.id}</span>
+                                                <span style={{ fontWeight: 900, color: 'var(--index-text-heading)', fontSize: '1rem' }}>{cohort.name}</span>
+                                                <span style={{ fontSize: '0.8rem', color: 'var(--index-text-secondary)', fontWeight: 600 }}>{cohort.course?.title || 'No Curriculum Linked'}</span>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 800, color: '#475569' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--index-text-secondary)' }}>
                                                 <Clock size={14} /> {new Date(cohort.start_date).toLocaleDateString()}
                                             </div>
-                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Session Active</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--index-text-faint)', fontWeight: 700, textTransform: 'uppercase' }}>Session Active</div>
                                         </div>
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <Users size={18} color="#94a3b8" />
-                                            <span style={{ fontWeight: 950, fontSize: '1rem', color: '#0f172a' }}>{cohort.students?.length || 0}</span>
+                                            <Users size={18} color="var(--index-text-faint)" />
+                                            <span style={{ fontWeight: 950, fontSize: '1rem', color: 'var(--index-text-heading)' }}>{cohort.students?.length || 0}</span>
                                         </div>
                                     </td>
                                     <td style={{ textAlign: 'right' }}>
@@ -348,7 +348,7 @@ export default function MyCourses() {
                                                 className="action-btn-circle"
                                                 title="Delete"
                                                 onClick={() => handleDeleteCohort(cohort.id)}
-                                                style={{ color: '#ef4444' }}
+                                                style={{ color: 'var(--lgl-error)' }}
                                             >
                                                 <Trash2 size={18} />
                                             </button>
